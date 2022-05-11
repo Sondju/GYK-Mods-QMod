@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32421.90
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QModReloadedGUI", "QModReloadedGUI\QModReloadedGUI.csproj", "{50A53D3C-A80E-421C-9A2A-43CBEACEDEC6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QModReloadedInstaller", "QModReloadedInstaller\QModReloadedInstaller.csproj", "{53FC79B8-326D-42DC-B8ED-73D60DCD153C}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "QModReloadedSetup", "QModReloadedSetup\QModReloadedSetup.vdproj", "{A34055FA-C52B-489B-8FF8-53D1982284F5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release Installer|Any CPU = Release Installer|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{50A53D3C-A80E-421C-9A2A-43CBEACEDEC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50A53D3C-A80E-421C-9A2A-43CBEACEDEC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50A53D3C-A80E-421C-9A2A-43CBEACEDEC6}.Release Installer|Any CPU.ActiveCfg = Release Installer|Any CPU
+		{50A53D3C-A80E-421C-9A2A-43CBEACEDEC6}.Release Installer|Any CPU.Build.0 = Release Installer|Any CPU
+		{50A53D3C-A80E-421C-9A2A-43CBEACEDEC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50A53D3C-A80E-421C-9A2A-43CBEACEDEC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53FC79B8-326D-42DC-B8ED-73D60DCD153C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53FC79B8-326D-42DC-B8ED-73D60DCD153C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53FC79B8-326D-42DC-B8ED-73D60DCD153C}.Release Installer|Any CPU.ActiveCfg = Release Installer|Any CPU
+		{53FC79B8-326D-42DC-B8ED-73D60DCD153C}.Release Installer|Any CPU.Build.0 = Release Installer|Any CPU
+		{53FC79B8-326D-42DC-B8ED-73D60DCD153C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53FC79B8-326D-42DC-B8ED-73D60DCD153C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A34055FA-C52B-489B-8FF8-53D1982284F5}.Debug|Any CPU.ActiveCfg = Debug
+		{A34055FA-C52B-489B-8FF8-53D1982284F5}.Release Installer|Any CPU.ActiveCfg = Release Installer
+		{A34055FA-C52B-489B-8FF8-53D1982284F5}.Release Installer|Any CPU.Build.0 = Release Installer
+		{A34055FA-C52B-489B-8FF8-53D1982284F5}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {98F88C72-B7BA-4629-9849-1E3ECA806C5E}
+	EndGlobalSection
+EndGlobal
