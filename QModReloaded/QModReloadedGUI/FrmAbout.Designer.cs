@@ -87,10 +87,10 @@
             this.LblMyUrl.AutoSize = true;
             this.LblMyUrl.Location = new System.Drawing.Point(157, 67);
             this.LblMyUrl.Name = "LblMyUrl";
-            this.LblMyUrl.Size = new System.Drawing.Size(229, 17);
+            this.LblMyUrl.Size = new System.Drawing.Size(239, 17);
             this.LblMyUrl.TabIndex = 4;
             this.LblMyUrl.TabStop = true;
-            this.LblMyUrl.Text = "https://github.com/p1xel8ted/QModReloaded";
+            this.LblMyUrl.Text = "https://github.com/p1xel8ted/GraveyardKeeper";
             this.LblMyUrl.UseCompatibleTextRendering = true;
             this.LblMyUrl.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LblMyUrl_LinkClicked);
             // 

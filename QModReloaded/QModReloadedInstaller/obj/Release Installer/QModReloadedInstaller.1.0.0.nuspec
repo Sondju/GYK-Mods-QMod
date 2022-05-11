@@ -19,9 +19,9 @@
     </contentFiles>
   </metadata>
   <files>
-    <file src="H:\OneDrive\Development\QModReloaded\QModReloadedInstaller\bin\Release Installer\net48\QModReloadedInstaller.dll" target="lib\net48\QModReloadedInstaller.dll" />
-    <file src="H:\OneDrive\Development\QModReloaded\QModReloadedInstaller\icon.ico" target="content\icon.ico" />
-    <file src="H:\OneDrive\Development\QModReloaded\QModReloadedInstaller\icon.ico" target="contentFiles\any\net48\icon.ico" />
-    <file src="H:\OneDrive\Development\QModReloaded\QModReloadedGUI\image.png" target="\image.png" />
+    <file src="H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedInstaller\bin\Release Installer\net48\QModReloadedInstaller.dll" target="lib\net48\QModReloadedInstaller.dll" />
+    <file src="H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedInstaller\icon.ico" target="content\icon.ico" />
+    <file src="H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedInstaller\icon.ico" target="contentFiles\any\net48\icon.ico" />
+    <file src="H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedGUI\image.png" target="\image.png" />
   </files>
 </package>

@@ -7,3 +7,12 @@ H:\OneDrive\Development\QModReloaded\QModReloadedInstaller\obj\Release Installer
 H:\OneDrive\Development\QModReloaded\QModReloadedInstaller\obj\Release Installer\net48\QModReloadedInstaller.csproj.CoreCompileInputs.cache
 H:\OneDrive\Development\QModReloaded\QModReloadedInstaller\obj\Release Installer\net48\QModReloadedInstaller.csproj.CopyComplete
 H:\OneDrive\Development\QModReloaded\QModReloadedInstaller\obj\Release Installer\net48\QModReloadedInstaller.dll
+H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedInstaller\bin\Release Installer\net48\0Harmony.dll
+H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedInstaller\bin\Release Installer\net48\Mono.Cecil.dll
+H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedInstaller\bin\Release Installer\net48\QModReloadedInstaller.dll
+H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedInstaller\bin\Release Installer\net48\Newtonsoft.Json.dll
+H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedInstaller\obj\Release Installer\net48\QModReloadedInstaller.csproj.AssemblyReference.cache
+H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedInstaller\obj\Release Installer\net48\QModReloadedInstaller.GeneratedMSBuildEditorConfig.editorconfig
+H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedInstaller\obj\Release Installer\net48\QModReloadedInstaller.csproj.CoreCompileInputs.cache
+H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedInstaller\obj\Release Installer\net48\QModReloadedInstaller.csproj.CopyComplete
+H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedInstaller\obj\Release Installer\net48\QModReloadedInstaller.dll
