@@ -22,8 +22,8 @@ ___
 
 ### Images:
 
-| ![alt text](https://github.com/p1xel8ted/QModReloaded/blob/master/main_ui.png?raw=true) | ![alt text](https://github.com/p1xel8ted/QModReloaded/blob/master/res_ui.png?raw=true)|
-| ![alt text](https://github.com/p1xel8ted/QModReloaded/blob/master/checklist_ui.png?raw=true) | ![alt text](https://github.com/p1xel8ted/QModReloaded/blob/master/about_ui.png?raw=true) |
+| ![alt text](https://github.com/p1xel8ted/GraveyardKeeper/QModReloaded/blob/master/main_ui.png?raw=true) | ![alt text](https://github.com/p1xel8ted/GraveyardKeeper/QModReloaded/blob/master/res_ui.png?raw=true)|
+| ![alt text](https://github.com/p1xel8ted/GraveyardKeeper/QModReloaded/blob/master/checklist_ui.png?raw=true) | ![alt text](https://github.com/p1xel8ted/GraveyardKeeper/QModReloaded/blob/master/about_ui.png?raw=true) |
 
 ___
 
