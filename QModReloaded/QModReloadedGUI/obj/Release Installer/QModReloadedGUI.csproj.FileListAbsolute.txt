@@ -34,6 +34,7 @@ H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedGUI\bin\Release
 H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedGUI\bin\Release Installer\QModReloadedInstaller.dll
 H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedGUI\bin\Release Installer\Gameloop.Vdf.xml
 H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedGUI\bin\Release Installer\Gameloop.Vdf.JsonConverter.xml
+H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedGUI\bin\Release Installer\Newtonsoft.Json.xml
 H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedGUI\obj\Release Installer\QModReloadedGUI.csproj.AssemblyReference.cache
 H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedGUI\obj\Release Installer\QModReloadedGUI.csproj.SuggestedBindingRedirects.cache
 H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedGUI\obj\Release Installer\QModReloadedGUI.FrmAbout.resources
@@ -47,4 +48,3 @@ H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedGUI\obj\Release
 H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedGUI\obj\Release Installer\QModReloadedGUI.csproj.CopyComplete
 H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedGUI\obj\Release Installer\QModReloadedGUI.exe
 H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedGUI\obj\Release Installer\QModReloadedGUI.pdb
-H:\OneDrive\Development\GraveyardKeeper\QModReloaded\QModReloadedGUI\bin\Release Installer\Newtonsoft.Json.xml

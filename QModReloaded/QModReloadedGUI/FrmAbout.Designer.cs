@@ -65,9 +65,9 @@
             this.LblCredits.AutoSize = true;
             this.LblCredits.Location = new System.Drawing.Point(154, 97);
             this.LblCredits.Name = "LblCredits";
-            this.LblCredits.Size = new System.Drawing.Size(177, 17);
+            this.LblCredits.Size = new System.Drawing.Size(210, 17);
             this.LblCredits.TabIndex = 2;
-            this.LblCredits.Text = "Credits to original author oldark87.";
+            this.LblCredits.Text = "Credits to oldark87 for the QMod system.";
             this.LblCredits.UseCompatibleTextRendering = true;
             // 
             // LblCreditsUrl
