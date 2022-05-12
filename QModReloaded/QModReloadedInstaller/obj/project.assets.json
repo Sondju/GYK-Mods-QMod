@@ -2,6 +2,28 @@
   "version": 3,
   "targets": {
     ".NETFramework,Version=v4.8": {
+      "Gameloop.Vdf/0.6.0": {
+        "type": "package",
+        "compile": {
+          "lib/net45/Gameloop.Vdf.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Gameloop.Vdf.dll": {}
+        }
+      },
+      "Gameloop.Vdf.JsonConverter/0.2.1": {
+        "type": "package",
+        "dependencies": {
+          "Gameloop.Vdf": "0.6.0",
+          "Newtonsoft.Json": "12.0.3"
+        },
+        "compile": {
+          "lib/net45/Gameloop.Vdf.JsonConverter.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Gameloop.Vdf.JsonConverter.dll": {}
+        }
+      },
       "Microsoft.CodeAnalysis.NetAnalyzers/7.0.0-preview1.22217.1": {
         "type": "package",
         "build": {
@@ -21,6 +43,37 @@
     }
   },
   "libraries": {
+    "Gameloop.Vdf/0.6.0": {
+      "sha512": "589v+YyR8LFIWKgf/MIyFLa99ST+LHTmCP6jeyYVN8snSfPS2mvFiAyFT8CApRpLMVjUDMBbsowm8mCwvABK1A==",
+      "type": "package",
+      "path": "gameloop.vdf/0.6.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "gameloop.vdf.0.6.0.nupkg.sha512",
+        "gameloop.vdf.nuspec",
+        "lib/net45/Gameloop.Vdf.dll",
+        "lib/net45/Gameloop.Vdf.xml",
+        "lib/netstandard1.0/Gameloop.Vdf.dll",
+        "lib/netstandard1.0/Gameloop.Vdf.xml",
+        "readme.txt"
+      ]
+    },
+    "Gameloop.Vdf.JsonConverter/0.2.1": {
+      "sha512": "vGw/cRHSDZ/Rh/PDZ8GSMMlRki7ocqU3eh4TNr+Z/cqRpvtg3w0LOW5bn8J8u4AAOjUMSZtNAmYh2OsYHxFhbA==",
+      "type": "package",
+      "path": "gameloop.vdf.jsonconverter/0.2.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "gameloop.vdf.jsonconverter.0.2.1.nupkg.sha512",
+        "gameloop.vdf.jsonconverter.nuspec",
+        "lib/net45/Gameloop.Vdf.JsonConverter.dll",
+        "lib/net45/Gameloop.Vdf.JsonConverter.xml",
+        "lib/netstandard1.0/Gameloop.Vdf.JsonConverter.dll",
+        "lib/netstandard1.0/Gameloop.Vdf.JsonConverter.xml"
+      ]
+    },
     "Microsoft.CodeAnalysis.NetAnalyzers/7.0.0-preview1.22217.1": {
       "sha512": "QNNeUh+dW9gUcTxQGjEDuhFSe6dybBke1bPB5aoADfvz1EnBS9LZicXir5QsGCnxanBiowg9T9vqumVaXxnhmg==",
       "type": "package",
@@ -267,6 +320,7 @@
   },
   "projectFileDependencyGroups": {
     ".NETFramework,Version=v4.8": [
+      "Gameloop.Vdf.JsonConverter >= 0.2.1",
       "Microsoft.CodeAnalysis.NetAnalyzers >= 7.0.0-preview1.22217.1",
       "Newtonsoft.Json >= 13.0.1"
     ]
@@ -278,9 +332,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "H:\\OneDrive\\Development\\GraveyardKeeper\\QModReloaded\\QModReloadedInstaller\\QModReloadedInstaller.csproj",
-      "projectName": "QModReloadedInstaller",
-      "projectPath": "H:\\OneDrive\\Development\\GraveyardKeeper\\QModReloaded\\QModReloadedInstaller\\QModReloadedInstaller.csproj",
+      "projectUniqueName": "H:\\OneDrive\\Development\\GraveyardKeeper\\QModReloaded\\QModReloadedInstaller\\QModReloaded.csproj",
+      "projectName": "QModReloaded",
+      "projectPath": "H:\\OneDrive\\Development\\GraveyardKeeper\\QModReloaded\\QModReloadedInstaller\\QModReloaded.csproj",
       "packagesPath": "C:\\Users\\Ben\\.nuget\\packages\\",
       "outputPath": "H:\\OneDrive\\Development\\GraveyardKeeper\\QModReloaded\\QModReloadedInstaller\\obj\\",
       "projectStyle": "PackageReference",
@@ -317,6 +371,10 @@
       "net48": {
         "targetAlias": "net48",
         "dependencies": {
+          "Gameloop.Vdf.JsonConverter": {
+            "target": "Package",
+            "version": "[0.2.1, )"
+          },
           "Microsoft.CodeAnalysis.NetAnalyzers": {
             "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
             "suppressParent": "All",

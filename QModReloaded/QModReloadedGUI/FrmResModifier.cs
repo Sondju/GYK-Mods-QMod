@@ -53,7 +53,7 @@ public partial class FrmResModifier : Form
             _prc?.Replace(_prc?.Body.Instructions[22], newWidth);
 
             _resAssembly.Write(Path.Combine(_gameLocation, "Graveyard Keeper_Data\\Managed\\Assembly-CSharp.dll"));
-            Utilities.WriteLog($"Res Modifier (Update Resolutions): Successfully patched in new resolution.", _gameLocation);
+            Utilities.WriteLog("Res Modifier (Update Resolutions): Successfully patched in new resolution.", _gameLocation);
         }
         catch (Exception ex)
         {
@@ -69,7 +69,7 @@ public partial class FrmResModifier : Form
             var currentWidth = Convert.ToInt32(_prc?.Body.Instructions[22].Operand.ToString());
             TxtMaxHeight.Text = currentHeight.ToString();
             TxtMaxWidth.Text = currentWidth.ToString();
-            Utilities.WriteLog($"Res Modifier (GetCurrentResolutions): Obtained current max resolution.", _gameLocation);
+            Utilities.WriteLog("Res Modifier (GetCurrentResolutions): Obtained current max resolution.", _gameLocation);
         }
         catch (Exception ex)
         {

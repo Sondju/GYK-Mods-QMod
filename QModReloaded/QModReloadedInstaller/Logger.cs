@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace QModReloadedInstaller;
+namespace QModReloaded;
 
 public static class Logger
 {

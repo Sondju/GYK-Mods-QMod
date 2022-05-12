@@ -1,11 +1,14 @@
-﻿namespace QModReloadedGUI
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+
+namespace QModReloadedGUI
 {
     partial class FrmAbout
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -145,12 +148,12 @@
 
         #endregion
 
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Label LblTitle;
-        private System.Windows.Forms.Label LblCredits;
-        private System.Windows.Forms.LinkLabel LblCreditsUrl;
-        private System.Windows.Forms.LinkLabel LblMyUrl;
-        private System.Windows.Forms.Label LblVersion;
-        private System.Windows.Forms.Button BtnOK;
+        private PictureBox pictureBox1;
+        private Label LblTitle;
+        private Label LblCredits;
+        private LinkLabel LblCreditsUrl;
+        private LinkLabel LblMyUrl;
+        private Label LblVersion;
+        private Button BtnOK;
     }
 }

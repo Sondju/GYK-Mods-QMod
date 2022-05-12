@@ -4,19 +4,16 @@ using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace QModReloadedInstaller;
+namespace QModReloaded;
 
 public class Injector
 {
-    private const string InjectorFile = "QModReloadedInstaller.dll";
-    private readonly string _mainFilename = "\\Assembly-CSharp.dll";
-    private readonly string _backupFilename = "\\Assembly-CSharp.dll.original";
+    private const string InjectorFile = "QModReloaded.dll";
+    private readonly string _mainFilename;
 
     public Injector(string gamePath)
     {
-        var managedDirectory = Path.Combine(gamePath, "Graveyard Keeper_Data\\Managed");
-        _mainFilename = managedDirectory + _mainFilename;
-        _backupFilename = managedDirectory + _backupFilename;
+        _mainFilename = Path.Combine(gamePath, "Graveyard Keeper_Data\\Managed\\Assembly-CSharp.dll");
     }
 
     public (bool injected, string message) InjectNoIntros()
@@ -24,7 +21,7 @@ public class Injector
         try
         {
             if(IsNoIntroInjected()) return (true,
-                $"Intros patch already injected.");
+                "Intros patch already injected.");
             var gameAssembly = AssemblyDefinition.ReadAssembly(_mainFilename);
 
             var logoScene = gameAssembly.MainModule.GetType("LogoScene");
@@ -48,10 +45,10 @@ public class Injector
     {
         try
         {
-            if (IsInjected()) return (true, $"Mod patch already applied.");
+            if (IsInjected()) return (true, "Mod patch already applied.");
             var gameAssembly = AssemblyDefinition.ReadAssembly(_mainFilename);
             var injectorAssembly = AssemblyDefinition.ReadAssembly(InjectorFile);
-            var patchInstruction = injectorAssembly.MainModule.GetType("QModReloadedInstaller.QModLoader").Methods
+            var patchInstruction = injectorAssembly.MainModule.GetType("QModReloaded.QModLoader").Methods
                 .Single(x => x.Name == "Patch");
             var logoScene = gameAssembly.MainModule.GetType("LogoScene");
             var awakeMethod = logoScene.Methods.First(x => x.Name == "Awake");
@@ -70,7 +67,7 @@ public class Injector
     {
         try
         {
-            if (!IsInjected()) return (false, $"Mod patch already removed.");
+            if (!IsInjected()) return (false, "Mod patch already removed.");
             var gameAssembly = AssemblyDefinition.ReadAssembly(_mainFilename);
             var logoScene = gameAssembly.MainModule.GetType("LogoScene");
             var awakeMethod = logoScene.Methods.First(x => x.Name == "Awake");
@@ -96,7 +93,7 @@ public class Injector
             var awakeMethod = logoScene.Methods.First(x => x.Name == "Awake");
             return awakeMethod.Body.Instructions.Any(instruction =>
                 instruction.OpCode.Equals(OpCodes.Call) && instruction.Operand.ToString()
-                    .Equals("System.Void QModReloadedInstaller.QModLoader::Patch()", StringComparison.Ordinal));
+                    .Equals("System.Void QModReloaded.QModLoader::Patch()", StringComparison.Ordinal));
         }
         catch (Exception ex)
         {

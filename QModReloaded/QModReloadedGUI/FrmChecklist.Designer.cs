@@ -1,11 +1,14 @@
-﻿namespace QModReloadedGUI
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+
+namespace QModReloadedGUI
 {
     partial class FrmChecklist
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -182,10 +185,9 @@
             this.ChkInjector.ForeColor = System.Drawing.SystemColors.Desktop;
             this.ChkInjector.Location = new System.Drawing.Point(11, 227);
             this.ChkInjector.Name = "ChkInjector";
-            this.ChkInjector.Size = new System.Drawing.Size(456, 18);
+            this.ChkInjector.Size = new System.Drawing.Size(416, 18);
             this.ChkInjector.TabIndex = 10;
-            this.ChkInjector.Text = "QModReloadedInstaller.dll Exists (Required for main application and mods to funct" +
-    "ion)";
+            this.ChkInjector.Text = "QModReloaded.dll Exists (Required for main application and mods to function)";
             this.ChkInjector.UseCompatibleTextRendering = true;
             this.ChkInjector.UseVisualStyleBackColor = true;
             // 
@@ -236,17 +238,17 @@
 
         #endregion
 
-        private System.Windows.Forms.CheckBox ChkModPatched;
-        private System.Windows.Forms.CheckBox ChkNoIntroPatched;
-        private System.Windows.Forms.CheckBox ChkModDirectoryExists;
-        private System.Windows.Forms.CheckBox ChkGameLocation;
-        private System.Windows.Forms.CheckBox ChkMonoCecilExists;
-        private System.Windows.Forms.CheckBox Chk0HarmonyExists;
-        private System.Windows.Forms.CheckBox ChkPatcherLocation;
-        private System.Windows.Forms.CheckBox ChkNewtonExists;
-        private System.Windows.Forms.CheckBox ChkGameLoopVDFJson;
-        private System.Windows.Forms.CheckBox ChkGameLoopVDF;
-        private System.Windows.Forms.CheckBox ChkInjector;
-        private System.Windows.Forms.CheckBox ChkConfig;
+        private CheckBox ChkModPatched;
+        private CheckBox ChkNoIntroPatched;
+        private CheckBox ChkModDirectoryExists;
+        private CheckBox ChkGameLocation;
+        private CheckBox ChkMonoCecilExists;
+        private CheckBox Chk0HarmonyExists;
+        private CheckBox ChkPatcherLocation;
+        private CheckBox ChkNewtonExists;
+        private CheckBox ChkGameLoopVDFJson;
+        private CheckBox ChkGameLoopVDF;
+        private CheckBox ChkInjector;
+        private CheckBox ChkConfig;
     }
 }

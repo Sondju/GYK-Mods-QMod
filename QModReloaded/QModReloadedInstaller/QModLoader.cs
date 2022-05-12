@@ -6,7 +6,7 @@ using System.Reflection;
 using Mono.Cecil;
 using Newtonsoft.Json;
 
-namespace QModReloadedInstaller;
+namespace QModReloaded;
 
 public class QModLoader
 {
@@ -16,18 +16,6 @@ public class QModLoader
     {
         Logger.WriteLog("Assembly-CSharp.dll has been patched, (otherwise you wouldn't see this message.");
         Logger.WriteLog("Patch method called. Attempting to load mods.");
-        AppDomain.CurrentDomain.AssemblyResolve += (_, args) =>
-        {
-            var files = new DirectoryInfo(QModBaseDir).GetFiles("*.dll", SearchOption.AllDirectories);
-            foreach (var file in files)
-            {
-                Logger.WriteLog($"Mod DLL found: {file.Name}");
-                if (args.Name.Contains(Path.GetFileNameWithoutExtension(file.Name)))
-                    return Assembly.LoadFrom(file.FullName);
-            }
-
-            return null;
-        };
 
         var dllFiles = Directory.GetFiles(QModBaseDir, "*.dll", SearchOption.AllDirectories);
         var mods = new List<QMod>();
@@ -127,14 +115,13 @@ public class QModLoader
 
     private static void LoadMod(QMod mod)
     {
-        string jsonEntry = null;
         try
         {
             MethodInfo methodToLoad;
             var jsonEntrySplit = mod.EntryMethod.Split('.');
             var m = GetModEntryPoint(mod.ModAssemblyPath);
 
-            jsonEntry = $"{jsonEntrySplit[0]}.{jsonEntrySplit[1]}.{jsonEntrySplit[2]}";
+            var jsonEntry = $"{jsonEntrySplit[0]}.{jsonEntrySplit[1]}.{jsonEntrySplit[2]}";
             var foundEntry = $"{m.namesp}.{m.type}.{m.method}";
 
             if (!jsonEntry.Equals(foundEntry, StringComparison.Ordinal))
@@ -152,19 +139,13 @@ public class QModLoader
             methodToLoad?.Invoke(m, Array.Empty<object>());
             Logger.WriteLog($"Load order: {mod.LoadOrder}, successfully invoked {mod.DisplayName} entry method.");
         }
-        catch (ArgumentNullException ex)
+        catch (TargetInvocationException)
         {
-            Logger.WriteLog($"ERR: Could not parse EntryMethod {jsonEntry} for {mod.Id}");
-            Logger.WriteLog(ex.Message);
+            Logger.WriteLog($"Invoking the specified EntryMethod {mod.EntryMethod} failed for {mod.Id}");
         }
-        catch (TargetInvocationException ex2)
+        catch (Exception finalEx)
         {
-            Logger.WriteLog($"ERR: Invoking the specified EntryMethod {mod.EntryMethod} failed for {mod.Id}");
-            Logger.WriteLog(ex2.Message);
-        }
-        catch (Exception ex3)
-        {
-            Logger.WriteLog($"ERR: {ex3.Message}");
+            Logger.WriteLog(finalEx.Message);
         }
     }
 }

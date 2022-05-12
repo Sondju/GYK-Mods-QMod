@@ -1,11 +1,14 @@
-﻿namespace QModReloadedGUI
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+
+namespace QModReloadedGUI
 {
     partial class FrmResModifier
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -174,17 +177,17 @@
 
         #endregion
 
-        private System.Windows.Forms.Label LblCurrentMaxWidth;
-        private System.Windows.Forms.Label LblCurrentMaxHeight;
-        private System.Windows.Forms.TextBox TxtMaxWidth;
-        private System.Windows.Forms.TextBox TxtMaxHeight;
-        private System.Windows.Forms.TextBox TxtRequestedMaxHeight;
-        private System.Windows.Forms.TextBox TxtRequestedMaxWidth;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button BtnApply;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.ToolTip toolTip1;
+        private Label LblCurrentMaxWidth;
+        private Label LblCurrentMaxHeight;
+        private TextBox TxtMaxWidth;
+        private TextBox TxtMaxHeight;
+        private TextBox TxtRequestedMaxHeight;
+        private TextBox TxtRequestedMaxWidth;
+        private Label label1;
+        private Label label2;
+        private Label label3;
+        private Button BtnApply;
+        private Label label4;
+        private ToolTip toolTip1;
     }
 }

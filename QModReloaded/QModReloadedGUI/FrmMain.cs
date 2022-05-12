@@ -9,7 +9,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Mono.Cecil;
 using Newtonsoft.Json;
-using QModReloadedInstaller;
+using QModReloaded;
 
 namespace QModReloadedGUI;
 
@@ -23,9 +23,9 @@ public partial class FrmMain : Form
     private FrmAbout _frmAbout;
     private FrmResModifier _frmResModifier;
     private string _currentlySelectedModConfigLocation;
-    private Rectangle dragBoxFromMouseDown;
-    private int rowIndexFromMouseDown;
-    private int rowIndexOfItemUnderMouseToDrop;
+    private Rectangle _dragBoxFromMouseDown;
+    private int _rowIndexFromMouseDown;
+    private int _rowIndexOfItemUnderMouseToDrop;
 
     public FrmMain()
     {
@@ -293,6 +293,11 @@ public partial class FrmMain : Form
     private void BtnPatch_Click(object sender, EventArgs e)
     {
         if (IsGameRunning()) return;
+        if (_injector.IsInjected())
+        {
+            MessageBox.Show(@"All patching already done!", @"Done!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
         var (_, message) = _injector.Inject();
         WriteLog(message);
         CheckPatched();
@@ -624,27 +629,27 @@ public partial class FrmMain : Form
     private void DgvMods_MouseMove(object sender, MouseEventArgs e)
     {
         if ((e.Button & MouseButtons.Left) != MouseButtons.Left) return;
-        if (dragBoxFromMouseDown != Rectangle.Empty &&
-            !dragBoxFromMouseDown.Contains(e.X, e.Y))
+        if (_dragBoxFromMouseDown != Rectangle.Empty &&
+            !_dragBoxFromMouseDown.Contains(e.X, e.Y))
         {
             DgvMods.DoDragDrop(
-                DgvMods.Rows[rowIndexFromMouseDown],
+                DgvMods.Rows[_rowIndexFromMouseDown],
                 DragDropEffects.Move);
         }
     }
 
     private void DgvMods_MouseDown(object sender, MouseEventArgs e)
     {
-        rowIndexFromMouseDown = DgvMods.HitTest(e.X, e.Y).RowIndex;
-        if (rowIndexFromMouseDown != -1)
+        _rowIndexFromMouseDown = DgvMods.HitTest(e.X, e.Y).RowIndex;
+        if (_rowIndexFromMouseDown != -1)
         {
             var dragSize = SystemInformation.DragSize;
-            dragBoxFromMouseDown = new Rectangle(new Point(e.X - (dragSize.Width / 2),
+            _dragBoxFromMouseDown = new Rectangle(new Point(e.X - (dragSize.Width / 2),
                     e.Y - (dragSize.Height / 2)),
                 dragSize);
         }
         else
-            dragBoxFromMouseDown = Rectangle.Empty;
+            _dragBoxFromMouseDown = Rectangle.Empty;
     }
 
     private void DgvMods_DragOver(object sender, DragEventArgs e)
@@ -655,16 +660,16 @@ public partial class FrmMain : Form
     private void DgvMods_DragDrop(object sender, DragEventArgs e)
     {
         var clientPoint = DgvMods.PointToClient(new Point(e.X, e.Y));
-        rowIndexOfItemUnderMouseToDrop =
+        _rowIndexOfItemUnderMouseToDrop =
             DgvMods.HitTest(clientPoint.X, clientPoint.Y).RowIndex;
         if (e.Effect != DragDropEffects.Move) return;
-        if (rowIndexOfItemUnderMouseToDrop < 0)
+        if (_rowIndexOfItemUnderMouseToDrop < 0)
         {
             return;
         }
-        DgvMods.Rows.RemoveAt(rowIndexFromMouseDown);
+        DgvMods.Rows.RemoveAt(_rowIndexFromMouseDown);
         if (e.Data.GetData(
-            typeof(DataGridViewRow)) is DataGridViewRow rowToMove) DgvMods.Rows.Insert(rowIndexOfItemUnderMouseToDrop, rowToMove);
+            typeof(DataGridViewRow)) is DataGridViewRow rowToMove) DgvMods.Rows.Insert(_rowIndexOfItemUnderMouseToDrop, rowToMove);
         UpdateLoadOrders();
     }
 

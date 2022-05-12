@@ -1,11 +1,14 @@
-﻿namespace QModReloadedGUI
+﻿using System.ComponentModel;
+using System.Windows.Forms;
+
+namespace QModReloadedGUI
 {
     partial class FrmMain
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -638,59 +641,59 @@
 
         #endregion
 
-        private System.Windows.Forms.TextBox TxtGameLocation;
-        private System.Windows.Forms.TextBox TxtModFolderLocation;
-        private System.Windows.Forms.Button BtnBrowse;
-        private System.Windows.Forms.Label LblGameLocation;
-        private System.Windows.Forms.Label LblModFolderLocation;
-        private System.Windows.Forms.Label LblInstalledMods;
-        private System.Windows.Forms.Button BtnPatch;
-        private System.Windows.Forms.Label LblModInfo;
-        private System.Windows.Forms.TextBox TxtModInfo;
-        private System.Windows.Forms.FolderBrowserDialog DlgBrowse;
-        private System.Windows.Forms.Button BtnAddMod;
-        private System.Windows.Forms.Button BtnRemove;
-        private System.Windows.Forms.PictureBox BtnRunGame;
-        private System.Windows.Forms.ToolTip ToolTip;
-        private System.Windows.Forms.Button BtnRemovePatch;
-        private System.Windows.Forms.Button BtnRefresh;
-        private System.Windows.Forms.Button BtnRemoveIntros;
-        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem checklistToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
-        private System.Windows.Forms.Label LblLog;
-        private System.Windows.Forms.TextBox TxtLog;
-        private System.Windows.Forms.ToolStrip ToolStrip;
-        private System.Windows.Forms.ToolStripLabel LblPatched;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripLabel LblIntroPatched;
-        private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem checklistToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem1;
-        private System.Windows.Forms.OpenFileDialog DlgFile;
-        private System.Windows.Forms.Button BtnOpenGameDir;
-        private System.Windows.Forms.Button BtnOpenModDir;
-        private System.Windows.Forms.Button BtnOpenLog;
-        private System.Windows.Forms.ToolStripMenuItem modifyResolutionToolStripMenuItem;
-        private System.Windows.Forms.Label LblConfig;
-        private System.Windows.Forms.TextBox TxtConfig;
-        private System.Windows.Forms.Label LblSaved;
-        private System.Windows.Forms.DataGridView DgvMods;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ChOrder;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ChMod;
-        private System.Windows.Forms.DataGridViewCheckBoxColumn ChEnabled;
-        private System.Windows.Forms.NotifyIcon trayIcon;
-        private System.Windows.Forms.ContextMenuStrip trayIconCtxMenu;
-        private System.Windows.Forms.ToolStripMenuItem restoreWindowToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
-        private System.Windows.Forms.ToolStripMenuItem launchGameToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem openmModDirectoryToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem openGameDirectoryToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem2;
+        private TextBox TxtGameLocation;
+        private TextBox TxtModFolderLocation;
+        private Button BtnBrowse;
+        private Label LblGameLocation;
+        private Label LblModFolderLocation;
+        private Label LblInstalledMods;
+        private Button BtnPatch;
+        private Label LblModInfo;
+        private TextBox TxtModInfo;
+        private FolderBrowserDialog DlgBrowse;
+        private Button BtnAddMod;
+        private Button BtnRemove;
+        private PictureBox BtnRunGame;
+        private ToolTip ToolTip;
+        private Button BtnRemovePatch;
+        private Button BtnRefresh;
+        private Button BtnRemoveIntros;
+        private ToolStripMenuItem fileToolStripMenuItem;
+        private ToolStripMenuItem exitToolStripMenuItem;
+        private ToolStripMenuItem checklistToolStripMenuItem;
+        private ToolStripMenuItem aboutToolStripMenuItem;
+        private Label LblLog;
+        private TextBox TxtLog;
+        private ToolStrip ToolStrip;
+        private ToolStripLabel LblPatched;
+        private ToolStripSeparator toolStripSeparator2;
+        private ToolStripLabel LblIntroPatched;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem fileToolStripMenuItem1;
+        private ToolStripMenuItem exitToolStripMenuItem1;
+        private ToolStripMenuItem checklistToolStripMenuItem1;
+        private ToolStripMenuItem aboutToolStripMenuItem1;
+        private OpenFileDialog DlgFile;
+        private Button BtnOpenGameDir;
+        private Button BtnOpenModDir;
+        private Button BtnOpenLog;
+        private ToolStripMenuItem modifyResolutionToolStripMenuItem;
+        private Label LblConfig;
+        private TextBox TxtConfig;
+        private Label LblSaved;
+        private DataGridView DgvMods;
+        private DataGridViewTextBoxColumn ChOrder;
+        private DataGridViewTextBoxColumn ChMod;
+        private DataGridViewCheckBoxColumn ChEnabled;
+        private NotifyIcon trayIcon;
+        private ContextMenuStrip trayIconCtxMenu;
+        private ToolStripMenuItem restoreWindowToolStripMenuItem;
+        private ToolStripSeparator toolStripMenuItem2;
+        private ToolStripMenuItem launchGameToolStripMenuItem;
+        private ToolStripMenuItem openmModDirectoryToolStripMenuItem;
+        private ToolStripMenuItem openGameDirectoryToolStripMenuItem;
+        private ToolStripSeparator toolStripMenuItem1;
+        private ToolStripMenuItem exitToolStripMenuItem2;
     }
 }
 

@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using QModReloadedInstaller;
+using QModReloaded;
 
 namespace QModReloadedGUI
 {
@@ -43,7 +43,7 @@ namespace QModReloadedGUI
             ChkGameLoopVDFJson.Checked =
                 CheckFileExists(Path.Combine(Application.StartupPath, "Gameloop.Vdf.JsonConverter.dll"));
             ChkInjector.Checked =
-                CheckFileExists(Path.Combine(Application.StartupPath, "QModReloadedInstaller.dll"));
+                CheckFileExists(Path.Combine(Application.StartupPath, "QModReloaded.dll"));
             ChkConfig.Checked =
                 CheckFileExists(Path.Combine(Application.StartupPath, "QModReloadedGUI.exe.config"));
 

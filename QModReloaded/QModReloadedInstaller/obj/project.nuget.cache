@@ -1,9 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "zd7G+zSchP9u+0BFmqr3nKXm0WVXyA+xCKtIm7ANDuT7ZurVNx3Zd7lJcale83vHUy2BhIt26DciZAyEj5Ajtw==",
+  "dgSpecHash": "IVBt+ia/jkGI0eMYT1PROrRzvd2k9pkePGCDc8f7AedSDMxmpZNZ3LLZJh8g4OIhj1EQ/i+fUeYZb9kewL72tQ==",
   "success": true,
-  "projectFilePath": "H:\\OneDrive\\Development\\GraveyardKeeper\\QModReloaded\\QModReloadedInstaller\\QModReloadedInstaller.csproj",
+  "projectFilePath": "H:\\OneDrive\\Development\\GraveyardKeeper\\QModReloaded\\QModReloadedInstaller\\QModReloaded.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\Ben\\.nuget\\packages\\gameloop.vdf\\0.6.0\\gameloop.vdf.0.6.0.nupkg.sha512",
+    "C:\\Users\\Ben\\.nuget\\packages\\gameloop.vdf.jsonconverter\\0.2.1\\gameloop.vdf.jsonconverter.0.2.1.nupkg.sha512",
     "C:\\Users\\Ben\\.nuget\\packages\\microsoft.codeanalysis.netanalyzers\\7.0.0-preview1.22217.1\\microsoft.codeanalysis.netanalyzers.7.0.0-preview1.22217.1.nupkg.sha512",
     "C:\\Users\\Ben\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512"
   ],
