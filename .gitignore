@@ -2,4 +2,12 @@ releases/*
 template/*
 */bin/*
 */obj/*
+**/bin/*
+**/obj/*
+**/**/bin/*
+**/**/obj/*
+*/*/bin/*
+*/*/obj/*
 .vs/*
+*/*.vs/*
+**/**/.vs/*
