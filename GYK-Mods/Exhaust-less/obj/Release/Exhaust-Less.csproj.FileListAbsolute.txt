@@ -20,7 +20,6 @@ H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\Rewire
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityEngine.SpriteMaskModule.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\com.unity.multiplayer-hlapi.Runtime.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\websocket-sharp.dll
-H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\Newtonsoft.Json.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityEngine.TerrainModule.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\Pathfinding.ClipperLib.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\Pathfinding.Ionic.Zip.Reduced.dll
@@ -30,7 +29,6 @@ H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\LinqTo
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\Sirenix.Utilities.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityEngine.JSONSerializeModule.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\DOTween43.dll
-H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\QModReloadedInstaller.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityEngine.SharedInternalsModule.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityEngine.AIModule.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityEngine.UnityWebRequestWWWModule.dll
@@ -38,7 +36,6 @@ H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityE
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityEngine.SpriteShapeModule.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityEngine.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityEngine.UNETModule.dll
-H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\Mono.Cecil.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityEngine.AssetBundleModule.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityEngine.UnityWebRequestAssetBundleModule.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityEngine.ImageConversionModule.dll
@@ -75,7 +72,6 @@ H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityE
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityEngine.XRModule.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityEngine.ARModule.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\UnityEngine.InputModule.dll
-H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\bin\Release\Newtonsoft.Json.xml
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\obj\Release\Exhaust-Less.csproj.AssemblyReference.cache
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\obj\Release\Exhaust-Less.csproj.CoreCompileInputs.cache
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaust-Less\obj\Release\Exhaust-Less.csproj.CopyComplete

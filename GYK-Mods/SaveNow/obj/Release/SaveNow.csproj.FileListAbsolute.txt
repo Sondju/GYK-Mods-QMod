@@ -69,16 +69,12 @@ H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\LitJson.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\Rewired_Core.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\com.unity.multiplayer-hlapi.Runtime.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\websocket-sharp.dll
-H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\Newtonsoft.Json.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\Pathfinding.ClipperLib.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\Pathfinding.Ionic.Zip.Reduced.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\Pathfinding.Poly2Tri.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\LinqTools.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\Sirenix.Utilities.dll
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\DOTween43.dll
-H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\QModReloadedInstaller.dll
-H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\Mono.Cecil.dll
-H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\Newtonsoft.Json.xml
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\obj\Release\SaveNow.csproj.AssemblyReference.cache
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\obj\Release\SaveNow.csproj.CoreCompileInputs.cache
 H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\obj\Release\SaveNow.csproj.CopyComplete

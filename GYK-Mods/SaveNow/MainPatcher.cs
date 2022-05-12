@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using Harmony;
@@ -7,41 +8,40 @@ namespace SaveNow
 {
     public class MainPatcher
     {
-        public static Vector3 pos;
-        public static string[] xyz;
-        public static float x, y, z;
-        public static string dataPath;
-
+        public static Vector3 Pos;
+        public static string[] Xyz;
+        public static float X, Y, Z;
+        public static string DataPath;
 
         public static void Patch()
         {
-            HarmonyInstance val = HarmonyInstance.Create("p1xel8ted.graveyardkeeper.savenow");
+            var val = HarmonyInstance.Create("p1xel8ted.graveyardkeeper.savenow");
             val.PatchAll(Assembly.GetExecutingAssembly());
-            dataPath = "QMods//SaveNow//last_loc.txt";
+            DataPath = "QMods//SaveNow//dont-remove.dat";
         }
 
         public static void SaveLocation()
         {
-            pos = MainGame.me.player.pos3;
-            var x = pos.x;
-            var y = pos.y;
-            var z = pos.z;
-            string[] xyz = { x.ToString(), y.ToString(), z.ToString() };
-            File.WriteAllLines(dataPath, xyz);
+            Pos = MainGame.me.player.pos3;
+            var x = Pos.x;
+            var y = Pos.y;
+            var z = Pos.z;
+            string[] xyz = { x.ToString(CultureInfo.InvariantCulture), y.ToString(CultureInfo.InvariantCulture), z.ToString(CultureInfo.InvariantCulture) };
+            File.WriteAllLines(DataPath, xyz);
         }
 
         public static void RestoreLocation()
         {
-            xyz = File.ReadAllLines(dataPath);
-            x = float.Parse(xyz[0]);
-            y = float.Parse(xyz[1]);
-            z = float.Parse(xyz[2]);
-            pos.Set(x, y, z);
-            MainGame.me.player.PlaceAtPos(pos);
+            Xyz = File.ReadAllLines(DataPath);
+            X = float.Parse(Xyz[0]);
+            Y = float.Parse(Xyz[1]);
+            Z = float.Parse(Xyz[2]);
+            Pos.Set(X, Y, Z);
+            MainGame.me.player.PlaceAtPos(Pos);
         }
 
         [HarmonyPatch(typeof(SleepGUI), "WakeUp")]
-        public static class Patch_SavePosWhenUsingBed
+        public static class PatchSavePosWhenUsingBed
         {
             public static void Prefix()
             {
@@ -51,7 +51,7 @@ namespace SaveNow
 
         [HarmonyPatch(typeof(GameSave))]
         [HarmonyPatch(nameof(GameSave.GlobalEventsCheck))]
-        public static class Patch_LoadGame 
+        public static class PatchLoadGame 
         {
             public static void Prefix()
             {
@@ -61,7 +61,7 @@ namespace SaveNow
 
         [HarmonyPatch(typeof(TimeOfDay))]
         [HarmonyPatch(nameof(TimeOfDay.Update))]
-        public static class Patch_SaveGame
+        public static class PatchSaveGame
         {
             [HarmonyPrefix]
             public static void Prefix()

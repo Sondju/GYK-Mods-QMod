@@ -8,14 +8,14 @@ namespace QModReloaded;
 
 public class QMod
 {
-    public string Id { get; set; } = "mod_id";
-    public string DisplayName { get; set; } = "Display name";
-    public string Author { get; set; } = "author";
-    public string Version { get; set; } = "0.0.0";
+    public string Id { get; set; }
+    public string DisplayName { get; set; }
+    public string Author { get; set; }
+    public string Version { get; set; }
     public string[] Requires { get; set; } = Array.Empty<string>();
     public bool Enable { get; set; }
-    public string AssemblyName { get; set; } = "dll filename";
-    public string EntryMethod { get; set; } = "Namespace.Class.Method of Harmony.PatchAll or your equivalent";
+    public string AssemblyName { get; set; }
+    public string EntryMethod { get; set; }
     public int LoadOrder { get; set; } = -1;
     public string Priority { get; set; }
 
