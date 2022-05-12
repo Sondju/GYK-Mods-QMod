@@ -5,7 +5,7 @@ VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QModReloadedGUI", "QModReloadedGUI\QModReloadedGUI.csproj", "{50A53D3C-A80E-421C-9A2A-43CBEACEDEC6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QModReloaded", "QModReloadedInstaller\QModReloaded.csproj", "{53FC79B8-326D-42DC-B8ED-73D60DCD153C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QModReloaded", "QModReloaded\QModReloaded.csproj", "{53FC79B8-326D-42DC-B8ED-73D60DCD153C}"
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "QModReloadedSetup", "QModReloadedSetup\QModReloadedSetup.vdproj", "{305C06AC-B4FD-471E-9A23-260FD2BF7F5C}"
 EndProject

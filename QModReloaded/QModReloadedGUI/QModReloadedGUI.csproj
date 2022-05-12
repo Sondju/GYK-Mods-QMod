@@ -157,7 +157,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\QModReloadedInstaller\QModReloaded.csproj">
+    <ProjectReference Include="..\QModReloaded\QModReloaded.csproj">
       <Project>{53FC79B8-326D-42DC-B8ED-73D60DCD153C}</Project>
       <Name>QModReloaded</Name>
     </ProjectReference>
