@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exhaust-Less", "Exhaust-Les
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SaveNow", "SaveNow\SaveNow.csproj", "{0C0D9B04-E186-4E98-AE03-8771E67D7B82}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewGameAtBottom", "NewGameAtBottom\NewGameAtBottom.csproj", "{2084C92A-5D15-44CE-AC53-4C1AC6859E37}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{0C0D9B04-E186-4E98-AE03-8771E67D7B82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C0D9B04-E186-4E98-AE03-8771E67D7B82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C0D9B04-E186-4E98-AE03-8771E67D7B82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2084C92A-5D15-44CE-AC53-4C1AC6859E37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2084C92A-5D15-44CE-AC53-4C1AC6859E37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2084C92A-5D15-44CE-AC53-4C1AC6859E37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2084C92A-5D15-44CE-AC53-4C1AC6859E37}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
