@@ -13,7 +13,7 @@
 
 ### Why:
 
-I'm late to the party I know - I recently started playing SDV despite having it for years and never touching it, and love it. Remembered I had Graveyard Keeper on Steam as well as some other similar games. I know the modding scene isnt huge/active for GYK anymore, and that's fine. I mainly developed this to see if I could do it (using oldark87's code as a base). I'm not a software developer by profession, it's more of a hobby at the moment, so learning as I go. Enjoy.
+I'm late to the party I know - I recently started playing SDV despite having it for years and never touching it, and love it. Remembered I had Graveyard Keeper on Steam as well as some other similar games. I know the modding scene isnt huge/active for GYK anymore, and that's fine. I mainly developed this to see if I could do it using oldark87's existing QMod system. I'm not a software developer by profession, it's more of a hobby at the moment, so learning as I go. Enjoy.
 
 ### Installation:
 
@@ -22,8 +22,8 @@ ___
 
 ### Images:
 
-| ![alt text](https://github.com/p1xel8ted/QModReloaded/blob/master/main_ui.png?raw=true) | ![alt text](https://github.com/p1xel8ted/QModReloaded/blob/master/res_ui.png?raw=true)|
-| ![alt text](https://github.com/p1xel8ted/QModReloaded/blob/master/checklist_ui.png?raw=true) | ![alt text](https://github.com/p1xel8ted/QModReloaded/blob/master/about_ui.png?raw=true) |
+| ![alt text](https://github.com/p1xel8ted/GraveyardKeeper/blob/main/QModReloaded/main_ui.png?raw=true) | ![alt text](https://github.com/p1xel8ted/GraveyardKeeper/blob/main/QModReloaded/res_ui.png?raw=true)|
+| ![alt text](https://github.com/p1xel8ted/GraveyardKeeper/blob/main/QModReloaded/checklist_ui.png?raw=true) | ![alt text](https://github.com/p1xel8ted/GraveyardKeeper/blob/main/QModReloaded/about_ui.png?raw=true) |
 
 ___
 
