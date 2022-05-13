@@ -51,4 +51,13 @@
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />
   </ProjectExtensions>
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\TreesNoMore\bin\Release\TreesNoMore.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\TreesNoMore\" /K /D /H /Y
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\UltraWide\bin\Release\UltraWide.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\UltraWide\" /K /D /H /Y
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\FogBeGone\bin\Release\FogBeGone.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\FogBeGone\" /K /D /H /Y
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NewGameAtBottom\bin\Release\NewGameAtBottom.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NewGameAtBottom\" /K /D /H /Y
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\SaveNow.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\SaveNow\" /K /D /H /Y
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaustless\bin\Release\Exhaust-less.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\Exhaust-less\" /K /D /H /Y
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoTimeForFishing\bin\Release\NoTimeForFishing.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoTimeForFishing\" /K /D /H /Y</PostBuildEvent>
+  </PropertyGroup>
 </Project>
