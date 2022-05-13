@@ -15,6 +15,7 @@ namespace TreesNoMore
         [HarmonyPatch(typeof(WorldGameObject), "SmartInstantiate")]
         public static class PatchLoadGame 
         {
+            [HarmonyPrefix]
             public static void Prefix(ref WorldObjectPart prefab)
             {
                 if (!MainGame.loaded_from_scene_main && prefab.name.Contains("tree"))
