@@ -13,7 +13,6 @@ namespace SaveNow
         public static float X, Y, Z;
         public static string DataPath, ErrorPath;
 
-
         public static void Patch()
         {
             var val = HarmonyInstance.Create("p1xel8ted.graveyardkeeper.savenow");
@@ -51,12 +50,12 @@ namespace SaveNow
             Z = float.Parse(Xyz[2]);
             Pos.Set(X, Y, Z);
             MainGame.me.player.PlaceAtPos(Pos);
-            var home = MainGame.me.player.GetMyWorldZone().name;
-            if (!home.EndsWith("home_zone"))
-            {
+           // var home = MainGame.me.player.GetMyWorldZone().name;
+            //if (!home.EndsWith("home_zone"))
+           // {
                 EffectBubblesManager.ShowImmediately(Pos, "Woooah! What a rush! Gets me every time!",
                     EffectBubblesManager.BubbleColor.Relation, true, 4f, false);
-            }
+           // }
         }
 
         [HarmonyPatch(typeof(InGameMenuGUI), "OnPressedSaveAndExit")]
@@ -64,6 +63,8 @@ namespace SaveNow
         {
             public static bool Prefix()
             {
+                EffectBubblesManager.ShowImmediately(Pos, "", EffectBubblesManager.BubbleColor.Relation,
+                    true, 3f, false);
                 return false;
             }
 
@@ -88,6 +89,8 @@ namespace SaveNow
             [HarmonyPrefix]
             public static void Prefix()
             {
+                EffectBubblesManager.ShowImmediately(Pos, "", EffectBubblesManager.BubbleColor.Relation,
+                    true, 3f, false);
                 SaveLocation(false);
             }
         }
@@ -99,6 +102,8 @@ namespace SaveNow
             [HarmonyPrefix]
             public static void Prefix()
             {
+                EffectBubblesManager.ShowImmediately(Pos, "", EffectBubblesManager.BubbleColor.Relation,
+                    true, 3f, false);
                 RestoreLocation();
             }
         }
@@ -110,6 +115,8 @@ namespace SaveNow
             [HarmonyPrefix]
             public static void Prefix()
             {
+                EffectBubblesManager.ShowImmediately(Pos, "", EffectBubblesManager.BubbleColor.Relation,
+                    true, 3f, false);
                 if (Input.GetKeyUp(KeyCode.K))
                 {
                     PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,

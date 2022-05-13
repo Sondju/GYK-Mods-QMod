@@ -18,7 +18,7 @@ namespace TreesNoMore
             [HarmonyPrefix]
             public static void Prefix(ref WorldObjectPart prefab)
             {
-                if (!MainGame.loaded_from_scene_main && prefab.name.Contains("tree"))
+                if ((MainGame.game_started || MainGame.game_starting) && prefab.name.Contains("tree"))
                 {
                     prefab = null;
                 }

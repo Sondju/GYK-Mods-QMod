@@ -205,6 +205,7 @@ public partial class FrmMain : Form
                 }
             }
 
+            DgvMods.Sort(DgvMods.Columns[0], ListSortDirection.Ascending);
             WriteLog(
                 "All mods with an entry point added. This doesn't mean they'll load correctly or function if they do load.");
         }
@@ -308,6 +309,10 @@ public partial class FrmMain : Form
             {
                 MessageBox.Show(@"Error launching game: " + ex.Message, @"Error", MessageBoxButtons.OK);
             }
+        }
+        finally
+        {
+            WindowState = FormWindowState.Minimized;
         }
     }
 
@@ -634,8 +639,9 @@ public partial class FrmMain : Form
             }
             else
             {
-                WriteLog($"No config file found for {modFound.DisplayName} that is JSON/TXT/INI.");
+                TxtConfig.Clear();
             }
+            
         }
         catch (NullReferenceException ex)
         {
