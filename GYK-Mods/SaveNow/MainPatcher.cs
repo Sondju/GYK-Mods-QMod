@@ -28,6 +28,7 @@ namespace SaveNow
             var z = Pos.z;
             string[] xyz = { x.ToString(CultureInfo.InvariantCulture), y.ToString(CultureInfo.InvariantCulture), z.ToString(CultureInfo.InvariantCulture) };
             File.WriteAllLines(DataPath, xyz);
+            EffectBubblesManager.ShowImmediately(Pos, "Game saved!", EffectBubblesManager.BubbleColor.Relation, true, 3f, false);
         }
 
         public static void RestoreLocation()

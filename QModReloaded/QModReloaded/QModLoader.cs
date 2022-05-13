@@ -143,9 +143,13 @@ public class QModLoader
         {
             Logger.WriteLog($"Invoking the specified EntryMethod {mod.EntryMethod} failed for {mod.Id}");
         }
+        catch (NullReferenceException nullEx)
+        {
+            Logger.WriteLog(nullEx.Message);
+        }
         catch (Exception finalEx)
         {
-            Logger.WriteLog(finalEx.Message);
+            Logger.WriteLog($"LoadMod():{finalEx.Message}, Source: {finalEx.Source}, Tract: {finalEx.StackTrace}");
         }
     }
 }

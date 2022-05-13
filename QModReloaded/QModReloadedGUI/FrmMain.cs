@@ -26,6 +26,7 @@ public partial class FrmMain : Form
     private Rectangle _dragBoxFromMouseDown;
     private int _rowIndexFromMouseDown;
     private int _rowIndexOfItemUnderMouseToDrop;
+    private const string CleanMd5 = "b75466bdcc44f5f098d4b22dc047b175"; //hash for Assembly-CSharp.dll 1.405
 
     public FrmMain()
     {
@@ -215,6 +216,7 @@ public partial class FrmMain : Form
 
     private void CheckPatched()
     {
+
         if (!_gameLocation.found) return;
 
         _injector = new Injector(_gameLocation.location);
@@ -242,6 +244,25 @@ public partial class FrmMain : Form
         {
             LblIntroPatched.Text = @"Intros Not Removed";
             LblIntroPatched.ForeColor = Color.Red;
+        }
+
+        
+        if (!Utilities.CalculateMd5(Path.Combine(_gameLocation.location,
+                "Graveyard Keeper_Data\\Managed\\Assembly-CSharp.dll")).Equals(CleanMd5)) return;
+        try
+        {
+            File.Copy(Path.Combine(_gameLocation.location, "Graveyard Keeper_Data\\Managed\\Assembly-CSharp.dll"),
+                Path.Combine(_gameLocation.location, "Graveyard Keeper_Data\\Managed\\dep\\Assembly-CSharp.dll"),
+                true);
+            WriteLog("Clean Assembly-CSharp.dll detected. Backing up to Graveyard Keeper_Data\\Managed\\dep");
+        }
+        catch (FileNotFoundException)
+        {
+            WriteLog("Assembly-CSharp.dll not found. Probably need to check that out.");
+        }
+        catch (Exception)
+        {
+            //
         }
     }
 
@@ -578,7 +599,7 @@ public partial class FrmMain : Form
         try
         {
             QMod modFound = null;
-            foreach (var mod in _modList.Where(mod => mod.DisplayName == DgvMods.CurrentRow.Cells[1].Value.ToString()))
+            foreach (var mod in _modList.Where(mod => mod.DisplayName == DgvMods.CurrentRow?.Cells[1].Value.ToString()))
                 modFound = mod;
 
             if (modFound == null) return;
@@ -710,6 +731,30 @@ public partial class FrmMain : Form
         if (WindowState == FormWindowState.Minimized)
         {
             ShowInTaskbar = false;
+        }
+    }
+
+    private void BtnRestore_Click(object sender, EventArgs e)
+    {
+        var result =
+            MessageBox.Show(
+                @"This will restore any backed up Assembly-CSharp.dll. You will need to re-patch to use mods. Continue?",
+                @"Restore", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+        if (result != DialogResult.Yes) return;
+        try
+        {
+            File.Copy(Path.Combine(_gameLocation.location, "Graveyard Keeper_Data\\Managed\\dep\\Assembly-CSharp.dll"),
+                Path.Combine(_gameLocation.location, "Graveyard Keeper_Data\\Managed\\Assembly-CSharp.dll"), true);
+            FrmMain_Load(sender,e);
+            WriteLog("Restored Assembly-CSharp.dll from the Graveyard Keeper_Data\\Managed\\dep directory.");
+        }
+        catch (FileNotFoundException)
+        {
+            WriteLog("A backed up Assembly-CSharp.dll could not be found.");
+        }
+        catch (Exception ex)
+        {
+            WriteLog($"An error occurred: {ex.Message}.");
         }
     }
 }

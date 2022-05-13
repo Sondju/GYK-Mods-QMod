@@ -29,7 +29,7 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <RootNamespace>Exhaust_Less</RootNamespace>
+    <RootNamespace>Exhaustless</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="MainPatcher.cs" />

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using Gameloop.Vdf;
 using Gameloop.Vdf.JsonConverter;
 using Microsoft.Win32;
@@ -10,6 +11,14 @@ namespace QModReloadedGUI
 {
     internal static class Utilities
     {
+
+        public static string CalculateMd5(string file)
+        {
+            using var md5 = MD5.Create();
+            using var stream = File.OpenRead(file);
+            var hash = md5.ComputeHash(stream);
+            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+        }
 
         public static void WriteLog(string message, string gameLocation)
         {

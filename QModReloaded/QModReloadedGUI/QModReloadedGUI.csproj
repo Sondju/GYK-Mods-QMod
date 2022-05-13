@@ -164,6 +164,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="about-image.jpg" />
+    <Content Include="dep\0Harmony.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dep\Newtonsoft.Json.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="icon.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +183,9 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="NewFolder1\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

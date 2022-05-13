@@ -86,6 +86,7 @@ namespace QModReloadedGUI
             this.openGameDirectoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.BtnRestore = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.BtnRunGame)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.DgvMods)).BeginInit();
             this.ToolStrip.SuspendLayout();
@@ -587,11 +588,24 @@ namespace QModReloadedGUI
             this.exitToolStripMenuItem2.Text = "E&xit";
             this.exitToolStripMenuItem2.Click += new System.EventHandler(this.ExitToolStripMenuItem2_Click);
             // 
+            // BtnRestore
+            // 
+            this.BtnRestore.Location = new System.Drawing.Point(371, 435);
+            this.BtnRestore.Name = "BtnRestore";
+            this.BtnRestore.Size = new System.Drawing.Size(95, 23);
+            this.BtnRestore.TabIndex = 36;
+            this.BtnRestore.Text = "Restore Backup";
+            this.ToolTip.SetToolTip(this.BtnRestore, "Restores backed up Assembly-CSharp.dll if it exists.");
+            this.BtnRestore.UseCompatibleTextRendering = true;
+            this.BtnRestore.UseVisualStyleBackColor = true;
+            this.BtnRestore.Click += new System.EventHandler(this.BtnRestore_Click);
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(578, 631);
+            this.Controls.Add(this.BtnRestore);
             this.Controls.Add(this.DgvMods);
             this.Controls.Add(this.LblSaved);
             this.Controls.Add(this.TxtConfig);
@@ -663,7 +677,7 @@ namespace QModReloadedGUI
         private ToolStripMenuItem checklistToolStripMenuItem;
         private ToolStripMenuItem aboutToolStripMenuItem;
         private Label LblLog;
-        private TextBox TxtLog;
+        public TextBox TxtLog;
         private ToolStrip ToolStrip;
         private ToolStripLabel LblPatched;
         private ToolStripSeparator toolStripSeparator2;
@@ -694,6 +708,7 @@ namespace QModReloadedGUI
         private ToolStripMenuItem openGameDirectoryToolStripMenuItem;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem exitToolStripMenuItem2;
+        private Button BtnRestore;
     }
 }
 

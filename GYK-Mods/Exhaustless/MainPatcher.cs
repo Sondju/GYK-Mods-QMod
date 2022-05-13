@@ -1,7 +1,7 @@
 using System.Reflection;
 using Harmony;
 
-namespace Exhaust_Less
+namespace Exhaustless
 {
     public class MainPatcher
     {
@@ -16,9 +16,9 @@ namespace Exhaust_Less
         public static class PatchTrySpendEnergy
         {
             [HarmonyPrefix]
-            public static void Prefix(ref float needEnergy)
+            public static void Prefix(ref float need_energy)
             {
-                needEnergy /= 2f;
+                need_energy /= 2f;
             }
         }
     }
