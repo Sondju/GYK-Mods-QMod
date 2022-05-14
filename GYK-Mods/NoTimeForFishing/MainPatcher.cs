@@ -23,8 +23,8 @@ namespace NoTimeForFishing
             {
                 //make the "pulling" and "awaiting pull" actions skip to looting
                     var codes = new List<CodeInstruction>(instructions);
-                    codes[20] = codes[26];
-                    codes[23] = codes[26];
+                    codes[20] = codes[26]; //index 26 is the instruction that starts the fish looting process
+                    codes[23] = codes[26]; //replacing the awaiting pull and pulling statements with it
                     return codes.AsEnumerable();
             }
         }

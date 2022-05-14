@@ -57,6 +57,7 @@ namespace QModReloadedGUI
             this.ChOrder = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ChMod = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ChEnabled = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.BtnRestore = new System.Windows.Forms.Button();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checklistToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -86,7 +87,6 @@ namespace QModReloadedGUI
             this.openGameDirectoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.BtnRestore = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.BtnRunGame)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.DgvMods)).BeginInit();
             this.ToolStrip.SuspendLayout();
@@ -323,6 +323,7 @@ namespace QModReloadedGUI
             this.DgvMods.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvMods_CellContentClick);
             this.DgvMods.DragDrop += new System.Windows.Forms.DragEventHandler(this.DgvMods_DragDrop);
             this.DgvMods.DragOver += new System.Windows.Forms.DragEventHandler(this.DgvMods_DragOver);
+            this.DgvMods.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.DgvMods_MouseDoubleClick);
             this.DgvMods.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DgvMods_MouseDown);
             this.DgvMods.MouseMove += new System.Windows.Forms.MouseEventHandler(this.DgvMods_MouseMove);
             // 
@@ -352,6 +353,18 @@ namespace QModReloadedGUI
             this.ChEnabled.ReadOnly = true;
             this.ChEnabled.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.ChEnabled.Width = 52;
+            // 
+            // BtnRestore
+            // 
+            this.BtnRestore.Location = new System.Drawing.Point(371, 435);
+            this.BtnRestore.Name = "BtnRestore";
+            this.BtnRestore.Size = new System.Drawing.Size(95, 23);
+            this.BtnRestore.TabIndex = 36;
+            this.BtnRestore.Text = "Restore Backup";
+            this.ToolTip.SetToolTip(this.BtnRestore, "Restores backed up Assembly-CSharp.dll if it exists.");
+            this.BtnRestore.UseCompatibleTextRendering = true;
+            this.BtnRestore.UseVisualStyleBackColor = true;
+            this.BtnRestore.Click += new System.EventHandler(this.BtnRestore_Click);
             // 
             // fileToolStripMenuItem
             // 
@@ -481,7 +494,7 @@ namespace QModReloadedGUI
             // 
             // DlgFile
             // 
-            this.DlgFile.FileName = "openFileDialog1";
+            this.DlgFile.Filter = "ZIP Files|*.zip";
             this.DlgFile.Multiselect = true;
             this.DlgFile.Title = "Select ZIP file( s)";
             // 
@@ -587,18 +600,6 @@ namespace QModReloadedGUI
             this.exitToolStripMenuItem2.Size = new System.Drawing.Size(188, 22);
             this.exitToolStripMenuItem2.Text = "E&xit";
             this.exitToolStripMenuItem2.Click += new System.EventHandler(this.ExitToolStripMenuItem2_Click);
-            // 
-            // BtnRestore
-            // 
-            this.BtnRestore.Location = new System.Drawing.Point(371, 435);
-            this.BtnRestore.Name = "BtnRestore";
-            this.BtnRestore.Size = new System.Drawing.Size(95, 23);
-            this.BtnRestore.TabIndex = 36;
-            this.BtnRestore.Text = "Restore Backup";
-            this.ToolTip.SetToolTip(this.BtnRestore, "Restores backed up Assembly-CSharp.dll if it exists.");
-            this.BtnRestore.UseCompatibleTextRendering = true;
-            this.BtnRestore.UseVisualStyleBackColor = true;
-            this.BtnRestore.Click += new System.EventHandler(this.BtnRestore_Click);
             // 
             // FrmMain
             // 

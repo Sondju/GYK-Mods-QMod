@@ -274,6 +274,7 @@ public partial class FrmMain : Form
         CheckPatched();
         DgvMods.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         DgvMods.Sort(DgvMods.Columns[0], ListSortDirection.Ascending);
+
     }
 
     private void BtnBrowse_Click(object sender, EventArgs e)
@@ -723,12 +724,14 @@ public partial class FrmMain : Form
     private void RestoreWindowToolStripMenuItem_Click(object sender, EventArgs e)
     {
         WindowState = FormWindowState.Normal;
+        Focus();
         ShowInTaskbar = true;
     }
 
     private void TrayIcon_MouseDoubleClick(object sender, MouseEventArgs e)
     {
         WindowState = FormWindowState.Normal;
+        Focus();
         ShowInTaskbar = true;
     }
 
@@ -761,6 +764,28 @@ public partial class FrmMain : Form
         catch (Exception ex)
         {
             WriteLog($"An error occurred: {ex.Message}.");
+        }
+    }
+
+    private void DgvMods_MouseDoubleClick(object sender, MouseEventArgs e)
+    {
+        if (DgvMods.SelectedRows.Count > 1)
+        {
+            return;
+        }
+        QMod modFound = null;
+        try
+        {
+            
+            foreach (var mod in _modList.Where(mod => mod.DisplayName == DgvMods.CurrentRow?.Cells[1].Value.ToString()))
+                modFound = mod;
+            if (!_gameLocation.found) return;
+            if (modFound != null)
+                Process.Start(modFound.ModAssemblyPath);
+        }
+        catch (Exception)
+        {
+            WriteLog($"Issue locating folder for {modFound?.DisplayName}.");
         }
     }
 }

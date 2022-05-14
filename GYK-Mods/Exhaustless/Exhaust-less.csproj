@@ -58,6 +58,7 @@ xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\FogBeGone\bin\Release\Fo
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NewGameAtBottom\bin\Release\NewGameAtBottom.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NewGameAtBottom\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\SaveNow.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\SaveNow\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaustless\bin\Release\Exhaust-less.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\Exhaust-less\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoTimeForFishing\bin\Release\NoTimeForFishing.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoTimeForFishing\" /K /D /H /Y</PostBuildEvent>
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoTimeForFishing\bin\Release\NoTimeForFishing.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoTimeForFishing\" /K /D /H /Y
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoIntros\bin\Release\NoIntros.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoIntros\" /K /D /H /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>

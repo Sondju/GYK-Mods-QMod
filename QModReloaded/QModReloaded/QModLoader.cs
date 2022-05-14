@@ -94,11 +94,11 @@ public class QModLoader
         var (namesp, type, method, found) = GetModEntryPoint(file);
         var newMod = new QMod
         {
-            DisplayName = fileNameWithoutExt,
+            DisplayName = AssemblyName.GetAssemblyName(sFile.FullName).Name, //fileNameWithoutExt,
             Enable = true,
             ModAssemblyPath = path,
-            AssemblyName = fileNameWithExt,
-            Author = "?",
+            AssemblyName = AssemblyName.GetAssemblyName(sFile.FullName).Name,
+            Author = "QMod JSON Auto-Gen",
             Id = fileNameWithoutExt,
             EntryMethod = found ? $"{namesp}.{type}.{method}" : $"{fileNameWithoutExt}.MainPatcher.Patch",
             Config = new Dictionary<string, object>(),
