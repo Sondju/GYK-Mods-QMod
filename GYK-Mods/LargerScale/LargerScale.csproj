@@ -2,10 +2,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{15FE0965-BCF2-470C-8D0E-616DA7B0F17C}</ProjectGuid>
+    <ProjectGuid>{7690963B-2079-4C05-BC9E-2AA7C645CC75}</ProjectGuid>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
-    <AssemblyName>Exhaust-less</AssemblyName>
+    <AssemblyName>LargerScale</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -29,12 +29,14 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <RootNamespace>Exhaustless</RootNamespace>
+    <RootNamespace>LargerScale</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Config.cs" />
     <Compile Include="MainPatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>..\0Harmony.dll</HintPath>
@@ -43,23 +45,18 @@
       <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="UnityEngine.CoreModule">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />
   </ProjectExtensions>
-  <PropertyGroup>
-    <PostBuildEvent>xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\TreesNoMore\bin\Release\TreesNoMore.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\TreesNoMore\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\UltraWide\bin\Release\UltraWide.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\UltraWide\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\FogBeGone\bin\Release\FogBeGone.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\FogBeGone\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NewGameAtBottom\bin\Release\NewGameAtBottom.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NewGameAtBottom\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\SaveNow.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\SaveNow\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaustless\bin\Release\Exhaust-less.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\Exhaust-less\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoTimeForFishing\bin\Release\NoTimeForFishing.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoTimeForFishing\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\LargerScale\bin\Release\LargerScale.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\LargerScale\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoIntros\bin\Release\NoIntros.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoIntros\" /K /D /H /Y</PostBuildEvent>
-  </PropertyGroup>
 </Project>
