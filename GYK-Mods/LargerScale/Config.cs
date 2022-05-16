@@ -1,54 +1,36 @@
-﻿using System.IO;
-using System.Text;
+﻿using System;
 
 namespace LargerScale
 {
     public class Config
     {
         private static Options _options;
-        private const string Path = "./QMods/LargerScale/config.txt";
+        private static ConfigReader _con;
 
+        [Serializable]
         public class Options
         {
-            public int Width = GameSettings.me.res_x;
-            public int Height = GameSettings.me.res_y;
             public int Scale = 2;
-        }
-
-        private static void SaveDefaultOptions()
-        {
-            var defaultOptions = new[] { _options.Width.ToString(), _options.Height.ToString(), _options.Scale.ToString() };
-            File.WriteAllLines(Path, defaultOptions, Encoding.Default);
+            public int Width = 1920;
+            public int Height = 1080;
         }
 
         public static Options GetOptions()
         {
-            if (_options != null) return _options;
             _options = new Options();
-         
-            if (File.Exists(Path))
-            {
-                var config = File.ReadAllLines(Path);
-                if (config.Length > 0)
-                {
-                    var isWidthNo  = int.TryParse(config[0], out var tempW);
-                    _options.Width = isWidthNo ? tempW : GameSettings.me.res_x;
-                    var isHeightNo  = int.TryParse(config[1], out var tempH);
-                    _options.Height = isHeightNo ? tempH : GameSettings.me.res_y;
-                    var isScaleNo = int.TryParse(config[2], out var tempS);
-                    _options.Scale = isScaleNo ? tempS : 2;
-                }
-                else
-                {
-                    SaveDefaultOptions();
-                    return _options;
-                }
-            }
-            else
-            {
-                SaveDefaultOptions();
-                return _options;
-            }
+            _con = new ConfigReader();
+
+            int.TryParse(_con.Value("Scale", "2"), out var scale);
+            _options.Scale = scale;
+
+            int.TryParse(_con.Value("Width", "1920"), out var width);
+            _options.Width = width;
+
+            int.TryParse(_con.Value("Height", "1080"), out var height);
+            _options.Height = height;
+
+            _con.ConfigWrite();
+
             return _options;
         }
     }

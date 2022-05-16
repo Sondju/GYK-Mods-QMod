@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -32,7 +33,7 @@ namespace SaveNow
         }
 
         //reads co-ords from player, and saves to file
-        public static bool SaveLocation(bool menuExit)
+        public static bool SaveLocation(bool menuExit, string saveFile)
         {
             Pos = MainGame.me.player.pos3;
             var x = Pos.x;
@@ -48,8 +49,24 @@ namespace SaveNow
             if (menuExit) return true;
             if (!_cfg.TurnOffSaveGameNotificationText)
             {
-                EffectBubblesManager.ShowImmediately(Pos, "Game Saved!", EffectBubblesManager.BubbleColor.Relation,
-                    true, 3f);
+                if (!saveFile.Equals(string.Empty))
+                {
+                    if (_cfg.NewFileOnAutoSave)
+                    {
+                        EffectBubblesManager.ShowImmediately(Pos, "Auto-Save! : " + saveFile, EffectBubblesManager.BubbleColor.Relation,
+                            true, 3f);
+                    }
+                    else
+                    {
+                        EffectBubblesManager.ShowImmediately(Pos, "Auto-Save!", EffectBubblesManager.BubbleColor.Relation,
+                            true, 3f);
+                    }
+                }
+                else
+                {
+                    EffectBubblesManager.ShowImmediately(Pos, "Game Saved!", EffectBubblesManager.BubbleColor.Relation,
+                        true, 3f);
+                }
             }
 
             return true;
@@ -73,10 +90,9 @@ namespace SaveNow
             {
                 string message = null;
                 var files = Directory.GetFiles(PlatformSpecific.GetSaveFolder(), "*.info", SearchOption.TopDirectoryOnly).Select(file => new FileInfo(file)).ToList();
-
                 var sortedFiles = files.OrderByDescending(o => o.CreationTime).ToList();
                 Resize(sortedFiles, _cfg.AutoSavesToKeep);
-                
+
                 foreach (var file in Directory.GetFiles(PlatformSpecific.GetSaveFolder(), "*.info", SearchOption.TopDirectoryOnly))
                 {
                     var tFile = new FileInfo(file);
@@ -167,15 +183,8 @@ namespace SaveNow
 
         private static void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            if (!_cfg.NewFileOnAutoSave)
-            {
-                PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
-                    delegate { SaveLocation(false); });
-            }
-            else
-            {
-                AutoSave();
-            }
+            AutoSave();
+
         }
 
         [HarmonyPatch(typeof(InGameMenuGUI), "OnPressedSaveAndExit")]
@@ -195,7 +204,7 @@ namespace SaveNow
                     "Are you sure you want to exit?" + "\n\n" + "Progress and current location will be saved.",
                     delegate
                     {
-                        if (SaveLocation(true))
+                        if (SaveLocation(true, string.Empty))
                         {
                             PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,delegate
                             {
@@ -213,7 +222,7 @@ namespace SaveNow
             [HarmonyPrefix]
             public static void Prefix()
             {
-                SaveLocation(false);
+                SaveLocation(false, string.Empty);
             }
         }
 
@@ -240,24 +249,37 @@ namespace SaveNow
                 if (Input.GetKeyUp(KeyCode.K))
                 {
                     PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
-                        delegate { SaveLocation(false); });
+                        delegate { SaveLocation(false, string.Empty); });
                 }
+                //if (Input.GetKeyUp(KeyCode.L))
+                //{
+                //  AutoSave();
+                //}
             }
         }
 
         public static void AutoSave()
         {
-            GUIElements.me.ShowSavingStatus(true);
-            var date = DateTime.Now.ToString("ddmmyyhhmmss");
-            var newSlot = $"Autosave.{date}".Trim();
+            if (!_cfg.NewFileOnAutoSave)
+            {
+                PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
+                    delegate { SaveLocation(false, MainGame.me.save_slot.filename_no_extension); });
+            }
+            else
+            {
 
-            MainGame.me.save_slot.filename_no_extension = newSlot;
-            PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
-                delegate
-                {
-                    SaveLocation(false);
-                    GUIElements.me.ShowSavingStatus(false);
-                });
+                GUIElements.me.ShowSavingStatus(true);
+                var date = DateTime.Now.ToString("ddmmyyhhmmss");
+                var newSlot = $"autosave.{date}".Trim();
+
+                MainGame.me.save_slot.filename_no_extension = newSlot;
+                PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
+                    delegate
+                    {
+                        SaveLocation(false, newSlot);
+                        GUIElements.me.ShowSavingStatus(false);
+                    });
+            }
         }
     }
 }

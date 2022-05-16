@@ -1,50 +1,32 @@
-﻿using System.IO;
-using System.Text;
+﻿using System;
 
 namespace UltraWide
 {
     public class Config
     {
         private static Options _options;
-        private const string Path = "./QMods/UltraWide/config.txt";
+        private static ConfigReader _con;
 
+        [Serializable]
         public class Options
         {
-            public int Width = GameSettings.me.res_x;
-            public int Height = GameSettings.me.res_y;
-        }
-
-        private static void SaveDefaultOptions()
-        {
-            var defaultOptions = new[] { _options.Width.ToString(), _options.Height.ToString() };
-            File.WriteAllLines(Path, defaultOptions, Encoding.Default);
+            public int Width = 1920;
+            public int Height = 1080;
         }
 
         public static Options GetOptions()
         {
-            if (_options != null) return _options;
             _options = new Options();
-            if (File.Exists(Path))
-            {
-                var config = File.ReadAllLines(Path);
-                if (config.Length > 0)
-                {
-                    var isWidthNo = int.TryParse(config[0], out var tempW);
-                    _options.Width = isWidthNo ? tempW : GameSettings.me.res_x;
-                    var isHeightNo = int.TryParse(config[1], out var tempH);
-                    _options.Height = isHeightNo ? tempH : GameSettings.me.res_y;
-                }
-                else
-                {
-                    SaveDefaultOptions();
-                    return _options;
-                }
-            }
-            else
-            {
-                SaveDefaultOptions();
-                return _options;
-            }
+            _con = new ConfigReader();
+
+            int.TryParse(_con.Value("Width", "1920"), out var width);
+            _options.Width = width;
+
+            int.TryParse(_con.Value("Height", "1080"), out var height);
+            _options.Height = height;
+
+            _con.ConfigWrite();
+
             return _options;
         }
     }
