@@ -13,7 +13,6 @@ namespace NoIntros
         }
         
         [HarmonyPatch(typeof(LBPreloader), "StartAnimations")]
-        [HarmonyPriority(Priority.First)]
         public static class NoIntroPatch
         {
             [HarmonyPrefix]

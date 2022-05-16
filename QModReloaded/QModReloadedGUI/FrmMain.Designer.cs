@@ -87,6 +87,8 @@ namespace QModReloadedGUI
             this.openGameDirectoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.ChkToggleMods = new System.Windows.Forms.CheckBox();
+            this.BtnLaunchModless = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.BtnRunGame)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.DgvMods)).BeginInit();
             this.ToolStrip.SuspendLayout();
@@ -448,7 +450,8 @@ namespace QModReloadedGUI
             this.fileToolStripMenuItem1,
             this.checklistToolStripMenuItem1,
             this.modifyResolutionToolStripMenuItem,
-            this.aboutToolStripMenuItem1});
+            this.aboutToolStripMenuItem1,
+            this.BtnLaunchModless});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(578, 24);
@@ -601,11 +604,29 @@ namespace QModReloadedGUI
             this.exitToolStripMenuItem2.Text = "E&xit";
             this.exitToolStripMenuItem2.Click += new System.EventHandler(this.ExitToolStripMenuItem2_Click);
             // 
+            // ChkToggleMods
+            // 
+            this.ChkToggleMods.AutoSize = true;
+            this.ChkToggleMods.Location = new System.Drawing.Point(254, 116);
+            this.ChkToggleMods.Name = "ChkToggleMods";
+            this.ChkToggleMods.Size = new System.Drawing.Size(15, 14);
+            this.ChkToggleMods.TabIndex = 37;
+            this.ChkToggleMods.UseVisualStyleBackColor = true;
+            this.ChkToggleMods.Click += new System.EventHandler(this.ChkToggleMods_Click);
+            // 
+            // BtnLaunchModless
+            // 
+            this.BtnLaunchModless.Name = "BtnLaunchModless";
+            this.BtnLaunchModless.Size = new System.Drawing.Size(105, 20);
+            this.BtnLaunchModless.Text = "&Launch Modless";
+            this.BtnLaunchModless.Click += new System.EventHandler(this.BtnLaunchModless_Click);
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(578, 631);
+            this.Controls.Add(this.ChkToggleMods);
             this.Controls.Add(this.BtnRestore);
             this.Controls.Add(this.DgvMods);
             this.Controls.Add(this.LblSaved);
@@ -635,6 +656,7 @@ namespace QModReloadedGUI
             this.Controls.Add(this.TxtGameLocation);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.KeyPreview = true;
             this.MaximizeBox = false;
             this.Name = "FrmMain";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
@@ -710,6 +732,8 @@ namespace QModReloadedGUI
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem exitToolStripMenuItem2;
         private Button BtnRestore;
+        private CheckBox ChkToggleMods;
+        private ToolStripMenuItem BtnLaunchModless;
     }
 }
 

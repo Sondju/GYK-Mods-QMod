@@ -58,6 +58,7 @@ public class QModLoader
         }
     }
 
+
     private static (string namesp, string type, string method, bool found) GetModEntryPoint(string mod)
     {
         try

@@ -6,8 +6,10 @@ using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Forms;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 using Newtonsoft.Json;
 using QModReloaded;
 
@@ -17,7 +19,7 @@ public partial class FrmMain : Form
 {
     private (string location, bool found) _gameLocation;
     private string _modLocation = string.Empty;
-    private readonly List<QMod> _modList = new();
+    private List<QMod> _modList = new();
     private Injector _injector;
     private FrmChecklist _frmChecklist;
     private FrmAbout _frmAbout;
@@ -116,12 +118,13 @@ public partial class FrmMain : Form
     {
         foreach (DataGridViewRow row in DgvMods.Rows)
         {
-            foreach (var mod in _modList.Where(mod => mod.DisplayName == DgvMods.Rows[row.Index].Cells[1].Value.ToString()))
+            foreach (var mod in _modList.Where(mod =>
+                         mod.DisplayName == DgvMods.Rows[row.Index].Cells[1].Value.ToString()))
             {
                 DgvMods.Rows[row.Index].Cells[0].Value = row.Index + 1;
                 mod.LoadOrder = row.Index + 1;
                 var json = JsonConvert.SerializeObject(mod, Formatting.Indented);
-                File.WriteAllText(Path.Combine(mod.ModAssemblyPath,"mod.json"),json);
+                File.WriteAllText(Path.Combine(mod.ModAssemblyPath, "mod.json"), json);
             }
         }
     }
@@ -137,7 +140,7 @@ public partial class FrmMain : Form
             var dllFiles = Directory.GetFiles(_modLocation, "*.dll", SearchOption.AllDirectories);
             foreach (var dllFile in dllFiles)
             {
-               // GetModEntryPoint(dllFile);
+                // GetModEntryPoint(dllFile);
                 var path = new FileInfo(dllFile).DirectoryName;
                 if (path == null) continue;
                 var dllFileName = new FileInfo(dllFile).Name;
@@ -195,7 +198,7 @@ public partial class FrmMain : Form
                     {
                         _modList.Add(mod);
                         DgvMods.Rows.Add(mod.LoadOrder, mod.DisplayName, mod.Enable);
-                       
+
                         WriteLog(mod.DisplayName + " added.");
                     }
                     else
@@ -213,6 +216,14 @@ public partial class FrmMain : Form
         {
             WriteLog($"LoadMods() ERROR: {ex.Message}");
         }
+
+        CheckAllModsActive();
+        CheckPatched();
+    }
+
+    public bool ModInList(string mod)
+    {
+        return _modList.Any(x => x.DisplayName.ToLower().Contains(mod.ToLower()));
     }
 
     private void CheckPatched()
@@ -223,14 +234,14 @@ public partial class FrmMain : Form
         _injector = new Injector(_gameLocation.location);
         if (_injector.IsInjected())
         {
-            LblPatched.Text = @"Game Mod Patched";
+            LblPatched.Text = @"Mod Injector Installed";
             LblPatched.ForeColor = Color.Green;
             BtnPatch.Enabled = false;
             BtnRemovePatch.Enabled = true;
         }
         else
         {
-            LblPatched.Text = @"Game Not Mod Patched";
+            LblPatched.Text = @"Mod Injector Not Installed";
             LblPatched.ForeColor = Color.Red;
             BtnPatch.Enabled = true;
             BtnRemovePatch.Enabled = false;
@@ -238,16 +249,31 @@ public partial class FrmMain : Form
 
         if (_injector.IsNoIntroInjected())
         {
-            LblIntroPatched.Text = @"Intros Removed";
-            LblIntroPatched.ForeColor = Color.Green;
+            if (ModInList("intros"))
+            {
+                LblIntroPatched.Text = @"Intros Removed (via mod and patch?).";
+                LblIntroPatched.ForeColor = Color.DarkOrange;
+            }
+            else
+            {
+                LblIntroPatched.Text = @"Intros Removed (via patch).";
+                LblIntroPatched.ForeColor = Color.Green;
+            }
         }
         else
         {
-            LblIntroPatched.Text = @"Intros Not Removed";
-            LblIntroPatched.ForeColor = Color.Red;
+            if (ModInList("intros"))
+            {
+                LblIntroPatched.Text = @"Intros Removed (via mod).";
+                LblIntroPatched.ForeColor = Color.Green;
+            }
+            else
+            {
+                LblIntroPatched.Text = @"Intros Not Removed";
+                LblIntroPatched.ForeColor = Color.Red;
+            }
         }
 
-        
         if (!Utilities.CalculateMd5(Path.Combine(_gameLocation.location,
                 "Graveyard Keeper_Data\\Managed\\Assembly-CSharp.dll")).Equals(CleanMd5)) return;
         try
@@ -271,7 +297,6 @@ public partial class FrmMain : Form
     {
         SetLocations(string.Empty);
         LoadMods();
-        CheckPatched();
         DgvMods.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         DgvMods.Sort(DgvMods.Columns[0], ListSortDirection.Ascending);
 
@@ -290,7 +315,7 @@ public partial class FrmMain : Form
                 MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
     }
 
-    private void BtnRunGame_Click(object sender, EventArgs e)
+    private void RunGame()
     {
         try
         {
@@ -305,6 +330,7 @@ public partial class FrmMain : Form
                 using var gyk = new Process();
                 gyk.StartInfo.FileName = Path.Combine(_gameLocation.location, "Graveyard Keeper.exe");
                 gyk.Start();
+
             }
             catch (Exception ex)
             {
@@ -317,6 +343,11 @@ public partial class FrmMain : Form
         }
     }
 
+    private void BtnRunGame_Click(object sender, EventArgs e)
+    {
+        RunGame();
+    }
+
     private void BtnPatch_Click(object sender, EventArgs e)
     {
         if (IsGameRunning()) return;
@@ -325,6 +356,7 @@ public partial class FrmMain : Form
             MessageBox.Show(@"All patching already done!", @"Done!", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
+
         var (_, message) = _injector.Inject();
         WriteLog(message);
         CheckPatched();
@@ -354,12 +386,13 @@ public partial class FrmMain : Form
                 .GetTypes()
                 .SelectMany(t => t.Methods
                     .Where(m => m.HasBody)
-                    .Select(m => new { t, m }));
+                    .Select(m => new {t, m}));
 
             toInspect = toInspect.Where(x => x.m.Name == "Patch");
 
             foreach (var method in toInspect)
-                if (method.m.Body.Instructions.Where(instruction => instruction.Operand != null).Any(instruction => instruction.Operand.ToString().Contains("PatchAll")))
+                if (method.m.Body.Instructions.Where(instruction => instruction.Operand != null)
+                    .Any(instruction => instruction.Operand.ToString().Contains("PatchAll")))
                 {
                     return (method.t.Namespace, method.t.Name, method.m.Name, true);
                 }
@@ -368,6 +401,7 @@ public partial class FrmMain : Form
         {
             Logger.WriteLog($"GetModEntryPoint(): Error, {ex.Message}");
         }
+
         return (null, null, null, false);
     }
 
@@ -539,7 +573,9 @@ public partial class FrmMain : Form
             var mod = _modList.FirstOrDefault(mod => mod.DisplayName == modName);
             if (mod == null) return;
             Directory.Delete(mod.ModAssemblyPath, true);
+            _modList.Remove(mod);
         }
+
         LoadMods();
     }
 
@@ -557,6 +593,7 @@ public partial class FrmMain : Form
             MessageBox.Show(@"The config file is now blank. This mod may or may not function correctly, if at all.",
                 @"Blank config.", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
+
         try
         {
             File.WriteAllText(_currentlySelectedModConfigLocation, TxtConfig.Text);
@@ -589,18 +626,35 @@ public partial class FrmMain : Form
             ToggleModEnabled(false, DgvMods.CurrentRow.Index);
             DgvMods.CurrentRow.Cells[2].Value = 0;
         }
+
         DgvMods_CellClick(sender, e);
+    }
+
+    private void CheckAllModsActive()
+    {
+        ChkToggleMods.Checked = true;
+        foreach (var mod in _modList)
+        {
+            if (mod.Enable == false)
+            {
+                ChkToggleMods.Checked = false;
+                break;
+            }
+        }
     }
 
     private void DgvMods_CellClick(object sender, DataGridViewCellEventArgs e)
     {
-        
+
         if (DgvMods.SelectedRows.Count > 1)
         {
             TxtModInfo.Clear();
             TxtConfig.Clear();
             return;
         }
+
+        CheckAllModsActive();
+
         LblSaved.Visible = false;
         try
         {
@@ -620,7 +674,7 @@ public partial class FrmMain : Form
             TxtModInfo.Text += @"Mod Path: " + modFound.ModAssemblyPath + Environment.NewLine;
             string path = null;
             var files = Directory.GetFiles(modFound.ModAssemblyPath, "*", SearchOption.AllDirectories);
-            string[] configs = { ".ini", ".json", ".txt" };
+            string[] configs = {".ini", ".json", ".txt"};
             foreach (var file in files)
             {
                 if (file.EndsWith("mod.json")) continue;
@@ -642,7 +696,7 @@ public partial class FrmMain : Form
             {
                 TxtConfig.Clear();
             }
-            
+
         }
         catch (NullReferenceException ex)
         {
@@ -695,30 +749,32 @@ public partial class FrmMain : Form
         {
             return;
         }
+
         DgvMods.Rows.RemoveAt(_rowIndexFromMouseDown);
         if (e.Data.GetData(
-            typeof(DataGridViewRow)) is DataGridViewRow rowToMove) DgvMods.Rows.Insert(_rowIndexOfItemUnderMouseToDrop, rowToMove);
+                typeof(DataGridViewRow)) is DataGridViewRow rowToMove)
+            DgvMods.Rows.Insert(_rowIndexOfItemUnderMouseToDrop, rowToMove);
         UpdateLoadOrders();
     }
 
     private void ExitToolStripMenuItem2_Click(object sender, EventArgs e)
     {
-        ExitToolStripMenuItem1_Click(sender,e);
+        ExitToolStripMenuItem1_Click(sender, e);
     }
 
     private void LaunchGameToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        BtnRunGame_Click(sender,e);
+        BtnRunGame_Click(sender, e);
     }
 
     private void OpenmModDirectoryToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        BtnOpenModDir_Click(sender,e);
+        BtnOpenModDir_Click(sender, e);
     }
 
     private void OpenGameDirectoryToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        BtnOpenGameDir_Click( sender,e);
+        BtnOpenGameDir_Click(sender, e);
     }
 
     private void RestoreWindowToolStripMenuItem_Click(object sender, EventArgs e)
@@ -754,7 +810,7 @@ public partial class FrmMain : Form
         {
             File.Copy(Path.Combine(_gameLocation.location, "Graveyard Keeper_Data\\Managed\\dep\\Assembly-CSharp.dll"),
                 Path.Combine(_gameLocation.location, "Graveyard Keeper_Data\\Managed\\Assembly-CSharp.dll"), true);
-            FrmMain_Load(sender,e);
+            FrmMain_Load(sender, e);
             WriteLog("Restored Assembly-CSharp.dll from the Graveyard Keeper_Data\\Managed\\dep directory.");
         }
         catch (FileNotFoundException)
@@ -773,10 +829,11 @@ public partial class FrmMain : Form
         {
             return;
         }
+
         QMod modFound = null;
         try
         {
-            
+
             foreach (var mod in _modList.Where(mod => mod.DisplayName == DgvMods.CurrentRow?.Cells[1].Value.ToString()))
                 modFound = mod;
             if (!_gameLocation.found) return;
@@ -787,5 +844,35 @@ public partial class FrmMain : Form
         {
             WriteLog($"Issue locating folder for {modFound?.DisplayName}.");
         }
+    }
+    
+    private void ChkToggleMods_Click(object sender, EventArgs e)
+    {
+        foreach (DataGridViewRow row in DgvMods.Rows)
+        {
+            if (ChkToggleMods.Checked)
+            {
+                row.Cells[2].Value = 1;
+                ToggleModEnabled(true, row.Index);
+            }
+            else
+            {
+                row.Cells[2].Value = 0;
+                ToggleModEnabled(false, row.Index);
+            }
+        }
+    }
+
+    private void BtnLaunchModless_Click(object sender, EventArgs e)
+    {
+        if (IsGameRunning()) return;
+        foreach (var mod in _modList)
+        {
+            WriteLog("Disabling mods and launching game.");
+            mod.Enable = false;
+            var newJson = JsonConvert.SerializeObject(mod, Formatting.Indented);
+            File.WriteAllText(Path.Combine(mod.ModAssemblyPath, "mod.json"), newJson);
+        }
+        RunGame();
     }
 }

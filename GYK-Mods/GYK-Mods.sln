@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoIntros", "NoIntros\NoIntr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LargerScale", "LargerScale\LargerScale.csproj", "{7690963B-2079-4C05-BC9E-2AA7C645CC75}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AddStraightToTable", "AddStraightToTable\AddStraightToTable.csproj", "{37340A24-0BAD-4B0B-9221-6626B7344124}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,6 +70,10 @@ Global
 		{7690963B-2079-4C05-BC9E-2AA7C645CC75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7690963B-2079-4C05-BC9E-2AA7C645CC75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7690963B-2079-4C05-BC9E-2AA7C645CC75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37340A24-0BAD-4B0B-9221-6626B7344124}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37340A24-0BAD-4B0B-9221-6626B7344124}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37340A24-0BAD-4B0B-9221-6626B7344124}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37340A24-0BAD-4B0B-9221-6626B7344124}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
