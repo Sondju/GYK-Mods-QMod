@@ -33,7 +33,7 @@ namespace QModReloadedGUI
             var buildDate = new DateTime(2000, 1, 1)
                 .AddDays(version.Build).AddSeconds(version.Revision * 2);
             var displayableVersion = $"{version} ({buildDate})";
-            LblVersion.Text = displayableVersion;
+            TxtVersion.Text = displayableVersion;
         }
     }
 }

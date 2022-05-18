@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using Gameloop.Vdf;
-using Gameloop.Vdf.JsonConverter;
+using System.Windows.Forms;
 using Microsoft.Win32;
 
 namespace QModReloadedGUI
@@ -27,37 +26,47 @@ namespace QModReloadedGUI
             streamWriter.WriteLine(message);
         }
 
+        public static void ReadLibraryVdf()
+        {
+            using var registryKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\WOW6432Node\\Valve\\Steam");
+            var value = registryKey?.GetValue("InstallPath");
+            var vdfFile = File.ReadAllLines(value + "\\steamapps\\libraryfolders.vdf");
+            List<string> libList = new List<string>();
+            foreach (var line in vdfFile)
+            {
+                if (line.Contains("path"))
+                {
+                    foreach (var s in line.Split('"'))
+                    {
+                        if (string.IsNullOrEmpty(s) || string.IsNullOrWhiteSpace(s)) continue;
+                        var t = s.Replace("\\\\", "\\").Trim();
+                       if (s.Contains("path")) continue;
+                        libList.Add(t);
+                       Console.WriteLine(t);
+                        
+                    }
+                }
+            }
+        }
+
         internal static (string location,bool found) GetGameDirectory()
         {
             try
             {
-                var gameDirectories = new List<string>();
-                string gd = null;
+                //  string gd = null;
                 using var registryKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\WOW6432Node\\Valve\\Steam");
                 var value = registryKey?.GetValue("InstallPath");
-                var dir = VdfConvert.Deserialize(File.ReadAllText(value + "\\steamapps\\libraryfolders.vdf"));
-                var json = dir.ToJson();
-                foreach (var child in json.Value.Children())
+                var vdfFile = File.ReadAllLines(value + "\\steamapps\\libraryfolders.vdf");
+                var gameDirectories = (from line in vdfFile where line.Contains("path") from s in line.Split('"') where !string.IsNullOrEmpty(s) && !string.IsNullOrWhiteSpace(s) let t = s.Replace("\\\\", "\\").Trim() where !s.Contains("path") select t).ToList();
+                foreach (var gdFile in gameDirectories.Select(gameDirectory => new FileInfo(gameDirectory + "\\steamapps\\common\\Graveyard Keeper\\Graveyard Keeper.exe")).Where(gdFile => gdFile.Exists))
                 {
-                    foreach (var child2 in child.Children())
-                    {
-                        gd = child2.Children().ElementAt(0).ToString();
-                        gd = gd.Substring(9, gd.Length - 10);
-                        gd = gd.Replace("\\\\","\\").Trim();
-                        gameDirectories.Add(gd);
-                    }
+                    return (gdFile.Directory?.ToString(), true);
                 }
-                if (gd != null)
-                    foreach (var gdFile in gameDirectories.Select(gameDirectory => new FileInfo(gameDirectory + "\\steamapps\\common\\Graveyard Keeper\\Graveyard Keeper.exe")).Where(gdFile => gdFile.Exists))
-                    {
-                        return (gdFile.Directory?.ToString(), true);
-                    }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine(ex.Message);
+                //Console.WriteLine(ex.Message);
             }
-
             return (null, false);
         }
 

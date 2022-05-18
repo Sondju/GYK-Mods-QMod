@@ -19,6 +19,7 @@ namespace SaveNow
             public bool RemoveFromSaveListButKeepFile;
             public bool TurnOffTravelMessages;
             public bool TurnOffSaveGameNotificationText;
+            public bool ExitToDesktop;
         }
 
         public static Options GetOptions()
@@ -49,6 +50,9 @@ namespace SaveNow
 
             bool.TryParse(_con.Value("TurnOffSaveGameNotificationText", "false"), out var turnOffSaveGameNotificationText);
             _options.TurnOffSaveGameNotificationText = turnOffSaveGameNotificationText;
+
+            bool.TryParse(_con.Value("ExitToDesktop", "false"), out var exitToDesktop);
+            _options.ExitToDesktop = exitToDesktop;
 
             _con.ConfigWrite();
 

@@ -74,6 +74,7 @@ namespace QModReloadedGUI
             this.checklistToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.modifyResolutionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.BtnLaunchModless = new System.Windows.Forms.ToolStripMenuItem();
             this.DlgFile = new System.Windows.Forms.OpenFileDialog();
             this.LblConfig = new System.Windows.Forms.Label();
             this.TxtConfig = new System.Windows.Forms.TextBox();
@@ -88,7 +89,6 @@ namespace QModReloadedGUI
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.ChkToggleMods = new System.Windows.Forms.CheckBox();
-            this.BtnLaunchModless = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.BtnRunGame)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.DgvMods)).BeginInit();
             this.ToolStrip.SuspendLayout();
@@ -325,6 +325,7 @@ namespace QModReloadedGUI
             this.DgvMods.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvMods_CellContentClick);
             this.DgvMods.DragDrop += new System.Windows.Forms.DragEventHandler(this.DgvMods_DragDrop);
             this.DgvMods.DragOver += new System.Windows.Forms.DragEventHandler(this.DgvMods_DragOver);
+            this.DgvMods.KeyUp += new System.Windows.Forms.KeyEventHandler(this.DgvMods_KeyUp);
             this.DgvMods.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.DgvMods_MouseDoubleClick);
             this.DgvMods.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DgvMods_MouseDown);
             this.DgvMods.MouseMove += new System.Windows.Forms.MouseEventHandler(this.DgvMods_MouseMove);
@@ -495,6 +496,13 @@ namespace QModReloadedGUI
             this.aboutToolStripMenuItem1.Text = "A&bout";
             this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.AboutToolStripMenuItem1_Click);
             // 
+            // BtnLaunchModless
+            // 
+            this.BtnLaunchModless.Name = "BtnLaunchModless";
+            this.BtnLaunchModless.Size = new System.Drawing.Size(105, 20);
+            this.BtnLaunchModless.Text = "&Launch Modless";
+            this.BtnLaunchModless.Click += new System.EventHandler(this.BtnLaunchModless_Click);
+            // 
             // DlgFile
             // 
             this.DlgFile.Filter = "ZIP Files|*.zip";
@@ -613,13 +621,6 @@ namespace QModReloadedGUI
             this.ChkToggleMods.TabIndex = 37;
             this.ChkToggleMods.UseVisualStyleBackColor = true;
             this.ChkToggleMods.Click += new System.EventHandler(this.ChkToggleMods_Click);
-            // 
-            // BtnLaunchModless
-            // 
-            this.BtnLaunchModless.Name = "BtnLaunchModless";
-            this.BtnLaunchModless.Size = new System.Drawing.Size(105, 20);
-            this.BtnLaunchModless.Text = "&Launch Modless";
-            this.BtnLaunchModless.Click += new System.EventHandler(this.BtnLaunchModless_Click);
             // 
             // FrmMain
             // 

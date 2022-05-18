@@ -28,40 +28,41 @@ namespace QModReloadedGUI
         private void FrmChecklist_Load(object sender, EventArgs e)
         {
             ChkModPatched.Checked = _injector.IsInjected();
-            ChkNoIntroPatched.Checked = _injector.IsNoIntroInjected();
             ChkGameLocation.Checked = _gameLocation != string.Empty;
             ChkModDirectoryExists.Checked = _modLocation != string.Empty;
-
-            Chk0HarmonyExists.Checked =
-                CheckFileExists(Path.Combine(Application.StartupPath, "0Harmony.dll"));
-            ChkNewtonExists.Checked =
-                CheckFileExists(Path.Combine(Application.StartupPath, "Newtonsoft.Json.dll"));
-            ChkMonoCecilExists.Checked =
-                CheckFileExists(Path.Combine(Application.StartupPath, "Mono.Cecil.dll"));
-            ChkGameLoopVDF.Checked =
-                CheckFileExists(Path.Combine(Application.StartupPath, "Gameloop.Vdf.dll"));
-            ChkGameLoopVDFJson.Checked =
-                CheckFileExists(Path.Combine(Application.StartupPath, "Gameloop.Vdf.JsonConverter.dll"));
-            ChkInjector.Checked =
-                CheckFileExists(Path.Combine(Application.StartupPath, "QModReloaded.dll"));
-            ChkConfig.Checked =
-                CheckFileExists(Path.Combine(Application.StartupPath, "QModReloadedGUI.exe.config"));
-
-            if (Chk0HarmonyExists.Checked && ChkNewtonExists.Checked && ChkMonoCecilExists.Checked &&
-                ChkGameLoopVDF.Checked && ChkGameLoopVDFJson.Checked && ChkInjector.Checked && ChkConfig.Checked)
-            {
-                if (Application.ExecutablePath.Contains("Graveyard Keeper_Data\\Managed"))
-                {
-                    ChkPatcherLocation.Checked = true;
-                }
-            }
-
+            var allFound = 0;
             foreach (Control control in Controls)
             {
                 if (control.GetType() != typeof(CheckBox)) continue;
                 var c = (CheckBox)control;
+                
+                if (c.Text.Contains("exe") || c.Text.Contains("dll"))
+                {
+                    var found = CheckFileExists(Path.Combine(Application.StartupPath, c.Text));
+                    if (found)
+                    {
+                        c.Checked = true;
+                        allFound++;
+                    }
+                    else
+                    {
+                        c.Checked = false;
+                    }
+                }
+
                 c.ForeColor = c.Checked ? Color.Green : Color.Red;
             }
+            if (allFound == 14)
+            {
+                ChkPatcherLocation.Checked = true;
+                ChkPatcherLocation.ForeColor = Color.Green;
+            }
+            else
+            {
+                ChkPatcherLocation.Checked = false;
+                ChkPatcherLocation.ForeColor = Color.Red;
+            }
+
         }
     }
 }

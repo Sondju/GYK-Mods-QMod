@@ -6,12 +6,11 @@ using System.Drawing;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Forms;
 using Mono.Cecil;
-using Mono.Cecil.Cil;
-using Newtonsoft.Json;
 using QModReloaded;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace QModReloadedGUI;
 
@@ -19,7 +18,7 @@ public partial class FrmMain : Form
 {
     private (string location, bool found) _gameLocation;
     private string _modLocation = string.Empty;
-    private List<QMod> _modList = new();
+    private readonly List<QMod> _modList = new();
     private Injector _injector;
     private FrmChecklist _frmChecklist;
     private FrmAbout _frmAbout;
@@ -66,6 +65,8 @@ public partial class FrmMain : Form
                 TxtGameLocation.Text = _gameLocation.location;
                 _modLocation = $@"{_gameLocation.location}\QMods";
                 TxtModFolderLocation.Text = _modLocation;
+                Properties.Settings.Default.GamePath = _gameLocation.location;
+                Properties.Settings.Default.Save();
             }
             else
             {
@@ -74,10 +75,13 @@ public partial class FrmMain : Form
         }
         else
         {
+            _gameLocation.location = directory;
             TxtGameLocation.Text = directory;
             _modLocation = $@"{directory}\QMods";
             TxtModFolderLocation.Text = _modLocation;
             _gameLocation.found = true;
+            Properties.Settings.Default.GamePath = directory;
+            Properties.Settings.Default.Save();
         }
 
         if (!_gameLocation.found) return;
@@ -107,7 +111,7 @@ public partial class FrmMain : Form
             Requires = Array.Empty<string>(),
             Version = "?",
         };
-        var newJson = JsonConvert.SerializeObject(newMod, Formatting.Indented);
+        var newJson = JsonSerializer.Serialize(newMod);
         if (path == null) return false;
         File.WriteAllText(Path.Combine(path, "mod.json"), newJson);
         var files = new FileInfo(Path.Combine(path, "mod.json"));
@@ -123,7 +127,7 @@ public partial class FrmMain : Form
             {
                 DgvMods.Rows[row.Index].Cells[0].Value = row.Index + 1;
                 mod.LoadOrder = row.Index + 1;
-                var json = JsonConvert.SerializeObject(mod, Formatting.Indented);
+                var json = JsonSerializer.Serialize(mod);
                 File.WriteAllText(Path.Combine(mod.ModAssemblyPath, "mod.json"), json);
             }
         }
@@ -274,10 +278,11 @@ public partial class FrmMain : Form
             }
         }
 
-        if (!Utilities.CalculateMd5(Path.Combine(_gameLocation.location,
-                "Graveyard Keeper_Data\\Managed\\Assembly-CSharp.dll")).Equals(CleanMd5)) return;
         try
         {
+            if (!Utilities.CalculateMd5(Path.Combine(_gameLocation.location,
+                    "Graveyard Keeper_Data\\Managed\\Assembly-CSharp.dll")).Equals(CleanMd5)) return;
+
             File.Copy(Path.Combine(_gameLocation.location, "Graveyard Keeper_Data\\Managed\\Assembly-CSharp.dll"),
                 Path.Combine(_gameLocation.location, "Graveyard Keeper_Data\\Managed\\dep\\Assembly-CSharp.dll"),
                 true);
@@ -295,7 +300,7 @@ public partial class FrmMain : Form
 
     private void FrmMain_Load(object sender, EventArgs e)
     {
-        SetLocations(string.Empty);
+        SetLocations(Properties.Settings.Default.GamePath);
         LoadMods();
         DgvMods.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         DgvMods.Sort(DgvMods.Columns[0], ListSortDirection.Ascending);
@@ -309,13 +314,19 @@ public partial class FrmMain : Form
         var di = new DirectoryInfo(DlgBrowse.SelectedPath);
         var fi = new FileInfo(di.FullName + "\\Graveyard Keeper.exe");
         if (fi.Exists)
+        {
+            Console.WriteLine(di.ToString());
             SetLocations(di.ToString());
+            LoadMods();
+        }
         else
+        {
             MessageBox.Show(@"Please select the directory containing Graveyard Keeper.exe", @"Wrong directory.",
                 MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-    }
+        }
+}
 
-    private void RunGame()
+private void RunGame()
     {
         try
         {
@@ -465,7 +476,7 @@ public partial class FrmMain : Form
                 WriteLog("Disabled " + modFound.DisplayName);
             }
 
-            var newJson = JsonConvert.SerializeObject(modFound, Formatting.Indented);
+            var newJson = JsonSerializer.Serialize(modFound);
             File.WriteAllText(Path.Combine(modFound.ModAssemblyPath, "mod.json"), newJson);
         }
         catch (Exception)
@@ -627,25 +638,21 @@ public partial class FrmMain : Form
             DgvMods.CurrentRow.Cells[2].Value = 0;
         }
 
-        DgvMods_CellClick(sender, e);
+        DgvModsClick(sender, e, null);
     }
 
     private void CheckAllModsActive()
     {
         ChkToggleMods.Checked = true;
-        foreach (var mod in _modList)
+        foreach (var mod in _modList.Where(mod => mod.Enable == false))
         {
-            if (mod.Enable == false)
-            {
-                ChkToggleMods.Checked = false;
-                break;
-            }
+            ChkToggleMods.Checked = false;
+            break;
         }
     }
 
-    private void DgvMods_CellClick(object sender, DataGridViewCellEventArgs e)
+    private void DgvModsClick(object sender, DataGridViewCellEventArgs e, KeyEventArgs k)
     {
-
         if (DgvMods.SelectedRows.Count > 1)
         {
             TxtModInfo.Clear();
@@ -674,7 +681,7 @@ public partial class FrmMain : Form
             TxtModInfo.Text += @"Mod Path: " + modFound.ModAssemblyPath + Environment.NewLine;
             string path = null;
             var files = Directory.GetFiles(modFound.ModAssemblyPath, "*", SearchOption.AllDirectories);
-            string[] configs = {".ini", ".json", ".txt"};
+            string[] configs = { ".ini", ".json", ".txt", ".cfg" };
             foreach (var file in files)
             {
                 if (file.EndsWith("mod.json")) continue;
@@ -706,6 +713,11 @@ public partial class FrmMain : Form
         {
             WriteLog($"List Mods ERROR: {ex.Message}");
         }
+    }
+
+    private void DgvMods_CellClick(object sender, DataGridViewCellEventArgs e)
+    {
+        DgvModsClick(sender, e, null);
     }
 
     private void DgvMods_MouseMove(object sender, MouseEventArgs e)
@@ -870,9 +882,17 @@ public partial class FrmMain : Form
         {
             WriteLog("Disabling mods and launching game.");
             mod.Enable = false;
-            var newJson = JsonConvert.SerializeObject(mod, Formatting.Indented);
+            var newJson = JsonSerializer.Serialize(mod);
             File.WriteAllText(Path.Combine(mod.ModAssemblyPath, "mod.json"), newJson);
         }
         RunGame();
+    }
+
+    private void DgvMods_KeyUp(object sender, KeyEventArgs e)
+    {
+        if (e.KeyCode is Keys.Up or Keys.Down)
+        {
+            DgvModsClick(sender, null, e);
+        }
     }
 }

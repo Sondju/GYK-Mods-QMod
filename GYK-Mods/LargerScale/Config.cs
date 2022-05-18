@@ -10,7 +10,7 @@ namespace LargerScale
         [Serializable]
         public class Options
         {
-            public int Scale = 2;
+            public int GameScale = 2;
             public int Width = 1920;
             public int Height = 1080;
         }
@@ -20,14 +20,14 @@ namespace LargerScale
             _options = new Options();
             _con = new ConfigReader();
 
-            int.TryParse(_con.Value("Scale", "2"), out var scale);
-            _options.Scale = scale;
+            var gameScaleBool = int.TryParse(_con.Value("GameScale", "2"), out var gameScale);
+            _options.GameScale = gameScaleBool ? gameScale : 2;
 
-            int.TryParse(_con.Value("Width", "1920"), out var width);
-            _options.Width = width;
+            var widthBool = int.TryParse(_con.Value("Width", "1920"), out var width);
+            _options.Width = widthBool ? width : 1920;
 
-            int.TryParse(_con.Value("Height", "1080"), out var height);
-            _options.Height = height;
+            var heightBool = int.TryParse(_con.Value("Height", "1080"), out var height);
+            _options.Height = heightBool ? height: 1080;
 
             _con.ConfigWrite();
 

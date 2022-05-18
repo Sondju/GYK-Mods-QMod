@@ -33,17 +33,23 @@ namespace QModReloadedGUI
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmChecklist));
             this.ChkModPatched = new System.Windows.Forms.CheckBox();
-            this.ChkNoIntroPatched = new System.Windows.Forms.CheckBox();
             this.ChkModDirectoryExists = new System.Windows.Forms.CheckBox();
             this.ChkGameLocation = new System.Windows.Forms.CheckBox();
             this.ChkMonoCecilExists = new System.Windows.Forms.CheckBox();
             this.Chk0HarmonyExists = new System.Windows.Forms.CheckBox();
             this.ChkPatcherLocation = new System.Windows.Forms.CheckBox();
-            this.ChkNewtonExists = new System.Windows.Forms.CheckBox();
-            this.ChkGameLoopVDFJson = new System.Windows.Forms.CheckBox();
-            this.ChkGameLoopVDF = new System.Windows.Forms.CheckBox();
             this.ChkInjector = new System.Windows.Forms.CheckBox();
             this.ChkConfig = new System.Windows.Forms.CheckBox();
+            this.ChkUnsafeExists = new System.Windows.Forms.CheckBox();
+            this.ChkNumericsExists = new System.Windows.Forms.CheckBox();
+            this.ChkMemoryExists = new System.Windows.Forms.CheckBox();
+            this.ChkBuffersExists = new System.Windows.Forms.CheckBox();
+            this.ChkBCLExists = new System.Windows.Forms.CheckBox();
+            this.ChkThreadingExists = new System.Windows.Forms.CheckBox();
+            this.ChkJsonExists = new System.Windows.Forms.CheckBox();
+            this.ChkEncodingsExists = new System.Windows.Forms.CheckBox();
+            this.ChkTupleExists = new System.Windows.Forms.CheckBox();
+            this.ChkAssemblyExists = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // ChkModPatched
@@ -59,25 +65,12 @@ namespace QModReloadedGUI
             this.ChkModPatched.UseCompatibleTextRendering = true;
             this.ChkModPatched.UseVisualStyleBackColor = true;
             // 
-            // ChkNoIntroPatched
-            // 
-            this.ChkNoIntroPatched.AutoCheck = false;
-            this.ChkNoIntroPatched.AutoSize = true;
-            this.ChkNoIntroPatched.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.ChkNoIntroPatched.Location = new System.Drawing.Point(11, 35);
-            this.ChkNoIntroPatched.Name = "ChkNoIntroPatched";
-            this.ChkNoIntroPatched.Size = new System.Drawing.Size(189, 18);
-            this.ChkNoIntroPatched.TabIndex = 1;
-            this.ChkNoIntroPatched.Text = "No Intro Patch Applied (Optional)";
-            this.ChkNoIntroPatched.UseCompatibleTextRendering = true;
-            this.ChkNoIntroPatched.UseVisualStyleBackColor = true;
-            // 
             // ChkModDirectoryExists
             // 
             this.ChkModDirectoryExists.AutoCheck = false;
             this.ChkModDirectoryExists.AutoSize = true;
             this.ChkModDirectoryExists.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.ChkModDirectoryExists.Location = new System.Drawing.Point(11, 83);
+            this.ChkModDirectoryExists.Location = new System.Drawing.Point(11, 59);
             this.ChkModDirectoryExists.Name = "ChkModDirectoryExists";
             this.ChkModDirectoryExists.Size = new System.Drawing.Size(127, 18);
             this.ChkModDirectoryExists.TabIndex = 2;
@@ -90,7 +83,7 @@ namespace QModReloadedGUI
             this.ChkGameLocation.AutoCheck = false;
             this.ChkGameLocation.AutoSize = true;
             this.ChkGameLocation.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.ChkGameLocation.Location = new System.Drawing.Point(11, 59);
+            this.ChkGameLocation.Location = new System.Drawing.Point(11, 35);
             this.ChkGameLocation.Name = "ChkGameLocation";
             this.ChkGameLocation.Size = new System.Drawing.Size(158, 18);
             this.ChkGameLocation.TabIndex = 3;
@@ -105,9 +98,9 @@ namespace QModReloadedGUI
             this.ChkMonoCecilExists.ForeColor = System.Drawing.SystemColors.Desktop;
             this.ChkMonoCecilExists.Location = new System.Drawing.Point(11, 131);
             this.ChkMonoCecilExists.Name = "ChkMonoCecilExists";
-            this.ChkMonoCecilExists.Size = new System.Drawing.Size(341, 18);
+            this.ChkMonoCecilExists.Size = new System.Drawing.Size(95, 18);
             this.ChkMonoCecilExists.TabIndex = 4;
-            this.ChkMonoCecilExists.Text = "Mono.Cecil.dll Exists (Required for main application to function)";
+            this.ChkMonoCecilExists.Text = "Mono.Cecil.dll";
             this.ChkMonoCecilExists.UseCompatibleTextRendering = true;
             this.ChkMonoCecilExists.UseVisualStyleBackColor = true;
             // 
@@ -118,9 +111,9 @@ namespace QModReloadedGUI
             this.Chk0HarmonyExists.ForeColor = System.Drawing.SystemColors.Desktop;
             this.Chk0HarmonyExists.Location = new System.Drawing.Point(11, 107);
             this.Chk0HarmonyExists.Name = "Chk0HarmonyExists";
-            this.Chk0HarmonyExists.Size = new System.Drawing.Size(282, 18);
+            this.Chk0HarmonyExists.Size = new System.Drawing.Size(90, 18);
             this.Chk0HarmonyExists.TabIndex = 5;
-            this.Chk0HarmonyExists.Text = "0Harmony.dll Exists (Required for mods to function)";
+            this.Chk0HarmonyExists.Text = "0Harmony.dll";
             this.Chk0HarmonyExists.UseCompatibleTextRendering = true;
             this.Chk0HarmonyExists.UseVisualStyleBackColor = true;
             // 
@@ -129,65 +122,25 @@ namespace QModReloadedGUI
             this.ChkPatcherLocation.AutoCheck = false;
             this.ChkPatcherLocation.AutoSize = true;
             this.ChkPatcherLocation.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.ChkPatcherLocation.Location = new System.Drawing.Point(12, 275);
+            this.ChkPatcherLocation.Location = new System.Drawing.Point(11, 419);
             this.ChkPatcherLocation.Name = "ChkPatcherLocation";
-            this.ChkPatcherLocation.Size = new System.Drawing.Size(630, 18);
+            this.ChkPatcherLocation.Size = new System.Drawing.Size(260, 43);
             this.ChkPatcherLocation.TabIndex = 6;
-            this.ChkPatcherLocation.Text = "Patcher and associated files located in \"Graveyard Keeper_Data\\Managed\" directory" +
-    " (Required for everything to function)";
+            this.ChkPatcherLocation.Text = "Patcher and associated files located in \r\n\"Graveyard Keeper_Data\\Managed\" directo" +
+    "ry \r\n(Required for everything to function)";
             this.ChkPatcherLocation.UseCompatibleTextRendering = true;
             this.ChkPatcherLocation.UseVisualStyleBackColor = true;
-            // 
-            // ChkNewtonExists
-            // 
-            this.ChkNewtonExists.AutoCheck = false;
-            this.ChkNewtonExists.AutoSize = true;
-            this.ChkNewtonExists.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.ChkNewtonExists.Location = new System.Drawing.Point(11, 155);
-            this.ChkNewtonExists.Name = "ChkNewtonExists";
-            this.ChkNewtonExists.Size = new System.Drawing.Size(368, 18);
-            this.ChkNewtonExists.TabIndex = 7;
-            this.ChkNewtonExists.Text = "Newtonsoft.Json.dll Exists (Required for main application to function)";
-            this.ChkNewtonExists.UseCompatibleTextRendering = true;
-            this.ChkNewtonExists.UseVisualStyleBackColor = true;
-            // 
-            // ChkGameLoopVDFJson
-            // 
-            this.ChkGameLoopVDFJson.AutoCheck = false;
-            this.ChkGameLoopVDFJson.AutoSize = true;
-            this.ChkGameLoopVDFJson.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.ChkGameLoopVDFJson.Location = new System.Drawing.Point(11, 203);
-            this.ChkGameLoopVDFJson.Name = "ChkGameLoopVDFJson";
-            this.ChkGameLoopVDFJson.Size = new System.Drawing.Size(433, 18);
-            this.ChkGameLoopVDFJson.TabIndex = 8;
-            this.ChkGameLoopVDFJson.Text = "Gameloop.Vdf.JsonConverter.dll Exists (Required for main application to function)" +
-    "";
-            this.ChkGameLoopVDFJson.UseCompatibleTextRendering = true;
-            this.ChkGameLoopVDFJson.UseVisualStyleBackColor = true;
-            // 
-            // ChkGameLoopVDF
-            // 
-            this.ChkGameLoopVDF.AutoCheck = false;
-            this.ChkGameLoopVDF.AutoSize = true;
-            this.ChkGameLoopVDF.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.ChkGameLoopVDF.Location = new System.Drawing.Point(11, 179);
-            this.ChkGameLoopVDF.Name = "ChkGameLoopVDF";
-            this.ChkGameLoopVDF.Size = new System.Drawing.Size(357, 18);
-            this.ChkGameLoopVDF.TabIndex = 9;
-            this.ChkGameLoopVDF.Text = "Gameloop.Vdf.dll Exists (Required for main application to function)";
-            this.ChkGameLoopVDF.UseCompatibleTextRendering = true;
-            this.ChkGameLoopVDF.UseVisualStyleBackColor = true;
             // 
             // ChkInjector
             // 
             this.ChkInjector.AutoCheck = false;
             this.ChkInjector.AutoSize = true;
             this.ChkInjector.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.ChkInjector.Location = new System.Drawing.Point(11, 227);
+            this.ChkInjector.Location = new System.Drawing.Point(11, 371);
             this.ChkInjector.Name = "ChkInjector";
-            this.ChkInjector.Size = new System.Drawing.Size(416, 18);
+            this.ChkInjector.Size = new System.Drawing.Size(117, 18);
             this.ChkInjector.TabIndex = 10;
-            this.ChkInjector.Text = "QModReloaded.dll Exists (Required for main application and mods to function)";
+            this.ChkInjector.Text = "QModReloaded.dll";
             this.ChkInjector.UseCompatibleTextRendering = true;
             this.ChkInjector.UseVisualStyleBackColor = true;
             // 
@@ -196,30 +149,166 @@ namespace QModReloadedGUI
             this.ChkConfig.AutoCheck = false;
             this.ChkConfig.AutoSize = true;
             this.ChkConfig.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.ChkConfig.Location = new System.Drawing.Point(11, 251);
+            this.ChkConfig.Location = new System.Drawing.Point(11, 395);
             this.ChkConfig.Name = "ChkConfig";
-            this.ChkConfig.Size = new System.Drawing.Size(424, 18);
+            this.ChkConfig.Size = new System.Drawing.Size(178, 18);
             this.ChkConfig.TabIndex = 11;
-            this.ChkConfig.Text = "QModReloadedGUI.exe.config Exists (Required for main application to function)";
+            this.ChkConfig.Text = "QModReloadedGUI.exe.config";
             this.ChkConfig.UseCompatibleTextRendering = true;
             this.ChkConfig.UseVisualStyleBackColor = true;
+            // 
+            // ChkUnsafeExists
+            // 
+            this.ChkUnsafeExists.AutoCheck = false;
+            this.ChkUnsafeExists.AutoSize = true;
+            this.ChkUnsafeExists.ForeColor = System.Drawing.SystemColors.Desktop;
+            this.ChkUnsafeExists.Location = new System.Drawing.Point(11, 251);
+            this.ChkUnsafeExists.Name = "ChkUnsafeExists";
+            this.ChkUnsafeExists.Size = new System.Drawing.Size(252, 18);
+            this.ChkUnsafeExists.TabIndex = 12;
+            this.ChkUnsafeExists.Text = "System.Runtime.CompilerServices.Unsafe.dll";
+            this.ChkUnsafeExists.UseCompatibleTextRendering = true;
+            this.ChkUnsafeExists.UseVisualStyleBackColor = true;
+            // 
+            // ChkNumericsExists
+            // 
+            this.ChkNumericsExists.AutoCheck = false;
+            this.ChkNumericsExists.AutoSize = true;
+            this.ChkNumericsExists.ForeColor = System.Drawing.SystemColors.Desktop;
+            this.ChkNumericsExists.Location = new System.Drawing.Point(11, 227);
+            this.ChkNumericsExists.Name = "ChkNumericsExists";
+            this.ChkNumericsExists.Size = new System.Drawing.Size(168, 18);
+            this.ChkNumericsExists.TabIndex = 13;
+            this.ChkNumericsExists.Text = "System.Numerics.Vectors.dll";
+            this.ChkNumericsExists.UseCompatibleTextRendering = true;
+            this.ChkNumericsExists.UseVisualStyleBackColor = true;
+            // 
+            // ChkMemoryExists
+            // 
+            this.ChkMemoryExists.AutoCheck = false;
+            this.ChkMemoryExists.AutoSize = true;
+            this.ChkMemoryExists.ForeColor = System.Drawing.SystemColors.Desktop;
+            this.ChkMemoryExists.Location = new System.Drawing.Point(11, 203);
+            this.ChkMemoryExists.Name = "ChkMemoryExists";
+            this.ChkMemoryExists.Size = new System.Drawing.Size(120, 18);
+            this.ChkMemoryExists.TabIndex = 14;
+            this.ChkMemoryExists.Text = "System.Memory.dll";
+            this.ChkMemoryExists.UseCompatibleTextRendering = true;
+            this.ChkMemoryExists.UseVisualStyleBackColor = true;
+            // 
+            // ChkBuffersExists
+            // 
+            this.ChkBuffersExists.AutoCheck = false;
+            this.ChkBuffersExists.AutoSize = true;
+            this.ChkBuffersExists.ForeColor = System.Drawing.SystemColors.Desktop;
+            this.ChkBuffersExists.Location = new System.Drawing.Point(11, 179);
+            this.ChkBuffersExists.Name = "ChkBuffersExists";
+            this.ChkBuffersExists.Size = new System.Drawing.Size(115, 18);
+            this.ChkBuffersExists.TabIndex = 15;
+            this.ChkBuffersExists.Text = "System.Buffers.dll";
+            this.ChkBuffersExists.UseCompatibleTextRendering = true;
+            this.ChkBuffersExists.UseVisualStyleBackColor = true;
+            // 
+            // ChkBCLExists
+            // 
+            this.ChkBCLExists.AutoCheck = false;
+            this.ChkBCLExists.AutoSize = true;
+            this.ChkBCLExists.ForeColor = System.Drawing.SystemColors.Desktop;
+            this.ChkBCLExists.Location = new System.Drawing.Point(11, 155);
+            this.ChkBCLExists.Name = "ChkBCLExists";
+            this.ChkBCLExists.Size = new System.Drawing.Size(187, 18);
+            this.ChkBCLExists.TabIndex = 16;
+            this.ChkBCLExists.Text = "Microsoft.Bcl.AsyncInterfaces.dll";
+            this.ChkBCLExists.UseCompatibleTextRendering = true;
+            this.ChkBCLExists.UseVisualStyleBackColor = true;
+            // 
+            // ChkThreadingExists
+            // 
+            this.ChkThreadingExists.AutoCheck = false;
+            this.ChkThreadingExists.AutoSize = true;
+            this.ChkThreadingExists.ForeColor = System.Drawing.SystemColors.Desktop;
+            this.ChkThreadingExists.Location = new System.Drawing.Point(11, 323);
+            this.ChkThreadingExists.Name = "ChkThreadingExists";
+            this.ChkThreadingExists.Size = new System.Drawing.Size(222, 18);
+            this.ChkThreadingExists.TabIndex = 17;
+            this.ChkThreadingExists.Text = "System.Threading.Tasks.Extensions.dll";
+            this.ChkThreadingExists.UseCompatibleTextRendering = true;
+            this.ChkThreadingExists.UseVisualStyleBackColor = true;
+            // 
+            // ChkJsonExists
+            // 
+            this.ChkJsonExists.AutoCheck = false;
+            this.ChkJsonExists.AutoSize = true;
+            this.ChkJsonExists.ForeColor = System.Drawing.SystemColors.Desktop;
+            this.ChkJsonExists.Location = new System.Drawing.Point(11, 299);
+            this.ChkJsonExists.Name = "ChkJsonExists";
+            this.ChkJsonExists.Size = new System.Drawing.Size(128, 18);
+            this.ChkJsonExists.TabIndex = 18;
+            this.ChkJsonExists.Text = "System.Text.Json.dll";
+            this.ChkJsonExists.UseCompatibleTextRendering = true;
+            this.ChkJsonExists.UseVisualStyleBackColor = true;
+            // 
+            // ChkEncodingsExists
+            // 
+            this.ChkEncodingsExists.AutoCheck = false;
+            this.ChkEncodingsExists.AutoSize = true;
+            this.ChkEncodingsExists.ForeColor = System.Drawing.SystemColors.Desktop;
+            this.ChkEncodingsExists.Location = new System.Drawing.Point(11, 275);
+            this.ChkEncodingsExists.Name = "ChkEncodingsExists";
+            this.ChkEncodingsExists.Size = new System.Drawing.Size(183, 18);
+            this.ChkEncodingsExists.TabIndex = 19;
+            this.ChkEncodingsExists.Text = "System.Text.Encodings.Web.dll";
+            this.ChkEncodingsExists.UseCompatibleTextRendering = true;
+            this.ChkEncodingsExists.UseVisualStyleBackColor = true;
+            // 
+            // ChkTupleExists
+            // 
+            this.ChkTupleExists.AutoCheck = false;
+            this.ChkTupleExists.AutoSize = true;
+            this.ChkTupleExists.ForeColor = System.Drawing.SystemColors.Desktop;
+            this.ChkTupleExists.Location = new System.Drawing.Point(11, 347);
+            this.ChkTupleExists.Name = "ChkTupleExists";
+            this.ChkTupleExists.Size = new System.Drawing.Size(136, 18);
+            this.ChkTupleExists.TabIndex = 20;
+            this.ChkTupleExists.Text = "System.ValueTuple.dll";
+            this.ChkTupleExists.UseCompatibleTextRendering = true;
+            this.ChkTupleExists.UseVisualStyleBackColor = true;
+            // 
+            // ChkAssemblyExists
+            // 
+            this.ChkAssemblyExists.AutoCheck = false;
+            this.ChkAssemblyExists.AutoSize = true;
+            this.ChkAssemblyExists.ForeColor = System.Drawing.SystemColors.Desktop;
+            this.ChkAssemblyExists.Location = new System.Drawing.Point(11, 83);
+            this.ChkAssemblyExists.Name = "ChkAssemblyExists";
+            this.ChkAssemblyExists.Size = new System.Drawing.Size(129, 18);
+            this.ChkAssemblyExists.TabIndex = 21;
+            this.ChkAssemblyExists.Text = "Assembly-CSharp.dll";
+            this.ChkAssemblyExists.UseCompatibleTextRendering = true;
+            this.ChkAssemblyExists.UseVisualStyleBackColor = true;
             // 
             // FrmChecklist
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(648, 304);
+            this.ClientSize = new System.Drawing.Size(294, 472);
+            this.Controls.Add(this.ChkAssemblyExists);
+            this.Controls.Add(this.ChkTupleExists);
+            this.Controls.Add(this.ChkEncodingsExists);
+            this.Controls.Add(this.ChkJsonExists);
+            this.Controls.Add(this.ChkThreadingExists);
+            this.Controls.Add(this.ChkBCLExists);
+            this.Controls.Add(this.ChkBuffersExists);
+            this.Controls.Add(this.ChkMemoryExists);
+            this.Controls.Add(this.ChkNumericsExists);
+            this.Controls.Add(this.ChkUnsafeExists);
             this.Controls.Add(this.ChkConfig);
             this.Controls.Add(this.ChkInjector);
-            this.Controls.Add(this.ChkGameLoopVDF);
-            this.Controls.Add(this.ChkGameLoopVDFJson);
-            this.Controls.Add(this.ChkNewtonExists);
             this.Controls.Add(this.ChkPatcherLocation);
             this.Controls.Add(this.Chk0HarmonyExists);
             this.Controls.Add(this.ChkMonoCecilExists);
             this.Controls.Add(this.ChkGameLocation);
             this.Controls.Add(this.ChkModDirectoryExists);
-            this.Controls.Add(this.ChkNoIntroPatched);
             this.Controls.Add(this.ChkModPatched);
             this.ForeColor = System.Drawing.Color.Red;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -239,16 +328,22 @@ namespace QModReloadedGUI
         #endregion
 
         private CheckBox ChkModPatched;
-        private CheckBox ChkNoIntroPatched;
         private CheckBox ChkModDirectoryExists;
         private CheckBox ChkGameLocation;
         private CheckBox ChkMonoCecilExists;
         private CheckBox Chk0HarmonyExists;
         private CheckBox ChkPatcherLocation;
-        private CheckBox ChkNewtonExists;
-        private CheckBox ChkGameLoopVDFJson;
-        private CheckBox ChkGameLoopVDF;
         private CheckBox ChkInjector;
         private CheckBox ChkConfig;
+        private CheckBox ChkUnsafeExists;
+        private CheckBox ChkNumericsExists;
+        private CheckBox ChkMemoryExists;
+        private CheckBox ChkBuffersExists;
+        private CheckBox ChkBCLExists;
+        private CheckBox ChkThreadingExists;
+        private CheckBox ChkJsonExists;
+        private CheckBox ChkEncodingsExists;
+        private CheckBox ChkTupleExists;
+        private CheckBox ChkAssemblyExists;
     }
 }

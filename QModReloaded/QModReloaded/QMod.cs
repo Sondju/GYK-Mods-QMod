@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace QModReloaded;
 
@@ -19,24 +20,18 @@ public class QMod
     public int LoadOrder { get; set; } = -1;
     public string Priority { get; set; }
 
-    [JsonIgnore] public Assembly LoadedAssembly { get; set; }
+    [JsonIgnore] 
+    public Assembly LoadedAssembly { get; set; }
 
-    [JsonIgnore]
+    [JsonIgnore] 
     public string ModAssemblyPath { get; set; }
 
     public Dictionary<string, object> Config { get; set; }
 
     public static QMod FromJsonFile(string file)
 	{
-		try
-		{
-			var value = File.ReadAllText(file);
-			return JsonConvert.DeserializeObject<QMod>(value);
-		}
-		catch (Exception ex)
-		{
-            Logger.WriteLog($"Parsing JSON failed: {ex.Message}");
-			return null;
-		}
-	}
+
+        var value = File.ReadAllText(file);
+        return JsonSerializer.Deserialize<QMod>(value);
+    }
 }

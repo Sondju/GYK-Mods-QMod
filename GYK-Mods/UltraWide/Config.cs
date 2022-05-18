@@ -19,11 +19,11 @@ namespace UltraWide
             _options = new Options();
             _con = new ConfigReader();
 
-            int.TryParse(_con.Value("Width", "1920"), out var width);
-            _options.Width = width;
+            var widthBool = int.TryParse(_con.Value("Width", "1920"), out var width);
+            _options.Width = widthBool ? width : 1920;
 
-            int.TryParse(_con.Value("Height", "1080"), out var height);
-            _options.Height = height;
+            var heightBool = int.TryParse(_con.Value("Height", "1080"), out var height);
+            _options.Height = heightBool ? height : 1080;
 
             _con.ConfigWrite();
 

@@ -20,9 +20,9 @@ namespace LargerScale
             [HarmonyPostfix]
             static void Postfix(ref ResolutionConfig __result)
             {
-                    var config = new ResolutionConfig(_cfg.Width, _cfg.Height)
+                var config = new ResolutionConfig(_cfg.Width, _cfg.Height)
                 {
-                    pixel_size = _cfg.Scale
+                    pixel_size = _cfg.GameScale,
                 };
                 __result = config;
             }

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using Mono.Cecil;
-using Newtonsoft.Json;
 
 namespace QModReloaded;
 
@@ -107,7 +107,7 @@ public class QModLoader
             Requires = Array.Empty<string>(),
             Version = "?"
         };
-        var newJson = JsonConvert.SerializeObject(newMod, Formatting.Indented);
+        var newJson = JsonSerializer.Serialize(newMod);
         if (path == null) return false;
         File.WriteAllText(Path.Combine(path, "mod.json"), newJson);
         var files = new FileInfo(Path.Combine(path, "mod.json"));

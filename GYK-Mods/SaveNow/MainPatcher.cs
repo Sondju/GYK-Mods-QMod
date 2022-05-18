@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -16,20 +15,22 @@ namespace SaveNow
         public static Vector3 Pos;
         public static string[] Xyz;
         public static float X, Y, Z;
-        public static string DataPath, ErrorPath, SavePath;
+        public static string DataPath, SavePath;
         private static readonly List<SaveSlotData> AllSaveGames = new();
         private static List<SaveSlotData> _sortedTrimmedSaveGames = new();
-        
+        private static Timer _aTimer;
+        private static bool _canSave;
+
         private static Config.Options _cfg;
 
         public static void Patch()
         {
             _cfg = Config.GetOptions();
+            _aTimer = new Timer();
             var val = HarmonyInstance.Create("p1xel8ted.graveyardkeeper.savenow");
             val.PatchAll(Assembly.GetExecutingAssembly());
             DataPath = "./QMods/SaveNow/dont-remove.dat";
-            ErrorPath = "./QMods/SaveNow/error.txt";
-            SavePath = "./QMods/SaveNow/saves.txt";
+            SavePath = "./QMods/SaveNow/SaveBackup/";
         }
 
         //reads co-ords from player, and saves to file
@@ -53,12 +54,14 @@ namespace SaveNow
                 {
                     if (_cfg.NewFileOnAutoSave)
                     {
-                        EffectBubblesManager.ShowImmediately(Pos, "Auto-Save! : " + saveFile, EffectBubblesManager.BubbleColor.Relation,
+                        EffectBubblesManager.ShowImmediately(Pos, "Auto-Save! : " + saveFile,
+                            EffectBubblesManager.BubbleColor.Relation,
                             true, 3f);
                     }
                     else
                     {
-                        EffectBubblesManager.ShowImmediately(Pos, "Auto-Save!", EffectBubblesManager.BubbleColor.Relation,
+                        EffectBubblesManager.ShowImmediately(Pos, "Auto-Save!",
+                            EffectBubblesManager.BubbleColor.Relation,
                             true, 3f);
                     }
                 }
@@ -88,25 +91,30 @@ namespace SaveNow
             [HarmonyPrefix]
             public static void Prefix()
             {
-                string message = null;
-                var files = Directory.GetFiles(PlatformSpecific.GetSaveFolder(), "*.info", SearchOption.TopDirectoryOnly).Select(file => new FileInfo(file)).ToList();
+                var files = Directory
+                    .GetFiles(PlatformSpecific.GetSaveFolder(), "*.info", SearchOption.TopDirectoryOnly)
+                    .Select(file => new FileInfo(file)).ToList();
                 var sortedFiles = files.OrderByDescending(o => o.CreationTime).ToList();
                 Resize(sortedFiles, _cfg.AutoSavesToKeep);
 
-                foreach (var file in Directory.GetFiles(PlatformSpecific.GetSaveFolder(), "*.info", SearchOption.TopDirectoryOnly))
+                foreach (var file in Directory.GetFiles(PlatformSpecific.GetSaveFolder(), "*.info",
+                             SearchOption.TopDirectoryOnly))
                 {
                     var tFile = new FileInfo(file);
                     var stringToCompare = Path.GetFileNameWithoutExtension(tFile.FullName).ToLower().Trim();
                     if (sortedFiles.Any(x => string.Equals(Path.GetFileNameWithoutExtension(x.FullName).ToLower(),
                             stringToCompare, StringComparison.CurrentCultureIgnoreCase))) continue;
-                    var sDat = Path.Combine(PlatformSpecific.GetSaveFolder(), Path.GetFileNameWithoutExtension(tFile.FullName)+ ".dat");
-                    var sInfo = Path.Combine(PlatformSpecific.GetSaveFolder(), Path.GetFileNameWithoutExtension(tFile.FullName)+ ".info");
-                    var dDat = Path.Combine(PlatformSpecific.GetSaveFolder(), "backup/", Path.GetFileNameWithoutExtension(tFile.FullName) + ".dat");
-                    var dInfo = Path.Combine(PlatformSpecific.GetSaveFolder(), "backup/", Path.GetFileNameWithoutExtension(tFile.FullName)+ ".info");
-                    message += $"Source dat: {sDat}\n";
-                    message += $"Dest data: {dDat}\n";
-                    message += $"Source info: {sInfo}\n";
-                    message += $"Dest Info: {dInfo}\n";
+                    var sDat = Path.Combine(PlatformSpecific.GetSaveFolder(),
+                        Path.GetFileNameWithoutExtension(tFile.FullName) + ".dat");
+                    var sInfo = Path.Combine(PlatformSpecific.GetSaveFolder(),
+                        Path.GetFileNameWithoutExtension(tFile.FullName) + ".info");
+                    if (!Directory.Exists(SavePath))
+                    {
+                        Directory.CreateDirectory(SavePath);
+                    }
+
+                    var dDat = SavePath + Path.GetFileNameWithoutExtension(tFile.FullName) + ".dat";
+                    var dInfo = SavePath + Path.GetFileNameWithoutExtension(tFile.FullName) + ".info";
 
                     if (_cfg.RemoveFromSaveListButKeepFile)
                     {
@@ -119,7 +127,6 @@ namespace SaveNow
                         File.Delete(sInfo);
                     }
                 }
-
             }
         }
 
@@ -146,6 +153,7 @@ namespace SaveNow
                         AllSaveGames.Add(data);
                     }
                 }
+
                 _sortedTrimmedSaveGames = AllSaveGames.OrderByDescending(o => o.game_time).ToList();
                 Resize(_sortedTrimmedSaveGames, 5);
                 slot_datas = _sortedTrimmedSaveGames;
@@ -169,10 +177,11 @@ namespace SaveNow
                     EffectBubblesManager.BubbleColor.Relation, true, 4f);
             }
 
-            var aTimer = new Timer();
-            aTimer.Elapsed += OnTimedEvent;
-            aTimer.Interval = _cfg.SaveInterval;
-            aTimer.Enabled = _cfg.AutoSave;
+            _aTimer.AutoReset = true;
+            _aTimer.Elapsed += OnTimedEvent;
+            _aTimer.Interval = _cfg.SaveInterval;
+            _aTimer.Enabled = _cfg.AutoSave;
+            _aTimer.Start();
             if (!_cfg.DisableAutoSaveInfo)
             {
                 EffectBubblesManager.ShowImmediately(Pos,
@@ -184,7 +193,6 @@ namespace SaveNow
         private static void OnTimedEvent(object source, ElapsedEventArgs e)
         {
             AutoSave();
-
         }
 
         [HarmonyPatch(typeof(InGameMenuGUI), "OnPressedSaveAndExit")]
@@ -200,15 +208,30 @@ namespace SaveNow
             {
                 __instance.SetControllsActive(false);
                 __instance.OnClosePressed();
-                GUIElements.me.dialog.OpenYesNo(
-                    "Are you sure you want to exit?" + "\n\n" + "Progress and current location will be saved.",
+                var messageText = "Are you sure you want to return to the main menu?" + "\n\n" +
+                                  "Progress and current location will be saved.";
+                if (_cfg.ExitToDesktop)
+                {
+                    messageText = "Are you sure you want to exit to desktop?" + "\n\n" +
+                                  "Progress and current location will be saved.";
+                }
+
+                GUIElements.me.dialog.OpenYesNo(messageText
+                    ,
                     delegate
                     {
                         if (SaveLocation(true, string.Empty))
                         {
-                            PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,delegate
+                            PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save, delegate
                             {
-                                LoadingGUI.Show(__instance.ReturnToMainMenu);
+                                if (_cfg.ExitToDesktop)
+                                {
+                                    Application.Quit();
+                                }
+                                else
+                                {
+                                    LoadingGUI.Show(__instance.ReturnToMainMenu);
+                                }
                             });
                         }
                     }, null, delegate { __instance.SetControllsActive(true); });
@@ -238,6 +261,17 @@ namespace SaveNow
             }
         }
 
+        [HarmonyPatch(typeof(MovementComponent), "UpdateMovement", null)]
+        public static class CheckPlayerState
+        {
+            [HarmonyPostfix]
+            public static void Postfix(MovementComponent __instance)
+            {
+                _canSave = !__instance.player_controlled_by_script;
+            }
+        }
+
+
         //hooks into the time of day update and saves if the K key was pressed
         [HarmonyPatch(typeof(TimeOfDay))]
         [HarmonyPatch(nameof(TimeOfDay.Update))]
@@ -260,6 +294,7 @@ namespace SaveNow
 
         public static void AutoSave()
         {
+            if (!_canSave) return;
             if (!_cfg.NewFileOnAutoSave)
             {
                 PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
@@ -267,7 +302,6 @@ namespace SaveNow
             }
             else
             {
-
                 GUIElements.me.ShowSavingStatus(true);
                 var date = DateTime.Now.ToString("ddmmyyhhmmss");
                 var newSlot = $"autosave.{date}".Trim();

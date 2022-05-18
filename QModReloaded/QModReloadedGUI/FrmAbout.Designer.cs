@@ -37,8 +37,8 @@ namespace QModReloadedGUI
             this.LblCredits = new System.Windows.Forms.Label();
             this.LblCreditsUrl = new System.Windows.Forms.LinkLabel();
             this.LblMyUrl = new System.Windows.Forms.LinkLabel();
-            this.LblVersion = new System.Windows.Forms.Label();
             this.BtnOK = new System.Windows.Forms.Button();
+            this.TxtVersion = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -88,7 +88,7 @@ namespace QModReloadedGUI
             // LblMyUrl
             // 
             this.LblMyUrl.AutoSize = true;
-            this.LblMyUrl.Location = new System.Drawing.Point(157, 67);
+            this.LblMyUrl.Location = new System.Drawing.Point(157, 69);
             this.LblMyUrl.Name = "LblMyUrl";
             this.LblMyUrl.Size = new System.Drawing.Size(239, 17);
             this.LblMyUrl.TabIndex = 4;
@@ -96,16 +96,6 @@ namespace QModReloadedGUI
             this.LblMyUrl.Text = "https://github.com/p1xel8ted/GraveyardKeeper";
             this.LblMyUrl.UseCompatibleTextRendering = true;
             this.LblMyUrl.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LblMyUrl_LinkClicked);
-            // 
-            // LblVersion
-            // 
-            this.LblVersion.AutoSize = true;
-            this.LblVersion.Location = new System.Drawing.Point(157, 47);
-            this.LblVersion.Name = "LblVersion";
-            this.LblVersion.Size = new System.Drawing.Size(35, 17);
-            this.LblVersion.TabIndex = 5;
-            this.LblVersion.Text = "label3";
-            this.LblVersion.UseCompatibleTextRendering = true;
             // 
             // BtnOK
             // 
@@ -118,13 +108,21 @@ namespace QModReloadedGUI
             this.BtnOK.UseVisualStyleBackColor = true;
             this.BtnOK.Click += new System.EventHandler(this.BtnOK_Click);
             // 
+            // TxtVersion
+            // 
+            this.TxtVersion.Location = new System.Drawing.Point(157, 44);
+            this.TxtVersion.Name = "TxtVersion";
+            this.TxtVersion.ReadOnly = true;
+            this.TxtVersion.Size = new System.Drawing.Size(239, 20);
+            this.TxtVersion.TabIndex = 7;
+            // 
             // FrmAbout
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(509, 141);
+            this.Controls.Add(this.TxtVersion);
             this.Controls.Add(this.BtnOK);
-            this.Controls.Add(this.LblVersion);
             this.Controls.Add(this.LblMyUrl);
             this.Controls.Add(this.LblCreditsUrl);
             this.Controls.Add(this.LblCredits);
@@ -153,7 +151,7 @@ namespace QModReloadedGUI
         private Label LblCredits;
         private LinkLabel LblCreditsUrl;
         private LinkLabel LblMyUrl;
-        private Label LblVersion;
         private Button BtnOK;
+        private TextBox TxtVersion;
     }
 }
