@@ -1,3 +1,7 @@
+
+### Please ensure it's installed into "..\Graveyard Keeper\Graveyard Keeper_Data\Managed" directory and you've clicked the "Checklist" button at the top before asking for support.
+
+
 ### Continuation of QMod Manager
 
 - Removed console app, entirely GUI based.
@@ -10,6 +14,9 @@
 - Can start game via GUI. Launches via steam:// first, and then EXE directly if it fails.
 - Implemented mod load order
 - Doesnt rely on correct entry point being entered in JSON to load. Will search DLL's directly.
+- Can Browse for a location manually if not using Steam.
+- Backup/restore clean Assembly-CSharp.dll files.
+
 
 ### Why:
 
