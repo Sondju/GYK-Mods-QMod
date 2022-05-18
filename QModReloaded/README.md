@@ -36,6 +36,8 @@ ___
 
 ### Note to developers
 
+Any configs must be named "config" - can be txt, cfg, json, ini
+Mod info json should be "mod.json"
 Any JSONS that are named as "info.json" will be renamed "mod.json" by the GUI to remain compatible with the patcher.
 
 To support your mod for the QMods system, you need to learn how `mod.json` is implemented. The critical keys are:  
