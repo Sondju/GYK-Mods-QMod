@@ -9,55 +9,111 @@ namespace FogBeGone
     {
         public static void Patch()
         {
-            var val = HarmonyInstance.Create($"p1xel8ted.graveyardkeeper.FogBeGone");
-            val.PatchAll(Assembly.GetExecutingAssembly());
+            try
+            {
+                var val = HarmonyInstance.Create($"p1xel8ted.graveyardkeeper.FogBeGone");
+                val.PatchAll(Assembly.GetExecutingAssembly());
+            }
+            catch (System.Exception ex)
+            {
+                File.AppendAllText("./QMods/errors.txt",
+                    "FogBeGone: " + ex.Message + " : " + ex.Source + " : " + ex.StackTrace + " : " + ex.Data);
+            }
         }
 
-
-        [HarmonyPatch(typeof(EnvironmentEngine), "SetWeatherEnabled")]
-        //[HarmonyPatch(nameof(EnvironmentEngine.Update))]
-        public static class WeatherPatch
+        [HarmonyPatch(typeof(SmartWeatherState))]
+        [HarmonyPatch(nameof(SmartWeatherState.Update))]
+        public static class WeatherPatch1
         {
-            [HarmonyPrefix]
-            public static bool Prefix()
+              [HarmonyPrefix]
+            public static bool Prefix(SmartWeatherState __instance, ref bool ____previously_enabled, ref bool ____enabled, ref float ____cur_amount)
             {
-                return false;
-            }
-
-            [HarmonyPostfix]
-            public static void Postfix(EnvironmentEngine __instance, bool enable)
-            {
-                string message = null;
-                var array = __instance.states;
-                foreach (var t in array)
+                try
                 {
-                    message += $"State: {t.type}\n";
-                    if (t.type != SmartWeatherState.WeatherType.Rain ||
-                        t.type != SmartWeatherState.WeatherType.LUT)
+                    if (__instance != null)
                     {
-                        message += $"{t.type} : Enabled, False\n";
-                        t.SetEnabled(false);
-                    }
-                    else
-                    {
-                        message += $"{t.type} : Enabled, True\n";
-                        t.SetEnabled(true);
+                        if (__instance.type == SmartWeatherState.WeatherType.Fog)
+                        {
+                            ____previously_enabled = true;
+                            ____enabled = false;
+                            ____cur_amount = 0;
+                            __instance.value = 0;
+                        }
+
+                        if (__instance.type == SmartWeatherState.WeatherType.Wind)
+                        {
+                            ____previously_enabled = true;
+                            ____enabled = false;
+                            ____cur_amount = 0;
+                            __instance.value = 0;
+                        }
+
+                        if (__instance.type == SmartWeatherState.WeatherType.Rain)
+                        {
+                            ____previously_enabled = false;
+                        }
                     }
                 }
-                File.WriteAllText("./QMods/FogBeGone/info.txt", message);
+                catch (System.Exception ex)
+                {
+                    File.AppendAllText("./QMods/errors.txt",
+                        "FogBeGone: " + ex.Message + " : " + ex.Source + " : " + ex.StackTrace + " : " + ex.Data);
+                }
+
+                return true;
             }
         }
 
 
-        [HarmonyPatch(typeof(FogObject))]
-        [HarmonyPatch(nameof(FogObject.InitFog))]
-        public static class FogModPatch
-        {
-            [HarmonyPrefix]
-            public static void Prefix(ref FogObject prefab)
-            {
-                prefab = null;
-            }
-        }
+        //[HarmonyPatch(typeof(EnvironmentEngine), "SetWeatherEnabled")]
+        //public static class WeatherPatch2
+        //{
+        //    [HarmonyPrefix]
+        //    public static bool Prefix()
+        //    {
+        //        return false;
+        //    }
+
+        //    [HarmonyPostfix]
+        //    public static void Postfix(EnvironmentEngine __instance, bool enable)
+        //    {
+        //        string message = null;
+        //        var array = __instance.states;
+        //        foreach (var t in array)
+        //        {
+        //            message += $"Type: {t.type.ToString()}";
+        //            if (t.type.ToString().Equals("Fog"))
+        //            {
+        //                t.enabled = false;
+        //                message += $"Disabling {t.type}!\n";
+        //                continue;
+        //            }
+
+        //            if (t.type.ToString().Equals("Wind"))
+        //            {
+        //                t.enabled = false;
+        //                message += $"Disabling {t.type}!\n";
+        //                continue;
+        //            }
+
+        //            t.enabled = true;
+        //            message += $"Enabling {t.type}!\n";
+        //        }
+
+        //        File.AppendAllText("./QMods/FogBeGone/info.txt", message);
+        //    }
+        //}
+
+
+        //[HarmonyPatch(typeof(FogObject))]
+        //[HarmonyPatch(nameof(FogObject.InitFog))]
+        //public static class FogModPatch
+        //{
+        //    [HarmonyPrefix]
+        //    public static void Prefix(ref FogObject prefab)
+        //    {
+        //        prefab = null;
+        //    }
+        //}
     }
 }

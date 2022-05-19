@@ -294,6 +294,8 @@ namespace SaveNow
 
         public static void AutoSave()
         {
+            if (EnvironmentEngine.me.IsTimeStopped()) return;
+            if (!Application.isFocused) return;
             if (!_canSave) return;
             if (!_cfg.NewFileOnAutoSave)
             {

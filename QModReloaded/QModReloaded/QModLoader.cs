@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Mono.Cecil;
 
 namespace QModReloaded;
@@ -11,6 +12,12 @@ namespace QModReloaded;
 public class QModLoader
 {
     private static readonly string QModBaseDir = Environment.CurrentDirectory + "\\QMods";
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true,
+        IncludeFields = true,
+        UnknownTypeHandling = JsonUnknownTypeHandling.JsonElement
+    };
 
     public static void Patch()
     {
@@ -91,7 +98,6 @@ public class QModLoader
         var sFile = new FileInfo(file);
         var path = new FileInfo(file).DirectoryName;
         var fileNameWithoutExt = sFile.Name.Substring(0, sFile.Name.Length - 4);
-        var fileNameWithExt = sFile.Name;
         var (namesp, type, method, found) = GetModEntryPoint(file);
         var newMod = new QMod
         {
@@ -107,7 +113,7 @@ public class QModLoader
             Requires = Array.Empty<string>(),
             Version = "?"
         };
-        var newJson = JsonSerializer.Serialize(newMod);
+        var newJson = JsonSerializer.Serialize(newMod, JsonOptions);
         if (path == null) return false;
         File.WriteAllText(Path.Combine(path, "mod.json"), newJson);
         var files = new FileInfo(Path.Combine(path, "mod.json"));

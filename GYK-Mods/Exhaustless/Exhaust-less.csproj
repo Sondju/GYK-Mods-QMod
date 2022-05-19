@@ -59,6 +59,7 @@ xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\Save
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaustless\bin\Release\Exhaust-less.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\Exhaust-less\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoTimeForFishing\bin\Release\NoTimeForFishing.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoTimeForFishing\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\LargerScale\bin\Release\LargerScale.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\LargerScale\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AddStraightToTable\bin\Release\AddStraightToTable.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AddStraightToTable\" /K /D /H /Y</PostBuildEvent>
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AddStraightToTable\bin\Release\AddStraightToTable.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AddStraightToTable\" /K /D /H /Y
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AutoLootHeavies\bin\Release\AutoLootHeavies.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AutoLootHeavies\" /K /D /H /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>

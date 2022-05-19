@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Windows.Forms;
 using Microsoft.Win32;
 
 namespace QModReloadedGUI
@@ -24,29 +22,6 @@ namespace QModReloadedGUI
             using var streamWriter = new StreamWriter(Path.Combine(gameLocation, "qmod_reloaded_log.txt"),
                 true);
             streamWriter.WriteLine(message);
-        }
-
-        public static void ReadLibraryVdf()
-        {
-            using var registryKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\WOW6432Node\\Valve\\Steam");
-            var value = registryKey?.GetValue("InstallPath");
-            var vdfFile = File.ReadAllLines(value + "\\steamapps\\libraryfolders.vdf");
-            List<string> libList = new List<string>();
-            foreach (var line in vdfFile)
-            {
-                if (line.Contains("path"))
-                {
-                    foreach (var s in line.Split('"'))
-                    {
-                        if (string.IsNullOrEmpty(s) || string.IsNullOrWhiteSpace(s)) continue;
-                        var t = s.Replace("\\\\", "\\").Trim();
-                       if (s.Contains("path")) continue;
-                        libList.Add(t);
-                       Console.WriteLine(t);
-                        
-                    }
-                }
-            }
         }
 
         internal static (string location,bool found) GetGameDirectory()

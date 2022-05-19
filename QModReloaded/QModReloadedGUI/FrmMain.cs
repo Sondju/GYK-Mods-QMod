@@ -28,8 +28,11 @@ public partial class FrmMain : Form
     private int _rowIndexFromMouseDown;
     private int _rowIndexOfItemUnderMouseToDrop;
     private const string CleanMd5 = "b75466bdcc44f5f098d4b22dc047b175"; //hash for Assembly-CSharp.dll 1.405
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    { WriteIndented = true, IncludeFields = true, UnknownTypeHandling = JsonUnknownTypeHandling.JsonElement
+    };
 
-    public FrmMain()
+public FrmMain()
     {
         InitializeComponent();
     }
@@ -111,7 +114,7 @@ public partial class FrmMain : Form
             Requires = Array.Empty<string>(),
             Version = "?",
         };
-        var newJson = JsonSerializer.Serialize(newMod);
+        var newJson = JsonSerializer.Serialize(newMod, JsonOptions);
         if (path == null) return false;
         File.WriteAllText(Path.Combine(path, "mod.json"), newJson);
         var files = new FileInfo(Path.Combine(path, "mod.json"));
@@ -127,7 +130,7 @@ public partial class FrmMain : Form
             {
                 DgvMods.Rows[row.Index].Cells[0].Value = row.Index + 1;
                 mod.LoadOrder = row.Index + 1;
-                var json = JsonSerializer.Serialize(mod);
+                var json = JsonSerializer.Serialize(mod, JsonOptions);
                 File.WriteAllText(Path.Combine(mod.ModAssemblyPath, "mod.json"), json);
             }
         }
@@ -300,6 +303,7 @@ public partial class FrmMain : Form
 
     private void FrmMain_Load(object sender, EventArgs e)
     {
+        
         SetLocations(Properties.Settings.Default.GamePath);
         LoadMods();
         DgvMods.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
@@ -476,7 +480,7 @@ private void RunGame()
                 WriteLog("Disabled " + modFound.DisplayName);
             }
 
-            var newJson = JsonSerializer.Serialize(modFound);
+            var newJson = JsonSerializer.Serialize(modFound, JsonOptions);
             File.WriteAllText(Path.Combine(modFound.ModAssemblyPath, "mod.json"), newJson);
         }
         catch (Exception)
@@ -638,20 +642,20 @@ private void RunGame()
             DgvMods.CurrentRow.Cells[2].Value = 0;
         }
 
-        DgvModsClick(sender, e, null);
+        DgvModsClick();
     }
 
     private void CheckAllModsActive()
     {
         ChkToggleMods.Checked = true;
-        foreach (var mod in _modList.Where(mod => mod.Enable == false))
+        foreach (var unused in _modList.Where(mod => mod.Enable == false))
         {
             ChkToggleMods.Checked = false;
             break;
         }
     }
 
-    private void DgvModsClick(object sender, DataGridViewCellEventArgs e, KeyEventArgs k)
+    private void DgvModsClick()
     {
         if (DgvMods.SelectedRows.Count > 1)
         {
@@ -717,7 +721,7 @@ private void RunGame()
 
     private void DgvMods_CellClick(object sender, DataGridViewCellEventArgs e)
     {
-        DgvModsClick(sender, e, null);
+        DgvModsClick();
     }
 
     private void DgvMods_MouseMove(object sender, MouseEventArgs e)
@@ -882,7 +886,7 @@ private void RunGame()
         {
             WriteLog("Disabling mods and launching game.");
             mod.Enable = false;
-            var newJson = JsonSerializer.Serialize(mod);
+            var newJson = JsonSerializer.Serialize(mod, JsonOptions);
             File.WriteAllText(Path.Combine(mod.ModAssemblyPath, "mod.json"), newJson);
         }
         RunGame();
@@ -892,7 +896,7 @@ private void RunGame()
     {
         if (e.KeyCode is Keys.Up or Keys.Down)
         {
-            DgvModsClick(sender, null, e);
+            DgvModsClick();
         }
     }
 }

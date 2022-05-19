@@ -1,0 +1,211 @@
+using System.Collections.Generic;
+using Harmony;
+using System.Reflection;
+
+namespace AutoLootHeavies
+{
+    public class MainPatcher
+    {
+        public static void Patch()
+        {
+            var val = HarmonyInstance.Create($"p1xel8ted.graveyardkeeper.AutoLootHeavies");
+            val.PatchAll(Assembly.GetExecutingAssembly());
+            HarmonyInstance.DEBUG = true;
+            FileLog.logPath = "./qmods/log.txt";
+        }
+
+        //this works, but gets you unlimited wood from the pile
+        [HarmonyPatch(typeof(BaseCharacterComponent))]
+        [HarmonyPatch(nameof(BaseCharacterComponent.SetOverheadItem))]
+        public class SetPatching
+        {
+            //[HarmonyPrefix]
+            //public static void Prefix(BaseCharacterComponent __instance, ref Item item)
+            //{
+            //    try
+            //    {
+            //        if (item != null)
+            //        {
+            //            List<Item> itemsToInsert = new List<Item>();
+            //            itemsToInsert.Add(item);
+            //            FileLog.Log("Adding " + item.definition.GetItemName());
+
+            //            List<Item> itemsDidntFit = new List<Item>();
+
+            //            WorldGameObject targetContainer = null;
+            //            var objects = MainGame.me.GetListOfWorldObjects();
+            //            foreach (var obj in objects)
+            //            {
+            //                if (obj.obj_id.Contains("mf_timber"))
+            //                {
+            //                    targetContainer = obj;
+            //                    FileLog.Log("Set Prefix ID: " + obj);
+            //                    break;
+            //                }
+            //            }
+            //            targetContainer.PutToAllPossibleInventories(itemsToInsert, out itemsDidntFit);
+
+            //            if (itemsDidntFit.Count > 0)
+            //            {
+            //                __instance.ShowCustomNeedBubble("Couldn't fit some items.");
+            //            }
+            //        }
+            //    }
+            //    catch (System.Exception ex)
+            //    {
+
+            //        FileLog.Log("Set Prefix " + ex.Message + " : " + ex.Source + " : " + ex.StackTrace);
+            //    }
+            //}
+
+            ////Same effects as Prefix
+            //[HarmonyPostfix]
+            //public static void Postfix(BaseCharacterComponent __instance, ref Item item)
+            //{
+            //    try
+            //    {
+            //        if (item != null)
+            //        {
+            //            List<Item> itemsToInsert = new List<Item>();
+            //            itemsToInsert.Add(item);
+            //            FileLog.Log("Adding " + item.definition.GetItemName());
+
+            //            List<Item> itemsDidntFit = new List<Item>();
+
+            //            WorldGameObject targetContainer = null;
+            //            var objects = MainGame.me.GetListOfWorldObjects();
+            //            foreach (var obj in objects)
+            //            {
+            //                if (obj.obj_id.Contains("mf_timber"))
+            //                {
+            //                    targetContainer = obj;
+            //                    FileLog.Log("Set Postfix ID: " + obj);
+            //                    break;
+            //                }
+            //            }
+            //            targetContainer.PutToAllPossibleInventories(itemsToInsert, out itemsDidntFit);
+
+            //            if (itemsDidntFit.Count > 0)
+            //            {
+            //                __instance.ShowCustomNeedBubble("Couldn't fit some items.");
+            //            }
+            //        }
+            //    }
+            //    catch (System.Exception ex)
+            //    {
+
+            //        FileLog.Log("Set Postfix " + ex.Message + " : " + ex.Source + " : " + ex.StackTrace);
+            //    }
+            //}
+        }
+
+        //this works, but need a way to destroy the object on drop when the things arent full
+        [HarmonyPatch(typeof(BaseCharacterComponent))]
+        [HarmonyPatch(nameof(BaseCharacterComponent.DropOverheadItem))]
+        public class DropPatching
+        {
+
+            [HarmonyPrefix]
+            public static bool Prefix(BaseCharacterComponent __instance, out int __state)
+            {
+                int timberPileCount = 0;
+                int usedSlots = 0;
+                WorldGameObject wgo = MainGame.me.player;
+                var objects = MainGame.me.GetListOfWorldObjects();
+                foreach (var obj in objects)
+                {
+                    if (obj.obj_id.Contains("mf_timber"))
+                    {
+                        usedSlots += obj.data.inventory.Count;
+                        timberPileCount++;
+                    }
+                }
+
+                int totalSlots = 9 * timberPileCount;
+                __state = totalSlots - usedSlots;
+                return false;
+            }
+
+          
+            [HarmonyPostfix]
+            public static void Postfix(BaseCharacterComponent __instance, bool to_right = false, int __state)
+            {
+                try
+                {
+                    if (__instance.GetOverheadItem() != null)
+                    {
+
+                        if (!__instance.GetOverheadItem().definition.GetItemName(true).Contains("Log"))
+                        {
+                            DropResGameObject.Drop(__instance.tf.position, __instance.GetOverheadItem(), __instance.tf.parent, to_right ? __instance.anim_direction.ClockwiseDir() : __instance.anim_direction, 3f, UnityEngine.Random.Range(0, 2), true, false);
+                            __instance.SetOverheadItem(null);
+                        }
+
+                        List<Item> itemsToInsert = new List<Item>();
+                        itemsToInsert.Add(__instance.GetOverheadItem());
+   
+
+                        List<Item> itemsDidntFit = new List<Item>();
+
+                       // var objects = MainGame.me.GetListOfWorldObjects();
+                        int timberPileCount = 0;
+                        int usedSlots = 0;
+                        WorldGameObject wgo = MainGame.me.player;
+                        foreach (var obj in objects)
+                        {
+                            if (obj.obj_id.Contains("mf_timber"))
+                            {
+                                usedSlots += obj.data.inventory.Count;
+                                timberPileCount++;
+                                FileLog.Log("Drop Postfix ID: " + obj);
+                            }
+                        }
+
+                        int totalSlots = 9 * timberPileCount;
+                        int freeSlots = totalSlots - usedSlots;
+                        //__instance.ShowCustomNeedBubble($"Total Slots {totalSlots}, Free Slots {freeSlots}");
+                        if (freeSlots == 0 && __instance.GetOverheadItem() != null)
+                        {
+                            DropResGameObject.Drop(__instance.tf.position, __instance.GetOverheadItem(),
+                                __instance.tf.parent,
+                                to_right ? __instance.anim_direction.ClockwiseDir() : __instance.anim_direction, 3f,
+                                UnityEngine.Random.Range(0, 2), true, false);
+                            __instance.SetOverheadItem(null);
+                            __instance.ShowCustomNeedBubble("Can't do that, have no storage left!");
+                        }
+                        if (freeSlots == 1 && __instance.GetOverheadItem() != null)
+                        {
+                            wgo.PutToAllPossibleInventories(itemsToInsert, out itemsDidntFit);
+                            __instance.SetOverheadItem(null);
+                        }
+                        if (freeSlots > 0)
+                        {
+                            wgo.PutToAllPossibleInventories(itemsToInsert, out itemsDidntFit);
+                            __instance.SetOverheadItem(null);
+                            if (itemsDidntFit.Count > 0)
+                            {
+                                __instance.ShowCustomNeedBubble("Can't do that, have no storage left!");
+                            }
+                        }
+                        else
+                        {
+                            if (__instance.GetOverheadItem() != null)
+                            {
+                                DropResGameObject.Drop(__instance.tf.position, __instance.GetOverheadItem(),
+                                    __instance.tf.parent,
+                                    to_right ? __instance.anim_direction.ClockwiseDir() : __instance.anim_direction, 3f,
+                                    UnityEngine.Random.Range(0, 2), true, false);
+                                __instance.SetOverheadItem(null);
+                            }
+                        }
+                    }
+                }
+                catch (System.Exception ex)
+                {
+
+                    FileLog.Log("Drop Postfix " + ex.Message + " : " + ex.Source + " : " + ex.StackTrace);
+                }
+            }
+        }
+    }
+}
