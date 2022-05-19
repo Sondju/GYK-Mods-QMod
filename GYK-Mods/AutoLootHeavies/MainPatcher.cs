@@ -107,7 +107,6 @@ namespace AutoLootHeavies
                             itemsToInsert.Clear();
                             itemsDidntFit.Clear();
                             itemsToInsert.Add(item);
-                            //lastKnownOrePos = oWgo.pos3;
 
                             if (oWgo == null)
                             {
