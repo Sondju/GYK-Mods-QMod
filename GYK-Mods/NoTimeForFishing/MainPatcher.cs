@@ -1,8 +1,7 @@
-using System.Collections.Generic;
-using System.Linq;
 using Harmony;
 using System.Reflection;
-using System.Reflection.Emit;
+using Fishing;
+using UnityEngine;
 
 namespace NoTimeForFishing
 {
@@ -13,39 +12,75 @@ namespace NoTimeForFishing
             var val = HarmonyInstance.Create($"p1xel8ted.graveyardkeeper.NoTimeForFishing");
             val.PatchAll(Assembly.GetExecutingAssembly());
         }
-
-        [HarmonyPatch(typeof(FishingGUI), "Update")]
-        public static class PatchOutMiniGame
+        
+        [HarmonyPatch(typeof(FishLogic), "CalculateFishPos")]
+        public class PatchCalculateFishPos
         {
-            //skip the mini-game
-            [HarmonyTranspiler]
-            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            [HarmonyPrefix]
+            public static void Prefix(ref float pos, ref float rod_zone_size)
             {
-                //make the "pulling" and "awaiting pull" actions skip to looting
-                    var codes = new List<CodeInstruction>(instructions);
-                    codes[20] = codes[26]; //index 26 is the instruction that starts the fish looting process
-                    codes[23] = codes[26]; //replacing the awaiting pull and pulling statements with it
-                    return codes.AsEnumerable();
+                pos = 0f;
+                rod_zone_size = 100f;
             }
         }
 
-
-        [HarmonyPatch(typeof(FishingGUI), "UpdateTakingOut")]
-        public static class PatchOutAnimationRequirement
+        [HarmonyPatch(typeof(FishingGUI), "UpdateWaitingForBite", null)]
+        internal class PatchUpdateWaitingForBite
         {
-            //remove the check for the animation to finish
-            //nop index 0 - 4
-            [HarmonyTranspiler]
-            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            [HarmonyPrefix]
+            public static void Prefix(ref float ____waiting_for_bite_delay)
             {
-                var codes = new List<CodeInstruction>(instructions);
-                codes[0].opcode = OpCodes.Nop; //removes the check for fishing animation which never plays because it gets skipped
-                codes[1].opcode = OpCodes.Nop;
-                codes[2].opcode = OpCodes.Nop;
-                codes[3].opcode = OpCodes.Nop;
-                codes[14].opcode = OpCodes.Brtrue_S; //makes the games "successful fish" check always true
-                return codes.AsEnumerable();
+                ____waiting_for_bite_delay = 0f;
+            }
+
+            [HarmonyPostfix]
+            private static void Postfix(FishingGUI __instance, ref Item ____fish, ref float ____waiting_for_bite_delay, ref FishDefinition ____fish_def, ref FishPreset ____fish_preset)
+            {
+                var fishy = (FishDefinition)typeof(FishingGUI)
+                    .GetMethod("GetRandomFish", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(__instance, new object[]
+                    {
+                        ____waiting_for_bite_delay
+                    });
+
+                ____fish_def = fishy;
+                ____fish = new Item(____fish_def.item_id, 1);
+                ____fish_preset = Resources.Load<FishPreset>("MiniGames/Fishing/" + ____fish_def.fish_preset);
+                typeof(FishingGUI).GetMethod("ChangeState", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(__instance, new object[]
+                {
+                    FishingGUI.FishingState.WaitingForPulling
+                });
+                
+            }
+        }
+
+        [HarmonyPatch(typeof(FishingGUI), "UpdateWaitingForPulling", null)]
+        internal class PatchUpdateWaitingForPulling
+        {
+            [HarmonyPostfix]
+            private static void PostFix(FishingGUI __instance, ref bool ___is_success_fishing)
+            {
+                ___is_success_fishing = true;
+                typeof(FishingGUI).GetMethod("ChangeState", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(__instance, new object[]
+                {
+                    FishingGUI.FishingState.Pulling
+                });
+                
+            }
+        }
+        
+        [HarmonyPatch(typeof(FishingGUI), "UpdatePulling", null)]
+        internal class PatchUpdatePulling
+        {
+
+            [HarmonyPostfix]
+            private static void Postfix(FishingGUI __instance)
+            {
+                typeof(FishingGUI).GetMethod("ChangeState", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(__instance, new object[]
+                {
+                    FishingGUI.FishingState.TakingOut
+                });
             }
         }
     }
 }
+    

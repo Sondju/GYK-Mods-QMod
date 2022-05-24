@@ -30,7 +30,7 @@ namespace AutoLootHeavies
         public static int FreeStoneSlots;
         public static int FreeOreSlots;
 
-        public static List<WorldGameObject> StoredStockpiles = new();
+        public static List<WorldGameObject> storedStockpiles = new List<Object>();
 
         public static List<Item> ItemsDidntFit = new();
         public static List<Item> ItemsToInsert = new();
@@ -170,15 +170,12 @@ namespace AutoLootHeavies
         {
             var pwo = MainGame.me.player;
             var needEnergy = 3f;
-            if (_cfg.DisableImmersionMode)
-            {
-                needEnergy = 0f;
-            }
+            float lastBubbleTime = 0;
             if (pwo.IsPlayerInvulnerable())
             {
                 needEnergy = 0f;
             }
-            float lastBubbleTime = 0;
+
             if (pwo.energy >= needEnergy)
             {
                 pwo.energy -= needEnergy;
@@ -420,61 +417,35 @@ namespace AutoLootHeavies
             [HarmonyPostfix]
             public static void Postfix()
             {
-                TimberPileCount = 0;
-                StonePileCount = 0;
-                OrePileCount = 0;
-                UsedTimberSlots = 0;
-                UsedStoneSlots = 0;
-                UsedOreSlots = 0;
+                //TimberPileCount = 0;
+                //StonePileCount = 0;
+                //OrePileCount = 0;
+                //UsedTimberSlots = 0;
+                //UsedStoneSlots = 0;
+                //UsedOreSlots = 0;
 
-                foreach (var obj in StoredStockpiles.Where(obj => obj != null))
+
+                if (Time.time - LastScanTime < 0.5f)
+                {
+                    return;
+                }
+
+                LastScanTime = Time.time;
+                Objects = Object.FindObjectsOfType<WorldGameObject>().Where(x =>
+                        x.obj_id.Contains("mf_timber_1") | x.obj_id.Contains("mf_ore_1") |
+                        x.obj_id.Contains("mf_stones_1"))
+                    .ToList();
+                storedStockpiles = Objects;
+
+
+
+                foreach (var obj in storedStockpiles.Where(obj => obj != null))
                 {
                     if (obj.obj_id.Contains("mf_timber_1"))
                     {
                         UsedTimberSlots += obj.data.inventory.Count;
                         TimberPileCount++;
                         TimberTemp = obj;
-                    }
-                    else if (obj.obj_id.Contains("mf_ore_1"))
-                    {
-                        UsedOreSlots += obj.data.inventory.Count;
-                        OrePileCount++;
-                        OreTemp = obj;
-                    }
-                    else if (obj.obj_id.Contains("mf_stones_1"))
-                    {
-                        UsedStoneSlots += obj.data.inventory.Count;
-                        StonePileCount++;
-                        StoneTemp = obj;
-                    }
-                }
-
-                FreeTimberSlots = (9 * TimberPileCount) - UsedTimberSlots;
-                FreeStoneSlots = (6 * StonePileCount) - UsedStoneSlots;
-                FreeOreSlots = (6 * OrePileCount) - UsedOreSlots;
-
-
-                if (Time.time - LastScanTime < _cfg.ScanIntervalInSeconds)
-                {
-                    //EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
-                    //    $"Scan Skipped",
-                    //    EffectBubblesManager.BubbleColor.Red, true, 3f);
-                    return;
-                }
-                //EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
-                //    $"Scan Started",
-                //    EffectBubblesManager.BubbleColor.Red, true, 3f);
-                LastScanTime = Time.time;
-                Objects = Object.FindObjectsOfType<WorldGameObject>().Where(x =>
-                        x.obj_id.Contains("mf_timber_1") | x.obj_id.Contains("mf_ore_1") |
-                        x.obj_id.Contains("mf_stones_1"))
-                    .ToList();
-                StoredStockpiles = Objects;
-
-                foreach (var obj in Objects.Where(obj => obj != null))
-                {
-                    if (obj.obj_id.Contains("mf_timber_1"))
-                    {
                         if (!VectorDictionary.ContainsKey(obj.pos3))
                         {
                             VectorDictionary.Add(obj.pos3, "t");
@@ -482,6 +453,9 @@ namespace AutoLootHeavies
                     }
                     else if (obj.obj_id.Contains("mf_ore_1"))
                     {
+                        UsedOreSlots += obj.data.inventory.Count;
+                        OrePileCount++;
+                        OreTemp = obj;
                         if (!VectorDictionary.ContainsKey(obj.pos3))
                         {
                             VectorDictionary.Add(obj.pos3, "o");
@@ -489,12 +463,19 @@ namespace AutoLootHeavies
                     }
                     else if (obj.obj_id.Contains("mf_stones_1"))
                     {
+                        UsedStoneSlots += obj.data.inventory.Count;
+                        StonePileCount++;
+                        StoneTemp = obj;
                         if (!VectorDictionary.ContainsKey(obj.pos3))
                         {
                             VectorDictionary.Add(obj.pos3, "s");
                         }
                     }
                 }
+
+                FreeTimberSlots = (9 * TimberPileCount) - UsedTimberSlots;
+                FreeStoneSlots = (6 * StonePileCount) - UsedStoneSlots;
+                FreeOreSlots = (6 * OrePileCount) - UsedOreSlots;
             }
         }
 
@@ -522,7 +503,7 @@ namespace AutoLootHeavies
         public class DropPatching
         {
             [HarmonyPrefix]
-            public static bool Prefix(ref Item ___overhead_item, out (bool wood, bool stone, bool iron, bool runCode) __state)
+            public static bool Prefix(BaseCharacterComponent __instance, ref Item ___overhead_item, out (bool wood, bool stone, bool iron, bool runCode) __state)
             {
 
                 var itemIsLog = ___overhead_item.definition.GetItemName().Contains("Log");

@@ -27,10 +27,10 @@ namespace SaveNow
         {
             _cfg = Config.GetOptions();
             _aTimer = new Timer();
-            var val = HarmonyInstance.Create("p1xel8ted.graveyardkeeper.savenow");
-            val.PatchAll(Assembly.GetExecutingAssembly());
             DataPath = "./QMods/SaveNow/dont-remove.dat";
             SavePath = "./QMods/SaveNow/SaveBackup/";
+            var val = HarmonyInstance.Create("p1xel8ted.graveyardkeeper.savenow");
+            val.PatchAll(Assembly.GetExecutingAssembly());
         }
 
         //reads co-ords from player, and saves to file
@@ -226,6 +226,8 @@ namespace SaveNow
                             {
                                 if (_cfg.ExitToDesktop)
                                 {
+                                    GC.Collect();
+                                    Resources.UnloadUnusedAssets();
                                     Application.Quit();
                                 }
                                 else
@@ -285,10 +287,6 @@ namespace SaveNow
                     PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
                         delegate { SaveLocation(false, string.Empty); });
                 }
-                //if (Input.GetKeyUp(KeyCode.L))
-                //{
-                //  AutoSave();
-                //}
             }
         }
 
