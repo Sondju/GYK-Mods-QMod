@@ -590,7 +590,15 @@ namespace AutoLootHeavies
                             {
                                 if (_cfg.Teleportation)
                                 {
-                                    TeleportItem(__instance, item, "o");
+                                    var distance = Vector3.Distance(_cfg.DesignatedOreLocation, pWgo.pos3);
+                                    if (distance <= 750f)
+                                    {
+                                        DropOjectAndNull(__instance, item);
+                                    }
+                                    else
+                                    {
+                                        TeleportItem(__instance, item, "o");
+                                    }
                                 }
                                 else
                                 {
@@ -681,7 +689,15 @@ namespace AutoLootHeavies
                             {
                                 if (_cfg.Teleportation)
                                 {
-                                    TeleportItem(__instance, item, "t");
+                                    var distance = Vector3.Distance(_cfg.DesignatedTimberLocation, pWgo.pos3);
+                                    if (distance <= 750f)
+                                    {
+                                        DropOjectAndNull(__instance, item);
+                                    }
+                                    else
+                                    {
+                                        TeleportItem(__instance, item, "t");
+                                    }
                                 }
                                 else
                                 {
@@ -771,7 +787,15 @@ namespace AutoLootHeavies
                             {
                                 if (_cfg.Teleportation)
                                 {
-                                    TeleportItem(__instance, item, "s");
+                                    var distance = Vector3.Distance(_cfg.DesignatedStoneLocation, pWgo.pos3);
+                                    if (distance <= 750f)
+                                    {
+                                        DropOjectAndNull(__instance, item);
+                                    }
+                                    else
+                                    {
+                                        TeleportItem(__instance, item, "s");
+                                    }
                                 }
                                 else
                                 {

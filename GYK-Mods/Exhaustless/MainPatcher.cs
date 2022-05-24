@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -21,7 +22,7 @@ namespace Exhaustless
             }
             catch (Exception ex)
             {
-                //
+                File.AppendAllText("./qmods/dura.txt", $"{ex.Message} - {ex.Source} - {ex.StackTrace}\n");
             }
         }
 
@@ -86,6 +87,42 @@ namespace Exhaustless
             }
         }
 
+        [HarmonyPatch(typeof(WorldGameObject))]
+        [HarmonyPatch(nameof(WorldGameObject.EquipItem))]
+        public static class PatchToolDurabilitySpeed2
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref Item item)
+            {
+                if (item.definition.durability_decrease_on_use)
+                {
+                    item.definition.durability_decrease_on_use_speed = 0.005f;
+                }
+            }
+        }
+
+
+        [HarmonyPatch(typeof(MainGame))]
+        [HarmonyPatch(nameof(MainGame.OnEquippedToolBroken))]
+        public static class PatchBrokenTool
+        {
+            [HarmonyPrefix]
+            public static void Prefix()
+            {
+                var equippedTool = MainGame.me.player.GetEquippedTool();
+                var save = MainGame.me.save;
+                var playerInv = save.GetSavedPlayerInventory();
+                foreach (var item in playerInv.inventory.Where(item => item.definition.id.Equals(equippedTool.definition.id)))
+                {
+                    if (item.durability_state is not (Item.DurabilityState.Full or Item.DurabilityState.Used)) continue;
+                    MainGame.me.player.EquipItem(item, -1, playerInv.is_bag ? playerInv : null);
+                    MainGame.me.player.Say($"Lucky I had another {item.definition.GetItemName(true).ToLower()} on me!", null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
+                        SmartSpeechEngine.VoiceID.None, true);
+                }
+            }
+        }
+
+
         [HarmonyPatch(typeof(SleepGUI))]
         [HarmonyPatch(nameof(SleepGUI.Update))]
         public static class PatchSleeping
@@ -126,6 +163,7 @@ namespace Exhaustless
             [HarmonyPrefix]
             public static void Prefix(InventoryGUI __instance)
             {
+                string message = string.Empty;
                 if (_cfg.AllowHandToolDestroy)
                 {
                     var itemDef = __instance.selected_item.definition;
@@ -136,6 +174,7 @@ namespace Exhaustless
                     };
                     if (items.Contains(itemDef.type))
                     {
+                        File.AppendAllText("./qmods/dura.txt", $"Item: {__instance.selected_item.GetItemName()}, Decrease: {__instance.selected_item.definition.durability_decrease_on_use_speed.ToString()}\n");
                         itemDef.player_cant_throw_out = false;
                     }
                 }
