@@ -426,9 +426,13 @@ namespace AutoLootHeavies
                 UsedTimberSlots = 0;
                 UsedStoneSlots = 0;
                 UsedOreSlots = 0;
-
+                //string message = string.Empty;
                 foreach (var obj in StoredStockpiles.Where(obj => obj != null))
                 {
+                   // message += obj.obj_id+"\n";
+                    //EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
+                    //    obj.data.definition.GetItemName(),
+                    //    EffectBubblesManager.BubbleColor.White, true, 4f);
                     if (obj.obj_id.Contains("mf_timber_1"))
                     {
                         UsedTimberSlots += obj.data.inventory.Count;
@@ -448,6 +452,7 @@ namespace AutoLootHeavies
                         StoneTemp = obj;
                     }
                 }
+                //File.WriteAllText("./qmods/obj.txt", message);
 
                 FreeTimberSlots = (9 * TimberPileCount) - UsedTimberSlots;
                 FreeStoneSlots = (6 * StonePileCount) - UsedStoneSlots;

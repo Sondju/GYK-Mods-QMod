@@ -65,8 +65,8 @@ namespace Exhaustless
             {
                 if (_cfg.SpeedUpMeditation)
                 {
-                    MainGame.me.player.energy += 0.375f;
-                    MainGame.me.player.hp += 0.375f;
+                    MainGame.me.player.energy += 0.25f;
+                    MainGame.me.player.hp += 0.25f;
                 }
             }
 
@@ -95,8 +95,8 @@ namespace Exhaustless
             {
                 if (_cfg.SpeedUpSleep)
                 {
-                    MainGame.me.player.energy += 0.375f;
-                    MainGame.me.player.hp += 0.375f;
+                    MainGame.me.player.energy += 0.25f;
+                    MainGame.me.player.hp += 0.25f;
                 }
             }
         }
@@ -120,7 +120,7 @@ namespace Exhaustless
         }
         
         [HarmonyPatch(typeof(InventoryGUI))]
-        
+        [HarmonyPatch(nameof(InventoryGUI.OnItemOver))]
         public static class PatchCantDestroy
         {
             [HarmonyPrefix]
