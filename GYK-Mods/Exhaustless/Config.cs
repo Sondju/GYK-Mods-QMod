@@ -20,12 +20,20 @@ namespace Exhaustless
             public bool SpendHalfSanity;
             public bool AutoWakeFromMeditation;
             public bool QuietMusicInGui;
+            public bool MakeToolsLastLonger;
+            public bool AutoEquipNewTool;
         }
 
         public static Options GetOptions()
         {
             _options = new Options();
             _con = new ConfigReader();
+
+            bool.TryParse(_con.Value("MakeToolsLastLonger", "true"), out var makeToolsLastLonger);
+            _options.MakeToolsLastLonger = makeToolsLastLonger;
+
+            bool.TryParse(_con.Value("AutoEquipNewTool", "true"), out var autoEquipNewTool);
+            _options.AutoEquipNewTool = autoEquipNewTool;
 
             bool.TryParse(_con.Value("SpeedUpSleep", "true"), out var speedUpSleep);
             _options.SpeedUpSleep = speedUpSleep;

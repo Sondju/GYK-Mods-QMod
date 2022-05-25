@@ -97,10 +97,18 @@ namespace SaveNow
                 var sortedFiles = files.OrderByDescending(o => o.CreationTime).ToList();
                 Resize(sortedFiles, _cfg.AutoSavesToKeep);
 
-                foreach (var file in Directory.GetFiles(PlatformSpecific.GetSaveFolder(), "*.info",
+                foreach (var file in Directory.GetFiles(PlatformSpecific.GetSaveFolder(), "*.*",
                              SearchOption.TopDirectoryOnly))
                 {
+                    if (!File.Exists(file)) continue;
                     var tFile = new FileInfo(file);
+                    if (tFile.Name.Contains("backup"))
+                    {
+                        File.Delete(file);
+                        continue;
+                    }
+
+                    if (!tFile.Extension.Contains("info") || !tFile.Extension.Contains("dat")) continue;
                     var stringToCompare = Path.GetFileNameWithoutExtension(tFile.FullName).ToLower().Trim();
                     if (sortedFiles.Any(x => string.Equals(Path.GetFileNameWithoutExtension(x.FullName).ToLower(),
                             stringToCompare, StringComparison.CurrentCultureIgnoreCase))) continue;

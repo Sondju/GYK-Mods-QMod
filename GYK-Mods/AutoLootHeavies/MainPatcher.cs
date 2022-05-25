@@ -47,14 +47,14 @@ namespace AutoLootHeavies
         private static readonly Dictionary<Vector3, string> VectorDictionary = new();
 
         public static float LastScanTime;
+        public static float LastGetLocationScanTime;
 
-        public static void Patch(){
-
-
-            VectorsLoaded = false;
+        public static void Patch()
+        {
             _cfg = Config.GetOptions();
             var val = HarmonyInstance.Create($"p1xel8ted.graveyardkeeper.AutoLootHeavies");
             val.PatchAll(Assembly.GetExecutingAssembly());
+            VectorsLoaded = false;
         }
 
         public static void UpdateConfig()
@@ -65,6 +65,9 @@ namespace AutoLootHeavies
 
         public static void GetLocations()
         {
+            EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
+                $"Get Locations",
+                EffectBubblesManager.BubbleColor.Red, true, 3f);
             if (!File.Exists(VectorPath)) return;
 
             var lines = File.ReadAllLines(VectorPath, Encoding.Default);
@@ -102,7 +105,7 @@ namespace AutoLootHeavies
             Sounds.PlaySound("pickup", null, true);
         }
 
-        public static void PutToAllAndNull(BaseCharacterComponent __instance, WorldGameObject wgo,
+        public static bool PutToAllAndNull(BaseCharacterComponent __instance, WorldGameObject wgo,
             List<Item> itemsToInsert)
         {
             var pwo = MainGame.me.player;
@@ -120,18 +123,17 @@ namespace AutoLootHeavies
 
                 wgo.PutToAllPossibleInventories(itemsToInsert, out _);
                 __instance.SetOverheadItem(null);
+                return true;
             }
-            else
-            {
-                if (Time.time - lastBubbleTime < 0.5f)
-                {
-                    return;
-                }
 
+            if (Time.time - lastBubbleTime > 0.5f)
+            {
                 lastBubbleTime = Time.time;
                 EffectBubblesManager.ShowImmediately(pwo.bubble_pos, GJL.L("not_enough_something", "(en)"),
                     EffectBubblesManager.BubbleColor.Energy, true, 1f);
             }
+
+            return false;
         }
 
         public static (int, int) GetGridLocation()
@@ -224,15 +226,18 @@ namespace AutoLootHeavies
             }
             else
             {
+                DropOjectAndNull(__instance, item);
+
                 if (Time.time - lastBubbleTime < 0.5f)
                 {
                     return;
                 }
 
                 lastBubbleTime = Time.time;
+
                 EffectBubblesManager.ShowImmediately(pwo.bubble_pos, GJL.L("not_enough_something", "(en)"),
                     EffectBubblesManager.BubbleColor.Energy, true, 1f);
-                DropOjectAndNull(__instance,item);
+                
             }
         }
 
@@ -277,6 +282,46 @@ namespace AutoLootHeavies
                 SmartSpeechEngine.VoiceID.None, true);
         }
 
+        public static void GetClosestStockPile()
+        {
+            if (LastKnownTimberLocation == BlankVector3 || LastKnownTimberLocation == Vector3.zero)
+            {
+                LastKnownTimberLocation = VectorDictionary.FirstOrDefault(x => x.Value == "t").Key;
+            }
+
+            if (LastKnownOreLocation == BlankVector3 || LastKnownOreLocation == Vector3.zero)
+            {
+                LastKnownOreLocation = VectorDictionary.FirstOrDefault(x => x.Value == "o").Key;
+            }
+
+            if (LastKnownStoneLocation == BlankVector3 || LastKnownStoneLocation == Vector3.zero)
+            {
+                LastKnownStoneLocation = VectorDictionary.FirstOrDefault(x => x.Value == "s").Key;
+            }
+
+            foreach (var v in VectorDictionary.Where(x => x.Value == "t"))
+            {
+                if (Vector3.Distance(MainGame.me.player_pos, v.Key) < Vector3.Distance(MainGame.me.player_pos, LastKnownTimberLocation))
+                {
+                    LastKnownTimberLocation = v.Key;
+                }
+            }
+            foreach (var v in VectorDictionary.Where(x => x.Value == "o"))
+            {
+                if (Vector3.Distance(MainGame.me.player_pos, v.Key) < Vector3.Distance(MainGame.me.player_pos, LastKnownOreLocation))
+                {
+                    LastKnownOreLocation = v.Key;
+                }
+            }
+            foreach (var v in VectorDictionary.Where(x => x.Value == "s"))
+            {
+                if (Vector3.Distance(MainGame.me.player_pos, v.Key) < Vector3.Distance(MainGame.me.player_pos, LastKnownStoneLocation))
+                {
+                    LastKnownStoneLocation = v.Key;
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(MainGame))]
         [HarmonyPatch(nameof(MainGame.Update))]
         public class UpdateStockPiles
@@ -284,29 +329,14 @@ namespace AutoLootHeavies
             [HarmonyPostfix]
             public static void Postfix()
             {
- 
-                foreach (var v in VectorDictionary.Where(x => x.Value == "t"))
+                if (Time.time - LastGetLocationScanTime < 5f)
                 {
-                    if(Vector3.Distance(MainGame.me.player_pos, v.Key) < Vector3.Distance(MainGame.me.player_pos, LastKnownTimberLocation))
-                    {
-                        LastKnownTimberLocation = v.Key;
-                    }
+                    return;
                 }
-                foreach (var v in VectorDictionary.Where(x => x.Value == "o"))
-                {
-                    if (Vector3.Distance(MainGame.me.player_pos, v.Key) < Vector3.Distance(MainGame.me.player_pos, LastKnownOreLocation))
-                    {
-                        LastKnownOreLocation = v.Key;
-                    }
-                }
-                foreach (var v in VectorDictionary.Where(x => x.Value == "s"))
-                {
-                    if (Vector3.Distance(MainGame.me.player_pos, v.Key) < Vector3.Distance(MainGame.me.player_pos, LastKnownStoneLocation))
-                    {
-                        LastKnownStoneLocation = v.Key;
-                    }
-                }
-            }
+
+                GetClosestStockPile();
+                LastGetLocationScanTime = Time.time;
+            } 
         }
 
         //hooks into the time of day update and saves if the K key was pressed
@@ -400,18 +430,24 @@ namespace AutoLootHeavies
                     UpdateConfig();
                 }
             }
-
-            [HarmonyPostfix]
-            public static void Postfix()
-            {
-                if (!MainGame.loaded_from_scene_main) return;
-                if (VectorsLoaded) return;
-                GetLocations();
-                VectorsLoaded = true;
-            }
         }
 
-
+        [HarmonyPatch(typeof(MovementComponent), "UpdateMovement")]
+        public static class LoadLocations
+        {
+            [HarmonyPrefix]
+            public static bool Prefix()
+            {
+                if (!VectorsLoaded)
+                {
+                    GetLocations();
+                    GetClosestStockPile();
+                    VectorsLoaded = true;
+                }
+                return true;
+            }
+        }
+        
         [HarmonyPatch(typeof(BaseCharacterComponent))]
         [HarmonyPatch(nameof(BaseCharacterComponent.SetOverheadItem))]
         public class SetPatching
@@ -426,13 +462,9 @@ namespace AutoLootHeavies
                 UsedTimberSlots = 0;
                 UsedStoneSlots = 0;
                 UsedOreSlots = 0;
-                //string message = string.Empty;
+
                 foreach (var obj in StoredStockpiles.Where(obj => obj != null))
                 {
-                   // message += obj.obj_id+"\n";
-                    //EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
-                    //    obj.data.definition.GetItemName(),
-                    //    EffectBubblesManager.BubbleColor.White, true, 4f);
                     if (obj.obj_id.Contains("mf_timber_1"))
                     {
                         UsedTimberSlots += obj.data.inventory.Count;
@@ -452,7 +484,7 @@ namespace AutoLootHeavies
                         StoneTemp = obj;
                     }
                 }
-                //File.WriteAllText("./qmods/obj.txt", message);
+
 
                 FreeTimberSlots = (9 * TimberPileCount) - UsedTimberSlots;
                 FreeStoneSlots = (6 * StonePileCount) - UsedStoneSlots;
@@ -462,13 +494,13 @@ namespace AutoLootHeavies
                 if (Time.time - LastScanTime < _cfg.ScanIntervalInSeconds)
                 {
                     //EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
-                    //    $"Scan Skipped",
+                    //    $"Scan Skipped {LastScanTime}",
                     //    EffectBubblesManager.BubbleColor.Red, true, 3f);
                     return;
                 }
                 //EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
-                //    $"Scan Started",
-                //    EffectBubblesManager.BubbleColor.Red, true, 3f);
+                //    $"Scan Started {LastScanTime}",
+                //    EffectBubblesManager.BubbleColor.White, true, 3f);
                 LastScanTime = Time.time;
                 Objects = Object.FindObjectsOfType<WorldGameObject>().Where(x =>
                         x.obj_id.Contains("mf_timber_1") | x.obj_id.Contains("mf_ore_1") |
@@ -563,8 +595,9 @@ namespace AutoLootHeavies
                     var sWgo = StoneTemp; //stone
                     var oWgo = OreTemp; //iron ore
 
-          
-                     var item = ___overhead_item;
+                    bool success;
+
+                    var item = ___overhead_item;
                      if (item == null) return;
                      if (isAttacking)
                      {
@@ -609,6 +642,7 @@ namespace AutoLootHeavies
                         }
                         else
                         {
+                            
                             switch (FreeOreSlots)
                             {
                                 //not sure how it can get to -1, but here because it did
@@ -657,15 +691,26 @@ namespace AutoLootHeavies
 
                                 case 1:
 
-                                    PutToAllAndNull(__instance, oWgo, ItemsToInsert);
-                                    ShowLootAddedIcon(item);
-                                    ShowMessage("", false, true, false, "o");
+                                    success = PutToAllAndNull(__instance, oWgo, ItemsToInsert);
+                                    if (success)
+                                    {
+                                        ShowLootAddedIcon(item);
+                                        ShowMessage("", false, true, false, "o");
+                                    }
+                                    else
+                                    {
+                                        DropOjectAndNull(__instance, item);
+                                    }
+
                                     break;
 
                                 case > 0:
 
-                                    PutToAllAndNull(__instance, oWgo, ItemsToInsert);
-                                    ShowLootAddedIcon(item);
+                                    success = PutToAllAndNull(__instance, oWgo, ItemsToInsert);
+                                    if (success)
+                                    {
+                                        ShowLootAddedIcon(item);
+                                    }
 
                                     if (ItemsDidntFit.Count > 0)
                                     {
@@ -755,15 +800,26 @@ namespace AutoLootHeavies
 
                                 case 1:
 
-                                    PutToAllAndNull(__instance, tWgo, ItemsToInsert);
-                                    ShowLootAddedIcon(item);
-                                    ShowMessage("", false, true, false, "t");
+                                    success = PutToAllAndNull(__instance, tWgo, ItemsToInsert);
+                                    if (success)
+                                    {
+                                        ShowLootAddedIcon(item);
+                                        ShowMessage("", false, true, false, "t");
+                                    }
+                                    else
+                                    {
+                                        DropOjectAndNull(__instance, item);
+                                    }
+
                                     break;
 
                                 case > 0:
 
-                                    PutToAllAndNull(__instance, tWgo, ItemsToInsert);
-                                    ShowLootAddedIcon(item);
+                                    success = PutToAllAndNull(__instance, tWgo, ItemsToInsert);
+                                    if (success)
+                                    {
+                                        ShowLootAddedIcon(item);
+                                    }
 
                                     if (ItemsDidntFit.Count > 0)
                                     {
@@ -855,15 +911,26 @@ namespace AutoLootHeavies
 
                                 case 1:
 
-                                    PutToAllAndNull(__instance, sWgo, ItemsToInsert);
-                                    ShowLootAddedIcon(item);
-                                    ShowMessage("", false, true, false, "s");
+                                    success = PutToAllAndNull(__instance, sWgo, ItemsToInsert);
+                                    if (success)
+                                    {
+                                        ShowLootAddedIcon(item);
+                                        ShowMessage("", false, true, false, "s");
+                                    }
+                                    else
+                                    {
+                                        DropOjectAndNull(__instance, item);
+                                    }
+
                                     break;
 
                                 case > 0:
 
-                                    PutToAllAndNull(__instance, sWgo, ItemsToInsert);
-                                    ShowLootAddedIcon(item);
+                                    success = PutToAllAndNull(__instance, sWgo, ItemsToInsert);
+                                    if (success)
+                                    {
+                                        ShowLootAddedIcon(item);
+                                    }
 
                                     if (ItemsDidntFit.Count > 0)
                                     {

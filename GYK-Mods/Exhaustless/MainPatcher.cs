@@ -22,7 +22,7 @@ namespace Exhaustless
             }
             catch (Exception ex)
             {
-                File.AppendAllText("./qmods/dura.txt", $"{ex.Message} - {ex.Source} - {ex.StackTrace}\n");
+              //  File.AppendAllText("./qmods/dura.txt", $"{ex.Message} - {ex.Source} - {ex.StackTrace}\n");
             }
         }
 
@@ -94,9 +94,12 @@ namespace Exhaustless
             [HarmonyPostfix]
             public static void Postfix(ref Item item)
             {
-                if (item.definition.durability_decrease_on_use)
+                if (_cfg.MakeToolsLastLonger)
                 {
-                    item.definition.durability_decrease_on_use_speed = 0.005f;
+                    if (item.definition.durability_decrease_on_use)
+                    {
+                        item.definition.durability_decrease_on_use_speed = 0.005f;
+                    }
                 }
             }
         }
@@ -109,15 +112,22 @@ namespace Exhaustless
             [HarmonyPrefix]
             public static void Prefix()
             {
-                var equippedTool = MainGame.me.player.GetEquippedTool();
-                var save = MainGame.me.save;
-                var playerInv = save.GetSavedPlayerInventory();
-                foreach (var item in playerInv.inventory.Where(item => item.definition.id.Equals(equippedTool.definition.id)))
+                if (_cfg.AutoEquipNewTool)
                 {
-                    if (item.durability_state is not (Item.DurabilityState.Full or Item.DurabilityState.Used)) continue;
-                    MainGame.me.player.EquipItem(item, -1, playerInv.is_bag ? playerInv : null);
-                    MainGame.me.player.Say($"Lucky I had another {item.definition.GetItemName(true).ToLower()} on me!", null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
-                        SmartSpeechEngine.VoiceID.None, true);
+                    var equippedTool = MainGame.me.player.GetEquippedTool();
+                    var save = MainGame.me.save;
+                    var playerInv = save.GetSavedPlayerInventory();
+                    foreach (var item in playerInv.inventory.Where(item =>
+                                 item.definition.id.Equals(equippedTool.definition.id)))
+                    {
+                        if (item.durability_state is not (Item.DurabilityState.Full or Item.DurabilityState.Used))
+                            continue;
+                        MainGame.me.player.EquipItem(item, -1, playerInv.is_bag ? playerInv : null);
+                        MainGame.me.player.Say(
+                            $"Lucky I had another {item.definition.GetItemName(true).ToLower()} on me!", null, false,
+                            SpeechBubbleGUI.SpeechBubbleType.Think,
+                            SmartSpeechEngine.VoiceID.None, true);
+                    }
                 }
             }
         }
@@ -163,7 +173,7 @@ namespace Exhaustless
             [HarmonyPrefix]
             public static void Prefix(InventoryGUI __instance)
             {
-                string message = string.Empty;
+                //string message = string.Empty;
                 if (_cfg.AllowHandToolDestroy)
                 {
                     var itemDef = __instance.selected_item.definition;
@@ -174,7 +184,7 @@ namespace Exhaustless
                     };
                     if (items.Contains(itemDef.type))
                     {
-                        File.AppendAllText("./qmods/dura.txt", $"Item: {__instance.selected_item.GetItemName()}, Decrease: {__instance.selected_item.definition.durability_decrease_on_use_speed.ToString()}\n");
+                       // File.AppendAllText("./qmods/dura.txt", $"Item: {__instance.selected_item.GetItemName()}, Decrease: {__instance.selected_item.definition.durability_decrease_on_use_speed.ToString()}\n");
                         itemDef.player_cant_throw_out = false;
                     }
                 }
