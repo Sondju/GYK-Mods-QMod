@@ -18,6 +18,7 @@ namespace AutoLootHeavies
         public static Vector3 LastKnownOreLocation;
         public static Vector3 LastKnownStoneLocation;
         public static float XAdjustment = 0;
+        public static float LastBubbleTime = 0;
 
         public static int TimberPileCount;
         public static int StonePileCount;
@@ -63,12 +64,12 @@ namespace AutoLootHeavies
             _cfg = Config.GetOptions();
         }
 
-        public static void GetLocations()
+        public static bool GetLocations()
         {
-            EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
-                $"Get Locations",
-                EffectBubblesManager.BubbleColor.Red, true, 3f);
-            if (!File.Exists(VectorPath)) return;
+            //EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
+            //    $"GetLocations()",
+            //    EffectBubblesManager.BubbleColor.Red, true, 5f);
+            if (!File.Exists(VectorPath)) return false;
 
             var lines = File.ReadAllLines(VectorPath, Encoding.Default);
 
@@ -84,6 +85,8 @@ namespace AutoLootHeavies
                     VectorDictionary.Add(keyToAdd, valueToAdd);
                 }
             }
+
+            return true;
         }
 
         public static void DropOjectAndNull(BaseCharacterComponent __instance, Item item)
@@ -110,7 +113,6 @@ namespace AutoLootHeavies
         {
             var pwo = MainGame.me.player;
             var needEnergy = 1f;
-            float lastBubbleTime = 0;
             if (pwo.IsPlayerInvulnerable())
             {
                 needEnergy = 0f;
@@ -126,9 +128,9 @@ namespace AutoLootHeavies
                 return true;
             }
 
-            if (Time.time - lastBubbleTime > 0.5f)
+            if (Time.time - LastBubbleTime > 0.5f)
             {
-                lastBubbleTime = Time.time;
+                LastBubbleTime = Time.time;
                 EffectBubblesManager.ShowImmediately(pwo.bubble_pos, GJL.L("not_enough_something", "(en)"),
                     EffectBubblesManager.BubbleColor.Energy, true, 1f);
             }
@@ -180,7 +182,6 @@ namespace AutoLootHeavies
             {
                 needEnergy = 0f;
             }
-            float lastBubbleTime = 0;
             if (pwo.energy >= needEnergy)
             {
                 pwo.energy -= needEnergy;
@@ -228,12 +229,12 @@ namespace AutoLootHeavies
             {
                 DropOjectAndNull(__instance, item);
 
-                if (Time.time - lastBubbleTime < 0.5f)
+                if (Time.time - LastBubbleTime < 0.5f)
                 {
                     return;
                 }
 
-                lastBubbleTime = Time.time;
+                LastBubbleTime = Time.time;
 
                 EffectBubblesManager.ShowImmediately(pwo.bubble_pos, GJL.L("not_enough_something", "(en)"),
                     EffectBubblesManager.BubbleColor.Energy, true, 1f);
@@ -284,42 +285,9 @@ namespace AutoLootHeavies
 
         public static void GetClosestStockPile()
         {
-            if (LastKnownTimberLocation == BlankVector3 || LastKnownTimberLocation == Vector3.zero)
-            {
-                LastKnownTimberLocation = VectorDictionary.FirstOrDefault(x => x.Value == "t").Key;
-            }
-
-            if (LastKnownOreLocation == BlankVector3 || LastKnownOreLocation == Vector3.zero)
-            {
-                LastKnownOreLocation = VectorDictionary.FirstOrDefault(x => x.Value == "o").Key;
-            }
-
-            if (LastKnownStoneLocation == BlankVector3 || LastKnownStoneLocation == Vector3.zero)
-            {
-                LastKnownStoneLocation = VectorDictionary.FirstOrDefault(x => x.Value == "s").Key;
-            }
-
-            foreach (var v in VectorDictionary.Where(x => x.Value == "t"))
-            {
-                if (Vector3.Distance(MainGame.me.player_pos, v.Key) < Vector3.Distance(MainGame.me.player_pos, LastKnownTimberLocation))
-                {
-                    LastKnownTimberLocation = v.Key;
-                }
-            }
-            foreach (var v in VectorDictionary.Where(x => x.Value == "o"))
-            {
-                if (Vector3.Distance(MainGame.me.player_pos, v.Key) < Vector3.Distance(MainGame.me.player_pos, LastKnownOreLocation))
-                {
-                    LastKnownOreLocation = v.Key;
-                }
-            }
-            foreach (var v in VectorDictionary.Where(x => x.Value == "s"))
-            {
-                if (Vector3.Distance(MainGame.me.player_pos, v.Key) < Vector3.Distance(MainGame.me.player_pos, LastKnownStoneLocation))
-                {
-                    LastKnownStoneLocation = v.Key;
-                }
-            }
+            LastKnownTimberLocation = VectorDictionary.Where(x => x.Value == "t").ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key)).Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
+            LastKnownOreLocation = VectorDictionary.Where(x => x.Value == "o").ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key)).Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
+            LastKnownStoneLocation = VectorDictionary.Where(x => x.Value == "s").ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key)).Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
         }
 
         [HarmonyPatch(typeof(MainGame))]
@@ -329,14 +297,17 @@ namespace AutoLootHeavies
             [HarmonyPostfix]
             public static void Postfix()
             {
-                if (Time.time - LastGetLocationScanTime < 5f)
+                if (_cfg.DistanceBasedTeleport)
                 {
-                    return;
-                }
+                    if (Time.time - LastGetLocationScanTime < 10f)
+                    {
+                        return;
+                    }
 
-                GetClosestStockPile();
-                LastGetLocationScanTime = Time.time;
-            } 
+                    GetClosestStockPile();
+                    LastGetLocationScanTime = Time.time;
+                }
+            }
         }
 
         //hooks into the time of day update and saves if the K key was pressed
@@ -370,9 +341,7 @@ namespace AutoLootHeavies
 
                 if (Input.GetKeyUp(KeyCode.Alpha6))
                 {
-                    _cfg.DistanceBasedTeleport = !_cfg.DistanceBasedTeleport;
-
-                    if (_cfg.DistanceBasedTeleport)
+                    if (!_cfg.DistanceBasedTeleport)
                     {
                         if (!_cfg.Teleportation)
                         {
@@ -381,32 +350,34 @@ namespace AutoLootHeavies
                                 "Teleportation is now ON.",
                                 EffectBubblesManager.BubbleColor.Relation,
                                 true, 3f);
+                            UpdateConfig();
                         }
-
+                        _cfg.DistanceBasedTeleport = true;
                         EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
-                            "Distance based teleportation is now ON.",
+                            "Distance-based teleportation is now ON.",
                             EffectBubblesManager.BubbleColor.Relation,
                             true, 3f);
-
+                        UpdateConfig();
                         GetLocations();
 
-                        typeof(MainGame).GetMethod(nameof(MainGame.Update))?.Invoke(null, null);
                     }
                     else
                     {
+                        _cfg.DistanceBasedTeleport = false;
                         EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
-                            "Distance based teleportation is now OFF.",
+                            "Distance-based teleportation is now OFF.",
                             EffectBubblesManager.BubbleColor.Relation,
                             true, 3f);
-                    }
+                        UpdateConfig();
 
+                    }
                     UpdateConfig();
                 }
 
                 if (Input.GetKeyUp(KeyCode.Alpha7))
                 {
                     _cfg.DesignatedTimberLocation = MainGame.me.player_pos;
-                    EffectBubblesManager.ShowImmediately(MainGame.me.player_pos, "Timber dump site recorded...",
+                    EffectBubblesManager.ShowImmediately(MainGame.me.player_pos, "Dump timber here!",
                         EffectBubblesManager.BubbleColor.Relation,
                         true, 3f);
                     UpdateConfig();
@@ -415,7 +386,7 @@ namespace AutoLootHeavies
                 if (Input.GetKeyUp(KeyCode.Alpha8))
                 {
                     _cfg.DesignatedOreLocation = MainGame.me.player_pos;
-                    EffectBubblesManager.ShowImmediately(MainGame.me.player_pos, "Ore dump site recorded...",
+                    EffectBubblesManager.ShowImmediately(MainGame.me.player_pos, "Dump ore here!",
                         EffectBubblesManager.BubbleColor.Relation,
                         true, 3f);
                     UpdateConfig();
@@ -424,7 +395,7 @@ namespace AutoLootHeavies
                 if (Input.GetKeyUp(KeyCode.Alpha9))
                 {
                     _cfg.DesignatedStoneLocation = MainGame.me.player_pos;
-                    EffectBubblesManager.ShowImmediately(MainGame.me.player_pos, "Stone dump site recorded...",
+                    EffectBubblesManager.ShowImmediately(MainGame.me.player_pos, "Dump stone & marble here!",
                         EffectBubblesManager.BubbleColor.Relation,
                         true, 3f);
                     UpdateConfig();
@@ -440,9 +411,11 @@ namespace AutoLootHeavies
             {
                 if (!VectorsLoaded)
                 {
-                    GetLocations();
-                    GetClosestStockPile();
-                    VectorsLoaded = true;
+                    if (GetLocations())
+                    {
+                        GetClosestStockPile();
+                        VectorsLoaded = true;
+                    }
                 }
                 return true;
             }
@@ -488,7 +461,7 @@ namespace AutoLootHeavies
 
                 FreeTimberSlots = (9 * TimberPileCount) - UsedTimberSlots;
                 FreeStoneSlots = (6 * StonePileCount) - UsedStoneSlots;
-                FreeOreSlots = (6 * OrePileCount) - UsedOreSlots;
+                FreeOreSlots = (7 * OrePileCount) - UsedOreSlots;
 
 
                 if (Time.time - LastScanTime < _cfg.ScanIntervalInSeconds)

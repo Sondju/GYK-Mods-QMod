@@ -34,7 +34,6 @@
   <ItemGroup>
     <Compile Include="Config.cs" />
     <Compile Include="ConfigReader.cs" />
-    <None Include="MainPatcher - Copy.cs.bak" />
     <Compile Include="MainPatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -1,4 +1,3 @@
-using System;
 using Harmony;
 using System.Reflection;
 using UnityEngine;
@@ -9,7 +8,6 @@ namespace ThoughtfulReminders
     {
         public static int PrevDayOfWeek;
         private static Config.Options _cfg;
-        private static TimeOfDay.TimeOfDayEnum _timeOfDay;
         private static float _timeOfDayFloat;
 
         public static void Patch()
@@ -26,12 +24,7 @@ namespace ThoughtfulReminders
             [HarmonyPostfix]
             public static void Postfix(TimeOfDay __instance)
             {
-                _timeOfDay = __instance.time_of_day_enum;
                 _timeOfDayFloat = __instance.GetTimeK();
-                //if (Input.GetKeyDown(KeyCode.L))
-                //{
-                //    SayMessage($"Time: {_timeOfDayFloat}");
-                //}
             }
         }
 
@@ -45,7 +38,7 @@ namespace ThoughtfulReminders
             else
             {
                 EffectBubblesManager.ShowImmediately(MainGame.me.player_pos, msg,
-                    EffectBubblesManager.BubbleColor.White,
+                    EffectBubblesManager.BubbleColor.Red,
                     true, 4f);
             }
 
@@ -72,10 +65,6 @@ namespace ThoughtfulReminders
                 {
                     return;
                 }
-                //if (_timeOfDay != TimeOfDay.TimeOfDayEnum.Day)
-                //{
-                //    return;
-                //}
                 if (_timeOfDayFloat is <= 0.22f or >= 0.25f) return;
                 if (_cfg.DaysOnly)
                 {
@@ -100,7 +89,7 @@ namespace ThoughtfulReminders
                             SayMessage("Day of Wrath...");
                             break;
                         default:
-                            SayMessage("Day of ...");
+                            SayMessage("Hmmm what day is it? ...");
                             break;
                     }
                 }
@@ -117,7 +106,7 @@ namespace ThoughtfulReminders
                                 : "Day of Pride...might go see the bishop...");
                             break;
                         case 2: //day of Lust
-                            SayMessage("Day of Lust...mmm Ms. Charm...");
+                            SayMessage("Day of Lust...could drop by the tavern...");
                             break;
                         case 3: //day of Gluttony
                             SayMessage("Day of Gluttony...should see the merchant today...");
@@ -126,14 +115,13 @@ namespace ThoughtfulReminders
                             SayMessage("Day of Envy ...");
                             break;
                         case 5: //day of Wrath
-                            SayMessage("Day of Wrath...wonder if there are any witches today...");
+                            SayMessage("Day of Wrath...wonder if there's anything to burn...");
                             break;
                         default:
-                            SayMessage("Day of ...");
+                            SayMessage("Hmmm what day is it? ...");
                             break;
                     }
                 }
-
                 PrevDayOfWeek = newDayOfWeek;
             }
         }
