@@ -69,6 +69,7 @@ xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\LargerScale\bin\Release\
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AddStraightToTable\bin\Release\AddStraightToTable.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AddStraightToTable\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AutoLootHeavies\bin\Release\AutoLootHeavies.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AutoLootHeavies\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\ThoughtfulReminders\bin\Release\ThoughtfulReminders.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\ThoughtfulReminders\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoIntros\bin\Release\NoIntros.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoIntros\" /K /D /H /Y</PostBuildEvent>
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoIntros\bin\Release\NoIntros.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoIntros\" /K /D /H /Y
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\LongerDays\bin\Release\LongerDays.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\LongerDays\" /K /D /H /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>

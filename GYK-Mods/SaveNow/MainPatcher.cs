@@ -105,10 +105,15 @@ namespace SaveNow
                     if (tFile.Name.Contains("backup"))
                     {
                         File.Delete(file);
-                        continue;
                     }
+                }
 
-                    if (!tFile.Extension.Contains("info") || !tFile.Extension.Contains("dat")) continue;
+                foreach (var file in Directory.GetFiles(PlatformSpecific.GetSaveFolder(), "*.info*",
+                             SearchOption.TopDirectoryOnly))
+                {
+                    if (!File.Exists(file)) continue;
+                    var tFile = new FileInfo(file);
+                    if (!tFile.Extension.Contains("info")) continue;
                     var stringToCompare = Path.GetFileNameWithoutExtension(tFile.FullName).ToLower().Trim();
                     if (sortedFiles.Any(x => string.Equals(Path.GetFileNameWithoutExtension(x.FullName).ToLower(),
                             stringToCompare, StringComparison.CurrentCultureIgnoreCase))) continue;
