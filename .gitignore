@@ -30,3 +30,4 @@ template/*
 /*/*/*/.vs/*
 /*/*/release/*
 /*/*/*/release/*
+*.csproj.user

@@ -1,8 +1,8 @@
+using Harmony;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Harmony;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
@@ -12,6 +12,31 @@ namespace AutoLootHeavies
 {
     public class MainPatcher
     {
+        private struct Constants
+        {
+            public struct FileKeys
+            {
+                public const string Timber = "t";
+                public const string Stone = "s";
+                public const string Ore = "o";
+            }
+
+            public struct ItemDefinitionId
+            {
+                public const string Wood = "wood";
+                public const string Stone = "stone";
+                public const string Marble = "marble";
+                public const string Ore = "ore_metal";
+            }
+
+            public struct ItemObjectId
+            {
+                public const string Timber = "mf_timber_1";
+                public const string Stone = "mf_stones_1";
+                public const string Ore = "mf_ore_1";
+            }
+        }
+
         private static Config.Options _cfg;
 
         public static Vector3 LastKnownTimberLocation;
@@ -192,9 +217,9 @@ namespace AutoLootHeavies
                 {
                     var location = type switch
                     {
-                        "o" => LastKnownOreLocation,
-                        "t" => LastKnownTimberLocation,
-                        "s" => LastKnownStoneLocation,
+                        Constants.FileKeys.Ore => LastKnownOreLocation,
+                        Constants.FileKeys.Timber => LastKnownTimberLocation,
+                        Constants.FileKeys.Stone => LastKnownStoneLocation,
                         _ => MainGame.me.player_pos
                     };
 
@@ -216,9 +241,9 @@ namespace AutoLootHeavies
 
                     var location = type switch
                     {
-                        "o" => ore,
-                        "t" => timber,
-                        "s" => stone,
+                        Constants.FileKeys.Ore => ore,
+                        Constants.FileKeys.Timber => timber,
+                        Constants.FileKeys.Stone => stone,
                         _ => MainGame.me.player_pos
                     };
                     MainGame.me.player.DropItem(item, Direction.IgnoreDirection, location, 0f, false);
@@ -250,9 +275,9 @@ namespace AutoLootHeavies
             {
                 msg = item switch
                 {
-                    "o" => "Dang, no ore stockpiles in range...",
-                    "s" => "Dang, no stone stockpiles in range...",
-                    "t" => "Dang, no timber stockpiles in range...",
+                    Constants.FileKeys.Ore => "Dang, no ore stockpiles in range...",
+                    Constants.FileKeys.Stone => "Dang, no stone stockpiles in range...",
+                    Constants.FileKeys.Timber => "Dang, no timber stockpiles in range...",
                     _ => msg
                 };
             }
@@ -261,9 +286,9 @@ namespace AutoLootHeavies
             {
                 msg = item switch
                 {
-                    "o" => "Phew...ore storage is now full!",
-                    "s" => "Phew...stone storage is now full!",
-                    "t" => "Phew...timber storage is now full!",
+                    Constants.FileKeys.Ore => "Phew...ore storage is now full!",
+                    Constants.FileKeys.Stone => "Phew...stone storage is now full!",
+                    Constants.FileKeys.Timber => "Phew...timber storage is now full!",
                     _ => msg
                 };
             }
@@ -272,9 +297,9 @@ namespace AutoLootHeavies
             {
                 msg = item switch
                 {
-                    "o" => "I can't do that, I have no ore storage left!",
-                    "s" => "I can't do that, I have no stone storage left!",
-                    "t" => "I can't do that, I have no timber storage left!",
+                    Constants.FileKeys.Ore => "I can't do that, I have no ore storage left!",
+                    Constants.FileKeys.Stone => "I can't do that, I have no stone storage left!",
+                    Constants.FileKeys.Timber => "I can't do that, I have no timber storage left!",
                     _ => msg
                 };
             }
@@ -296,7 +321,7 @@ namespace AutoLootHeavies
 
             try
             {
-                LastKnownTimberLocation = VectorDictionary.Where(x => x.Value == "t")
+                LastKnownTimberLocation = VectorDictionary.Where(x => x.Value == Constants.FileKeys.Timber)
                     .ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key))
                     .Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
                 Debug.Log($"Closest Timber: {LastKnownTimberLocation}");
@@ -308,7 +333,7 @@ namespace AutoLootHeavies
 
             try
             {
-                LastKnownOreLocation = VectorDictionary.Where(x => x.Value == "o")
+                LastKnownOreLocation = VectorDictionary.Where(x => x.Value == Constants.FileKeys.Ore)
                     .ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key))
                     .Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
                 Debug.Log($"Closest Timber: {LastKnownOreLocation}");
@@ -320,7 +345,7 @@ namespace AutoLootHeavies
 
             try
             {
-                LastKnownStoneLocation = VectorDictionary.Where(x => x.Value == "s")
+                LastKnownStoneLocation = VectorDictionary.Where(x => x.Value == Constants.FileKeys.Stone)
                     .ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key))
                     .Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
                 Debug.Log($"Closest Stone: {LastKnownStoneLocation}");
@@ -396,7 +421,7 @@ namespace AutoLootHeavies
                                 true, 3f);
                             UpdateConfig();
                         }
-                        
+
                         _cfg.DistanceBasedTeleport = true;
                         EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
                             "Distance-based teleportation is now ON.",
@@ -487,38 +512,38 @@ namespace AutoLootHeavies
             }
 
             Objects = Object.FindObjectsOfType<WorldGameObject>(includeInactive: false).Where(x =>
-                    x.obj_id.Contains("mf_timber_1") | x.obj_id.Contains("mf_ore_1") |
-                    x.obj_id.Contains("mf_stones_1"))
+                    x.obj_id.Contains(Constants.ItemObjectId.Timber) | x.obj_id.Contains(Constants.ItemObjectId.Ore) |
+                    x.obj_id.Contains(Constants.ItemObjectId.Stone))
                 .ToList();
             StoredStockpiles = Objects;
             Debug.LogError($"StockPile Count: {StoredStockpiles.Count}, Object count: {Objects.Count}");
             foreach (var obj in Objects.Where(obj => obj != null))
             {
                 bool found;
-                var vectorToAdd = new Vector3((float) Math.Ceiling(obj.pos3.x), (float) Math.Ceiling(obj.pos3.y),
-                    (float) Math.Ceiling(obj.pos3.z));
-                if (obj.obj_id.Contains("mf_timber_1"))
+                var vectorToAdd = new Vector3((float)Math.Ceiling(obj.pos3.x), (float)Math.Ceiling(obj.pos3.y),
+                    (float)Math.Ceiling(obj.pos3.z));
+                if (obj.obj_id.Contains(Constants.ItemObjectId.Timber))
                 {
                     found = VectorDictionary.TryGetValue(vectorToAdd, out _);
                     if (!found)
                     {
-                        VectorDictionary.Add(vectorToAdd, "t");
+                        VectorDictionary.Add(vectorToAdd, Constants.FileKeys.Timber);
                     }
                 }
-                else if (obj.obj_id.Contains("mf_ore_1"))
+                else if (obj.obj_id.Contains(Constants.ItemObjectId.Ore))
                 {
                     found = VectorDictionary.TryGetValue(vectorToAdd, out _);
                     if (!found)
                     {
-                        VectorDictionary.Add(vectorToAdd, "o");
+                        VectorDictionary.Add(vectorToAdd, Constants.FileKeys.Ore);
                     }
                 }
-                else if (obj.obj_id.Contains("mf_stones_1"))
+                else if (obj.obj_id.Contains(Constants.ItemObjectId.Stone))
                 {
                     found = VectorDictionary.TryGetValue(vectorToAdd, out _);
                     if (!found)
                     {
-                        VectorDictionary.Add(vectorToAdd, "s");
+                        VectorDictionary.Add(vectorToAdd, Constants.FileKeys.Stone);
                     }
                 }
             }
@@ -535,19 +560,19 @@ namespace AutoLootHeavies
 
             foreach (var obj in StoredStockpiles.Where(obj => obj != null))
             {
-                if (obj.obj_id.Contains("mf_timber_1"))
+                if (obj.obj_id.Contains(Constants.ItemObjectId.Timber))
                 {
                     UsedTimberSlots += obj.data.inventory.Count;
                     TimberPileCount++;
                     TimberTemp = obj;
                 }
-                else if (obj.obj_id.Contains("mf_ore_1"))
+                else if (obj.obj_id.Contains(Constants.ItemObjectId.Ore))
                 {
                     UsedOreSlots += obj.data.inventory.Count;
                     OrePileCount++;
                     OreTemp = obj;
                 }
-                else if (obj.obj_id.Contains("mf_stones_1"))
+                else if (obj.obj_id.Contains(Constants.ItemObjectId.Stone))
                 {
                     UsedStoneSlots += obj.data.inventory.Count;
                     StonePileCount++;
@@ -574,7 +599,7 @@ namespace AutoLootHeavies
 
                 if (Time.time - LastScanTime < _cfg.ScanIntervalInSeconds)
                 {
-                   // Debug.LogError($"Been less than {_cfg.ScanIntervalInSeconds} seconds since last scan. Skipping.");
+                    // Debug.LogError($"Been less than {_cfg.ScanIntervalInSeconds} seconds since last scan. Skipping.");
                     return;
                 }
 
@@ -609,12 +634,11 @@ namespace AutoLootHeavies
             public static bool Prefix(ref Item ___overhead_item,
                 out (bool wood, bool stone, bool iron, bool runCode) __state)
             {
-                var itemIsLog = ___overhead_item.definition.GetItemName().Contains("Log");
-                var itemIsStone = ___overhead_item.definition.GetItemName().Contains("Stone") ||
-                                  ___overhead_item.definition.GetItemName().Contains("Marble");
-                ;
-                var itemIsOre = ___overhead_item.definition.GetItemName().Contains("Iron");
-                ;
+                string itemIdentifier = ___overhead_item.definition.id;
+
+                bool itemIsLog = itemIdentifier.ToLower().Contains(Constants.ItemDefinitionId.Wood);
+                bool itemIsStone = itemIdentifier.Contains(Constants.ItemDefinitionId.Stone) || itemIdentifier.Contains(Constants.ItemDefinitionId.Marble);
+                bool itemIsOre = itemIdentifier.Contains(Constants.ItemDefinitionId.Ore);
 
                 if (itemIsLog || itemIsStone || itemIsOre)
                 {
@@ -666,7 +690,7 @@ namespace AutoLootHeavies
                             if (LastKnownOreLocation == BlankVector3)
                             {
                                 DropOjectAndNull(__instance, item);
-                                ShowMessage("", true, false, false, "o");
+                                ShowMessage("", true, false, false, Constants.FileKeys.Ore);
                             }
                             else
                             {
@@ -679,13 +703,13 @@ namespace AutoLootHeavies
                                     }
                                     else
                                     {
-                                        TeleportItem(__instance, item, "o");
+                                        TeleportItem(__instance, item, Constants.FileKeys.Ore);
                                     }
                                 }
                                 else
                                 {
                                     DropOjectAndNull(__instance, item);
-                                    ShowMessage("", true, false, false, "o");
+                                    ShowMessage("", true, false, false, Constants.FileKeys.Ore);
                                 }
                             }
                         }
@@ -705,7 +729,7 @@ namespace AutoLootHeavies
                                         }
                                         else
                                         {
-                                            TeleportItem(__instance, item, "o");
+                                            TeleportItem(__instance, item, Constants.FileKeys.Ore);
                                         }
                                     }
                                     else
@@ -726,13 +750,13 @@ namespace AutoLootHeavies
                                         }
                                         else
                                         {
-                                            TeleportItem(__instance, item, "o");
+                                            TeleportItem(__instance, item, Constants.FileKeys.Ore);
                                         }
                                     }
                                     else
                                     {
                                         DropOjectAndNull(__instance, item);
-                                        //ShowMessage("", false, true, true, "o");
+                                        //ShowMessage("", false, true, true, Constants.FileKeys.Ores);
                                     }
 
                                     break;
@@ -743,7 +767,7 @@ namespace AutoLootHeavies
                                     if (success)
                                     {
                                         ShowLootAddedIcon(item);
-                                        ShowMessage("", false, true, false, "o");
+                                        ShowMessage("", false, true, false, Constants.FileKeys.Ore);
                                     }
                                     else
                                     {
@@ -766,7 +790,7 @@ namespace AutoLootHeavies
 
                                     if (ItemsDidntFit.Count > 0)
                                     {
-                                        ShowMessage("", false, false, true, "o");
+                                        ShowMessage("", false, false, true, Constants.FileKeys.Ore);
                                     }
 
                                     break;
@@ -780,7 +804,7 @@ namespace AutoLootHeavies
                             if (LastKnownTimberLocation == BlankVector3)
                             {
                                 DropOjectAndNull(__instance, item);
-                                ShowMessage("", true, false, false, "t");
+                                ShowMessage("", true, false, false, Constants.FileKeys.Timber);
                             }
                             else
                             {
@@ -793,13 +817,13 @@ namespace AutoLootHeavies
                                     }
                                     else
                                     {
-                                        TeleportItem(__instance, item, "t");
+                                        TeleportItem(__instance, item, Constants.FileKeys.Timber);
                                     }
                                 }
                                 else
                                 {
                                     DropOjectAndNull(__instance, item);
-                                    ShowMessage("", true, false, false, "t");
+                                    ShowMessage("", true, false, false, Constants.FileKeys.Timber);
                                 }
                             }
                         }
@@ -819,7 +843,7 @@ namespace AutoLootHeavies
                                         }
                                         else
                                         {
-                                            TeleportItem(__instance, item, "t");
+                                            TeleportItem(__instance, item, Constants.FileKeys.Timber);
                                         }
                                     }
                                     else
@@ -840,7 +864,7 @@ namespace AutoLootHeavies
                                         }
                                         else
                                         {
-                                            TeleportItem(__instance, item, "t");
+                                            TeleportItem(__instance, item, Constants.FileKeys.Timber);
                                         }
                                     }
                                     else
@@ -856,7 +880,7 @@ namespace AutoLootHeavies
                                     if (success)
                                     {
                                         ShowLootAddedIcon(item);
-                                        ShowMessage("", false, true, false, "t");
+                                        ShowMessage("", false, true, false, Constants.FileKeys.Timber);
                                     }
                                     else
                                     {
@@ -879,7 +903,7 @@ namespace AutoLootHeavies
 
                                     if (ItemsDidntFit.Count > 0)
                                     {
-                                        ShowMessage("", false, false, true, "t");
+                                        ShowMessage("", false, false, true, Constants.FileKeys.Timber);
                                     }
 
                                     break;
@@ -893,7 +917,7 @@ namespace AutoLootHeavies
                             if (LastKnownStoneLocation == BlankVector3)
                             {
                                 DropOjectAndNull(__instance, item);
-                                ShowMessage("", true, false, false, "s");
+                                ShowMessage("", true, false, false, Constants.FileKeys.Stone);
                             }
                             else
                             {
@@ -906,13 +930,13 @@ namespace AutoLootHeavies
                                     }
                                     else
                                     {
-                                        TeleportItem(__instance, item, "s");
+                                        TeleportItem(__instance, item, Constants.FileKeys.Stone);
                                     }
                                 }
                                 else
                                 {
                                     DropOjectAndNull(__instance, item);
-                                    ShowMessage("", true, false, false, "s");
+                                    ShowMessage("", true, false, false, Constants.FileKeys.Stone);
                                 }
                             }
                         }
@@ -932,13 +956,13 @@ namespace AutoLootHeavies
                                         }
                                         else
                                         {
-                                            TeleportItem(__instance, item, "s");
+                                            TeleportItem(__instance, item, Constants.FileKeys.Stone);
                                         }
                                     }
                                     else
                                     {
                                         DropOjectAndNull(__instance, item);
-                                        // ShowMessage("", false, false, true, "s");
+                                        // ShowMessage("", false, false, true, Constants.FileKeys.Stone);
                                     }
 
                                     break;
@@ -954,13 +978,13 @@ namespace AutoLootHeavies
                                         }
                                         else
                                         {
-                                            TeleportItem(__instance, item, "s");
+                                            TeleportItem(__instance, item, Constants.FileKeys.Stone);
                                         }
                                     }
                                     else
                                     {
                                         DropOjectAndNull(__instance, item);
-                                        // ShowMessage("", false, false, true, "s");
+                                        // ShowMessage("", false, false, true, Constants.FileKeys.Stone);
                                     }
 
                                     break;
@@ -971,7 +995,7 @@ namespace AutoLootHeavies
                                     if (success)
                                     {
                                         ShowLootAddedIcon(item);
-                                        ShowMessage("", false, true, false, "s");
+                                        ShowMessage("", false, true, false, Constants.FileKeys.Stone);
                                     }
                                     else
                                     {
@@ -994,7 +1018,7 @@ namespace AutoLootHeavies
 
                                     if (ItemsDidntFit.Count > 0)
                                     {
-                                        ShowMessage("", false, false, true, "s");
+                                        ShowMessage("", false, false, true, Constants.FileKeys.Stone);
                                     }
 
                                     break;
