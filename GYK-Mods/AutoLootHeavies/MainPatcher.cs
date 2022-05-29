@@ -137,6 +137,10 @@ namespace AutoLootHeavies
         {
             var pwo = MainGame.me.player;
             var needEnergy = 1f;
+            if (_cfg.DisableImmersionMode)
+            {
+                needEnergy = 0f;
+            }
             if (pwo.IsPlayerInvulnerable())
             {
                 needEnergy = 0f;
