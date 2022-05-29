@@ -165,7 +165,8 @@ namespace Exhaustless
                 ItemDefinition.ItemType[] items =
                 {
                     ItemDefinition.ItemType.Axe, ItemDefinition.ItemType.Shovel, ItemDefinition.ItemType.Hammer,
-                    ItemDefinition.ItemType.Pickaxe
+                    ItemDefinition.ItemType.Pickaxe, ItemDefinition.ItemType.FishingRod, ItemDefinition.ItemType.BodyArmor, 
+                    ItemDefinition.ItemType.HeadArmor, ItemDefinition.ItemType.Sword
                 };
                 if (itemDef == null) return;
                 if (items.Contains(itemDef.type))
