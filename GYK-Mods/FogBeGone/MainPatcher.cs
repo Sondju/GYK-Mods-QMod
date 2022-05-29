@@ -1,4 +1,4 @@
-using System.IO;
+using System;
 using Harmony;
 using System.Reflection;
 
@@ -20,38 +20,30 @@ namespace FogBeGone
               [HarmonyPrefix]
             public static bool Prefix(SmartWeatherState __instance, ref bool ____previously_enabled, ref bool ____enabled, ref float ____cur_amount)
             {
-                try
-                {
-                    if (__instance != null)
+                if (!MainGame.game_started) return true;
+                if (__instance == null) return true;
+                switch (__instance.type)
                     {
-                        if (__instance.type == SmartWeatherState.WeatherType.Fog)
-                        {
+                        case SmartWeatherState.WeatherType.Fog:
                             ____previously_enabled = true;
                             ____enabled = false;
                             ____cur_amount = 0;
                             __instance.value = 0;
-                        }
-
-                        if (__instance.type == SmartWeatherState.WeatherType.Wind)
-                        {
+                            break;
+                        case SmartWeatherState.WeatherType.Wind:
                             ____previously_enabled = true;
                             ____enabled = false;
                             ____cur_amount = 0;
                             __instance.value = 0;
-                        }
-
-                        if (__instance.type == SmartWeatherState.WeatherType.Rain)
-                        {
+                            break;
+                        case SmartWeatherState.WeatherType.Rain:
                             ____previously_enabled = false;
-                        }
+                            break;
+                        case SmartWeatherState.WeatherType.LUT:
+                            break;
+                        default:
+                            break;
                     }
-                }
-                catch (System.Exception ex)
-                {
-                    File.AppendAllText("./QMods/errors.txt",
-                        "FogBeGone: " + ex.Message + " : " + ex.Source + " : " + ex.StackTrace + " : " + ex.Data);
-                }
-
                 return true;
             }
         }

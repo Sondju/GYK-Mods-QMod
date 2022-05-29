@@ -37,7 +37,8 @@ namespace NoTimeForFishing
             private static void Postfix(FishingGUI __instance, ref Item ____fish, ref float ____waiting_for_bite_delay, ref FishDefinition ____fish_def, ref FishPreset ____fish_preset)
             {
                 var fishy = (FishDefinition)typeof(FishingGUI)
-                    .GetMethod("GetRandomFish", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(__instance, new object[]
+                    .GetMethod("GetRandomFish", BindingFlags.Instance | BindingFlags.NonPublic)
+                    ?.Invoke(__instance, new object[]
                     {
                         ____waiting_for_bite_delay
                     });
@@ -45,7 +46,8 @@ namespace NoTimeForFishing
                 ____fish_def = fishy;
                 ____fish = new Item(____fish_def.item_id, 1);
                 ____fish_preset = Resources.Load<FishPreset>("MiniGames/Fishing/" + ____fish_def.fish_preset);
-                typeof(FishingGUI).GetMethod("ChangeState", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(__instance, new object[]
+                typeof(FishingGUI).GetMethod("ChangeState", BindingFlags.Instance | BindingFlags.NonPublic)
+                    ?.Invoke(__instance, new object[]
                 {
                     FishingGUI.FishingState.WaitingForPulling
                 });
@@ -60,7 +62,8 @@ namespace NoTimeForFishing
             private static void PostFix(FishingGUI __instance, ref bool ___is_success_fishing)
             {
                 ___is_success_fishing = true;
-                typeof(FishingGUI).GetMethod("ChangeState", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(__instance, new object[]
+                typeof(FishingGUI).GetMethod("ChangeState", BindingFlags.Instance | BindingFlags.NonPublic)
+                    ?.Invoke(__instance, new object[]
                 {
                     FishingGUI.FishingState.Pulling
                 });
@@ -75,7 +78,8 @@ namespace NoTimeForFishing
             [HarmonyPostfix]
             private static void Postfix(FishingGUI __instance)
             {
-                typeof(FishingGUI).GetMethod("ChangeState", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(__instance, new object[]
+                typeof(FishingGUI).GetMethod("ChangeState", BindingFlags.Instance | BindingFlags.NonPublic)
+                    ?.Invoke(__instance, new object[]
                 {
                     FishingGUI.FishingState.TakingOut
                 });

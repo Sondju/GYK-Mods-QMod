@@ -52,6 +52,7 @@ namespace ThoughtfulReminders
             [HarmonyPostfix]
             public static void Postfix()
             {
+                if (!MainGame.game_started) return;
                 var newDayOfWeek = MainGame.me.save.day_of_week;
                 if (MainGame.me.player.is_dead)
                 {

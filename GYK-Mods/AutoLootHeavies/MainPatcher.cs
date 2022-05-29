@@ -26,6 +26,7 @@ namespace AutoLootHeavies
         public static int UsedTimberSlots;
         public static int UsedStoneSlots;
         public static int UsedOreSlots;
+        public static bool NeedScanning = true;
 
         public static int FreeTimberSlots;
         public static int FreeStoneSlots;
@@ -56,6 +57,7 @@ namespace AutoLootHeavies
             var val = HarmonyInstance.Create($"p1xel8ted.graveyardkeeper.AutoLootHeavies");
             val.PatchAll(Assembly.GetExecutingAssembly());
             VectorsLoaded = false;
+            NeedScanning = true;
         }
 
         public static void UpdateConfig()
@@ -66,26 +68,23 @@ namespace AutoLootHeavies
 
         public static bool GetLocations()
         {
-            //EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
-            //    $"GetLocations()",
-            //    EffectBubblesManager.BubbleColor.Red, true, 5f);
             if (!File.Exists(VectorPath)) return false;
 
             var lines = File.ReadAllLines(VectorPath, Encoding.Default);
-
             foreach (var line in lines)
             {
                 var splitLine = line.Split(',');
-
                 var keyToAdd = new Vector3(float.Parse(splitLine[0].Trim()),
                     float.Parse(splitLine[1].Trim()), float.Parse(splitLine[2].Trim()));
                 var valueToAdd = splitLine[3].Trim();
-                if (!VectorDictionary.ContainsKey(keyToAdd))
+                var found = VectorDictionary.TryGetValue(keyToAdd, out _);
+                if (!found)
                 {
                     VectorDictionary.Add(keyToAdd, valueToAdd);
                 }
             }
 
+            Debug.LogError($"Loaded {VectorDictionary.Count} stockpiles into the dictionary.");
             return true;
         }
 
@@ -178,10 +177,12 @@ namespace AutoLootHeavies
             {
                 needEnergy = 0f;
             }
+
             if (pwo.IsPlayerInvulnerable())
             {
                 needEnergy = 0f;
             }
+
             if (pwo.energy >= needEnergy)
             {
                 pwo.energy -= needEnergy;
@@ -238,7 +239,6 @@ namespace AutoLootHeavies
 
                 EffectBubblesManager.ShowImmediately(pwo.bubble_pos, GJL.L("not_enough_something", "(en)"),
                     EffectBubblesManager.BubbleColor.Energy, true, 1f);
-                
             }
         }
 
@@ -285,9 +285,50 @@ namespace AutoLootHeavies
 
         public static void GetClosestStockPile()
         {
-            LastKnownTimberLocation = VectorDictionary.Where(x => x.Value == "t").ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key)).Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
-            LastKnownOreLocation = VectorDictionary.Where(x => x.Value == "o").ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key)).Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
-            LastKnownStoneLocation = VectorDictionary.Where(x => x.Value == "s").ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key)).Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
+            if (!MainGame.game_started) return;
+            if (VectorDictionary.Count <= 0)
+            {
+                Debug.LogError("Nothing loaded in the Vector dictionary.");
+                return;
+            }
+
+            Debug.LogError($"Vector dictionary has {VectorDictionary.Count} vectors.");
+
+            try
+            {
+                LastKnownTimberLocation = VectorDictionary.Where(x => x.Value == "t")
+                    .ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key))
+                    .Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
+                Debug.Log($"Closest Timber: {LastKnownTimberLocation}");
+            }
+            catch (Exception)
+            {
+                Debug.LogError("No last known timber locations available.");
+            }
+
+            try
+            {
+                LastKnownOreLocation = VectorDictionary.Where(x => x.Value == "o")
+                    .ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key))
+                    .Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
+                Debug.Log($"Closest Timber: {LastKnownOreLocation}");
+            }
+            catch (Exception)
+            {
+                Debug.LogError("No last known ore locations available.");
+            }
+
+            try
+            {
+                LastKnownStoneLocation = VectorDictionary.Where(x => x.Value == "s")
+                    .ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key))
+                    .Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
+                Debug.Log($"Closest Stone: {LastKnownStoneLocation}");
+            }
+            catch (Exception)
+            {
+                Debug.LogError("No last known stone locations available.");
+            }
         }
 
         [HarmonyPatch(typeof(MainGame))]
@@ -297,16 +338,14 @@ namespace AutoLootHeavies
             [HarmonyPostfix]
             public static void Postfix()
             {
-                if (_cfg.DistanceBasedTeleport)
+                if (!_cfg.DistanceBasedTeleport) return;
+                if (Time.time - LastGetLocationScanTime < 10f)
                 {
-                    if (Time.time - LastGetLocationScanTime < 10f)
-                    {
-                        return;
-                    }
-
-                    GetClosestStockPile();
-                    LastGetLocationScanTime = Time.time;
+                    return;
                 }
+
+                GetClosestStockPile();
+                LastGetLocationScanTime = Time.time;
             }
         }
 
@@ -320,23 +359,28 @@ namespace AutoLootHeavies
             {
                 if (Input.GetKeyUp(KeyCode.Alpha5))
                 {
-                    _cfg.Teleportation = !_cfg.Teleportation;
-                    if (_cfg.Teleportation)
+                    if (!_cfg.Teleportation)
                     {
+                        _cfg.Teleportation = true;
                         EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
                             "Teleportation is now ON.",
                             EffectBubblesManager.BubbleColor.Relation,
                             true, 3f);
+                        UpdateConfig();
                         GetLocations();
                         typeof(MainGame).GetMethod(nameof(MainGame.Update))?.Invoke(null, null);
                     }
                     else
                     {
+                        _cfg.Teleportation = false;
                         EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
                             "Teleportation is now OFF.",
                             EffectBubblesManager.BubbleColor.Relation,
                             true, 3f);
+                        UpdateConfig();
                     }
+
+                    UpdateConfig();
                 }
 
                 if (Input.GetKeyUp(KeyCode.Alpha6))
@@ -352,6 +396,7 @@ namespace AutoLootHeavies
                                 true, 3f);
                             UpdateConfig();
                         }
+                        
                         _cfg.DistanceBasedTeleport = true;
                         EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
                             "Distance-based teleportation is now ON.",
@@ -359,7 +404,6 @@ namespace AutoLootHeavies
                             true, 3f);
                         UpdateConfig();
                         GetLocations();
-
                     }
                     else
                     {
@@ -369,8 +413,8 @@ namespace AutoLootHeavies
                             EffectBubblesManager.BubbleColor.Relation,
                             true, 3f);
                         UpdateConfig();
-
                     }
+
                     UpdateConfig();
                 }
 
@@ -409,18 +453,115 @@ namespace AutoLootHeavies
             [HarmonyPrefix]
             public static bool Prefix()
             {
-                if (!VectorsLoaded)
+                if (MainGame.game_started)
                 {
-                    if (GetLocations())
+                    if (NeedScanning)
                     {
-                        GetClosestStockPile();
-                        VectorsLoaded = true;
+                        ScanStockpiles();
+                        UpdateStockpiles();
+                    }
+
+                    if (!VectorsLoaded)
+                    {
+                        if (GetLocations())
+                        {
+                            GetClosestStockPile();
+                            VectorsLoaded = true;
+                        }
                     }
                 }
+
                 return true;
             }
         }
-        
+
+        public static void ScanStockpiles()
+        {
+            if (NeedScanning)
+            {
+                NeedScanning = false;
+            }
+            else
+            {
+                LastScanTime = Time.time;
+            }
+
+            Objects = Object.FindObjectsOfType<WorldGameObject>(includeInactive: false).Where(x =>
+                    x.obj_id.Contains("mf_timber_1") | x.obj_id.Contains("mf_ore_1") |
+                    x.obj_id.Contains("mf_stones_1"))
+                .ToList();
+            StoredStockpiles = Objects;
+            Debug.LogError($"StockPile Count: {StoredStockpiles.Count}, Object count: {Objects.Count}");
+            foreach (var obj in Objects.Where(obj => obj != null))
+            {
+                bool found;
+                var vectorToAdd = new Vector3((float) Math.Ceiling(obj.pos3.x), (float) Math.Ceiling(obj.pos3.y),
+                    (float) Math.Ceiling(obj.pos3.z));
+                if (obj.obj_id.Contains("mf_timber_1"))
+                {
+                    found = VectorDictionary.TryGetValue(vectorToAdd, out _);
+                    if (!found)
+                    {
+                        VectorDictionary.Add(vectorToAdd, "t");
+                    }
+                }
+                else if (obj.obj_id.Contains("mf_ore_1"))
+                {
+                    found = VectorDictionary.TryGetValue(vectorToAdd, out _);
+                    if (!found)
+                    {
+                        VectorDictionary.Add(vectorToAdd, "o");
+                    }
+                }
+                else if (obj.obj_id.Contains("mf_stones_1"))
+                {
+                    found = VectorDictionary.TryGetValue(vectorToAdd, out _);
+                    if (!found)
+                    {
+                        VectorDictionary.Add(vectorToAdd, "s");
+                    }
+                }
+            }
+        }
+
+        public static void UpdateStockpiles()
+        {
+            TimberPileCount = 0;
+            StonePileCount = 0;
+            OrePileCount = 0;
+            UsedTimberSlots = 0;
+            UsedStoneSlots = 0;
+            UsedOreSlots = 0;
+
+            foreach (var obj in StoredStockpiles.Where(obj => obj != null))
+            {
+                if (obj.obj_id.Contains("mf_timber_1"))
+                {
+                    UsedTimberSlots += obj.data.inventory.Count;
+                    TimberPileCount++;
+                    TimberTemp = obj;
+                }
+                else if (obj.obj_id.Contains("mf_ore_1"))
+                {
+                    UsedOreSlots += obj.data.inventory.Count;
+                    OrePileCount++;
+                    OreTemp = obj;
+                }
+                else if (obj.obj_id.Contains("mf_stones_1"))
+                {
+                    UsedStoneSlots += obj.data.inventory.Count;
+                    StonePileCount++;
+                    StoneTemp = obj;
+                }
+
+            }
+
+            FreeTimberSlots = (9 * TimberPileCount) - UsedTimberSlots;
+            FreeStoneSlots = (6 * StonePileCount) - UsedStoneSlots;
+            FreeOreSlots = (7 * OrePileCount) - UsedOreSlots;
+        }
+
+
         [HarmonyPatch(typeof(BaseCharacterComponent))]
         [HarmonyPatch(nameof(BaseCharacterComponent.SetOverheadItem))]
         public class SetPatching
@@ -429,82 +570,15 @@ namespace AutoLootHeavies
             [HarmonyPostfix]
             public static void Postfix()
             {
-                TimberPileCount = 0;
-                StonePileCount = 0;
-                OrePileCount = 0;
-                UsedTimberSlots = 0;
-                UsedStoneSlots = 0;
-                UsedOreSlots = 0;
-
-                foreach (var obj in StoredStockpiles.Where(obj => obj != null))
-                {
-                    if (obj.obj_id.Contains("mf_timber_1"))
-                    {
-                        UsedTimberSlots += obj.data.inventory.Count;
-                        TimberPileCount++;
-                        TimberTemp = obj;
-                    }
-                    else if (obj.obj_id.Contains("mf_ore_1"))
-                    {
-                        UsedOreSlots += obj.data.inventory.Count;
-                        OrePileCount++;
-                        OreTemp = obj;
-                    }
-                    else if (obj.obj_id.Contains("mf_stones_1"))
-                    {
-                        UsedStoneSlots += obj.data.inventory.Count;
-                        StonePileCount++;
-                        StoneTemp = obj;
-                    }
-                }
-
-
-                FreeTimberSlots = (9 * TimberPileCount) - UsedTimberSlots;
-                FreeStoneSlots = (6 * StonePileCount) - UsedStoneSlots;
-                FreeOreSlots = (7 * OrePileCount) - UsedOreSlots;
-
+                UpdateStockpiles();
 
                 if (Time.time - LastScanTime < _cfg.ScanIntervalInSeconds)
                 {
-                    //EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
-                    //    $"Scan Skipped {LastScanTime}",
-                    //    EffectBubblesManager.BubbleColor.Red, true, 3f);
+                   // Debug.LogError($"Been less than {_cfg.ScanIntervalInSeconds} seconds since last scan. Skipping.");
                     return;
                 }
-                //EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
-                //    $"Scan Started {LastScanTime}",
-                //    EffectBubblesManager.BubbleColor.White, true, 3f);
-                LastScanTime = Time.time;
-                Objects = Object.FindObjectsOfType<WorldGameObject>().Where(x =>
-                        x.obj_id.Contains("mf_timber_1") | x.obj_id.Contains("mf_ore_1") |
-                        x.obj_id.Contains("mf_stones_1"))
-                    .ToList();
-                StoredStockpiles = Objects;
 
-                foreach (var obj in Objects.Where(obj => obj != null))
-                {
-                    if (obj.obj_id.Contains("mf_timber_1"))
-                    {
-                        if (!VectorDictionary.ContainsKey(obj.pos3))
-                        {
-                            VectorDictionary.Add(obj.pos3, "t");
-                        }
-                    }
-                    else if (obj.obj_id.Contains("mf_ore_1"))
-                    {
-                        if (!VectorDictionary.ContainsKey(obj.pos3))
-                        {
-                            VectorDictionary.Add(obj.pos3, "o");
-                        }
-                    }
-                    else if (obj.obj_id.Contains("mf_stones_1"))
-                    {
-                        if (!VectorDictionary.ContainsKey(obj.pos3))
-                        {
-                            VectorDictionary.Add(obj.pos3, "s");
-                        }
-                    }
-                }
+                ScanStockpiles();
             }
         }
 
@@ -532,17 +606,18 @@ namespace AutoLootHeavies
         public class DropPatching
         {
             [HarmonyPrefix]
-            public static bool Prefix(ref Item ___overhead_item, out (bool wood, bool stone, bool iron, bool runCode) __state)
+            public static bool Prefix(ref Item ___overhead_item,
+                out (bool wood, bool stone, bool iron, bool runCode) __state)
             {
-
                 var itemIsLog = ___overhead_item.definition.GetItemName().Contains("Log");
                 var itemIsStone = ___overhead_item.definition.GetItemName().Contains("Stone") ||
-                                  ___overhead_item.definition.GetItemName().Contains("Marble"); ;
-                var itemIsOre = ___overhead_item.definition.GetItemName().Contains("Iron"); ;
+                                  ___overhead_item.definition.GetItemName().Contains("Marble");
+                ;
+                var itemIsOre = ___overhead_item.definition.GetItemName().Contains("Iron");
+                ;
 
                 if (itemIsLog || itemIsStone || itemIsOre)
                 {
-
                     __state = (itemIsLog, itemIsStone, itemIsOre, true);
 
                     return false;
@@ -554,7 +629,8 @@ namespace AutoLootHeavies
             }
 
             [HarmonyPostfix]
-            public static void Postfix(BaseCharacterComponent __instance, ref Item ___overhead_item, (bool wood, bool stone, bool iron, bool runCode) __state)
+            public static void Postfix(BaseCharacterComponent __instance, ref Item ___overhead_item,
+                (bool wood, bool stone, bool iron, bool runCode) __state)
             {
                 if (!__state.runCode) return;
                 try
@@ -571,12 +647,12 @@ namespace AutoLootHeavies
                     bool success;
 
                     var item = ___overhead_item;
-                     if (item == null) return;
-                     if (isAttacking)
-                     {
-                         DropOjectAndNull(__instance, item);
-                         return;
-                     }
+                    if (item == null) return;
+                    if (isAttacking)
+                    {
+                        DropOjectAndNull(__instance, item);
+                        return;
+                    }
 
 
                     ItemsToInsert.Clear();
@@ -615,7 +691,6 @@ namespace AutoLootHeavies
                         }
                         else
                         {
-                            
                             switch (FreeOreSlots)
                             {
                                 //not sure how it can get to -1, but here because it did
@@ -683,6 +758,10 @@ namespace AutoLootHeavies
                                     if (success)
                                     {
                                         ShowLootAddedIcon(item);
+                                    }
+                                    else
+                                    {
+                                        DropOjectAndNull(__instance, item);
                                     }
 
                                     if (ItemsDidntFit.Count > 0)
@@ -792,6 +871,10 @@ namespace AutoLootHeavies
                                     if (success)
                                     {
                                         ShowLootAddedIcon(item);
+                                    }
+                                    else
+                                    {
+                                        DropOjectAndNull(__instance, item);
                                     }
 
                                     if (ItemsDidntFit.Count > 0)
@@ -904,6 +987,10 @@ namespace AutoLootHeavies
                                     {
                                         ShowLootAddedIcon(item);
                                     }
+                                    else
+                                    {
+                                        DropOjectAndNull(__instance, item);
+                                    }
 
                                     if (ItemsDidntFit.Count > 0)
                                     {
@@ -914,15 +1001,17 @@ namespace AutoLootHeavies
                             }
                         }
                     }
-                    //else
-                    //{
-                    //    DropOjectAndNull(__instance, item);
-                    //}
+                    else
+                    {
+                        //shouldn't need this, but just in case
+                        DropOjectAndNull(__instance, item);
+                    }
                 }
                 catch (Exception ex)
                 {
                     ShowMessage(
-                        "Something went wrong with the magic of teleporting resources - please let me know. A log was saved in the mod directory.", false,
+                        "Something went wrong with the magic of teleporting resources - please let me know. A log was saved in the mod directory.",
+                        false,
                         false, false, "");
                     try
                     {

@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Timers;
 using Harmony;
 using UnityEngine;
@@ -20,6 +21,8 @@ namespace SaveNow
         private static List<SaveSlotData> _sortedTrimmedSaveGames = new();
         private static Timer _aTimer;
         private static bool _canSave;
+        public static string CurrentSave;
+        public static Dictionary<string, Vector3> SaveLocationsDictionary = new();
 
         private static Config.Options _cfg;
 
@@ -31,21 +34,62 @@ namespace SaveNow
             SavePath = "./QMods/SaveNow/SaveBackup/";
             var val = HarmonyInstance.Create("p1xel8ted.graveyardkeeper.savenow");
             val.PatchAll(Assembly.GetExecutingAssembly());
+            LoadSaveLocations();
+        }
+
+        public static void WriteSavesToFile()
+        {
+          using var file = new StreamWriter(DataPath, false);
+          foreach (var entry in SaveLocationsDictionary)
+          {
+              var result = entry.Value.ToString().Substring(1, entry.Value.ToString().Length - 2);
+              result = result.Replace(" ", "");
+              file.WriteLine("{0}={1}", entry.Key, result);
+          }
+        }
+
+        public static void LoadSaveLocations()
+        {
+            if (!File.Exists(DataPath)) return;
+
+            var lines = File.ReadAllLines(DataPath, Encoding.Default);
+            foreach (var line in lines)
+            {
+                if (!line.Contains('=')) continue;
+                var splitLine = line.Split('=');
+                var saveName = splitLine[0];
+                var tempVector = splitLine[1].Split(',');
+                var vectorToAdd = new Vector3(float.Parse(tempVector[0].Trim()),
+                    float.Parse(tempVector[1].Trim()), float.Parse(tempVector[2].Trim()));
+
+                var found = SaveLocationsDictionary.TryGetValue(saveName, out _);
+                Debug.LogError(Path.Combine(PlatformSpecific.GetSaveFolder(), saveName+".dat"));
+                if(!File.Exists(Path.Combine(PlatformSpecific.GetSaveFolder(), saveName + ".dat"))) continue;
+                if (!found)
+                {
+                    SaveLocationsDictionary.Add(saveName, vectorToAdd);
+                }
+            }
         }
 
         //reads co-ords from player, and saves to file
         public static bool SaveLocation(bool menuExit, string saveFile)
         {
             Pos = MainGame.me.player.pos3;
-            var x = Pos.x;
-            var y = Pos.y;
-            var z = Pos.z;
-            string[] xyz =
+            CurrentSave = MainGame.me.save_slot.filename_no_extension;
+
+            var overwrite = SaveLocationsDictionary.TryGetValue(CurrentSave, out _);
+            if (overwrite)
             {
-                x.ToString(CultureInfo.InvariantCulture), y.ToString(CultureInfo.InvariantCulture),
-                z.ToString(CultureInfo.InvariantCulture)
-            };
-            File.WriteAllLines(DataPath, xyz);
+                SaveLocationsDictionary.Remove(CurrentSave);
+                SaveLocationsDictionary.Add(CurrentSave, Pos);
+            }
+            else
+            {
+                SaveLocationsDictionary.Add(CurrentSave, Pos);
+            }
+
+            WriteSavesToFile();
 
             if (menuExit) return true;
             if (!_cfg.TurnOffSaveGameNotificationText)
@@ -131,8 +175,17 @@ namespace SaveNow
 
                     if (_cfg.RemoveFromSaveListButKeepFile)
                     {
-                        File.Move(sDat, dDat);
-                        File.Move(sInfo, dInfo);
+                        try
+                        {
+                            File.Copy(sDat, dDat, true);
+                            File.Copy(sInfo, dInfo, true);
+                            File.Delete(sDat);
+                            File.Delete(sInfo);
+                        }
+                        catch (Exception e)
+                        {
+                           Debug.Log($"Error backing up save games. {e.Message}");
+                        }
                     }
                     else
                     {
@@ -160,11 +213,9 @@ namespace SaveNow
                              SearchOption.TopDirectoryOnly))
                 {
                     var data = SaveSlotData.FromJSON(File.ReadAllText(text));
-                    if (data != null) //don't inline. adds games twice
-                    {
-                        data.filename_no_extension = Path.GetFileNameWithoutExtension(text);
-                        AllSaveGames.Add(data);
-                    }
+                    if (data == null) continue;
+                    data.filename_no_extension = Path.GetFileNameWithoutExtension(text);
+                    AllSaveGames.Add(data);
                 }
 
                 _sortedTrimmedSaveGames = AllSaveGames.OrderByDescending(o => o.game_time).ToList();
@@ -178,12 +229,10 @@ namespace SaveNow
         //reads co-ords from file and teleports player there
         public static void RestoreLocation()
         {
-            Xyz = File.ReadAllLines(DataPath);
-            X = float.Parse(Xyz[0]);
-            Y = float.Parse(Xyz[1]);
-            Z = float.Parse(Xyz[2]);
-            Pos.Set(X, Y, Z);
-            MainGame.me.player.PlaceAtPos(Pos);
+            var homeVector = new Vector3(2841, -6396, -1332);
+            var foundLocation = SaveLocationsDictionary.TryGetValue(MainGame.me.save_slot.filename_no_extension, out var posVector3 );
+            MainGame.me.player.PlaceAtPos(foundLocation ? posVector3 : homeVector);
+
             if (!_cfg.TurnOffTravelMessages)
             {
                 EffectBubblesManager.ShowImmediately(Pos, "Woooah! What a rush! Gets me every time!",

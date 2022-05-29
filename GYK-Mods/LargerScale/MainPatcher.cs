@@ -18,7 +18,7 @@ namespace LargerScale
         public static class Patcher
         {
             [HarmonyPostfix]
-            static void Postfix(ref ResolutionConfig __result)
+            public static void Postfix(ref ResolutionConfig __result)
             {
                 var config = new ResolutionConfig(_cfg.Width, _cfg.Height)
                 {
