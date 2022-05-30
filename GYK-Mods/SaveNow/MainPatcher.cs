@@ -5,16 +5,18 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Timers;
 using Harmony;
+using SaveNow.lang;
 using UnityEngine;
+using Timer = System.Timers.Timer;
 
 namespace SaveNow
 {
     public class MainPatcher
     {
         public static Vector3 Pos;
-        public static string[] Xyz;
         public static float X, Y, Z;
         public static string DataPath, SavePath;
         private static readonly List<SaveSlotData> AllSaveGames = new();
@@ -72,10 +74,29 @@ namespace SaveNow
             }
         }
 
+        public static void ShowMessage(string msg, Vector3 pos, EffectBubblesManager.BubbleColor color = EffectBubblesManager.BubbleColor.Relation, float time = 3f)
+        {
+            var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+            //the floaty bubbles are stuck in english apparently??
+            if (lang.Contains("ko") || lang.Contains("ja") || lang.Contains("zh"))
+            {
+
+                MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
+                    SmartSpeechEngine.VoiceID.None, true);
+            }
+            else
+            {
+                EffectBubblesManager.ShowImmediately(pos, msg,
+                    color,
+                    true, time);
+            }
+        }
+
         //reads co-ords from player, and saves to file
         public static bool SaveLocation(bool menuExit, string saveFile)
         {
-            Pos = MainGame.me.player.pos3;
+           Pos = MainGame.me.player.pos3;
             CurrentSave = MainGame.me.save_slot.filename_no_extension;
 
             var overwrite = SaveLocationsDictionary.TryGetValue(CurrentSave, out _);
@@ -98,24 +119,19 @@ namespace SaveNow
                 {
                     if (_cfg.NewFileOnAutoSave)
                     {
-                        EffectBubblesManager.ShowImmediately(Pos, "Auto-Save! : " + saveFile,
-                            EffectBubblesManager.BubbleColor.Relation,
-                            true, 3f);
+                        ShowMessage(strings.AutoSave + ": " + saveFile, Pos);
                     }
                     else
                     {
-                        EffectBubblesManager.ShowImmediately(Pos, "Auto-Save!",
-                            EffectBubblesManager.BubbleColor.Relation,
-                            true, 3f);
+                        ShowMessage(strings.AutoSave + "!", Pos);
                     }
                 }
                 else
                 {
-                    EffectBubblesManager.ShowImmediately(Pos, "Game Saved!", EffectBubblesManager.BubbleColor.Relation,
-                        true, 3f);
+                    ShowMessage(strings.SaveMessage, Pos);
                 }
             }
-
+            
             return true;
         }
 
@@ -231,12 +247,11 @@ namespace SaveNow
         {
             var homeVector = new Vector3(2841, -6396, -1332);
             var foundLocation = SaveLocationsDictionary.TryGetValue(MainGame.me.save_slot.filename_no_extension, out var posVector3 );
-            MainGame.me.player.PlaceAtPos(foundLocation ? posVector3 : homeVector);
-
+            var pos = foundLocation ? posVector3 : homeVector;
+            MainGame.me.player.PlaceAtPos(pos);
             if (!_cfg.TurnOffTravelMessages)
             {
-                EffectBubblesManager.ShowImmediately(Pos, "Woooah! What a rush! Gets me every time!",
-                    EffectBubblesManager.BubbleColor.Relation, true, 4f);
+                ShowMessage(strings.Rush, pos);
             }
 
             _aTimer.AutoReset = true;
@@ -246,9 +261,7 @@ namespace SaveNow
             _aTimer.Start();
             if (!_cfg.DisableAutoSaveInfo)
             {
-                EffectBubblesManager.ShowImmediately(Pos,
-                    $"AutoSave: {_cfg.AutoSave}, Period: {_cfg.SaveInterval / 60000} minute(s), New Save on Auto Save: {_cfg.NewFileOnAutoSave}, Saves to keep: {_cfg.AutoSavesToKeep}",
-                    EffectBubblesManager.BubbleColor.Red, true, 4f);
+                ShowMessage($"{strings.InfoAutoSave}: {_cfg.AutoSave}, {strings.InfoPeriod}: {_cfg.SaveInterval / 60000} {strings.InfoMinutes}, {strings.InfoNewSaveOnAutoSave}: {_cfg.NewFileOnAutoSave}, {strings.InfoSavesToKeep}: {_cfg.AutoSavesToKeep}", pos, EffectBubblesManager.BubbleColor.Red, 4f);
             }
         }
 
@@ -268,14 +281,14 @@ namespace SaveNow
             //replaces the standard exit dialog with one that supports save on exit
             public static void Postfix(InGameMenuGUI __instance)
             {
-                __instance.SetControllsActive(false);
+               __instance.SetControllsActive(false);
                 __instance.OnClosePressed();
-                var messageText = "Are you sure you want to return to the main menu?" + "\n\n" +
-                                  "Progress and current location will be saved.";
+                var messageText = strings.SaveAreYouSureMenu + "?\n\n" +
+                                  strings.SaveProgressSaved + ".";
                 if (_cfg.ExitToDesktop)
                 {
-                    messageText = "Are you sure you want to exit to desktop?" + "\n\n" +
-                                  "Progress and current location will be saved.";
+                    messageText = strings.SaveAreYouSureDesktop + "?\n\n" +
+                                  strings.SaveProgressSaved + ".";
                 }
 
                 GUIElements.me.dialog.OpenYesNo(messageText
@@ -302,7 +315,7 @@ namespace SaveNow
             }
         }
 
-        //if this isn't here, when you sleep, it teleport you back to where the mod saved you last
+       // if this isn't here, when you sleep, it teleport you back to where the mod saved you last
         [HarmonyPatch(typeof(SleepGUI), "WakeUp")]
         public static class PatchSavePosWhenUsingBed
         {
@@ -348,6 +361,10 @@ namespace SaveNow
                 {
                     PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
                         delegate { SaveLocation(false, string.Empty); });
+                }
+                if (Input.GetKeyUp(KeyCode.L))
+                {
+                    AutoSave();
                 }
             }
         }

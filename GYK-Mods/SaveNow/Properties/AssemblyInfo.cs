@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SaveNow")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Save Now!")]
+[assembly: AssemblyDescription("Implements an auto-save, and save anywhere at any time system.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
-[assembly: AssemblyProduct("SaveNow")]
+[assembly: AssemblyProduct("Save Now!")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -29,6 +29,6 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("5.0.0.0")]
-[assembly: AssemblyFileVersion("5.0.0.0")]
-[assembly: NeutralResourcesLanguage("en-AT")]
+[assembly: AssemblyVersion("5.1.0.0")]
+[assembly: AssemblyFileVersion("5.1.0.0")]
+[assembly: NeutralResourcesLanguage("en")]

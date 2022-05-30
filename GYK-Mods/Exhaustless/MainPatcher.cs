@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using Exhaustless.lang;
 using Harmony;
 
 namespace Exhaustless
@@ -17,9 +18,9 @@ namespace Exhaustless
                 var val = HarmonyInstance.Create("p1xel8ted.graveyardkeeper.exhaust-less");
                 val.PatchAll(Assembly.GetExecutingAssembly());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-              //  File.AppendAllText("./qmods/dura.txt", $"{ex.Message} - {ex.Source} - {ex.StackTrace}\n");
+                //  File.AppendAllText("./qmods/dura.txt", $"{ex.Message} - {ex.Source} - {ex.StackTrace}\n");
             }
         }
 
@@ -114,7 +115,7 @@ namespace Exhaustless
                         continue;
                     MainGame.me.player.EquipItem(item, -1, playerInv.is_bag ? playerInv : null);
                     MainGame.me.player.Say(
-                        $"Lucky I had another {item.definition.GetItemName().ToLower()} on me!", null, false,
+                        $"{strings.LuckyHadAnotherPartOne} {item.definition.GetItemName().ToLower()} {strings.LuckyHadAnotherPartTwo}", null, false,
                         SpeechBubbleGUI.SpeechBubbleType.Think,
                         SmartSpeechEngine.VoiceID.None, true);
                 }
@@ -145,7 +146,7 @@ namespace Exhaustless
                 if (!_cfg.YawnMessage) return;
                 if (buff_id.Equals("buff_tired"))
                 {
-                    MainGame.me.player.Say("Yawn...*rubs eyes*..", null, null,
+                    MainGame.me.player.Say(strings.Yawn, null, null,
                         SpeechBubbleGUI.SpeechBubbleType.Think, SmartSpeechEngine.VoiceID.None, true);
                 }
             }

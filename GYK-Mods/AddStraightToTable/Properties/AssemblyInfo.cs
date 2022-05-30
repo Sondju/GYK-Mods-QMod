@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("AddStraightToTable")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Add Straight To Table")]
+[assembly: AssemblyDescription("Skips the confirm dialog on the autopsy table.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
-[assembly: AssemblyProduct("AddStraightToTable")]
+[assembly: AssemblyProduct("Add Straight To Table")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -31,4 +31,4 @@ using System.Runtime.InteropServices;
 //
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: NeutralResourcesLanguage("en-AT")]
+[assembly: NeutralResourcesLanguage("en")]

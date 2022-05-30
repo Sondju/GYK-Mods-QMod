@@ -144,7 +144,11 @@ public FrmMain()
             _modList.Clear();
             DgvMods.Rows.Clear();
             if (!_gameLocation.found) return;
-            var dllFiles = Directory.GetFiles(_modLocation, "*.dll", SearchOption.AllDirectories);
+
+            var dllFiles =
+                Directory.EnumerateDirectories(_modLocation).SelectMany(
+                    directory => Directory.EnumerateFiles(directory, "*.dll"));
+
             foreach (var dllFile in dllFiles)
             {
                 // GetModEntryPoint(dllFile);

@@ -1,16 +1,15 @@
 ﻿using System.Resources;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TreesNoMore")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Trees, No More!")]
+[assembly: AssemblyDescription("Stops trees respawning, even afte removing the stump.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
-[assembly: AssemblyProduct("TreesNoMore")]
+[assembly: AssemblyProduct("Trees, No More!")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -32,4 +31,4 @@ using System.Runtime.InteropServices;
 //
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: NeutralResourcesLanguage("en-AT")]
+[assembly: NeutralResourcesLanguage("en")]

@@ -1,5 +1,4 @@
 ﻿using System;
-using AutoLootHeavies;
 using UnityEngine;
 
 namespace AutoLootHeavies

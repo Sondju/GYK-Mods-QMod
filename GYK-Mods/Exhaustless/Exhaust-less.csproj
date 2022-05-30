@@ -34,6 +34,11 @@
   <ItemGroup>
     <Compile Include="Config.cs" />
     <Compile Include="ConfigReader.cs" />
+    <Compile Include="lang\strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>strings.resx</DependentUpon>
+    </Compile>
     <Compile Include="MainPatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -48,9 +53,27 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
+    <Reference Include="System" />
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="lang\strings.de.resx" />
+    <EmbeddedResource Include="lang\strings.es.resx" />
+    <EmbeddedResource Include="lang\strings.fr.resx" />
+    <EmbeddedResource Include="lang\strings.it.resx" />
+    <EmbeddedResource Include="lang\strings.ja.resx" />
+    <EmbeddedResource Include="lang\strings.ko.resx" />
+    <EmbeddedResource Include="lang\strings.pl.resx" />
+    <EmbeddedResource Include="lang\strings.pt-BR.resx" />
+    <EmbeddedResource Include="lang\strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="lang\strings.ru.resx" />
+    <EmbeddedResource Include="lang\strings.zh-CN.resx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>

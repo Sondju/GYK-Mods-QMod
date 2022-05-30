@@ -1,16 +1,15 @@
 ﻿using System.Reflection;
 using System.Resources;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FogBeGone")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Fog, Be Gone!")]
+[assembly: AssemblyDescription("Inteded for ultra-wide users. Removes the fog and wind overlays.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
-[assembly: AssemblyProduct("FogBeGone")]
+[assembly: AssemblyProduct("Fog, Be Gone!")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -32,4 +31,4 @@ using System.Runtime.InteropServices;
 //
 [assembly: AssemblyVersion("2.0.0.0")]
 [assembly: AssemblyFileVersion("2.0.0.0")]
-[assembly: NeutralResourcesLanguage("en-AT")]
+[assembly: NeutralResourcesLanguage("en")]

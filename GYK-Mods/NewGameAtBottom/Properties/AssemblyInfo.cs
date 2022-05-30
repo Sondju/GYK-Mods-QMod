@@ -1,16 +1,15 @@
 ﻿using System.Resources;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("NewGameAtBottom")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("New Game At Bottom")]
+[assembly: AssemblyDescription("Moves the New Game button to the bottom of the list.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
-[assembly: AssemblyProduct("NewGameAtBottom")]
+[assembly: AssemblyProduct("New Game At Bottom")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

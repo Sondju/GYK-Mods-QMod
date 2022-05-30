@@ -1,11 +1,14 @@
 using Harmony;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using UnityEngine;
+using AutoLootHeavies.lang;
 using Object = UnityEngine.Object;
 
 namespace AutoLootHeavies
@@ -159,7 +162,7 @@ namespace AutoLootHeavies
             if (Time.time - LastBubbleTime > 0.5f)
             {
                 LastBubbleTime = Time.time;
-                EffectBubblesManager.ShowImmediately(pwo.bubble_pos, GJL.L("not_enough_something", "(en)"),
+                EffectBubblesManager.ShowImmediately(pwo.bubble_pos, GJL.L("not_enough_something", $"({GameSettings.me.language})"),
                     EffectBubblesManager.BubbleColor.Energy, true, 1f);
             }
 
@@ -266,7 +269,7 @@ namespace AutoLootHeavies
 
                 LastBubbleTime = Time.time;
 
-                EffectBubblesManager.ShowImmediately(pwo.bubble_pos, GJL.L("not_enough_something", "(en)"),
+                EffectBubblesManager.ShowImmediately(pwo.bubble_pos, GJL.L("not_enough_something", $"({GameSettings.me.language})"),
                     EffectBubblesManager.BubbleColor.Energy, true, 1f);
             }
         }
@@ -274,14 +277,16 @@ namespace AutoLootHeavies
         public static void ShowMessage(string message, bool noStockpilesInRange, bool storageNowFull,
             bool cantStorageFull, string item)
         {
+            var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
             var msg = message;
             if (noStockpilesInRange)
             {
                 msg = item switch
                 {
-                    Constants.FileKeys.Ore => "Dang, no ore stockpiles in range...",
-                    Constants.FileKeys.Stone => "Dang, no stone stockpiles in range...",
-                    Constants.FileKeys.Timber => "Dang, no timber stockpiles in range...",
+                    Constants.FileKeys.Ore => strings.NoOreInRange,
+                    Constants.FileKeys.Stone => strings.NoStoneInRange,
+                    Constants.FileKeys.Timber => strings.NoTimberInRange,
                     _ => msg
                 };
             }
@@ -290,9 +295,9 @@ namespace AutoLootHeavies
             {
                 msg = item switch
                 {
-                    Constants.FileKeys.Ore => "Phew...ore storage is now full!",
-                    Constants.FileKeys.Stone => "Phew...stone storage is now full!",
-                    Constants.FileKeys.Timber => "Phew...timber storage is now full!",
+                    Constants.FileKeys.Ore => strings.OreFull,
+                    Constants.FileKeys.Stone => strings.StoneFull,
+                    Constants.FileKeys.Timber => strings.TimberFull,
                     _ => msg
                 };
             }
@@ -301,15 +306,36 @@ namespace AutoLootHeavies
             {
                 msg = item switch
                 {
-                    Constants.FileKeys.Ore => "I can't do that, I have no ore storage left!",
-                    Constants.FileKeys.Stone => "I can't do that, I have no stone storage left!",
-                    Constants.FileKeys.Timber => "I can't do that, I have no timber storage left!",
+                    Constants.FileKeys.Ore => strings.NoOreStorageLeft,
+                    Constants.FileKeys.Stone => strings.NoStoneStorageLeft,
+                    Constants.FileKeys.Timber => strings.NoTimberStorageLeft,
                     _ => msg
                 };
             }
 
             MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
                 SmartSpeechEngine.VoiceID.None, true);
+        }
+
+
+        public static void ShowMessage(string msg, Vector3 pos)
+        {
+            var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+            //the floaty bubbles are stuck in english apparently??
+            if (lang.Contains("ko") || lang.Contains("ja") || lang.Contains("zh"))
+            {
+
+                MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
+                    SmartSpeechEngine.VoiceID.None, true);
+            }
+            else
+            {
+                EffectBubblesManager.ShowImmediately(pos,
+                    msg,
+                    EffectBubblesManager.BubbleColor.Relation,
+                    true, 3f);
+            }
         }
 
         public static void GetClosestStockPile()
@@ -391,10 +417,7 @@ namespace AutoLootHeavies
                     if (!_cfg.Teleportation)
                     {
                         _cfg.Teleportation = true;
-                        EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
-                            "Teleportation is now ON.",
-                            EffectBubblesManager.BubbleColor.Relation,
-                            true, 3f);
+                        ShowMessage(strings.TeleOn, MainGame.me.player_pos);
                         UpdateConfig();
                         GetLocations();
                         typeof(MainGame).GetMethod(nameof(MainGame.Update))?.Invoke(null, null);
@@ -402,10 +425,7 @@ namespace AutoLootHeavies
                     else
                     {
                         _cfg.Teleportation = false;
-                        EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
-                            "Teleportation is now OFF.",
-                            EffectBubblesManager.BubbleColor.Relation,
-                            true, 3f);
+                        ShowMessage(strings.TeleOff, MainGame.me.player_pos);
                         UpdateConfig();
                     }
 
@@ -419,28 +439,19 @@ namespace AutoLootHeavies
                         if (!_cfg.Teleportation)
                         {
                             _cfg.Teleportation = true;
-                            EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
-                                "Teleportation is now ON.",
-                                EffectBubblesManager.BubbleColor.Relation,
-                                true, 3f);
+                            ShowMessage(strings.TeleOn, MainGame.me.player_pos);
                             UpdateConfig();
                         }
 
                         _cfg.DistanceBasedTeleport = true;
-                        EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
-                            "Distance-based teleportation is now ON.",
-                            EffectBubblesManager.BubbleColor.Relation,
-                            true, 3f);
+                        ShowMessage(strings.DistTeleOn, MainGame.me.player_pos);
                         UpdateConfig();
                         GetLocations();
                     }
                     else
                     {
                         _cfg.DistanceBasedTeleport = false;
-                        EffectBubblesManager.ShowImmediately(MainGame.me.player_pos,
-                            "Distance-based teleportation is now OFF.",
-                            EffectBubblesManager.BubbleColor.Relation,
-                            true, 3f);
+                        ShowMessage(strings.DistTeleOff, MainGame.me.player_pos);
                         UpdateConfig();
                     }
 
@@ -450,27 +461,21 @@ namespace AutoLootHeavies
                 if (Input.GetKeyUp(KeyCode.Alpha7))
                 {
                     _cfg.DesignatedTimberLocation = MainGame.me.player_pos;
-                    EffectBubblesManager.ShowImmediately(MainGame.me.player_pos, "Dump timber here!",
-                        EffectBubblesManager.BubbleColor.Relation,
-                        true, 3f);
+                    ShowMessage(strings.DumpTimber, _cfg.DesignatedTimberLocation);
                     UpdateConfig();
                 }
 
                 if (Input.GetKeyUp(KeyCode.Alpha8))
                 {
                     _cfg.DesignatedOreLocation = MainGame.me.player_pos;
-                    EffectBubblesManager.ShowImmediately(MainGame.me.player_pos, "Dump ore here!",
-                        EffectBubblesManager.BubbleColor.Relation,
-                        true, 3f);
+                    ShowMessage(strings.DumpOre, _cfg.DesignatedOreLocation);
                     UpdateConfig();
                 }
 
                 if (Input.GetKeyUp(KeyCode.Alpha9))
                 {
                     _cfg.DesignatedStoneLocation = MainGame.me.player_pos;
-                    EffectBubblesManager.ShowImmediately(MainGame.me.player_pos, "Dump stone & marble here!",
-                        EffectBubblesManager.BubbleColor.Relation,
-                        true, 3f);
+                    ShowMessage(strings.DumpStone, _cfg.DesignatedStoneLocation);
                     UpdateConfig();
                 }
             }
@@ -588,6 +593,7 @@ namespace AutoLootHeavies
             FreeTimberSlots = (9 * TimberPileCount) - UsedTimberSlots;
             FreeStoneSlots = (6 * StonePileCount) - UsedStoneSlots;
             FreeOreSlots = (7 * OrePileCount) - UsedOreSlots;
+          //  ShowMessage($"Free Timber: {FreeTimberSlots}, Free Stone: {FreeStoneSlots}, Free Ore: {FreeOreSlots}", false,false,false,"");
         }
 
 
@@ -1038,13 +1044,14 @@ namespace AutoLootHeavies
                 catch (Exception ex)
                 {
                     ShowMessage(
-                        "Something went wrong with the magic of teleporting resources - please let me know. A log was saved in the mod directory.",
+                       strings.ErrorMsg,
                         false,
                         false, false, "");
                     try
                     {
                         File.WriteAllText("./QMods/AutoLootHeavies/error.txt",
-                            $"Mod: AutoLootHeavies, Message: {ex.Message}, Source: {ex.Source}, Trace: {ex.StackTrace}\n");
+                            $@"Mod: AutoLootHeavies, Message: {ex.Message}, Source: {ex.Source}, Trace: {ex.StackTrace}
+");
                     }
                     catch (Exception)
                     {

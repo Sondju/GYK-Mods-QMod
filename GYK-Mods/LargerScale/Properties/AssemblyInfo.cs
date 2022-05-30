@@ -1,16 +1,15 @@
 ﻿using System.Reflection;
 using System.Resources;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("LargerScale")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Larger Scale")]
+[assembly: AssemblyDescription("Increase (or decrease) the default pixel size.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
-[assembly: AssemblyProduct("LargerScale")]
+[assembly: AssemblyProduct("Larger Scale")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -32,4 +31,4 @@ using System.Runtime.InteropServices;
 //
 [assembly: AssemblyVersion("2.0.0.0")]
 [assembly: AssemblyFileVersion("2.0.0.0")]
-[assembly: NeutralResourcesLanguage("en-AT")]
+[assembly: NeutralResourcesLanguage("en")]

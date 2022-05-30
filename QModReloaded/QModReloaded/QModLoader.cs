@@ -24,7 +24,10 @@ public class QModLoader
         Logger.WriteLog("Assembly-CSharp.dll has been patched, (otherwise you wouldn't see this message.");
         Logger.WriteLog("Patch method called. Attempting to load mods.");
 
-        var dllFiles = Directory.GetFiles(QModBaseDir, "*.dll", SearchOption.AllDirectories);
+        var dllFiles =
+            Directory.EnumerateDirectories(QModBaseDir).SelectMany(
+                directory => Directory.EnumerateFiles(directory, "*.dll"));
+
         var mods = new List<QMod>();
         foreach (var dllFile in dllFiles)
         {
