@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Harmony;
 using System.Reflection;
 using System.Text;
+using HarmonyLib;
 
 namespace ILReader
 {
@@ -11,8 +11,9 @@ namespace ILReader
     {
         public static void Patch()
         {
-            var val = HarmonyInstance.Create($"p1xel8ted.graveyardkeeper.MiscTweaks");
-            val.PatchAll(Assembly.GetExecutingAssembly());
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.ILReader");
+            var assembly = Assembly.GetExecutingAssembly();
+            harmony.PatchAll(assembly);
         }
 
         [HarmonyPatch(typeof(BaseMenuGUI))]

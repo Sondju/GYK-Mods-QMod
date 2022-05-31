@@ -22,7 +22,6 @@ namespace Exhaustless
             public bool QuietMusicInGui;
             public bool MakeToolsLastLonger;
             public bool AutoEquipNewTool;
-            public bool MergeInventories;
         }
 
         public static Options GetOptions()
@@ -32,9 +31,6 @@ namespace Exhaustless
 
             bool.TryParse(_con.Value("MakeToolsLastLonger", "true"), out var makeToolsLastLonger);
             _options.MakeToolsLastLonger = makeToolsLastLonger;
-
-            bool.TryParse(_con.Value("MergeInventories", "true"), out var mergeInventories);
-            _options.MergeInventories = mergeInventories;
 
             bool.TryParse(_con.Value("AutoEquipNewTool", "true"), out var autoEquipNewTool);
             _options.AutoEquipNewTool = autoEquipNewTool;

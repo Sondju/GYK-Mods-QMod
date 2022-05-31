@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Harmony;
+using HarmonyLib;
 
 namespace NewGameAtBottom
 {
@@ -9,8 +9,9 @@ namespace NewGameAtBottom
     {
         public static void Patch()
         {
-            var val = HarmonyInstance.Create("p1xel8ted.graveyardkeeper.newgameatbottom");
-            val.PatchAll(Assembly.GetExecutingAssembly());
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.NewGameAtBottom");
+            var assembly = Assembly.GetExecutingAssembly();
+            harmony.PatchAll(assembly);
         }
 
         [HarmonyPatch(typeof(SaveSlotsMenuGUI), "RedrawSlots")]

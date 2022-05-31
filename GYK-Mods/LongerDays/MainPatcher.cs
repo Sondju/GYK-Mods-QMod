@@ -1,5 +1,5 @@
-using Harmony;
 using System.Reflection;
+using HarmonyLib;
 
 namespace LongerDays
 {
@@ -13,8 +13,11 @@ namespace LongerDays
         public static void Patch()
         {
             _cfg = Config.GetOptions();
-            var val = HarmonyInstance.Create($"p1xel8ted.graveyardkeeper.LongerDays");
-            val.PatchAll(Assembly.GetExecutingAssembly());
+
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.LongerDays");
+            var assembly = Assembly.GetExecutingAssembly();
+            harmony.PatchAll(assembly);
+
             Seconds = _cfg.DoubleLengthDays ? SecondsInDay100 : SecondsInDay50;
         }
 

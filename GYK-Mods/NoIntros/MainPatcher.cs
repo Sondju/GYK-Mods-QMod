@@ -1,5 +1,5 @@
-using Harmony;
 using System.Reflection;
+using HarmonyLib;
 using LazyBearGames.Preloader;
 
 namespace NoIntros
@@ -8,8 +8,9 @@ namespace NoIntros
     {
         public static void Patch()
         {
-            var val = HarmonyInstance.Create($"p1xel8ted.graveyardkeeper.NoIntros");
-            val.PatchAll(Assembly.GetExecutingAssembly());
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.NoIntros");
+            var assembly = Assembly.GetExecutingAssembly();
+            harmony.PatchAll(assembly);
         }
         
         [HarmonyPatch(typeof(LBPreloader), "StartAnimations")]

@@ -1,5 +1,5 @@
 using System.Reflection;
-using Harmony;
+using HarmonyLib;
 
 namespace LargerScale
 {
@@ -10,8 +10,10 @@ namespace LargerScale
         public static void Patch()
         {
             _cfg = Config.GetOptions();
-            var val = HarmonyInstance.Create($"p1xel8ted.graveyardkeeper.LargerScale");
-            val.PatchAll(Assembly.GetExecutingAssembly());
+
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.LargerScale");
+            var assembly = Assembly.GetExecutingAssembly();
+            harmony.PatchAll(assembly);
         }
 
         [HarmonyPatch(typeof(ResolutionConfig), nameof(ResolutionConfig.GetResolutionConfigOrNull))]

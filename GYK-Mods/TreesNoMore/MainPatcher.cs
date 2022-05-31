@@ -1,5 +1,5 @@
 using System.Reflection;
-using Harmony;
+using HarmonyLib;
 
 namespace TreesNoMore
 {
@@ -8,8 +8,9 @@ namespace TreesNoMore
 
         public static void Patch()
         {
-            var val = HarmonyInstance.Create("p1xel8ted.graveyardkeeper.TreesNoMore");
-            val.PatchAll(Assembly.GetExecutingAssembly());
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.TreesNoMore");
+            var assembly = Assembly.GetExecutingAssembly();
+            harmony.PatchAll(assembly);
         }
 
         [HarmonyPatch(typeof(WorldGameObject), "SmartInstantiate")]

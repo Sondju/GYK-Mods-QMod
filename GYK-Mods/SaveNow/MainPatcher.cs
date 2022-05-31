@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Timers;
-using Harmony;
+using HarmonyLib;
 using SaveNow.lang;
 using UnityEngine;
 using Timer = System.Timers.Timer;
@@ -34,8 +34,11 @@ namespace SaveNow
             _aTimer = new Timer();
             DataPath = "./QMods/SaveNow/dont-remove.dat";
             SavePath = "./QMods/SaveNow/SaveBackup/";
-            var val = HarmonyInstance.Create("p1xel8ted.graveyardkeeper.savenow");
-            val.PatchAll(Assembly.GetExecutingAssembly());
+
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.SaveNow");
+            var assembly = Assembly.GetExecutingAssembly();
+            harmony.PatchAll(assembly);
+
             LoadSaveLocations();
         }
 
@@ -65,7 +68,7 @@ namespace SaveNow
                     float.Parse(tempVector[1].Trim()), float.Parse(tempVector[2].Trim()));
 
                 var found = SaveLocationsDictionary.TryGetValue(saveName, out _);
-                Debug.LogError(Path.Combine(PlatformSpecific.GetSaveFolder(), saveName+".dat"));
+               // Debug.LogError(Path.Combine(PlatformSpecific.GetSaveFolder(), saveName+".dat"));
                 if(!File.Exists(Path.Combine(PlatformSpecific.GetSaveFolder(), saveName + ".dat"))) continue;
                 if (!found)
                 {

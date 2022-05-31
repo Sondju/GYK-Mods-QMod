@@ -1,6 +1,6 @@
 using System.Linq;
 using System.Reflection;
-using Harmony;
+using HarmonyLib;
 
 namespace AddStraightToTable
 {
@@ -8,8 +8,9 @@ namespace AddStraightToTable
     {
         public static void Patch()
         {
-            var val = HarmonyInstance.Create("p1xel8ted.graveyardkeeper.AddStraightToTable");
-            val.PatchAll(Assembly.GetExecutingAssembly());
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.AddStraightToTable");
+            var assembly = Assembly.GetExecutingAssembly();
+            harmony.PatchAll(assembly);
         }
 
         [HarmonyPatch(typeof(AutopsyGUI), "OnBodyItemPress")]

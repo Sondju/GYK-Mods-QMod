@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Exhaustless.lang;
-using Harmony;
+using HarmonyLib;
 
 namespace Exhaustless
 {
@@ -15,8 +15,9 @@ namespace Exhaustless
             try
             {
                 _cfg = Config.GetOptions();
-                var val = HarmonyInstance.Create("p1xel8ted.graveyardkeeper.exhaust-less");
-                val.PatchAll(Assembly.GetExecutingAssembly());
+                var harmony = new Harmony("p1xel8ted.GraveyardKeeper.exhaust-less");
+                var assembly = Assembly.GetExecutingAssembly();
+                harmony.PatchAll(assembly);
             }
             catch (Exception)
             {

@@ -79,7 +79,7 @@ public class QModLoader
                 .GetTypes()
                 .SelectMany(t => t.Methods
                     .Where(m => m.HasBody)
-                    .Select(m => new {t, m}));
+                    .Select(m => new { t, m }));
 
             toInspect = toInspect.Where(x => x.m.Name == "Patch");
 

@@ -55,6 +55,7 @@ public class Injector
             awakeMethod.Body.GetILProcessor().InsertBefore(awakeMethod.Body.Instructions[0],
                 Instruction.Create(OpCodes.Call, awakeMethod.Module.Import(patchInstruction)));
             gameAssembly.Write(_mainFilename);
+
             return (true, $"Mod patch injected: {patchInstruction} inserted into {awakeMethod}");
         }
         catch (Exception ex)

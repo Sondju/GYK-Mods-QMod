@@ -1,9 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Windows.Forms;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using OpCodes = Mono.Cecil.Cil.OpCodes;
+
 
 namespace QModReloadedGUI;
 

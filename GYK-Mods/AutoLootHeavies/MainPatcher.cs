@@ -1,4 +1,3 @@
-using Harmony;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -9,6 +8,7 @@ using System.Text;
 using System.Threading;
 using UnityEngine;
 using AutoLootHeavies.lang;
+using HarmonyLib;
 using Object = UnityEngine.Object;
 
 namespace AutoLootHeavies
@@ -82,8 +82,11 @@ namespace AutoLootHeavies
         public static void Patch()
         {
             _cfg = Config.GetOptions();
-            var val = HarmonyInstance.Create($"p1xel8ted.graveyardkeeper.AutoLootHeavies");
-            val.PatchAll(Assembly.GetExecutingAssembly());
+
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.AutoLootHeavies");
+            var assembly = Assembly.GetExecutingAssembly();
+            harmony.PatchAll(assembly);
+
             VectorsLoaded = false;
             NeedScanning = true;
         }

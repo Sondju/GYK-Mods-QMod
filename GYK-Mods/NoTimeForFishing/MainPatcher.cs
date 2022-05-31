@@ -1,6 +1,6 @@
-using Harmony;
 using System.Reflection;
 using Fishing;
+using HarmonyLib;
 using UnityEngine;
 
 namespace NoTimeForFishing
@@ -9,8 +9,9 @@ namespace NoTimeForFishing
     {
         public static void Patch()
         {
-            var val = HarmonyInstance.Create($"p1xel8ted.graveyardkeeper.NoTimeForFishing");
-            val.PatchAll(Assembly.GetExecutingAssembly());
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.NoTimeForFishing");
+            var assembly = Assembly.GetExecutingAssembly();
+            harmony.PatchAll(assembly);
         }
         
         [HarmonyPatch(typeof(FishLogic), "CalculateFishPos")]

@@ -1,8 +1,8 @@
-using Harmony;
 using System.Reflection;
 using UnityEngine;
 using System.Threading;
 using System.Globalization;
+using HarmonyLib;
 using ThoughtfulReminders.lang;
 
 namespace ThoughtfulReminders
@@ -15,8 +15,10 @@ namespace ThoughtfulReminders
 
         public static void Patch()
         {
-            var val = HarmonyInstance.Create($"p1xel8ted.graveyardkeeper.ThoughtfulReminders");
-            val.PatchAll(Assembly.GetExecutingAssembly());
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.ThoughtfulReminders");
+            var assembly = Assembly.GetExecutingAssembly();
+            harmony.PatchAll(assembly);
+
             _cfg = Config.GetOptions();
         }
         

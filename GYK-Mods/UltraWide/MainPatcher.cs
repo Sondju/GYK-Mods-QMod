@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using Harmony;
 using System.Reflection;
+using HarmonyLib;
 
 namespace UltraWide
 {
@@ -12,8 +12,10 @@ namespace UltraWide
         public static void Patch()
         {
             _cfg = Config.GetOptions();
-            var val = HarmonyInstance.Create($"p1xel8ted.graveyardkeeper.UltraWide");
-            val.PatchAll(Assembly.GetExecutingAssembly());
+
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.UltraWide");
+            var assembly = Assembly.GetExecutingAssembly();
+            harmony.PatchAll(assembly);
         }
 
         [HarmonyPatch(typeof(ResolutionConfig), "GetResolutionConfigOrNull")]

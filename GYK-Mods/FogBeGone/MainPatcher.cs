@@ -1,5 +1,5 @@
-using Harmony;
 using System.Reflection;
+using HarmonyLib;
 
 namespace FogBeGone
 {
@@ -7,9 +7,9 @@ namespace FogBeGone
     {
         public static void Patch()
         {
-  
-                var val = HarmonyInstance.Create($"p1xel8ted.graveyardkeeper.FogBeGone");
-                val.PatchAll(Assembly.GetExecutingAssembly());
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.FogBeGone");
+            var assembly = Assembly.GetExecutingAssembly();
+            harmony.PatchAll(assembly);
         }
 
         [HarmonyPatch(typeof(SmartWeatherState))]
