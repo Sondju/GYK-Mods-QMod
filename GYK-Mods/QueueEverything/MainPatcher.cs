@@ -17,64 +17,64 @@ namespace QueueEverything
         public static Dictionary<string, SmartExpression> Crafts = new();
         public static bool FasterCraft, Exhaustless;
         public static float TimeAdjustment;
-        public static bool Skip;
+        //public static bool Skip;
         public static Dictionary<string, string> Objects = new();
         public static int CraftAmount = 1;
         public static SmartExpression CraftTimeBackup;
 
-        public static string[] SafeObjects =
-        {
-            "oven", "barrel_brew", "brewing_stand", "mf_barrel_mid", "mf_distcube_1", "mf_distcube_2", "mf_distcube_3",
-            "mf_furnace_1", "mf_furnace_2", "mf_furnace_3"
-        };
+        //public static string[] SafeObjects =
+        //{
+        //    "oven", "barrel_brew", "brewing_stand", "mf_barrel_mid", "mf_distcube_1", "mf_distcube_2", "mf_distcube_3",
+        //    "mf_furnace_1", "mf_furnace_2", "mf_furnace_3"
+        //};
 
-        public static string[] UnSafeObjects =
-        {
-            "mf_hammer_1",
-            "mf_hammer_2",
-            "mf_hammer_3",
-            "mf_vine_press",
-            "cellar_builddesk",
-            "desk_1",
-            "desk_2",
-            "desk_3",
-            "mf_alchemy_craft_03",
-            "mf_alchemy_craft_02",
-            "mf_alchemy_craft_01",
-            "mf_printing_press_2",
-            "mf_printing_press_1",
-            "mf_printing_press_3",
-            "alchemy_table_zombie",
-            "alchemy_workbench_zombie",
-            "morgue_builddesk",
-            "soul_workbench",
-            "mf_crematorium",
-            "table_book_constr",
-            "church_builddesk",
-            "graveyard_builddesk",
-            "cremation_builddesk",
-            "carrot_box",
-            "tree_garden_builddesk",
-            "elevator_top",
-            "garden_builddesk",
-            "mf_saw_1",
-            "mf_potter_wheel_1",
-            "mf_potter_wheel_2",
-            "mf_potter_wheel_3",
-            "mf_workbench_1",
-            "mf_workbench_2",
-            "mf_workbench_3",
-            "mf_anvil_1",
-            "mf_anvil_2",
-            "mf_anvil_3",
-            "mf_jewelry",
-            "mf_paper_press",
-            "mf_wood_builddesk",
-            "cooking_table_1",
-            "cooking_table_2",
-            "cooking_table_3",
-            "keeper_room_builddesk",
-        };
+        //public static string[] UnSafeObjects =
+        //{
+        //    "mf_hammer_1",
+        //    "mf_hammer_2",
+        //    "mf_hammer_3",
+        //    "mf_vine_press",
+        //    "cellar_builddesk",
+        //    "desk_1",
+        //    "desk_2",
+        //    "desk_3",
+        //    "mf_alchemy_craft_03",
+        //    "mf_alchemy_craft_02",
+        //    "mf_alchemy_craft_01",
+        //    "mf_printing_press_2",
+        //    "mf_printing_press_1",
+        //    "mf_printing_press_3",
+        //    "alchemy_table_zombie",
+        //    "alchemy_workbench_zombie",
+        //    "morgue_builddesk",
+        //    "soul_workbench",
+        //    "mf_crematorium",
+        //    "table_book_constr",
+        //    "church_builddesk",
+        //    "graveyard_builddesk",
+        //    "cremation_builddesk",
+        //    "carrot_box",
+        //    "tree_garden_builddesk",
+        //    "elevator_top",
+        //    "garden_builddesk",
+        //    "mf_saw_1",
+        //    "mf_potter_wheel_1",
+        //    "mf_potter_wheel_2",
+        //    "mf_potter_wheel_3",
+        //    "mf_workbench_1",
+        //    "mf_workbench_2",
+        //    "mf_workbench_3",
+        //    "mf_anvil_1",
+        //    "mf_anvil_2",
+        //    "mf_anvil_3",
+        //    "mf_jewelry",
+        //    "mf_paper_press",
+        //    "mf_wood_builddesk",
+        //    "cooking_table_1",
+        //    "cooking_table_2",
+        //    "cooking_table_3",
+        //    "keeper_room_builddesk",
+        //};
 
         public static void ShowMessage(string msg)
         {
