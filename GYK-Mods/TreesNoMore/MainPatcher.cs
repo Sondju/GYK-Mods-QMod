@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Reflection;
 using HarmonyLib;
 
@@ -19,10 +20,10 @@ namespace TreesNoMore
             [HarmonyPrefix]
             public static void Prefix(ref WorldObjectPart prefab)
             {
-                if ((MainGame.game_started || MainGame.game_starting) && prefab.name.Contains("tree"))
-                {
-                    prefab = null;
-                }
+                if ((!MainGame.game_started && !MainGame.game_starting) || !prefab.name.Contains("tree")) return;
+                UnityEngine.Debug.LogError(prefab.name);
+                if (prefab.name.Contains("apple")) return;
+                prefab = null;
             }
         }
     }

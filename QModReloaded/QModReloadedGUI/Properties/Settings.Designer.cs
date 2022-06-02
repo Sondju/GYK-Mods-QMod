@@ -34,5 +34,17 @@ namespace QModReloadedGUI.Properties {
                 this["GamePath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AlertShown {
+            get {
+                return ((bool)(this["AlertShown"]));
+            }
+            set {
+                this["AlertShown"] = value;
+            }
+        }
     }
 }

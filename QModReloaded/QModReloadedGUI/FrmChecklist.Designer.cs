@@ -50,6 +50,7 @@ namespace QModReloadedGUI
             this.ChkEncodingsExists = new System.Windows.Forms.CheckBox();
             this.ChkTupleExists = new System.Windows.Forms.CheckBox();
             this.ChkAssemblyExists = new System.Windows.Forms.CheckBox();
+            this.LblHarmonyVersion = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // ChkModPatched
@@ -287,11 +288,22 @@ namespace QModReloadedGUI
             this.ChkAssemblyExists.UseCompatibleTextRendering = true;
             this.ChkAssemblyExists.UseVisualStyleBackColor = true;
             // 
+            // LblHarmonyVersion
+            // 
+            this.LblHarmonyVersion.AutoSize = true;
+            this.LblHarmonyVersion.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LblHarmonyVersion.Location = new System.Drawing.Point(100, 108);
+            this.LblHarmonyVersion.Name = "LblHarmonyVersion";
+            this.LblHarmonyVersion.Size = new System.Drawing.Size(41, 13);
+            this.LblHarmonyVersion.TabIndex = 22;
+            this.LblHarmonyVersion.Text = "label1";
+            // 
             // FrmChecklist
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(294, 472);
+            this.Controls.Add(this.LblHarmonyVersion);
             this.Controls.Add(this.ChkAssemblyExists);
             this.Controls.Add(this.ChkTupleExists);
             this.Controls.Add(this.ChkEncodingsExists);
@@ -345,5 +357,6 @@ namespace QModReloadedGUI
         private CheckBox ChkEncodingsExists;
         private CheckBox ChkTupleExists;
         private CheckBox ChkAssemblyExists;
+        private Label LblHarmonyVersion;
     }
 }

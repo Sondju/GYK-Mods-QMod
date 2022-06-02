@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -61,6 +62,18 @@ namespace QModReloadedGUI
             {
                 ChkPatcherLocation.Checked = false;
                 ChkPatcherLocation.ForeColor = Color.Red;
+            }
+
+            var harmonyVersion = FileVersionInfo.GetVersionInfo(Path.Combine(Application.StartupPath, Chk0HarmonyExists.Text));
+            if (harmonyVersion.ProductVersion.StartsWith("2.2"))
+            {
+                LblHarmonyVersion.Text = @"Correct, 2.2+";
+                LblHarmonyVersion.ForeColor = Color.Green;
+            }
+            else
+            {
+                LblHarmonyVersion.Text = @"In-correct!, less than 2.2!";
+                LblHarmonyVersion.ForeColor = Color.Red;
             }
 
         }

@@ -109,9 +109,6 @@ public FrmMain()
             Author = "?",
             Id = fileNameWithoutExt,
             EntryMethod = found ? $"{namesp}.{type}.{method}" : $"{fileNameWithoutExt}.MainPatcher.Patch",
-            Config = new Dictionary<string, object>(),
-            Priority = "Last or First",
-            Requires = Array.Empty<string>(),
             Version = "?",
         };
         var newJson = JsonSerializer.Serialize(newMod, JsonOptions);
@@ -134,6 +131,8 @@ public FrmMain()
                 File.WriteAllText(Path.Combine(mod.ModAssemblyPath, "mod.json"), json);
             }
         }
+
+        CheckQueueEverything();
     }
 
 
@@ -228,8 +227,42 @@ public FrmMain()
             WriteLog($"LoadMods() ERROR: {ex.Message}");
         }
 
+        CheckQueueEverything();
         CheckAllModsActive();
         CheckPatched();
+    }
+
+    private void CheckQueueEverything()
+    {
+        var foundQueueEverything = _modList.Find(x => x.Id == "QueueEverything");
+        var foundExhaustless = _modList.Find(x => x.Id == "Exhaust-less");
+        var foundFasterCraft = _modList.Find(x => x.Id == "FasterCraft");
+        var showOrderMessage = false;
+        if (foundQueueEverything != null)
+        {
+            if (foundExhaustless != null)
+            {
+                if (foundQueueEverything.LoadOrder < foundExhaustless.LoadOrder)
+                {
+                    showOrderMessage = true;
+                }
+            }
+
+            if (foundFasterCraft != null)
+            {
+                if (foundQueueEverything.LoadOrder < foundFasterCraft.LoadOrder)
+                {
+                    showOrderMessage = true;
+                }
+            }
+        }
+
+        if (showOrderMessage)
+        {
+            MessageBox.Show(
+                @"It seems you have Queue Everything!* and Exhaust-less/FasterCraft set to an invalid load order. Please ensure that Queue Everything is further down the load order than both of those mods, or it won't detect them.",
+                @"Load Order Issue", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+        }
     }
 
     public bool ModInList(string mod)
@@ -312,6 +345,18 @@ public FrmMain()
         LoadMods();
         DgvMods.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         DgvMods.Sort(DgvMods.Columns[0], ListSortDirection.Ascending);
+        DgvMods.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+        DgvMods.AllowUserToResizeRows = false;
+
+        if (!Properties.Settings.Default.AlertShown)
+        {
+            MessageBox.Show(
+                @"PLEASE READ: I have upgraded an integral DLL (Harmony 1 to Harmony 2) to the latest version available as the current one is quite old and the new one has " +
+                @"a greater toolkit - this means mods will need to be updated as well. All my mods have been updated, (its a single line of code) and I have updated other mods I use." +
+                @" These updated mods will be available on my GitHub until the original author updates. Please re-verify game files, and re-run the patch process. You will not be shown this again.", @"STOP", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            Properties.Settings.Default.AlertShown = true;
+            Properties.Settings.Default.Save();
+        }
 
     }
 
@@ -473,16 +518,7 @@ private void RunGame()
                 modFound = mod;
 
             if (modFound == null) return;
-            if (enabled)
-            {
-                modFound.Enable = true;
-                WriteLog("Enabled " + modFound.DisplayName);
-            }
-            else
-            {
-                modFound.Enable = false;
-                WriteLog("Disabled " + modFound.DisplayName);
-            }
+            modFound.Enable = enabled;
 
             var newJson = JsonSerializer.Serialize(modFound, JsonOptions);
             File.WriteAllText(Path.Combine(modFound.ModAssemblyPath, "mod.json"), newJson);
@@ -806,7 +842,15 @@ private void RunGame()
 
     private void TrayIcon_MouseDoubleClick(object sender, MouseEventArgs e)
     {
-        WindowState = FormWindowState.Normal;
+        if(WindowState == FormWindowState.Minimized)
+            WindowState = FormWindowState.Normal;
+        else
+        {
+            TopMost = true;
+            Focus();
+            BringToFront();
+            TopMost = false;
+        }
         Focus();
         ShowInTaskbar = true;
     }

@@ -34,8 +34,28 @@
   <ItemGroup>
     <Compile Include="MainPatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="lang\strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>strings.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="lang\strings.de.resx" />
+    <EmbeddedResource Include="lang\strings.es.resx" />
+    <EmbeddedResource Include="lang\strings.fr.resx" />
+    <EmbeddedResource Include="lang\strings.it.resx" />
+    <EmbeddedResource Include="lang\strings.ja.resx" />
+    <EmbeddedResource Include="lang\strings.ko.resx" />
+    <EmbeddedResource Include="lang\strings.pl.resx" />
+    <EmbeddedResource Include="lang\strings.pt-BR.resx" />
+    <EmbeddedResource Include="lang\strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="lang\strings.ru.resx" />
+    <EmbeddedResource Include="lang\strings.zh-CN.resx" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="0Harmony, Version=1.2.0.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -57,6 +77,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />
