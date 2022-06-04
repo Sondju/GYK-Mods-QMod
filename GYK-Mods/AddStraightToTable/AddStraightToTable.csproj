@@ -44,6 +44,10 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
@@ -72,6 +76,7 @@ xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\ThoughtfulReminders\bin\
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoIntros\bin\Release\NoIntros.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoIntros\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\LongerDays\bin\Release\LongerDays.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\LongerDays\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\QueueEverything\bin\Release\QueueEverything.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\QueueEverything\" /K /D /H /Y
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\HalloweenNow\bin\Release\HalloweenNow.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\HalloweenNow\" /K /D /H /Y
 )
 if $(ConfigurationName) == Debug (
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\TreesNoMore\bin\Debug\TreesNoMore.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\TreesNoMore\" /K /D /H /Y
@@ -88,6 +93,7 @@ xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\ThoughtfulReminders\bin\
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoIntros\bin\Debug\NoIntros.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoIntros\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\LongerDays\bin\Debug\LongerDays.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\LongerDays\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\QueueEverything\bin\Debug\QueueEverything.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\QueueEverything\" /K /D /H /Y
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\HalloweenNow\bin\Debug\HalloweenNow.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\HalloweenNow\" /K /D /H /Y
 
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\TreesNoMore\bin\Debug\TreesNoMore.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\TreesNoMore\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\UltraWide\bin\Debug\UltraWide.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\UltraWide\" /K /D /H /Y
@@ -103,6 +109,7 @@ xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\ThoughtfulReminders\bin\
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoIntros\bin\Debug\NoIntros.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoIntros\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\LongerDays\bin\Debug\LongerDays.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\LongerDays\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\QueueEverything\bin\Debug\QueueEverything.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\QueueEverything\" /K /D /H /Y
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\HalloweenNow\bin\Debug\HalloweenNow.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\HalloweenNow\" /K /D /H /Y
 )
 </PostBuildEvent>
   </PropertyGroup>

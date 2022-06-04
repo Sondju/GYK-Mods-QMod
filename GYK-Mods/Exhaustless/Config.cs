@@ -22,6 +22,9 @@ namespace Exhaustless
             public bool QuietMusicInGui;
             public bool MakeToolsLastLonger;
             public bool AutoEquipNewTool;
+            public bool SpendHalfGratitude;
+            public int TavernInvIncrease;
+            public int ToolStackSize;
         }
 
         public static Options GetOptions()
@@ -31,6 +34,9 @@ namespace Exhaustless
 
             bool.TryParse(_con.Value("MakeToolsLastLonger", "true"), out var makeToolsLastLonger);
             _options.MakeToolsLastLonger = makeToolsLastLonger;
+
+            bool.TryParse(_con.Value("SpendHalfGratitude", "true"), out var spendHalfGratitude);
+            _options.SpendHalfGratitude = spendHalfGratitude;
 
             bool.TryParse(_con.Value("AutoEquipNewTool", "true"), out var autoEquipNewTool);
             _options.AutoEquipNewTool = autoEquipNewTool;
@@ -64,6 +70,12 @@ namespace Exhaustless
 
             bool.TryParse(_con.Value("DontShowEmptyRowsInInventory", "true"), out var dontShowEmptyRowsInInventory);
             _options.DontShowEmptyRowsInInventory = dontShowEmptyRowsInInventory;
+
+            int.TryParse(_con.Value("TavernInvIncrease", "30"), out var tavernInvIncrease);
+            _options.TavernInvIncrease = tavernInvIncrease;
+
+            int.TryParse(_con.Value("ToolStackSize", "5"), out var toolStackSize);
+            _options.ToolStackSize = toolStackSize;
 
             _con.ConfigWrite();
 

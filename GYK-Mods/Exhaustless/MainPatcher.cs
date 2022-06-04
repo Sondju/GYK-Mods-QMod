@@ -9,7 +9,12 @@ namespace Exhaustless
     public class MainPatcher
     {
         private static Config.Options _cfg;
-
+        public static ItemDefinition.ItemType[] Items =
+        {
+            ItemDefinition.ItemType.Axe, ItemDefinition.ItemType.Shovel, ItemDefinition.ItemType.Hammer,
+            ItemDefinition.ItemType.Pickaxe, ItemDefinition.ItemType.FishingRod, ItemDefinition.ItemType.BodyArmor,
+            ItemDefinition.ItemType.HeadArmor, ItemDefinition.ItemType.Sword
+        };
         public static void Patch()
         {
             try
@@ -25,6 +30,19 @@ namespace Exhaustless
             }
         }
 
+        [HarmonyPatch(typeof(CraftComponent))]
+        [HarmonyPatch(nameof(CraftComponent.TrySpendPlayerGratitudePoints))]
+        public static class CraftComponentTrySpendPlayerGratitudePointsPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref float value)
+            {
+                if (_cfg.SpendHalfGratitude)
+                {
+                    value /= 2f;
+                }
+            }
+        }
 
         [HarmonyPatch(typeof(PlayerComponent))]
         [HarmonyPatch(nameof(PlayerComponent.TrySpendEnergy))]
@@ -162,21 +180,45 @@ namespace Exhaustless
             {
                 if (!_cfg.AllowHandToolDestroy) return;
                 if (__instance == null) return;
-                if (__instance.selected_item == null) return;
-                var itemDef = __instance.selected_item.definition;
-                ItemDefinition.ItemType[] items =
-                {
-                    ItemDefinition.ItemType.Axe, ItemDefinition.ItemType.Shovel, ItemDefinition.ItemType.Hammer,
-                    ItemDefinition.ItemType.Pickaxe, ItemDefinition.ItemType.FishingRod, ItemDefinition.ItemType.BodyArmor, 
-                    ItemDefinition.ItemType.HeadArmor, ItemDefinition.ItemType.Sword
-                };
+                var itemDef = __instance.selected_item?.definition;
                 if (itemDef == null) return;
-                if (items.Contains(itemDef.type))
+                if (Items.Contains(itemDef.type))
                 {
                     itemDef.player_cant_throw_out = false;
                 }
             }
         }
+
+        //patch tools to be stack-able
+        [HarmonyPatch(typeof(GameBalance), "LoadGameBalance")]
+        public static class PatchTools
+        {
+            [HarmonyPostfix]
+            private static void Postfix()
+            {
+                foreach (var itemDefinition in GameBalance.me.items_data.Where(itemDefinition => Items.Contains(itemDefinition.type)).Where(itemDefinition => itemDefinition.stack_count < _cfg.ToolStackSize))
+                {
+                    itemDefinition.stack_count = _cfg.ToolStackSize;
+                }
+            }
+        }
+
+        //makes the racks and the barman inventory larger
+        [HarmonyPatch(typeof(WorldGameObject), "InitNewObject")]
+        internal class PatchTavernInventorySize
+        {
+            [HarmonyPostfix]
+            private static void Postfix(WorldGameObject __instance)
+            {
+                if (__instance.obj_id is "npc_tavern_barman" or "tavern_cellar_rack" or "tavern_cellar_rack_1"
+                    or "tavern_cellar_rack_2" or "tavern_cellar_rack_3" or "tavern_cellar_rack_4"
+                    or "tavern_cellar_rack_5")
+                {
+                    __instance.data.SetInventorySize(__instance.obj_def.inventory_size + _cfg.TavernInvIncrease);
+                }
+            }
+        }
+
 
         [HarmonyPatch(typeof(GameGUI))]
         [HarmonyPatch(nameof(GameGUI.Open))]

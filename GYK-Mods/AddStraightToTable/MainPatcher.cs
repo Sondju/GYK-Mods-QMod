@@ -23,8 +23,8 @@ namespace AddStraightToTable
             }
 
             [HarmonyPostfix]
-            public static void Postfix(AutopsyGUI __instance, BaseItemCellGUI item_gui, Item ____body,
-                WorldGameObject ____autopti_obj, Inventory ____parts_inventory)
+            public static void Postfix(ref AutopsyGUI __instance, BaseItemCellGUI item_gui, ref Item ____body,
+                ref WorldGameObject ____autopti_obj, ref Inventory ____parts_inventory)
             {
                 if (item_gui.item.id == "insertion_button_pseudoitem")
                 {
@@ -34,6 +34,8 @@ namespace AddStraightToTable
                         obj = ____autopti_obj;
                     }
 
+                    var inventory = ____parts_inventory;
+                    var instance = __instance;
                     GUIElements.me.resource_picker.Open(obj, delegate(Item item, InventoryWidget _)
                         {
                             if (item == null || item.IsEmpty())
@@ -53,96 +55,45 @@ namespace AddStraightToTable
                             }
 
                             text = text.Replace("_dark", "");
-                            if (____parts_inventory.data.inventory.Any(item2 => item2 != null && !item2.IsEmpty() && item2.id.StartsWith(text)))
+                            if (inventory.data.inventory.Any(item2 =>
+                                    item2 != null && !item2.IsEmpty() && item2.id.StartsWith(text)))
                             {
                                 return InventoryWidget.ItemFilterResult.Inactive;
                             }
 
-                            return GetInsertCraftDefinition(item, ____autopti_obj) == null ? InventoryWidget.ItemFilterResult.Inactive : InventoryWidget.ItemFilterResult.Active;
+                            return instance.GetInsertCraftDefinition(item) == null ? InventoryWidget.ItemFilterResult.Inactive : InventoryWidget.ItemFilterResult.Active;
+
                         },
                         __instance.OnItemForInsertionPicked);
                     return;
                 }
+          
+                var craftDefinition = (CraftDefinition)typeof(AutopsyGUI)
+                    .GetMethod("GetExtractCraftDefinition", AccessTools.all)
+                    ?.Invoke(__instance, new object[]
+                    {
+                        item_gui.item
+                    });
 
-                var craftDefinition = GetExtractCraftDefinition(item_gui.item, ____autopti_obj);
+
                 if (craftDefinition == null)
                 {
                     return;
                 }
 
-                RemoveBodyPartFromBody(____body, item_gui.item);
+                typeof(AutopsyGUI).GetMethod("RemoveBodyPartFromBody", AccessTools.all)
+                    ?.Invoke(__instance, new object[]
+                    {
+                        ____body,
+                        item_gui.item
+                    });
+
                 ____autopti_obj.components.craft.CraftAsPlayer(craftDefinition, item_gui.item);
-                __instance.Hide();
-            }
-        }
-
-        public static void RemoveBodyPartFromBody(Item body, Item item)
-        {
-            foreach (var item2 in body.inventory)
-            {
-                if (item2.id == item.id)
                 {
-                    body.RemoveItem(item, 1);
-                    break;
-                }
-
-                using var enumerator2 = item2.inventory.GetEnumerator();
-                while (enumerator2.MoveNext())
-                {
-                    if (enumerator2.Current?.id != item.id) continue;
-                    item2.RemoveItem(item, 1);
-                    return;
+                    __instance.Hide();
                 }
             }
         }
-
-        public static CraftDefinition GetInsertCraftDefinition(Item item, WorldGameObject obj)
-        {
-            if (item == null || item.IsEmpty())
-            {
-                return null;
-            }
-
-            var text = item.id;
-            if (text.Contains(":"))
-            {
-                text = text.Split(':')[0];
-            }
-
-            var dataOrNull =
-                GameBalance.me.GetDataOrNull<CraftDefinition>("insert:" + obj.obj_id + ":" + text);
-            if (dataOrNull != null && !MainGame.me.save.IsCraftVisible(dataOrNull))
-            {
-                return null;
-            }
-
-            return dataOrNull;
-        }
-
-        private static CraftDefinition GetExtractCraftDefinition(Item item, WorldGameObject obj)
-        {
-            if (item.IsEmpty())
-            {
-                return null;
-            }
-
-            var text = item.id;
-            if (text.Contains(":"))
-            {
-                text = text.Split(':')[0];
-            }
-
-            var dataOrNull = GameBalance.me.GetDataOrNull<CraftDefinition>("ex:" + obj.obj_id + ":" + text);
-            if (dataOrNull != null && !MainGame.me.save.IsCraftVisible(dataOrNull))
-            {
-                return null;
-            }
-
-            return dataOrNull;
-        }
-
-
-
     }
 }
 

@@ -369,6 +369,11 @@ namespace SaveNow
                 {
                     AutoSave();
                 }
+                if (Input.GetKeyUp(KeyCode.J))
+                {
+                    MainGame.me.player.Say(MainGame.me.player.cur_gd_point, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
+                        SmartSpeechEngine.VoiceID.None, true);
+                }
             }
         }
 
