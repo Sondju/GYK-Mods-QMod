@@ -15,16 +15,11 @@ namespace Exhaustless
             public bool YawnMessage;
             public bool SpendHalfEnergy;
             public bool AllowHandToolDestroy;
-            public bool ShowOnlyPersonalInventory;
-            public bool DontShowEmptyRowsInInventory;
             public bool SpendHalfSanity;
             public bool AutoWakeFromMeditation;
-            public bool QuietMusicInGui;
             public bool MakeToolsLastLonger;
             public bool AutoEquipNewTool;
             public bool SpendHalfGratitude;
-            public int TavernInvIncrease;
-            public int ToolStackSize;
         }
 
         public static Options GetOptions()
@@ -44,9 +39,6 @@ namespace Exhaustless
             bool.TryParse(_con.Value("SpeedUpSleep", "true"), out var speedUpSleep);
             _options.SpeedUpSleep = speedUpSleep;
 
-            bool.TryParse(_con.Value("QuietMusicInGUI", "true"), out var quietMusicInGUI);
-            _options.QuietMusicInGui = quietMusicInGUI;
-
             bool.TryParse(_con.Value("AutoWakeFromMeditation", "true"), out var autoWakeFromMeditation);
             _options.AutoWakeFromMeditation = autoWakeFromMeditation;
 
@@ -62,20 +54,6 @@ namespace Exhaustless
             bool.TryParse(_con.Value("SpendHalfEnergy", "true"), out var spendHalfEnergy);
             _options.SpendHalfEnergy = spendHalfEnergy;
 
-            bool.TryParse(_con.Value("AllowHandToolDestroy", "true"), out var allowHandToolDestroy);
-            _options.AllowHandToolDestroy = allowHandToolDestroy;
-
-            bool.TryParse(_con.Value("ShowOnlyPersonalInventory", "true"), out var showOnlyPersonalInventory);
-            _options.ShowOnlyPersonalInventory = showOnlyPersonalInventory;
-
-            bool.TryParse(_con.Value("DontShowEmptyRowsInInventory", "true"), out var dontShowEmptyRowsInInventory);
-            _options.DontShowEmptyRowsInInventory = dontShowEmptyRowsInInventory;
-
-            int.TryParse(_con.Value("TavernInvIncrease", "30"), out var tavernInvIncrease);
-            _options.TavernInvIncrease = tavernInvIncrease;
-
-            int.TryParse(_con.Value("ToolStackSize", "5"), out var toolStackSize);
-            _options.ToolStackSize = toolStackSize;
 
             _con.ConfigWrite();
 

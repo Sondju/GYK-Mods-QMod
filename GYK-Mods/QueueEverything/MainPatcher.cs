@@ -20,9 +20,9 @@ namespace QueueEverything
         public static float TimeAdjustment;
         public static Dictionary<string, string> Objects = new();
         public static int CraftAmount = 1;
-        public static SmartExpression CraftTimeBackup;
         private static Config.Options _cfg;
         public static WorldGameObject PreviouWorldGameObject;
+        public static bool AlreadyRun;
 
         public static void ShowMessage(string msg)
         {
@@ -44,6 +44,7 @@ namespace QueueEverything
             FasterCraft = false;
             Exhaustless = false;
             MaxButton = false;
+            AlreadyRun = false;
 
             if (Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod"))
             {
@@ -66,17 +67,6 @@ namespace QueueEverything
             }
         }
 
-        [HarmonyPatch(typeof(CraftItemGUI))]
-        [HarmonyPatch(nameof(CraftItemGUI.Redraw))]
-        public static class CraftItemGuiRedrawPatch
-        {
-            [HarmonyPrefix]
-            public static void Prefix(ref int ____amount)
-            {
-                CraftAmount = ____amount;
-            }
-        }
-
         [HarmonyPatch(typeof(CraftDefinition))]
         [HarmonyPatch(nameof(CraftDefinition.CanCraftMultiple))]
         public static class CraftDefinitionCanCraftMultiplePatch
@@ -84,6 +74,8 @@ namespace QueueEverything
             [HarmonyPostfix]
             public static void Postfix(ref bool __result)
             {
+                var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
+                if (crafteryWgo.obj_id.Contains("crematorium")) return;
                 __result = true;
             }
         }
@@ -256,16 +248,20 @@ namespace QueueEverything
 
                 if (__instance.is_auto)
                 {
-                    var num4 = __instance.craft_time is not {has_expression: true}
-                        ? 0
-                        : __instance.craft_time.EvaluateFloat(wgo);
+                    float num4 = 0; // = __instance.craft_time is not {has_expression: true}
+                    //    ? 0
+                    //    : __instance.craft_time.EvaluateFloat(wgo);
+
+                    var found = Crafts.TryGetValue(__instance.id, out var value);
+                    if (found)
+                    {
+                        num4 = value is not {has_expression: true}
+                            ? 0
+                            : value.EvaluateFloat(wgo);
+                    }
+
                     if (num4 != 0)
                     {
-                        if (num4 > 0)
-                        {
-                            num4 *= CraftAmount;
-                        }
-
                         if (FasterCraft)
                         {
                             if (TimeAdjustment < 0)
@@ -276,6 +272,11 @@ namespace QueueEverything
                             {
                                 num4 /= TimeAdjustment;
                             }
+                        }
+
+                        if (num4 > 0)
+                        {
+                            num4 *= CraftAmount;
                         }
 
                         var timeSpan = TimeSpan.FromSeconds(Mathf.RoundToInt(num4));
@@ -300,10 +301,10 @@ namespace QueueEverything
 
                 foreach (var item in __instance.needs_from_wgo.Where(item => item.id == "fire"))
                 {
-                    var found = FireCrafts.TryGetValue(item.id, out var value);
+                    var found = FireCrafts.TryGetValue(__instance.id, out var value);
                     if (!found)
                     {
-                        FireCrafts.Add(item.id, item.value);
+                        FireCrafts.Add(__instance.id, item.value);
                     }
                     else
                     {
@@ -311,7 +312,9 @@ namespace QueueEverything
                     }
 
                     var amount = item.value * multiplier;
-                    var text2 = amount % 1 == 0 ? $"[c](fire2)[/c]{item.value * multiplier:0}" : $"[c](fire2)[/c]{item.value * multiplier:0.0}";
+                    var text2 = amount % 1 == 0
+                        ? $"[c](fire2)[/c]{item.value * multiplier:0}"
+                        : $"[c](fire2)[/c]{item.value * multiplier:0.0}";
                     if (!wgo.data.IsEnoughItems(item, "", 0, multiplier))
                     {
                         text2 = "[ff1111]" + text2 + "[/c]";
@@ -353,8 +356,56 @@ namespace QueueEverything
                     }
                 }
 
-                File.WriteAllText("./qmods/resulttext.txt", text);
                 __result = text;
+            }
+        }
+
+        [HarmonyPatch(typeof(CraftGUI))]
+        [HarmonyPatch(nameof(CraftGUI.Open))]
+        public static class CraftGuiOpenPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix()
+            {
+                CraftAmount = 1;
+                AlreadyRun = false;
+            }
+        }
+
+        [HarmonyPatch(typeof(CraftGUI))]
+        [HarmonyPatch(nameof(CraftGUI.ExpandItem))]
+        public static class CraftGuiExpandItemPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref CraftGUI __instance, ref CraftItemGUI craft_item_gui, ref CraftItemGUI ____exanded_item)
+            {
+                if (_cfg.AutoSelectCraftButtonWithController && LazyInput.gamepad_active)
+                {
+                    foreach (var uiButton in craft_item_gui.GetComponentsInChildren<UIButton>())
+                    {
+                        if (!uiButton.name.Contains("craft")) continue;
+                        __instance.gamepad_controller.SetFocusedItem(uiButton.GetComponent<GamepadNavigationItem>());
+                        uiButton.gameObject.SetActive(true);
+
+                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(CraftGUI), "SwitchTab")]
+        public static class CraftGuiSwitchTabPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix()
+            {
+                CraftAmount = 1;
+                AlreadyRun = false;
+            }
+
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                AlreadyRun = true;
             }
         }
 
@@ -364,16 +415,29 @@ namespace QueueEverything
         public static class CraftItemGuiDrawPatch
         {
             [HarmonyPrefix]
-            public static void Prefix(ref CraftItemGUI __instance, ref CraftDefinition craft_definition)
+            public static void Prefix(ref CraftItemGUI __instance, ref CraftDefinition craft_definition, ref int ____amount)
             {
+                ____amount = 1;
                 CraftAmount = 1;
+
+                var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
+                if (PreviouWorldGameObject == null)
+                {
+                    PreviouWorldGameObject = crafteryWgo;
+                }
+
+                if (!string.Equals(crafteryWgo.obj_id, PreviouWorldGameObject.obj_id))
+                {
+                    FireCrafts.Clear();
+                    PreviouWorldGameObject = crafteryWgo;
+                }
 
                 foreach (var item in craft_definition.needs_from_wgo.Where(item => item.id == "fire"))
                 {
-                    var foundFire = FireCrafts.TryGetValue(item.id, out var fireValue);
+                    var foundFire = FireCrafts.TryGetValue(craft_definition.id, out var fireValue);
                     if (!foundFire)
                     {
-                        FireCrafts.Add(item.id, item.value);
+                        FireCrafts.Add(craft_definition.id, item.value);
                     }
                     else
                     {
@@ -388,15 +452,155 @@ namespace QueueEverything
                     }
                 }
 
-                var found = Crafts.TryGetValue(craft_definition.id, out var value);
+                var found = Crafts.TryGetValue(craft_definition.id, out _);
                 if (!found)
                 {
                     Crafts.Add(craft_definition.id, craft_definition.craft_time);
+                }
+
+                Crafts.TryGetValue(craft_definition.id, out var value);
+                if (FasterCraft)
+                {
+                    var ct = value?.EvaluateFloat();
+                    if (TimeAdjustment < 0)
+                    {
+                        ct *= TimeAdjustment;
+                        craft_definition.craft_time = SmartExpression.ParseExpression(ct.ToString());
+                    }
+                    else
+                    {
+                        ct /= TimeAdjustment;
+                        craft_definition.craft_time = SmartExpression.ParseExpression(ct.ToString());
+                    }
                 }
                 else
                 {
                     craft_definition.craft_time = value;
                 }
+            }
+        }
+
+        [HarmonyPatch(typeof(CraftItemGUI))]
+        [HarmonyPatch(nameof(CraftItemGUI.Redraw))]
+        public static class CraftItemGuiRedrawPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref CraftItemGUI __instance, ref List<string> ____multiquality_ids,
+                ref CraftGUI ____craft_gui, ref int ____amount)
+            {
+                CraftAmount = ____amount;
+
+                if (AlreadyRun) return;
+
+                List<int> craftable = new();
+                List<int> notCraftable = new();
+                craftable.Clear();
+                notCraftable.Clear();
+                var isMultiQualCraft = false;
+                var bCraftable = 0;
+                var sCraftable = 0;
+                var gCraftable = 0;
+                var multiInventory = (!GlobalCraftControlGUI.is_global_control_active)
+                    ? MainGame.me.player.GetMultiInventoryForInteraction()
+                    : GUIElements.me.craft.multi_inventory;
+                //const string path = "./qmods/multis.txt";
+                //var message = "---------------------\n" + "Item: " + __instance.current_craft.id + "\n";
+                for (var i = 0; i < ____multiquality_ids.Count; i++)
+                {
+                    if (string.IsNullOrWhiteSpace(____multiquality_ids[i]))
+                    {
+                        var itemCount = multiInventory.GetTotalCount(__instance.current_craft.needs[i].id);
+                        var itemNeed = __instance.current_craft.needs[i].value;
+                        var itemCraftable = itemCount / itemNeed;
+                        if (itemCraftable != 0)
+                        {
+                            craftable.Add(itemCraftable);
+                        }
+                        else
+                        {
+                            notCraftable.Add(itemCraftable);
+                        }
+                        //message += "Item: " + __instance.current_craft.needs[i].id + ", Stock: " + itemCount +
+                        //           ", Craftable: " + itemCraftable + "\n";
+                        //message += " - Required for craft: " + itemNeed + "\n";
+                    }
+                    else
+                    {
+                        isMultiQualCraft = true;
+                        var itemValueNeeded = __instance.current_craft.needs[i].value;
+                        var bStarItem = multiInventory.GetTotalCount(__instance.current_craft.needs[i].id + ":1");
+                        var sStarItem = multiInventory.GetTotalCount(__instance.current_craft.needs[i].id + ":2");
+                        var gStarItem = multiInventory.GetTotalCount(__instance.current_craft.needs[i].id + ":3");
+                        bCraftable = bStarItem / itemValueNeeded;
+                        sCraftable = sStarItem / itemValueNeeded;
+                        gCraftable = gStarItem / itemValueNeeded;
+                        if (bCraftable != 0) craftable.Add(bCraftable);
+                        if (sCraftable != 0) craftable.Add(sCraftable);
+                        if (gCraftable != 0) craftable.Add(gCraftable);
+
+
+                        //message += "MQ Item " + i + ": " + ____multiquality_ids[i] + "\n - Gold Stock: " + gStarItem +
+                        //           ", Craftable: " + gStarItem / itemValueNeeded + "\n";
+                        //message += " - Silver Stock: " + sStarItem + ", Craftable: " + sStarItem / itemValueNeeded +
+                        //           "\n";
+                        //message += " - Bronze Stock: " + bStarItem + ", Craftable: " + bCraftable + "\n";
+                        //message += " - Required for craft: " + __instance.current_craft.needs[i].value + "\n";
+                        if (bCraftable + sCraftable + gCraftable > 0)
+                        {
+                            if (_cfg.AutoSelectHighestQualRecipe)
+                            {
+                                if (gCraftable > 0)
+                                {
+                                    ____multiquality_ids[i] = __instance.current_craft.needs[i].id + ":3";
+                                }
+                                else if (sCraftable > 0)
+                                {
+                                    ____multiquality_ids[i] = __instance.current_craft.needs[i].id + ":2";
+                                }
+                                else
+                                {
+                                    ____multiquality_ids[i] = __instance.current_craft.needs[i].id + ":1";
+                                }
+                            }
+                        }
+                    }
+                }
+
+                var m1 = 0;
+                if (craftable.Count > 0)
+                {
+                    m1 = craftable.Min();
+                }
+
+                var multiMin = Mathf.Max(bCraftable, sCraftable, gCraftable);
+                var min = multiMin <= 0 ? m1 : Math.Min(m1, multiMin);
+
+                if (_cfg.AutoMaxMultiQualCrafts)
+                {
+                    if (isMultiQualCraft && multiMin!=0)
+                    {
+                        CraftAmount = min;
+                        ____amount = min;
+                    }
+                }
+
+                if (_cfg.AutoMaxNormalCrafts)
+                {
+                    if (!isMultiQualCraft)
+                    {
+                        if (notCraftable.Count <= 0)
+                        {
+                            CraftAmount = min;
+                            ____amount = min;
+                        }
+                    }
+                }
+
+
+                //message += "Max Craftable: " + min + "\n";
+                //message += "Ingredient list count: " + craftable.Count + "\n";
+                //message += "---------------------\n";
+                //File.AppendAllText(path, message);
             }
         }
 
@@ -410,23 +614,66 @@ namespace QueueEverything
                 var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
                 if (crafteryWgo.obj_id.Contains("build")) return;
 
-                CraftTimeBackup = __instance.craft_definition.craft_time;
-                var originalTimeFloat = CraftTimeBackup.EvaluateFloat(crafteryWgo, MainGame.me.player);
+                var found = Crafts.TryGetValue(__instance.craft_definition.id, out var value);
+                float originalTimeFloat;
+                if (found)
+                {
+                    originalTimeFloat = value.EvaluateFloat(crafteryWgo, MainGame.me.player);
+                }
+                else
+                {
+                    Crafts.Add(__instance.craft_definition.id, __instance.craft_definition.craft_time);
+                    originalTimeFloat =
+                        __instance.craft_definition.craft_time.EvaluateFloat(crafteryWgo, MainGame.me.player);
+                }
+
+
+                __instance.craft_definition.craft_time =
+                    SmartExpression.ParseExpression(originalTimeFloat.ToString(CultureInfo.InvariantCulture));
+
+                var time = originalTimeFloat;
+
 
                 if (FasterCraft)
                 {
                     if (TimeAdjustment < 0)
                     {
-                        originalTimeFloat *= TimeAdjustment;
+                        time *= TimeAdjustment;
                     }
                     else
                     {
-                        originalTimeFloat /= TimeAdjustment;
+                        time /= TimeAdjustment;
                     }
                 }
 
-                __instance.craft_definition.craft_time =
-                    SmartExpression.ParseExpression(originalTimeFloat.ToString(CultureInfo.InvariantCulture));
+                EffectBubblesManager.ShowImmediately(MainGame.me.player_pos, $"Time Before Craft Calc: {time}",
+                    EffectBubblesManager.BubbleColor.White,
+                    true, 4f);
+
+                time *= CraftAmount;
+
+                EffectBubblesManager.ShowImmediately(MainGame.me.player_pos, $"Time After Craft Calc: {time}",
+                    EffectBubblesManager.BubbleColor.White,
+                    true, 4f);
+
+                if (time >= 300)
+                {
+                    var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
+                    Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+                 
+                  
+                    if (lang.Contains("ko") || lang.Contains("ja") || lang.Contains("zh"))
+                    {
+                        MainGame.me.player.Say(strings.Message, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
+                            SmartSpeechEngine.VoiceID.None, true);
+                    }
+                    else
+                    {
+                        MainGame.me.player.Say($"Hmmm guess I'll come back in roughly {time / 60:00} minutes...",
+                            null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
+                            SmartSpeechEngine.VoiceID.None, true);
+                    }
+                }
             }
         }
     }

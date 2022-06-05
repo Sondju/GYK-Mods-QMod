@@ -21,23 +21,23 @@ public class QModLoader
 
     public static void Patch()
     {
-        AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
-        {
-            var dllFiles =
-            Directory.EnumerateDirectories(QModBaseDir).SelectMany(
-                directory => Directory.EnumerateFiles(directory, "*.dll"));
+        //AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+        //{
+        //    var dllFiles =
+        //    Directory.EnumerateDirectories(QModBaseDir).SelectMany(
+        //        directory => Directory.EnumerateFiles(directory, "*.dll"));
             
-            foreach (var dll in dllFiles)
-            {
-                var dllFi = new FileInfo(dll);
-                Console.WriteLine(Path.GetFileNameWithoutExtension(dllFi.Name) + " " + args.Name);
-                if (args.Name.Contains(Path.GetFileNameWithoutExtension(dllFi.Name)))
-                {
-                    return Assembly.LoadFrom(dllFi.FullName);
-                }
-            }
-            return null;
-        };
+        //    foreach (var dll in dllFiles)
+        //    {
+        //        var dllFi = new FileInfo(dll);
+        //        Console.WriteLine(Path.GetFileNameWithoutExtension(dllFi.Name) + " " + args.Name);
+        //        if (args.Name.Contains(Path.GetFileNameWithoutExtension(dllFi.Name)))
+        //        {
+        //            return Assembly.LoadFrom(dllFi.FullName);
+        //        }
+        //    }
+        //    return null;
+        //};
 
 
         Logger.WriteLog("Assembly-CSharp.dll has been patched, (otherwise you wouldn't see this message.");

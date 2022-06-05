@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace HalloweenNow
+namespace AppleTreesEnhanced
 {
     public class ConfigReader
     {
-        private const string ConfigPath = "./QMods/HalloweenNow/config.ini";
+        private const string ConfigPath = "./QMods/AppleTreesEnhanced/config.ini";
 
         private readonly Dictionary<string, string> _values = new();
         public ConfigReader( )

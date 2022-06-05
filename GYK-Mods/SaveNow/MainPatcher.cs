@@ -9,6 +9,7 @@ using System.Threading;
 using System.Timers;
 using HarmonyLib;
 using SaveNow.lang;
+using Steamworks;
 using UnityEngine;
 using Timer = System.Timers.Timer;
 
@@ -99,7 +100,10 @@ namespace SaveNow
         //reads co-ords from player, and saves to file
         public static bool SaveLocation(bool menuExit, string saveFile)
         {
-           Pos = MainGame.me.player.pos3;
+            var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+
+            Pos = MainGame.me.player.pos3;
             CurrentSave = MainGame.me.save_slot.filename_no_extension;
 
             var overwrite = SaveLocationsDictionary.TryGetValue(CurrentSave, out _);
@@ -238,7 +242,7 @@ namespace SaveNow
                 }
 
                 _sortedTrimmedSaveGames = AllSaveGames.OrderByDescending(o => o.game_time).ToList();
-                Resize(_sortedTrimmedSaveGames, 5);
+                Resize(_sortedTrimmedSaveGames, _cfg.AutoSavesToKeep);
                 slot_datas = _sortedTrimmedSaveGames;
                 focus_on_first = true;
             }
@@ -248,6 +252,9 @@ namespace SaveNow
         //reads co-ords from file and teleports player there
         public static void RestoreLocation()
         {
+            var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+
             var homeVector = new Vector3(2841, -6396, -1332);
             var foundLocation = SaveLocationsDictionary.TryGetValue(MainGame.me.save_slot.filename_no_extension, out var posVector3 );
             var pos = foundLocation ? posVector3 : homeVector;
@@ -284,7 +291,10 @@ namespace SaveNow
             //replaces the standard exit dialog with one that supports save on exit
             public static void Postfix(InGameMenuGUI __instance)
             {
-               __instance.SetControllsActive(false);
+                var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+
+                __instance.SetControllsActive(false);
                 __instance.OnClosePressed();
                 var messageText = strings.SaveAreYouSureMenu + "?\n\n" +
                                   strings.SaveProgressSaved + ".";
@@ -365,17 +375,54 @@ namespace SaveNow
                     PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
                         delegate { SaveLocation(false, string.Empty); });
                 }
-                if (Input.GetKeyUp(KeyCode.L))
-                {
-                    AutoSave();
-                }
-                if (Input.GetKeyUp(KeyCode.J))
-                {
-                    MainGame.me.player.Say(MainGame.me.player.cur_gd_point, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
-                        SmartSpeechEngine.VoiceID.None, true);
-                }
+                //if (Input.GetKeyUp(KeyCode.L))
+                //{
+                //    AutoSave();
+                //}
+                //if (Input.GetKeyUp(KeyCode.J))
+                //{
+                //    FixTrees();
+                //    MainGame.me.player.Say(MainGame.me.player.cur_gd_point, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
+                //        SmartSpeechEngine.VoiceID.None, true);
+                //}
             }
         }
+
+        //public static void FixTrees()
+        //{
+        //    MainGame.me.player.Say("Fixing bushes...hopefully..", null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
+        //        SmartSpeechEngine.VoiceID.None, true);
+
+        //    var bush1Items = WorldMap.GetWorldGameObjectsByObjId("bush_1");
+        //    var bush2Items = WorldMap.GetWorldGameObjectsByObjId("bush_2");
+        //    var bush3Items = WorldMap.GetWorldGameObjectsByObjId("bush_3");
+
+        //    MainGame.me.player.Say($"Bushes1: {bush1Items.Count}, Bushes2: {bush2Items.Count}, Bushes3: {bush3Items.Count}", null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
+        //        SmartSpeechEngine.VoiceID.None, true);
+
+        //    foreach (var item in bush1Items)
+        //    {
+        //        item.ReplaceWithObject("bush_1", true);
+        //        item.GetComponent<ChunkedGameObject>().Init(true);
+        //        item.TryStartCraft("bush_1_berry_respawn");
+
+        //    }
+        //    foreach (var item in bush2Items)
+        //    {
+        //        item.ReplaceWithObject("bush_2", true);
+        //        item.GetComponent<ChunkedGameObject>().Init(true);
+        //        item.TryStartCraft("bush_2_berry_respawn");
+
+        //    }
+
+        //    foreach (var item in bush3Items)
+        //    {
+        //        item.ReplaceWithObject("bush_3", true);
+        //        item.GetComponent<ChunkedGameObject>().Init(true);
+        //        item.TryStartCraft("bush_3_berry_respawn");
+
+        //    }
+        //}
 
         public static void AutoSave()
         {
