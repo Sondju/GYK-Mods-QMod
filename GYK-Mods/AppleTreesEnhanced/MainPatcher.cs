@@ -31,7 +31,7 @@ namespace AppleTreesEnhanced
 
                         for (var i = 0; i < 4; i++)
                         {
-                            __instance.DropItem(new Item("fruit:berry", 1), (Direction)Random.Range(1, 5));
+                            __instance.DropItem(new Item("fruit:berry", 1), direction:(Direction)Random.Range(1, 5), force: 5f, check_walls: false);
                         }
 
                         __instance.ReplaceWithObject(new_obj_id, true);
@@ -47,7 +47,7 @@ namespace AppleTreesEnhanced
                         new_obj_id = "bush_1";
                         for (var i = 0; i < 4; i++)
                         {
-                            __instance.DropItem(new Item("fruit:berry", 1), (Direction)Random.Range(1, 5));
+                            __instance.DropItem(new Item("fruit:berry", 1), direction: (Direction)Random.Range(1, 5), force: 5f, check_walls: false);
                         }
                         __instance.ReplaceWithObject(new_obj_id, true);
                         __instance.GetComponent<ChunkedGameObject>().Init(true);
@@ -59,7 +59,7 @@ namespace AppleTreesEnhanced
                         new_obj_id = "bush_2";
                         for (var i = 0; i < 4; i++)
                         {
-                            __instance.DropItem(new Item("fruit:berry", 1), (Direction)Random.Range(1, 5));
+                            __instance.DropItem(new Item("fruit:berry", 1), direction: (Direction)Random.Range(1, 5), force: 5f, check_walls: false);
                         }
                         __instance.ReplaceWithObject(new_obj_id, true);
                         __instance.GetComponent<ChunkedGameObject>().Init(true);
@@ -70,7 +70,7 @@ namespace AppleTreesEnhanced
                     {
                         for (var i = 0; i < 4; i++)
                         {
-                            __instance.DropItem(new Item("fruit:berry", 1), (Direction)Random.Range(1, 5));
+                            __instance.DropItem(new Item("fruit:berry", 1), direction: (Direction)Random.Range(1, 5), force: 5f, check_walls: false);
                         }
                         new_obj_id = "bush_3";
                         __instance.ReplaceWithObject(new_obj_id, true);
@@ -85,7 +85,7 @@ namespace AppleTreesEnhanced
                     {
                         for (var i = 0; i < 15; i++)
                         {
-                            __instance.DropItem(new Item("fruit:apple_red_crop", 1), (Direction)Random.Range(1, 5));
+                            __instance.DropItem(new Item("fruit:apple_red_crop", 1), direction: (Direction)Random.Range(1, 5), force: 5f, check_walls: false);
                         }
                         
                         new_obj_id = "tree_apple_garden_empty";

@@ -88,6 +88,8 @@ namespace ThoughtfulReminders
 
                 if (_cfg.DaysOnly)
                 {
+                    var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
+                    Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
                     switch (newDayOfWeek)
                     {
                         case 0: //day of Sloth
@@ -115,6 +117,8 @@ namespace ThoughtfulReminders
                 }
                 else
                 {
+                    var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
+                    Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
                     switch (newDayOfWeek)
                     {
                         case 0: //day of Sloth

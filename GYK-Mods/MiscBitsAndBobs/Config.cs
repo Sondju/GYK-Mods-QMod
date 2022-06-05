@@ -11,7 +11,7 @@ namespace MiscBitsAndBobs
         public class Options
         {
             public int TavernInvIncrease;
-            public int ToolStackSize;
+            public bool EnableToolAndPrayerStacking;
             public bool ShowOnlyPersonalInventory;
             public bool DontShowEmptyRowsInInventory;
             public bool QuietMusicInGui;
@@ -27,13 +27,13 @@ namespace MiscBitsAndBobs
             int.TryParse(_con.Value("TavernInvIncrease", "30"), out var tavernInvIncrease);
             _options.TavernInvIncrease = tavernInvIncrease;
 
-            int.TryParse(_con.Value("ToolStackSize", "5"), out var toolStackSize);
-            _options.ToolStackSize = toolStackSize;
+            bool.TryParse(_con.Value("EnableToolAndPrayerStacking", "true"), out var enableToolAndPrayerStacking);
+            _options.EnableToolAndPrayerStacking = enableToolAndPrayerStacking;
 
             bool.TryParse(_con.Value("QuietMusicInGUI", "true"), out var quietMusicInGUI);
             _options.QuietMusicInGui = quietMusicInGUI;
 
-            bool.TryParse(_con.Value("ShowOnlyPersonalInventory", "true"), out var showOnlyPersonalInventory);
+            bool.TryParse(_con.Value("ShowOnlyPersonalInventory", "false"), out var showOnlyPersonalInventory);
             _options.ShowOnlyPersonalInventory = showOnlyPersonalInventory;
 
             bool.TryParse(_con.Value("DontShowEmptyRowsInInventory", "true"), out var dontShowEmptyRowsInInventory);
@@ -42,7 +42,7 @@ namespace MiscBitsAndBobs
             bool.TryParse(_con.Value("AllowHandToolDestroy", "true"), out var allowHandToolDestroy);
             _options.AllowHandToolDestroy = allowHandToolDestroy;
 
-            bool.TryParse(_con.Value("HalloweenNow", "true"), out var halloweenNow);
+            bool.TryParse(_con.Value("HalloweenNow", "false"), out var halloweenNow);
             _options.HalloweenNow = halloweenNow;
 
             _con.ConfigWrite();

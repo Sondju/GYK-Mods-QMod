@@ -22,7 +22,7 @@ namespace MiscBitsAndBobs
         {
             ItemDefinition.ItemType.Axe, ItemDefinition.ItemType.Shovel, ItemDefinition.ItemType.Hammer,
             ItemDefinition.ItemType.Pickaxe, ItemDefinition.ItemType.FishingRod, ItemDefinition.ItemType.BodyArmor,
-            ItemDefinition.ItemType.HeadArmor, ItemDefinition.ItemType.Sword
+            ItemDefinition.ItemType.HeadArmor, ItemDefinition.ItemType.Sword, ItemDefinition.ItemType.Preach
         };
 
 
@@ -59,9 +59,14 @@ namespace MiscBitsAndBobs
             [HarmonyPostfix]
             private static void Postfix()
             {
-                foreach (var itemDefinition in GameBalance.me.items_data.Where(itemDefinition => ToolItems.Contains(itemDefinition.type)).Where(itemDefinition => itemDefinition.stack_count < _cfg.ToolStackSize))
+                if (_cfg.EnableToolAndPrayerStacking)
                 {
-                    itemDefinition.stack_count += _cfg.ToolStackSize;
+                    foreach (var itemDefinition in GameBalance.me.items_data
+                                 .Where(itemDefinition => ToolItems.Contains(itemDefinition.type)))
+                    {
+                        itemDefinition.stack_count += 1000;
+                        itemDefinition.base_count += 1000;
+                    }
                 }
             }
         }
