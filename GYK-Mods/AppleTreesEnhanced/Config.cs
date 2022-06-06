@@ -2,7 +2,7 @@
 
 namespace AppleTreesEnhanced
 {
-    public class Config
+    public static class Config
     {
         private static Options _options;
         private static ConfigReader _con;

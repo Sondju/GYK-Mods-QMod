@@ -9,20 +9,31 @@ using HarmonyLib;
 using QueueEverything.lang;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+// ReSharper disable InconsistentNaming
 
 namespace QueueEverything
 {
     public class MainPatcher
     {
-        public static Dictionary<string, SmartExpression> Crafts = new();
-        public static Dictionary<string, int> FireCrafts = new();
-        public static bool FasterCraft, Exhaustless, MaxButton;
-        public static float TimeAdjustment;
-        public static Dictionary<string, string> Objects = new();
-        public static int CraftAmount = 1;
+        private static readonly Dictionary<string, SmartExpression> Crafts = new();
+        private static readonly Dictionary<string, int> FireCrafts = new();
+        private static bool _fasterCraft;
+        private static bool _exhaustless;
+        private static float _timeAdjustment;
+        private static int _craftAmount = 1;
         private static Config.Options _cfg;
-        public static WorldGameObject PreviouWorldGameObject;
-        public static bool AlreadyRun;
+        private static WorldGameObject _previousWorldGameObject;
+        private static bool _alreadyRun;
+
+        private struct Constants
+        {
+            public struct UnsafeCraftItems
+            {
+                public const string BuildDesk = "build";
+                public const string Crematorium = "crematorium";
+                public const string StainedGlass = "semicircle";
+            }
+        }
 
         public static void ShowMessage(string msg)
         {
@@ -41,27 +52,21 @@ namespace QueueEverything
 
             _cfg = Config.GetOptions();
 
-            FasterCraft = false;
-            Exhaustless = false;
-            MaxButton = false;
-            AlreadyRun = false;
+            _fasterCraft = false;
+            _exhaustless = false;
+            _alreadyRun = false;
 
             if (Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod"))
             {
-                FasterCraft = true;
+                _fasterCraft = true;
             }
 
             if (Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.exhaust-less"))
             {
-                Exhaustless = true;
+                _exhaustless = true;
             }
 
-            if (Harmony.HasAnyPatches("com.graveyardkeeper.urbanvibes.maxbutton"))
-            {
-                MaxButton = true;
-            }
-
-            if (FasterCraft)
+            if (_fasterCraft)
             {
                 LoadFasterCraftConfig();
             }
@@ -75,12 +80,14 @@ namespace QueueEverything
             public static void Postfix(ref bool __result)
             {
                 var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
-                if (crafteryWgo.obj_id.Contains("crematorium")) return;
+                if (crafteryWgo.obj_id.Contains(Constants.UnsafeCraftItems.BuildDesk)) return;
+                if (crafteryWgo.obj_id.Contains(Constants.UnsafeCraftItems.StainedGlass)) return;
+                if (crafteryWgo.obj_id.Contains(Constants.UnsafeCraftItems.Crematorium)) return;
                 __result = true;
             }
         }
 
-        public static void LoadFasterCraftConfig()
+        private static void LoadFasterCraftConfig()
         {
             try
             {
@@ -88,13 +95,13 @@ namespace QueueEverything
                 var streamReader = new StreamReader(path);
                 var text = streamReader.ReadLine();
                 var array = text?.Split('=');
-                TimeAdjustment = (float) Convert.ToDouble(array?[1]);
+                _timeAdjustment = (float) Convert.ToDouble(array?[1]);
             }
             catch (Exception)
             {
                 Debug.LogError("Issue reading FasterCraft Config, disabling integration.");
                 Debug.Log("Issue reading FasterCraft Config, disabling integration.");
-                FasterCraft = false;
+                _fasterCraft = false;
             }
         }
 
@@ -178,10 +185,10 @@ namespace QueueEverything
                         var smartExpression = __instance.gratitude_points_craft_cost;
                         if (num > 0)
                         {
-                            num *= CraftAmount;
+                            num *= _craftAmount;
                         }
 
-                        if (Exhaustless)
+                        if (_exhaustless)
                         {
                             var adjustedNum = (float) Math.Round(num / 2f, 2);
                             if (gratitudePoints < (smartExpression?.EvaluateFloat(MainGame.me.player) ?? 0f))
@@ -224,10 +231,10 @@ namespace QueueEverything
                     {
                         if (num > 0)
                         {
-                            num *= CraftAmount;
+                            num *= _craftAmount;
                         }
 
-                        if (Exhaustless)
+                        if (_exhaustless)
                         {
                             var adjustedNum = (float) Math.Round(num / 2f, 2);
                             if (adjustedNum % 1 == 0)
@@ -262,21 +269,21 @@ namespace QueueEverything
 
                     if (num4 != 0)
                     {
-                        if (FasterCraft)
+                        if (_fasterCraft)
                         {
-                            if (TimeAdjustment < 0)
+                            if (_timeAdjustment < 0)
                             {
-                                num4 *= TimeAdjustment;
+                                num4 *= _timeAdjustment;
                             }
                             else
                             {
-                                num4 /= TimeAdjustment;
+                                num4 /= _timeAdjustment;
                             }
                         }
 
                         if (num4 > 0)
                         {
-                            num4 *= CraftAmount;
+                            num4 *= _craftAmount;
                         }
 
                         var timeSpan = TimeSpan.FromSeconds(Mathf.RoundToInt(num4));
@@ -288,15 +295,15 @@ namespace QueueEverything
 
                 //stops the fire price being the same on everything as the first one you visited
                 var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
-                if (PreviouWorldGameObject == null)
+                if (_previousWorldGameObject == null)
                 {
-                    PreviouWorldGameObject = crafteryWgo;
+                    _previousWorldGameObject = crafteryWgo;
                 }
 
-                if (!string.Equals(crafteryWgo.obj_id, PreviouWorldGameObject.obj_id))
+                if (!string.Equals(crafteryWgo.obj_id, _previousWorldGameObject.obj_id))
                 {
                     FireCrafts.Clear();
-                    PreviouWorldGameObject = crafteryWgo;
+                    _previousWorldGameObject = crafteryWgo;
                 }
 
                 foreach (var item in __instance.needs_from_wgo.Where(item => item.id == "fire"))
@@ -367,8 +374,14 @@ namespace QueueEverything
             [HarmonyPrefix]
             public static void Prefix()
             {
-                CraftAmount = 1;
-                AlreadyRun = false;
+                _craftAmount = 1;
+                _alreadyRun = false;
+            }
+
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                _alreadyRun = true;
             }
         }
 
@@ -377,7 +390,7 @@ namespace QueueEverything
         public static class CraftGuiExpandItemPatch
         {
             [HarmonyPostfix]
-            public static void Postfix(ref CraftGUI __instance, ref CraftItemGUI craft_item_gui, ref CraftItemGUI ____exanded_item)
+            public static void Postfix(ref CraftGUI __instance, ref CraftItemGUI craft_item_gui)
             {
                 if (_cfg.AutoSelectCraftButtonWithController && LazyInput.gamepad_active)
                 {
@@ -398,38 +411,38 @@ namespace QueueEverything
             [HarmonyPrefix]
             public static void Prefix()
             {
-                CraftAmount = 1;
-                AlreadyRun = false;
+                _craftAmount = 1;
+                _alreadyRun = false;
             }
 
             [HarmonyPostfix]
             public static void Postfix()
             {
-                AlreadyRun = true;
+                _alreadyRun = true;
             }
         }
-
-
+        
         [HarmonyPatch(typeof(CraftItemGUI))]
         [HarmonyPatch(nameof(CraftItemGUI.Draw))]
         public static class CraftItemGuiDrawPatch
         {
             [HarmonyPrefix]
-            public static void Prefix(ref CraftItemGUI __instance, ref CraftDefinition craft_definition, ref int ____amount)
+            public static void Prefix(ref CraftDefinition craft_definition, ref int ____amount)
             {
-                ____amount = 1;
-                CraftAmount = 1;
-
                 var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
-                if (PreviouWorldGameObject == null)
+
+                ____amount = 1;
+                _craftAmount = 1;
+
+                if (_previousWorldGameObject == null)
                 {
-                    PreviouWorldGameObject = crafteryWgo;
+                    _previousWorldGameObject = crafteryWgo;
                 }
 
-                if (!string.Equals(crafteryWgo.obj_id, PreviouWorldGameObject.obj_id))
+                if (!string.Equals(crafteryWgo.obj_id, _previousWorldGameObject.obj_id))
                 {
                     FireCrafts.Clear();
-                    PreviouWorldGameObject = crafteryWgo;
+                    _previousWorldGameObject = crafteryWgo;
                 }
 
                 foreach (var item in craft_definition.needs_from_wgo.Where(item => item.id == "fire"))
@@ -459,17 +472,17 @@ namespace QueueEverything
                 }
 
                 Crafts.TryGetValue(craft_definition.id, out var value);
-                if (FasterCraft)
+                if (_fasterCraft)
                 {
                     var ct = value?.EvaluateFloat();
-                    if (TimeAdjustment < 0)
+                    if (_timeAdjustment < 0)
                     {
-                        ct *= TimeAdjustment;
+                        ct *= _timeAdjustment;
                         craft_definition.craft_time = SmartExpression.ParseExpression(ct.ToString());
                     }
                     else
                     {
-                        ct /= TimeAdjustment;
+                        ct /= _timeAdjustment;
                         craft_definition.craft_time = SmartExpression.ParseExpression(ct.ToString());
                     }
                 }
@@ -488,9 +501,9 @@ namespace QueueEverything
             public static void Prefix(ref CraftItemGUI __instance, ref List<string> ____multiquality_ids,
                 ref CraftGUI ____craft_gui, ref int ____amount)
             {
-                CraftAmount = ____amount;
+                _craftAmount = ____amount;
 
-                if (AlreadyRun) return;
+                if (_alreadyRun) return;
 
                 List<int> craftable = new();
                 List<int> notCraftable = new();
@@ -503,8 +516,8 @@ namespace QueueEverything
                 var multiInventory = (!GlobalCraftControlGUI.is_global_control_active)
                     ? MainGame.me.player.GetMultiInventoryForInteraction()
                     : GUIElements.me.craft.multi_inventory;
-                //const string path = "./qmods/multis.txt";
-                //var message = "---------------------\n" + "Item: " + __instance.current_craft.id + "\n";
+                const string path = "./qmods/multis.txt";
+                var message = "---------------------\n" + "Item: " + __instance.current_craft.id + "\n";
                 for (var i = 0; i < ____multiquality_ids.Count; i++)
                 {
                     if (string.IsNullOrWhiteSpace(____multiquality_ids[i]))
@@ -520,9 +533,9 @@ namespace QueueEverything
                         {
                             notCraftable.Add(itemCraftable);
                         }
-                        //message += "Item: " + __instance.current_craft.needs[i].id + ", Stock: " + itemCount +
-                        //           ", Craftable: " + itemCraftable + "\n";
-                        //message += " - Required for craft: " + itemNeed + "\n";
+                        message += "Item: " + __instance.current_craft.needs[i].id + ", Stock: " + itemCount +
+                                   ", Craftable: " + itemCraftable + "\n";
+                        message += " - Required for craft: " + itemNeed + "\n";
                     }
                     else
                     {
@@ -539,12 +552,12 @@ namespace QueueEverything
                         if (gCraftable != 0) craftable.Add(gCraftable);
 
 
-                        //message += "MQ Item " + i + ": " + ____multiquality_ids[i] + "\n - Gold Stock: " + gStarItem +
-                        //           ", Craftable: " + gStarItem / itemValueNeeded + "\n";
-                        //message += " - Silver Stock: " + sStarItem + ", Craftable: " + sStarItem / itemValueNeeded +
-                        //           "\n";
-                        //message += " - Bronze Stock: " + bStarItem + ", Craftable: " + bCraftable + "\n";
-                        //message += " - Required for craft: " + __instance.current_craft.needs[i].value + "\n";
+                        message += "MQ Item " + i + ": " + ____multiquality_ids[i] + "\n - Gold Stock: " + gStarItem +
+                                   ", Craftable: " + gStarItem / itemValueNeeded + "\n";
+                        message += " - Silver Stock: " + sStarItem + ", Craftable: " + sStarItem / itemValueNeeded +
+                                   "\n";
+                        message += " - Bronze Stock: " + bStarItem + ", Craftable: " + bCraftable + "\n";
+                        message += " - Required for craft: " + __instance.current_craft.needs[i].value + "\n";
                         if (bCraftable + sCraftable + gCraftable > 0)
                         {
                             if (_cfg.AutoSelectHighestQualRecipe)
@@ -579,7 +592,7 @@ namespace QueueEverything
                 {
                     if (isMultiQualCraft && multiMin!=0)
                     {
-                        CraftAmount = min;
+                        _craftAmount = min;
                         ____amount = min;
                     }
                 }
@@ -590,17 +603,17 @@ namespace QueueEverything
                     {
                         if (notCraftable.Count <= 0)
                         {
-                            CraftAmount = min;
+                            _craftAmount = min;
                             ____amount = min;
                         }
                     }
                 }
 
 
-                //message += "Max Craftable: " + min + "\n";
-                //message += "Ingredient list count: " + craftable.Count + "\n";
-                //message += "---------------------\n";
-                //File.AppendAllText(path, message);
+                message += "Max Craftable: " + min + "\n";
+                message += "Ingredient list count: " + craftable.Count + "\n";
+                message += "---------------------\n";
+                File.AppendAllText(path, message);
             }
         }
 
@@ -612,8 +625,9 @@ namespace QueueEverything
             public static void Prefix(ref CraftItemGUI __instance)
             {
                 var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
-                if (crafteryWgo.obj_id.Contains("build")) return;
 
+                File.AppendAllText("./QMods/QueueEverything/interacted-objects.txt", crafteryWgo.obj_id + "\n");
+                if (crafteryWgo.obj_id.Contains(Constants.UnsafeCraftItems.BuildDesk)) return;
                 var found = Crafts.TryGetValue(__instance.craft_definition.id, out var value);
                 float originalTimeFloat;
                 if (found)
@@ -634,34 +648,26 @@ namespace QueueEverything
                 var time = originalTimeFloat;
 
 
-                if (FasterCraft)
+                if (_fasterCraft)
                 {
-                    if (TimeAdjustment < 0)
+                    if (_timeAdjustment < 0)
                     {
-                        time *= TimeAdjustment;
+                        time *= _timeAdjustment;
                     }
                     else
                     {
-                        time /= TimeAdjustment;
+                        time /= _timeAdjustment;
                     }
                 }
 
-                EffectBubblesManager.ShowImmediately(MainGame.me.player_pos, $"Time Before Craft Calc: {time}",
-                    EffectBubblesManager.BubbleColor.White,
-                    true, 4f);
-
-                time *= CraftAmount;
-
-                EffectBubblesManager.ShowImmediately(MainGame.me.player_pos, $"Time After Craft Calc: {time}",
-                    EffectBubblesManager.BubbleColor.White,
-                    true, 4f);
+                time *= _craftAmount;
 
                 if (time >= 300)
                 {
                     var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
                     Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
-                 
-                  
+
+
                     if (lang.Contains("ko") || lang.Contains("ja") || lang.Contains("zh"))
                     {
                         MainGame.me.player.Say(strings.Message, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,

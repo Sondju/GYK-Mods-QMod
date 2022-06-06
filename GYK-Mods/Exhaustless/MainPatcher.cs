@@ -180,8 +180,8 @@ namespace Exhaustless
                 {
                     if (____data.GetParam("tiredness", 0f) < 1200)
                     {
-                        //MainGame.me.player.Say("Tiredness less than 1200..", null, null,
-                        //    SpeechBubbleGUI.SpeechBubbleType.Think, SmartSpeechEngine.VoiceID.None, true);
+                        MainGame.me.player.Say("Tiredness less than 1200..", null, null,
+                            SpeechBubbleGUI.SpeechBubbleType.Think, SmartSpeechEngine.VoiceID.None, true);
                         __result = false;
                     }
                 }
@@ -197,8 +197,8 @@ namespace Exhaustless
             {
                 if (param_name.Contains("tiredness"))
                 {
-                    //MainGame.me.player.Say("Tiredness set to 1200..", null, null,
-                    //    SpeechBubbleGUI.SpeechBubbleType.Think, SmartSpeechEngine.VoiceID.None, true);
+                    MainGame.me.player.Say("Tiredness set to 1200..", null, null,
+                        SpeechBubbleGUI.SpeechBubbleType.Think, SmartSpeechEngine.VoiceID.None, true);
                     value = 1200f;
                 }
             }

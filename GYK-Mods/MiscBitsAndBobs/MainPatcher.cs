@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using HarmonyLib;
 using System.Reflection;
-using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace MiscBitsAndBobs
 {
@@ -121,6 +118,7 @@ namespace MiscBitsAndBobs
             [HarmonyPrefix]
             private static void Prefix(InventoryPanelGUI __instance, ref MultiInventory multi_inventory)
             {
+
                 if (_cfg.DontShowEmptyRowsInInventory)
                 {
                     __instance.dont_show_empty_rows = true;

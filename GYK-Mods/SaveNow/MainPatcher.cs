@@ -91,7 +91,9 @@ namespace SaveNow
             }
             else
             {
-                EffectBubblesManager.ShowImmediately(pos, msg,
+                var newPos = pos;
+                newPos.y += 125f;
+                EffectBubblesManager.ShowImmediately(newPos, msg,
                     color,
                     true, time);
             }
