@@ -377,29 +377,29 @@ public FrmMain()
             MessageBox.Show(@"Please select the directory containing Graveyard Keeper.exe", @"Wrong directory.",
                 MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
         }
-}
+    }
 
-private void RunGame()
+    private void RunGame()
     {
         try
         {
-            using var steam = new Process();
-            steam.StartInfo.FileName = "steam://rungameid/599140";
-            steam.Start();
-        }
-        catch (Exception)
-        {
-            try
+            if (!Properties.Settings.Default.LaunchDirectly)
+            {
+                using var steam = new Process();
+                steam.StartInfo.FileName = "steam://rungameid/599140";
+                steam.Start();
+            }
+            else
             {
                 using var gyk = new Process();
                 gyk.StartInfo.FileName = Path.Combine(_gameLocation.location, "Graveyard Keeper.exe");
                 gyk.Start();
-
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(@"Error launching game: " + ex.Message, @"Error", MessageBoxButtons.OK);
-            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(@"Error launching game: " + ex.Message, @"Error", MessageBoxButtons.OK);
+            
         }
         finally
         {
@@ -946,5 +946,11 @@ private void RunGame()
         {
             DgvModsClick();
         }
+    }
+
+    private void ChkLaunchExeDirectly_CheckStateChanged(object sender, EventArgs e)
+    {
+        Properties.Settings.Default.LaunchDirectly = ChkLaunchExeDirectly.Checked;
+        Properties.Settings.Default.Save();
     }
 }

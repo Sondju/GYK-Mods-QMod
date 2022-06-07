@@ -46,5 +46,17 @@ namespace QModReloadedGUI.Properties {
                 this["AlertShown"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LaunchDirectly {
+            get {
+                return ((bool)(this["LaunchDirectly"]));
+            }
+            set {
+                this["LaunchDirectly"] = value;
+            }
+        }
     }
 }

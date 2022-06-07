@@ -89,6 +89,7 @@ namespace QModReloadedGUI
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.ChkToggleMods = new System.Windows.Forms.CheckBox();
+            this.ChkLaunchExeDirectly = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.BtnRunGame)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.DgvMods)).BeginInit();
             this.ToolStrip.SuspendLayout();
@@ -622,11 +623,24 @@ namespace QModReloadedGUI
             this.ChkToggleMods.UseVisualStyleBackColor = true;
             this.ChkToggleMods.Click += new System.EventHandler(this.ChkToggleMods_Click);
             // 
+            // ChkLaunchExeDirectly
+            // 
+            this.ChkLaunchExeDirectly.AutoSize = true;
+            this.ChkLaunchExeDirectly.Location = new System.Drawing.Point(427, 462);
+            this.ChkLaunchExeDirectly.Name = "ChkLaunchExeDirectly";
+            this.ChkLaunchExeDirectly.Size = new System.Drawing.Size(135, 18);
+            this.ChkLaunchExeDirectly.TabIndex = 38;
+            this.ChkLaunchExeDirectly.Text = "Launch Game Directly";
+            this.ChkLaunchExeDirectly.UseCompatibleTextRendering = true;
+            this.ChkLaunchExeDirectly.UseVisualStyleBackColor = true;
+            this.ChkLaunchExeDirectly.CheckStateChanged += new System.EventHandler(this.ChkLaunchExeDirectly_CheckStateChanged);
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(578, 631);
+            this.Controls.Add(this.ChkLaunchExeDirectly);
             this.Controls.Add(this.ChkToggleMods);
             this.Controls.Add(this.BtnRestore);
             this.Controls.Add(this.DgvMods);
@@ -735,6 +749,7 @@ namespace QModReloadedGUI
         private Button BtnRestore;
         private CheckBox ChkToggleMods;
         private ToolStripMenuItem BtnLaunchModless;
+        private CheckBox ChkLaunchExeDirectly;
     }
 }
 
