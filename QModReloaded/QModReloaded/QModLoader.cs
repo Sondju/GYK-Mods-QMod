@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 namespace QModReloaded;
 
@@ -21,24 +22,6 @@ public class QModLoader
 
     public static void Patch()
     {
-        //AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
-        //{
-        //    var dllFiles =
-        //    Directory.EnumerateDirectories(QModBaseDir).SelectMany(
-        //        directory => Directory.EnumerateFiles(directory, "*.dll"));
-            
-        //    foreach (var dll in dllFiles)
-        //    {
-        //        var dllFi = new FileInfo(dll);
-        //        Console.WriteLine(Path.GetFileNameWithoutExtension(dllFi.Name) + " " + args.Name);
-        //        if (args.Name.Contains(Path.GetFileNameWithoutExtension(dllFi.Name)))
-        //        {
-        //            return Assembly.LoadFrom(dllFi.FullName);
-        //        }
-        //    }
-        //    return null;
-        //};
-
 
         Logger.WriteLog("Assembly-CSharp.dll has been patched, (otherwise you wouldn't see this message.");
         Logger.WriteLog("Patch method called. Attempting to load mods.");
@@ -64,7 +47,7 @@ public class QModLoader
                 else
                 {
                     Logger.WriteLog(
-                        $"No mod.json found for {dllFile}. Failed to create one automatically. Usually indicates an issue with the DLL.");
+                        $"No mod.json found for {dllFile}. Failed to create one automatically. Usually indicates an issue with the DLL.", true);
                     continue;
                 }
             }
@@ -79,12 +62,39 @@ public class QModLoader
 
         foreach (var mod in mods)
         {
-            Console.WriteLine($"Load Order: {mod.LoadOrder}, Mod name: {mod.DisplayName}");
             if (mod.Enable)
                 LoadMod(mod);
             else
                 Logger.WriteLog($"{mod.DisplayName} has been disabled in config. Skipping.");
         }
+    }
+
+    private static bool IsModCompatible(string mod)
+    {
+        try
+        {
+            var modAssembly = AssemblyDefinition.ReadAssembly(mod);
+
+            var toInspect = modAssembly.MainModule
+                .GetTypes()
+                .SelectMany(t => t.Methods
+                    .Where(m => m.HasBody)
+                    .Select(m => new { t, m }));
+
+            toInspect = toInspect.Where(x => x.m.Name is "Patch");
+
+            if (toInspect.Any(method => method.m.Body.Instructions.Where(instruction => instruction.Operand != null)
+                    .Any(instruction => instruction.OpCode == OpCodes.Newobj && instruction.Operand.ToString().Contains("HarmonyLib.Harmony"))))
+            {
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.WriteLog($"GetModEntryPoint(): Error, {ex.Message}",true);
+        }
+
+        return false;
     }
 
 
@@ -100,8 +110,8 @@ public class QModLoader
                     .Where(m => m.HasBody)
                     .Select(m => new { t, m }));
 
-            toInspect = toInspect.Where(x => x.m.Name == "Patch");
-
+            toInspect = toInspect.Where(x => x.m.Name is "Patch");
+            
             foreach (var method in toInspect)
                 if (method.m.Body.Instructions.Where(instruction => instruction.Operand != null)
                     .Any(instruction => instruction.Operand.ToString().Contains("PatchAll")))
@@ -109,7 +119,7 @@ public class QModLoader
         }
         catch (Exception ex)
         {
-            Logger.WriteLog($"GetModEntryPoint(): Error, {ex.Message}");
+            Logger.WriteLog($"GetModEntryPoint(): Error, {ex.Message}",true);
         }
 
         return (null, null, null, false);
@@ -146,7 +156,11 @@ public class QModLoader
             MethodInfo methodToLoad;
             var jsonEntrySplit = mod.EntryMethod.Split('.');
             var m = GetModEntryPoint(mod.ModAssemblyPath);
-
+            if (!IsModCompatible(mod.ModAssemblyPath))
+            {
+                Logger.WriteLog($"{mod.Id} is not Harmony2 enabled, and as such, is not compatible.",true);
+                return;
+            }
             var jsonEntry = $"{jsonEntrySplit[0]}.{jsonEntrySplit[1]}.{jsonEntrySplit[2]}";
             var foundEntry = $"{m.namesp}.{m.type}.{m.method}";
 
@@ -167,15 +181,15 @@ public class QModLoader
         }
         catch (TargetInvocationException)
         {
-            Logger.WriteLog($"Invoking the specified EntryMethod {mod.EntryMethod} failed for {mod.Id}");
+            Logger.WriteLog($"Invoking the specified EntryMethod {mod.EntryMethod} failed for {mod.Id}. Is the mod Harmony2.0 compatible?",true);
         }
         catch (NullReferenceException nullEx)
         {
-            Logger.WriteLog(nullEx.Message);
+            Logger.WriteLog(nullEx.Message,true);
         }
         catch (Exception finalEx)
         {
-            Logger.WriteLog($"LoadMod():{finalEx.Message}, Source: {finalEx.Source}, Tract: {finalEx.StackTrace}");
+            Logger.WriteLog($"LoadMod():{finalEx.Message}, Source: {finalEx.Source}, Trace: {finalEx.StackTrace}",true);
         }
     }
 }

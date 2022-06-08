@@ -54,16 +54,11 @@ namespace QModReloadedGUI
             this.BtnOpenModDir = new System.Windows.Forms.Button();
             this.BtnOpenLog = new System.Windows.Forms.Button();
             this.DgvMods = new System.Windows.Forms.DataGridView();
-            this.ChOrder = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ChMod = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ChEnabled = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.BtnRestore = new System.Windows.Forms.Button();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checklistToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.LblLog = new System.Windows.Forms.Label();
-            this.TxtLog = new System.Windows.Forms.TextBox();
             this.ToolStrip = new System.Windows.Forms.ToolStrip();
             this.LblPatched = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
@@ -90,11 +85,19 @@ namespace QModReloadedGUI
             this.exitToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.ChkToggleMods = new System.Windows.Forms.CheckBox();
             this.ChkLaunchExeDirectly = new System.Windows.Forms.CheckBox();
+            this.ChOrder = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ChMod = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ChEnabled = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.DgvLog = new System.Windows.Forms.DataGridView();
+            this.ChTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.LblErrors = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.BtnRunGame)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.DgvMods)).BeginInit();
             this.ToolStrip.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.trayIconCtxMenu.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.DgvLog)).BeginInit();
             this.SuspendLayout();
             // 
             // TxtGameLocation
@@ -331,33 +334,6 @@ namespace QModReloadedGUI
             this.DgvMods.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DgvMods_MouseDown);
             this.DgvMods.MouseMove += new System.Windows.Forms.MouseEventHandler(this.DgvMods_MouseMove);
             // 
-            // ChOrder
-            // 
-            this.ChOrder.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.ChOrder.HeaderText = "Order";
-            this.ChOrder.Name = "ChOrder";
-            this.ChOrder.ReadOnly = true;
-            this.ChOrder.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.ChOrder.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.ChOrder.Width = 58;
-            // 
-            // ChMod
-            // 
-            this.ChMod.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.ChMod.HeaderText = "Mod";
-            this.ChMod.Name = "ChMod";
-            this.ChMod.ReadOnly = true;
-            this.ChMod.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // ChEnabled
-            // 
-            this.ChEnabled.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.ChEnabled.HeaderText = "Enabled";
-            this.ChEnabled.Name = "ChEnabled";
-            this.ChEnabled.ReadOnly = true;
-            this.ChEnabled.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.ChEnabled.Width = 52;
-            // 
             // BtnRestore
             // 
             this.BtnRestore.Location = new System.Drawing.Point(371, 435);
@@ -393,27 +369,6 @@ namespace QModReloadedGUI
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
             this.aboutToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
             this.aboutToolStripMenuItem.Text = "&About";
-            // 
-            // LblLog
-            // 
-            this.LblLog.AutoSize = true;
-            this.LblLog.Location = new System.Drawing.Point(13, 466);
-            this.LblLog.Name = "LblLog";
-            this.LblLog.Size = new System.Drawing.Size(23, 17);
-            this.LblLog.TabIndex = 23;
-            this.LblLog.Text = "Log";
-            this.LblLog.UseCompatibleTextRendering = true;
-            // 
-            // TxtLog
-            // 
-            this.TxtLog.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.TxtLog.Location = new System.Drawing.Point(12, 486);
-            this.TxtLog.Multiline = true;
-            this.TxtLog.Name = "TxtLog";
-            this.TxtLog.ReadOnly = true;
-            this.TxtLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.TxtLog.Size = new System.Drawing.Size(550, 108);
-            this.TxtLog.TabIndex = 24;
             // 
             // ToolStrip
             // 
@@ -635,11 +590,89 @@ namespace QModReloadedGUI
             this.ChkLaunchExeDirectly.UseVisualStyleBackColor = true;
             this.ChkLaunchExeDirectly.CheckStateChanged += new System.EventHandler(this.ChkLaunchExeDirectly_CheckStateChanged);
             // 
+            // ChOrder
+            // 
+            this.ChOrder.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.ChOrder.HeaderText = "Order";
+            this.ChOrder.Name = "ChOrder";
+            this.ChOrder.ReadOnly = true;
+            this.ChOrder.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ChOrder.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            this.ChOrder.Width = 58;
+            // 
+            // ChMod
+            // 
+            this.ChMod.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.ChMod.HeaderText = "Mod";
+            this.ChMod.Name = "ChMod";
+            this.ChMod.ReadOnly = true;
+            this.ChMod.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // ChEnabled
+            // 
+            this.ChEnabled.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.ChEnabled.HeaderText = "Enabled";
+            this.ChEnabled.Name = "ChEnabled";
+            this.ChEnabled.ReadOnly = true;
+            this.ChEnabled.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.ChEnabled.Width = 52;
+            // 
+            // DgvLog
+            // 
+            this.DgvLog.AllowDrop = true;
+            this.DgvLog.AllowUserToAddRows = false;
+            this.DgvLog.AllowUserToDeleteRows = false;
+            this.DgvLog.BackgroundColor = System.Drawing.SystemColors.Control;
+            this.DgvLog.CausesValidation = false;
+            this.DgvLog.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
+            this.DgvLog.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.DgvLog.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.ChTime,
+            this.dataGridViewTextBoxColumn1});
+            this.DgvLog.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
+            this.DgvLog.GridColor = System.Drawing.SystemColors.Control;
+            this.DgvLog.Location = new System.Drawing.Point(13, 486);
+            this.DgvLog.MultiSelect = false;
+            this.DgvLog.Name = "DgvLog";
+            this.DgvLog.ReadOnly = true;
+            this.DgvLog.RowHeadersVisible = false;
+            this.DgvLog.ShowEditingIcon = false;
+            this.DgvLog.Size = new System.Drawing.Size(553, 108);
+            this.DgvLog.TabIndex = 39;
+            // 
+            // ChTime
+            // 
+            this.ChTime.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.ChTime.HeaderText = "Time";
+            this.ChTime.Name = "ChTime";
+            this.ChTime.ReadOnly = true;
+            this.ChTime.Width = 55;
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridViewTextBoxColumn1.HeaderText = "Log";
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            this.dataGridViewTextBoxColumn1.ReadOnly = true;
+            this.dataGridViewTextBoxColumn1.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewTextBoxColumn1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // LblErrors
+            // 
+            this.LblErrors.AutoSize = true;
+            this.LblErrors.ForeColor = System.Drawing.Color.Red;
+            this.LblErrors.Location = new System.Drawing.Point(12, 467);
+            this.LblErrors.Name = "LblErrors";
+            this.LblErrors.Size = new System.Drawing.Size(0, 13);
+            this.LblErrors.TabIndex = 40;
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(578, 631);
+            this.Controls.Add(this.LblErrors);
+            this.Controls.Add(this.DgvLog);
             this.Controls.Add(this.ChkLaunchExeDirectly);
             this.Controls.Add(this.ChkToggleMods);
             this.Controls.Add(this.BtnRestore);
@@ -652,8 +685,6 @@ namespace QModReloadedGUI
             this.Controls.Add(this.BtnOpenGameDir);
             this.Controls.Add(this.ToolStrip);
             this.Controls.Add(this.menuStrip1);
-            this.Controls.Add(this.TxtLog);
-            this.Controls.Add(this.LblLog);
             this.Controls.Add(this.BtnRemoveIntros);
             this.Controls.Add(this.BtnRefresh);
             this.Controls.Add(this.BtnRemovePatch);
@@ -686,6 +717,7 @@ namespace QModReloadedGUI
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.trayIconCtxMenu.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.DgvLog)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -714,8 +746,6 @@ namespace QModReloadedGUI
         private ToolStripMenuItem exitToolStripMenuItem;
         private ToolStripMenuItem checklistToolStripMenuItem;
         private ToolStripMenuItem aboutToolStripMenuItem;
-        private Label LblLog;
-        public TextBox TxtLog;
         private ToolStrip ToolStrip;
         private ToolStripLabel LblPatched;
         private ToolStripSeparator toolStripSeparator2;
@@ -734,9 +764,6 @@ namespace QModReloadedGUI
         private TextBox TxtConfig;
         private Label LblSaved;
         private DataGridView DgvMods;
-        private DataGridViewTextBoxColumn ChOrder;
-        private DataGridViewTextBoxColumn ChMod;
-        private DataGridViewCheckBoxColumn ChEnabled;
         private NotifyIcon trayIcon;
         private ContextMenuStrip trayIconCtxMenu;
         private ToolStripMenuItem restoreWindowToolStripMenuItem;
@@ -750,6 +777,13 @@ namespace QModReloadedGUI
         private CheckBox ChkToggleMods;
         private ToolStripMenuItem BtnLaunchModless;
         private CheckBox ChkLaunchExeDirectly;
+        private DataGridViewTextBoxColumn ChOrder;
+        private DataGridViewTextBoxColumn ChMod;
+        private DataGridViewCheckBoxColumn ChEnabled;
+        private DataGridView DgvLog;
+        private DataGridViewTextBoxColumn ChTime;
+        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+        private Label LblErrors;
     }
 }
 

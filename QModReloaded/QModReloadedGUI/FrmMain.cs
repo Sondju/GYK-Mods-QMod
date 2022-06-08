@@ -11,6 +11,7 @@ using Mono.Cecil;
 using QModReloaded;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Mono.Cecil.Cil;
 
 namespace QModReloadedGUI;
 
@@ -47,15 +48,33 @@ public FrmMain()
         return true;
     }
 
-    public void WriteLog(string message)
+    private void WriteLog(string message, bool error = false)
     {
-        Utilities.WriteLog(message, _gameLocation.location);
+        
+        var dt = DateTime.Now;
+        var rowIndex = DgvLog.Rows.Add(dt.ToLongTimeString(), message);
+        var row = DgvLog.Rows[rowIndex];
+        if (error)
+        {
+            row.DefaultCellStyle.BackColor = Color.LightCoral;
+        }
 
-        if (TxtLog.Text.Length > 0)
-            TxtLog.AppendText(Environment.NewLine + message);
+        string logMessage;
+        if (error)
+        {
+            logMessage = "-----------------------------------------\n";
+            logMessage += dt.ToShortDateString() + " " + dt.ToLongTimeString() + " : [ERROR] : " + message + "\n";
+            logMessage += "-----------------------------------------";
+        }
         else
+        {
+            logMessage = dt.ToShortDateString() + " " + dt.ToLongTimeString() + " : " + message;
+        }
+        Utilities.WriteLog(logMessage, _gameLocation.location);
 
-            TxtLog.AppendText(message);
+        var errors = DgvLog.Rows.Cast<DataGridViewRow>().Count(r => r.DefaultCellStyle.BackColor == Color.LightCoral);
+        LblErrors.Text = $@"Errors: {errors}";
+        DgvLog.FirstDisplayedScrollingRowIndex = DgvLog.RowCount - 1;
     }
 
     private void SetLocations(string directory)
@@ -184,11 +203,11 @@ public FrmMain()
                         var createResult = CreateJson(dllFile);
                         if (createResult == false)
                         {
-                            WriteLog("Error creating JSON file.");
+                            WriteLog("Error creating JSON file.", true);
                             continue;
                         }
 
-                        TxtLog.Text = "";
+                        DgvLog.Rows.Clear();
                         LoadMods();
                         return;
                     }
@@ -199,7 +218,7 @@ public FrmMain()
                 var mod = QMod.FromJsonFile(Path.Combine(path, jsonFile));
                 if (mod == null)
                 {
-                    WriteLog($"{dllFileName} didn't have a valid json.");
+                    WriteLog($"{dllFileName} didn't have a valid json.", true);
                 }
                 else
                 {
@@ -207,13 +226,22 @@ public FrmMain()
                     if (!string.IsNullOrEmpty(mod.EntryMethod))
                     {
                         _modList.Add(mod);
-                        DgvMods.Rows.Add(mod.LoadOrder, mod.DisplayName, mod.Enable);
-
-                        WriteLog(mod.DisplayName + " added.");
+                        var isModCompatible = IsModCompatible(Path.Combine(mod.ModAssemblyPath, dllFileName));
+                        var rowIndex = DgvMods.Rows.Add(mod.LoadOrder, mod.DisplayName, mod.Enable);
+                        var row = DgvMods.Rows[rowIndex];
+                        if (!isModCompatible)
+                        {
+                            row.DefaultCellStyle.BackColor = Color.LightCoral;
+                            WriteLog(mod.DisplayName + " added, but it's not Harmony 2 compatible, and will not load without updating by the author.",true);
+                        }
+                        else
+                        {
+                            WriteLog(mod.DisplayName + " added.");
+                        }
                     }
                     else
                     {
-                        WriteLog(mod.DisplayName + " had issues and wasn't loaded.");
+                        WriteLog(mod.DisplayName + " had issues and wasn't loaded.", true);
                     }
                 }
             }
@@ -224,12 +252,40 @@ public FrmMain()
         }
         catch (Exception ex)
         {
-            WriteLog($"LoadMods() ERROR: {ex.Message}");
+            WriteLog($"LoadMods() ERROR: {ex.Message}", true);
         }
 
         CheckQueueEverything();
         CheckAllModsActive();
         CheckPatched();
+    }
+
+    private static bool IsModCompatible(string mod)
+    {
+        try
+        {
+            var modAssembly = AssemblyDefinition.ReadAssembly(mod);
+
+            var toInspect = modAssembly.MainModule
+                .GetTypes()
+                .SelectMany(t => t.Methods
+                    .Where(m => m.HasBody)
+                    .Select(m => new { t, m }));
+
+            toInspect = toInspect.Where(x => x.m.Name is "Patch");
+
+            if (toInspect.Any(method => method.m.Body.Instructions.Where(instruction => instruction.Operand != null)
+                    .Any(instruction => instruction.OpCode == OpCodes.Newobj && instruction.Operand.ToString().Contains("HarmonyLib.Harmony"))))
+            {
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.WriteLog($"IsModCompatible(): Error, {ex.Message}");
+        }
+
+        return false;
     }
 
     private void CheckQueueEverything()
@@ -330,7 +386,7 @@ public FrmMain()
         }
         catch (FileNotFoundException)
         {
-            WriteLog("Assembly-CSharp.dll not found. Probably need to check that out.");
+            WriteLog("Assembly-CSharp.dll not found. Probably need to check that out.", true);
         }
         catch (Exception)
         {
@@ -340,7 +396,6 @@ public FrmMain()
 
     private void FrmMain_Load(object sender, EventArgs e)
     {
-        
         SetLocations(Properties.Settings.Default.GamePath);
         LoadMods();
         DgvMods.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
@@ -502,7 +557,7 @@ public FrmMain()
         }
         else
         {
-            WriteLog(message);
+            WriteLog(message, true);
             MessageBox.Show(@"There was an issue patching out intros. Validate Steam files and try again.", @"Hmmm",
                 MessageBoxButtons.OK);
         }
@@ -525,7 +580,7 @@ public FrmMain()
         }
         catch (Exception)
         {
-            WriteLog("Issues toggling mod functionality.");
+            WriteLog("Issues toggling mod functionality.", true);
         }
     }
 
@@ -583,7 +638,14 @@ public FrmMain()
             foreach (var zip in DlgFile.FileNames)
             {
                 var result = AddMod(zip);
-                if (result) WriteLog($"Extracted {zip}.");
+                if (result)
+                {
+                    WriteLog($"Extracted {zip}.");
+                }
+                else
+                {
+                    WriteLog($"Issue extracting {zip}.", true);
+                }
             }
 
         LoadMods();
@@ -656,7 +718,7 @@ public FrmMain()
         }
         catch (Exception)
         {
-            WriteLog($"Issue saving config: {_currentlySelectedModConfigLocation}");
+            WriteLog($"Issue saving config: {_currentlySelectedModConfigLocation}",true);
             throw;
         }
     }
@@ -751,11 +813,11 @@ public FrmMain()
         }
         catch (NullReferenceException ex)
         {
-            WriteLog($"List Mods ERROR: {ex.Message}");
+            WriteLog($"List Mods ERROR: {ex.Message}",true);
         }
         catch (Exception ex)
         {
-            WriteLog($"List Mods ERROR: {ex.Message}");
+            WriteLog($"List Mods ERROR: {ex.Message}",true);
         }
     }
 
@@ -879,11 +941,11 @@ public FrmMain()
         }
         catch (FileNotFoundException)
         {
-            WriteLog("A backed up Assembly-CSharp.dll could not be found.");
+            WriteLog("A backed up Assembly-CSharp.dll could not be found.",true);
         }
         catch (Exception ex)
         {
-            WriteLog($"An error occurred: {ex.Message}.");
+            WriteLog($"An error occurred: {ex.Message}.",true);
         }
     }
 
@@ -906,7 +968,7 @@ public FrmMain()
         }
         catch (Exception)
         {
-            WriteLog($"Issue locating folder for {modFound?.DisplayName}.");
+            WriteLog($"Issue locating folder for {modFound?.DisplayName}.",true);
         }
     }
     
