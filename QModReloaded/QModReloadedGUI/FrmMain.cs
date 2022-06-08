@@ -73,7 +73,11 @@ public FrmMain()
         Utilities.WriteLog(logMessage, _gameLocation.location);
 
         var errors = DgvLog.Rows.Cast<DataGridViewRow>().Count(r => r.DefaultCellStyle.BackColor == Color.LightCoral);
-        LblErrors.Text = $@"Errors: {errors}";
+        if (errors > 0)
+        {
+            LblErrors.Text = $@"Errors: {errors}";
+        }
+
         DgvLog.FirstDisplayedScrollingRowIndex = DgvLog.RowCount - 1;
     }
 
@@ -208,6 +212,7 @@ public FrmMain()
                         }
 
                         DgvLog.Rows.Clear();
+                        LblErrors.Text = string.Empty;
                         LoadMods();
                         return;
                     }
@@ -227,7 +232,7 @@ public FrmMain()
                     {
                         _modList.Add(mod);
                         var isModCompatible = IsModCompatible(Path.Combine(mod.ModAssemblyPath, dllFileName));
-                        var rowIndex = DgvMods.Rows.Add(mod.LoadOrder, mod.DisplayName, mod.Enable);
+                        var rowIndex = DgvMods.Rows.Add(mod.LoadOrder, mod.DisplayName, mod.Enable, mod.Id);
                         var row = DgvMods.Rows[rowIndex];
                         if (!isModCompatible)
                         {
@@ -686,8 +691,8 @@ public FrmMain()
         if (result != DialogResult.Yes) return;
         foreach (DataGridViewRow rows in DgvMods.SelectedRows)
         {
-            var modName = rows.Cells[1].Value.ToString();
-            var mod = _modList.FirstOrDefault(mod => mod.DisplayName == modName);
+            var modId = rows.Cells[3].Value.ToString();
+            var mod = _modList.FirstOrDefault(mod => mod.Id == modId);
             if (mod == null) return;
             Directory.Delete(mod.ModAssemblyPath, true);
             _modList.Remove(mod);
