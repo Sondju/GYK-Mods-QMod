@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using System.Reflection;
+using UnityEngine;
 
 namespace MiscBitsAndBobs
 {
@@ -10,12 +11,12 @@ namespace MiscBitsAndBobs
     {
         private static Config.Options _cfg;
 
-        public static string[] TavernItems =
+        private static readonly string[] TavernItems =
         {
             "npc_tavern_barman", "tavern_cellar_rack", "tavern_cellar_rack_1", "tavern_cellar_rack_2", "tavern_cellar_rack_3", "tavern_cellar_rack_4", "tavern_cellar_rack_5"
         };
 
-        public static ItemDefinition.ItemType[] ToolItems =
+        private static readonly ItemDefinition.ItemType[] ToolItems =
         {
             ItemDefinition.ItemType.Axe, ItemDefinition.ItemType.Shovel, ItemDefinition.ItemType.Hammer,
             ItemDefinition.ItemType.Pickaxe, ItemDefinition.ItemType.FishingRod, ItemDefinition.ItemType.BodyArmor,
@@ -42,6 +43,7 @@ namespace MiscBitsAndBobs
                 if (__instance == null) return;
                 var itemDef = __instance.selected_item?.definition;
                 if (itemDef == null) return;
+                Debug.Log($"ItemOver: {__instance.selected_item.id}");
                 if (ToolItems.Contains(itemDef.type))
                 {
                     itemDef.player_cant_throw_out = false;
@@ -56,14 +58,12 @@ namespace MiscBitsAndBobs
             [HarmonyPostfix]
             private static void Postfix()
             {
-                if (_cfg.EnableToolAndPrayerStacking)
+                if (!_cfg.EnableToolAndPrayerStacking) return;
+                foreach (var itemDefinition in GameBalance.me.items_data
+                             .Where(itemDefinition => ToolItems.Contains(itemDefinition.type)))
                 {
-                    foreach (var itemDefinition in GameBalance.me.items_data
-                                 .Where(itemDefinition => ToolItems.Contains(itemDefinition.type)))
-                    {
-                        itemDefinition.stack_count += 1000;
-                        itemDefinition.base_count += 1000;
-                    }
+                    itemDefinition.stack_count += 1000;
+                    itemDefinition.base_count += 1000;
                 }
             }
         }

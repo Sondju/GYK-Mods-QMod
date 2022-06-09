@@ -498,13 +498,12 @@ namespace QueueEverything
         public static class CraftItemGuiRedrawPatch
         {
             [HarmonyPrefix]
-            public static void Prefix(ref CraftItemGUI __instance, ref List<string> ____multiquality_ids,
-                ref CraftGUI ____craft_gui, ref int ____amount)
+            public static void Prefix(ref CraftItemGUI __instance, ref List<string> ____multiquality_ids, ref int ____amount)
             {
                 _craftAmount = ____amount;
 
                 if (_alreadyRun) return;
-
+                var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
                 List<int> craftable = new();
                 List<int> notCraftable = new();
                 craftable.Clear();
@@ -517,7 +516,7 @@ namespace QueueEverything
                     ? MainGame.me.player.GetMultiInventoryForInteraction()
                     : GUIElements.me.craft.multi_inventory;
                 const string path = "./qmods/multis.txt";
-                var message = "---------------------\n" + "Item: " + __instance.current_craft.id + "\n";
+                var message = crafteryWgo.obj_id+"\n---------------------\n" + "Item: " + __instance.current_craft.id + ", Craft Def: " + __instance.craft_definition.id + "\n";
                 for (var i = 0; i < ____multiquality_ids.Count; i++)
                 {
                     if (string.IsNullOrWhiteSpace(____multiquality_ids[i]))
@@ -533,7 +532,7 @@ namespace QueueEverything
                         {
                             notCraftable.Add(itemCraftable);
                         }
-                        message += "Item: " + __instance.current_craft.needs[i].id + ", Stock: " + itemCount +
+                        message += "Item: " + __instance.current_craft.needs[i].id + ", Icon: "+ __instance.current_craft.needs[i].GetIcon() + ", Stock: " + itemCount +
                                    ", Craftable: " + itemCraftable + "\n";
                         message += " - Required for craft: " + itemNeed + "\n";
                     }
