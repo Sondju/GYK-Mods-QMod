@@ -515,8 +515,8 @@ namespace QueueEverything
                 var multiInventory = (!GlobalCraftControlGUI.is_global_control_active)
                     ? MainGame.me.player.GetMultiInventoryForInteraction()
                     : GUIElements.me.craft.multi_inventory;
-                const string path = "./qmods/multis.txt";
-                var message = crafteryWgo.obj_id+"\n---------------------\n" + "Item: " + __instance.current_craft.id + ", Craft Def: " + __instance.craft_definition.id + "\n";
+                //const string path = "./qmods/multis.txt";
+                //var message = crafteryWgo.obj_id+"\n---------------------\n" + "Item: " + __instance.current_craft.id + ", Craft Def: " + __instance.craft_definition.id + "\n";
                 for (var i = 0; i < ____multiquality_ids.Count; i++)
                 {
                     if (string.IsNullOrWhiteSpace(____multiquality_ids[i]))
@@ -532,9 +532,9 @@ namespace QueueEverything
                         {
                             notCraftable.Add(itemCraftable);
                         }
-                        message += "Item: " + __instance.current_craft.needs[i].id + ", Icon: "+ __instance.current_craft.needs[i].GetIcon() + ", Stock: " + itemCount +
-                                   ", Craftable: " + itemCraftable + "\n";
-                        message += " - Required for craft: " + itemNeed + "\n";
+                        //message += "Item: " + __instance.current_craft.needs[i].id + ", Icon: "+ __instance.current_craft.needs[i].GetIcon() + ", Stock: " + itemCount +
+                        //           ", Craftable: " + itemCraftable + "\n";
+                        //message += " - Required for craft: " + itemNeed + "\n";
                     }
                     else
                     {
@@ -551,12 +551,12 @@ namespace QueueEverything
                         if (gCraftable != 0) craftable.Add(gCraftable);
 
 
-                        message += "MQ Item " + i + ": " + ____multiquality_ids[i] + "\n - Gold Stock: " + gStarItem +
-                                   ", Craftable: " + gStarItem / itemValueNeeded + "\n";
-                        message += " - Silver Stock: " + sStarItem + ", Craftable: " + sStarItem / itemValueNeeded +
-                                   "\n";
-                        message += " - Bronze Stock: " + bStarItem + ", Craftable: " + bCraftable + "\n";
-                        message += " - Required for craft: " + __instance.current_craft.needs[i].value + "\n";
+                        //message += "MQ Item " + i + ": " + ____multiquality_ids[i] + "\n - Gold Stock: " + gStarItem +
+                        //           ", Craftable: " + gStarItem / itemValueNeeded + "\n";
+                        //message += " - Silver Stock: " + sStarItem + ", Craftable: " + sStarItem / itemValueNeeded +
+                        //           "\n";
+                        //message += " - Bronze Stock: " + bStarItem + ", Craftable: " + bCraftable + "\n";
+                        //message += " - Required for craft: " + __instance.current_craft.needs[i].value + "\n";
                         if (bCraftable + sCraftable + gCraftable > 0)
                         {
                             if (_cfg.AutoSelectHighestQualRecipe)
@@ -609,10 +609,10 @@ namespace QueueEverything
                 }
 
 
-                message += "Max Craftable: " + min + "\n";
-                message += "Ingredient list count: " + craftable.Count + "\n";
-                message += "---------------------\n";
-                File.AppendAllText(path, message);
+                //message += "Max Craftable: " + min + "\n";
+                //message += "Ingredient list count: " + craftable.Count + "\n";
+                //message += "---------------------\n";
+                //File.AppendAllText(path, message);
             }
         }
 
@@ -667,17 +667,12 @@ namespace QueueEverything
                     Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
 
 
-                    if (lang.Contains("ko") || lang.Contains("ja") || lang.Contains("zh"))
-                    {
-                        MainGame.me.player.Say(strings.Message, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
-                            SmartSpeechEngine.VoiceID.None, true);
-                    }
-                    else
-                    {
-                        MainGame.me.player.Say($"Hmmm guess I'll come back in roughly {time / 60:00} minutes...",
-                            null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
-                            SmartSpeechEngine.VoiceID.None, true);
-                    }
+                    MainGame.me.player.Say(
+                        !lang.Contains("en")
+                            ? strings.Message
+                            : $"Hmmm guess I'll come back in roughly {time / 60:00} minutes...", null, false,
+                        SpeechBubbleGUI.SpeechBubbleType.Think,
+                        SmartSpeechEngine.VoiceID.None, true);
                 }
             }
         }

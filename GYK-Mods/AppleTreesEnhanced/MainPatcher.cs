@@ -56,23 +56,26 @@ namespace AppleTreesEnhanced
 
         private static void ShowMessage(WorldGameObject obj, string message)
         {
-            var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
-            var newObjPos = obj.pos3;
+            if (_cfg.ShowHarvestReadyMessages)
+            {
+                var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+                var newObjPos = obj.pos3;
 
-            if (obj.obj_id.Contains("berry"))
-            {
-                newObjPos.y += 100f;
-            }
-            if (obj.obj_id.Contains("tree"))
-            {
-                newObjPos.y += 250f;
-            }
-            
-            EffectBubblesManager.ShowImmediately(newObjPos, message,
+                if (obj.obj_id.Contains("berry"))
+                {
+                    newObjPos.y += 100f;
+                }
+
+                if (obj.obj_id.Contains("tree"))
+                {
+                    newObjPos.y += 250f;
+                }
+
+                EffectBubblesManager.ShowImmediately(newObjPos, message,
                     EffectBubblesManager.BubbleColor.Relation,
                     true, 3f);
-            
+            }
         }
 
 

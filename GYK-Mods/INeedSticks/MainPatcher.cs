@@ -47,11 +47,8 @@ namespace INeedSticks
                 {
                     if (__instance.wgo.is_current_craft_gratitude)
                     {
-                        typeof(CraftComponent).GetMethod("DistributeDropsFromSoulsCraft", AccessTools.all)
-                            ?.Invoke(__instance, new object[]
-                            {
-                                itemList
-                            });
+                        __instance.wgo.PutToAllPossibleInventories(itemList, out var items);
+                        __instance.wgo.DropItems(items, Direction.None);
                     }
                     else
                     {
