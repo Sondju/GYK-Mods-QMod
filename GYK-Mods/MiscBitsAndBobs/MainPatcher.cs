@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using HarmonyLib;
 using System.Reflection;
@@ -13,7 +14,8 @@ namespace MiscBitsAndBobs
 
         private static readonly string[] TavernItems =
         {
-            "npc_tavern_barman", "tavern_cellar_rack", "tavern_cellar_rack_1", "tavern_cellar_rack_2", "tavern_cellar_rack_3", "tavern_cellar_rack_4", "tavern_cellar_rack_5"
+            "npc_tavern_barman", "tavern_cellar_rack", "tavern_cellar_rack_1", "tavern_cellar_rack_2",
+            "tavern_cellar_rack_3", "tavern_cellar_rack_4", "tavern_cellar_rack_5"
         };
 
         private static readonly ItemDefinition.ItemType[] ToolItems =
@@ -26,7 +28,7 @@ namespace MiscBitsAndBobs
 
         public static void Patch()
         {
-            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.TavernTweaks");
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs");
             var assembly = Assembly.GetExecutingAssembly();
             harmony.PatchAll(assembly);
             _cfg = Config.GetOptions();
@@ -43,7 +45,6 @@ namespace MiscBitsAndBobs
                 if (__instance == null) return;
                 var itemDef = __instance.selected_item?.definition;
                 if (itemDef == null) return;
-                //Debug.Log($"ItemOver: {__instance.selected_item.id}");
                 if (ToolItems.Contains(itemDef.type))
                 {
                     itemDef.player_cant_throw_out = false;
@@ -59,8 +60,10 @@ namespace MiscBitsAndBobs
             private static void Postfix()
             {
                 if (!_cfg.EnableToolAndPrayerStacking) return;
+
                 foreach (var itemDefinition in GameBalance.me.items_data
-                             .Where(itemDefinition => ToolItems.Contains(itemDefinition.type) || itemDefinition.id.Contains("grave")))
+                             .Where(itemDefinition => itemDefinition != null)
+                             .Where(x => ToolItems.Contains(x.type) || x.id.Contains("book") || x.id.Contains("chapter") || x.id.Contains("grave") || x.id.Contains("pen")))
                 {
                     itemDefinition.stack_count += 1000;
                     itemDefinition.base_count += 1000;
@@ -75,10 +78,9 @@ namespace MiscBitsAndBobs
             [HarmonyPostfix]
             private static void Postfix(ref WorldGameObject __instance)
             {
-                // File.AppendAllText("./qmods/objects.txt", __instance.obj_id + "\n");
                 if (TavernItems.Contains(__instance.obj_id))
                 {
-                    __instance.data.SetInventorySize(__instance.obj_def.inventory_size + (int)_cfg.TavernInvIncrease);
+                    __instance.data.SetInventorySize(__instance.obj_def.inventory_size + (int) _cfg.TavernInvIncrease);
                 }
             }
         }
@@ -93,6 +95,87 @@ namespace MiscBitsAndBobs
                 if (_cfg.QuietMusicInGui)
                 {
                     SmartAudioEngine.me.SetDullMusicMode();
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(MainMenuGUI))]
+        [HarmonyPatch(nameof(MainMenuGUI.Open))]
+        public static class PatchInGameMenuGUIOpen
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref InGameMenuGUI __instance)
+            {
+                if (!_cfg.HideCreditsButtonOnMainMenu) return;
+                if (__instance == null) return;
+
+                foreach (var comp in __instance.GetComponentsInChildren<UIButton>()
+                             .Where(x => x.name.Contains("credits")))
+                {
+                    comp.SetState(UIButtonColor.State.Disabled, true);
+                    comp.SetActive(false);
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(HUD))]
+        [HarmonyPatch(nameof(HUD.Update))]
+        public static class HudUpdatePatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref bool ____inited)
+            {
+                
+                if (!____inited || !MainGame.game_started || !_cfg.CondenseXpBar)
+                {
+                    return;
+                }
+                
+                var r = MainGame.me.player.GetParam("r");
+                var g = MainGame.me.player.GetParam("g");
+                var b = MainGame.me.player.GetParam("b");
+
+                string red;
+                if (r >= 1000)
+                {
+                    r /= 1000f;
+                    var nSplit =r.ToString(CultureInfo.InvariantCulture).Split('.');
+                    red = nSplit[1].StartsWith("0") ? $"(r){r:0}K" : $"(r){r:0.0}K";
+                }
+                else
+                {
+                    red = $"(r){r}";
+                }
+
+
+                string green;
+                if (g >= 1000)
+                {
+                    g /= 1000f;
+                    var nSplit = g.ToString(CultureInfo.InvariantCulture).Split('.');
+                    green = nSplit[1].StartsWith("0") ? $"(g){g:0}K" : $"(g){g:0.0}K";
+                }
+                else
+                {
+                    green = $"(g){g}";
+                }
+
+                string blue;
+                if (b >= 1000)
+                {
+                    b /= 1000f;
+                    var nSplit = b.ToString(CultureInfo.InvariantCulture).Split('.');
+                    blue = nSplit[1].StartsWith("0") ? $"(b){b:0}K" : $"(b){b:0.0}K";
+                }
+                else
+                {
+                    blue = $"(b){b}";
+                }
+
+
+                foreach (var comp in GUIElements.me.hud.tech_points_bar.GetComponentsInChildren<UILabel>())
+                {
+                    comp.text = $"{red} {green} {blue}";
                 }
             }
         }
@@ -118,7 +201,6 @@ namespace MiscBitsAndBobs
             [HarmonyPrefix]
             private static void Prefix(ref InventoryPanelGUI __instance, ref MultiInventory multi_inventory)
             {
-
                 if (_cfg.DontShowEmptyRowsInInventory)
                 {
                     __instance.dont_show_empty_rows = true;
@@ -139,6 +221,8 @@ namespace MiscBitsAndBobs
 
                 multi_inventory = multiInventory;
             }
+
+
         }
 
         //makes halloween an annual event instead of the original 2018...

@@ -28,7 +28,7 @@ namespace TheSeedEqualizer
                 {
                     GameBalance.me.craft_data.ForEach(craft =>
                     {
-                        if (craft.id.Contains("refugee")) return;
+                        //if (craft.id.Contains("refugee")) return;
                         if (!(craft.id.Contains("grow_desk_planting") |
                               craft.id.Contains("grow_vineyard_planting"))) return;
                         if (craft.needs == null || craft.needs.Count == 0) return;

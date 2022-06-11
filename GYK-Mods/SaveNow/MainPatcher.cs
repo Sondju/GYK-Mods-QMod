@@ -340,6 +340,29 @@ namespace SaveNow
             }
         }
 
+        //change exit menu based on config
+        [HarmonyPatch(typeof(InGameMenuGUI))]
+        [HarmonyPatch(nameof(InGameMenuGUI.Open))]
+        public static class PatchInGameMenuGUIOpen
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref InGameMenuGUI __instance)
+            {
+                if (__instance == null) return;
+                foreach (var comp in __instance.GetComponentsInChildren<UIButton>().Where(x => x.name.Contains("exit")))
+                {
+                    foreach (var label in comp.GetComponentsInChildren<UILabel>())
+                    {
+                        if (_cfg.ExitToDesktop)
+                        {
+                            label.text = strings.ExitButtonText;
+                        }
+                    }
+
+                }
+            }
+        }
+
         //this is called last when loading a save game without patch
         [HarmonyPatch(typeof(GameSave))]
         [HarmonyPatch(nameof(GameSave.GlobalEventsCheck))]

@@ -70,6 +70,15 @@ namespace SaveNow.lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Exit to desktop.
+        /// </summary>
+        public static string ExitButtonText {
+            get {
+                return ResourceManager.GetString("ExitButtonText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to AutoSave.
         /// </summary>
         public static string InfoAutoSave {

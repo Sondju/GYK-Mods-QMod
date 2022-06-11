@@ -10,6 +10,7 @@ namespace INeedSticks
     public class MainPatcher
     {
         private static CraftDefinition _newItem;
+        private static bool _craftWoodenStick = false;
 
         public static void Patch()
         {
@@ -28,6 +29,17 @@ namespace INeedSticks
             {
                 if (_newItem == null) return;
                 __instance?.crafts.Add(_newItem);
+            }
+
+        }
+
+        [HarmonyPatch(typeof(CraftItemGUI), "OnCraftPressed", MethodType.Normal)]
+        public static class CraftItemGUIPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref CraftItemGUI __instance)
+            {
+                _craftWoodenStick = false || __instance.current_craft.id.Contains("wooden_stick");
             }
 
         }
@@ -74,7 +86,7 @@ namespace INeedSticks
 
         }
 
-        //this is required as it seems impossible to add things to GameData, this stops it coming back null when it doesn't find "wooden_stick" in game data
+        //this is required as it seems impossible to add things to GameData that actually take effect, this stops it coming back null when it doesn't find "wooden_stick" in game data
         [HarmonyPatch(typeof(CraftComponent.CraftQueueItem))]
         [HarmonyPatch("craft", MethodType.Getter)]
         public static class CraftComponentCraftQueueItemPatch
@@ -84,7 +96,10 @@ namespace INeedSticks
             {
                 if (GUIElements.me.craft.GetCrafteryWGO() == null) return;
                 if (!GUIElements.me.craft.GetCrafteryWGO().obj_id.Contains("mf_saw") && !MainGame.me.save.unlocked_techs.Contains("Circular")) return;
-                ____craft ??= _newItem;
+                if (_craftWoodenStick)
+                {
+                    ____craft ??= _newItem;
+                }
             }
         }
 

@@ -25,15 +25,20 @@ namespace QueueEverything
         private static WorldGameObject _previousWorldGameObject;
         private static bool _alreadyRun;
 
-        private struct Constants
-        {
-            public struct UnsafeCraftItems
-            {
-                public const string BuildDesk = "build";
-                public const string Crematorium = "crematorium";
-                public const string StainedGlass = "semicircle";
-            }
-        }
+        private static readonly string[] UnSafeCraftObjects = {
+            "mf_crematorium_corp", "garden_builddesk", "tree_garden_builddesk", "mf_crematorium", "grave_ground", "tile_church_semicircle_2floors"
+        };
+
+        //private struct Constants
+        //{
+        //    public struct UnsafeCraftItems
+        //    {
+        //        public const string BuildDesk = "build";
+        //        public const string Crematorium = "crematorium";
+        //        public const string StainedGlass = "semicircle";
+        //        public const string Grave = "grave";
+        //    }
+        //}
 
         public static void ShowMessage(string msg)
         {
@@ -76,14 +81,20 @@ namespace QueueEverything
         [HarmonyPatch(nameof(CraftDefinition.CanCraftMultiple))]
         public static class CraftDefinitionCanCraftMultiplePatch
         {
-            [HarmonyPostfix]
-            public static void Postfix(ref bool __result)
+            [HarmonyPrefix]
+            public static void Prefix(out WorldGameObject __state)
             {
-                var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
-                if (crafteryWgo.obj_id.Contains(Constants.UnsafeCraftItems.BuildDesk)) return;
-                if (crafteryWgo.obj_id.Contains(Constants.UnsafeCraftItems.StainedGlass)) return;
-                if (crafteryWgo.obj_id.Contains(Constants.UnsafeCraftItems.Crematorium)) return;
-                __result = true;
+                __state = GUIElements.me.craft.GetCrafteryWGO();
+            }
+
+            [HarmonyPostfix]
+            public static void Postfix(ref bool __result, WorldGameObject __state)
+            {
+                
+                if (!UnSafeCraftObjects.Contains(__state.obj_id))
+                {
+                    __result = true;
+                }
             }
         }
 
@@ -371,6 +382,8 @@ namespace QueueEverything
         [HarmonyPatch(nameof(CraftGUI.Open))]
         public static class CraftGuiOpenPatch
         {
+            private static string previousObjId;
+
             [HarmonyPrefix]
             public static void Prefix()
             {
@@ -382,6 +395,12 @@ namespace QueueEverything
             public static void Postfix()
             {
                 _alreadyRun = true;
+                var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
+                Debug.LogError($"[QueueEverything] CraftGUI Open CrafteryWGO: {crafteryWgo.obj_id}, {crafteryWgo.name}");
+                if (string.Equals(crafteryWgo.obj_id, previousObjId)) return;
+                previousObjId = crafteryWgo.obj_id;
+                File.AppendAllText("./QMods/QueueEverything/interacted-objects.txt", crafteryWgo.obj_id + "\n");
+
             }
         }
 
@@ -624,8 +643,8 @@ namespace QueueEverything
             {
                 var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
 
-                File.AppendAllText("./QMods/QueueEverything/interacted-objects.txt", crafteryWgo.obj_id + "\n");
-                if (crafteryWgo.obj_id.Contains(Constants.UnsafeCraftItems.BuildDesk)) return;
+                if (UnSafeCraftObjects.Contains(crafteryWgo.obj_id)) return;
+
                 var found = Crafts.TryGetValue(__instance.craft_definition.id, out var value);
                 float originalTimeFloat;
                 if (found)
@@ -657,6 +676,7 @@ namespace QueueEverything
                         time /= _timeAdjustment;
                     }
                 }
+
                 // _craftAmount = ____amount;
                 time *= ____amount;
                 Debug.LogError($"[QueueEverything]: CraftTime: {time}");
@@ -666,7 +686,9 @@ namespace QueueEverything
                     Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
 
                     var endTime = time / 60;
-                    var message = endTime % 1 == 0 ? $"Hmmm guess I'll come back in {time / 60:0} minutes..." : $"Hmmm guess I'll come back in roughly {time / 60:0} minutes...";
+                    var message = endTime % 1 == 0
+                        ? $"Hmmm guess I'll come back in {time / 60:0} minutes..."
+                        : $"Hmmm guess I'll come back in roughly {time / 60:0} minutes...";
                     MainGame.me.player.Say(
                         !lang.Contains("en")
                             ? strings.Message

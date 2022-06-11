@@ -130,4 +130,7 @@
 	<data name="SaveProgressSaved" xml:space="preserve">
 		<value>Postęp i aktualna lokalizacja zostaną zapisane</value>
 	</data>
+	<data name="ExitButtonText" xml:space="preserve">
+		<value>Wyjdź na pulpit</value>
+	</data>
 </root>

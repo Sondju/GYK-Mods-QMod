@@ -130,4 +130,7 @@
 	<data name="SaveProgressSaved" xml:space="preserve">
 		<value>进度和当前位置将被保存</value>
 	</data>
+	<data name="ExitButtonText" xml:space="preserve">
+		<value>退出到桌面</value>
+	</data>
 </root>

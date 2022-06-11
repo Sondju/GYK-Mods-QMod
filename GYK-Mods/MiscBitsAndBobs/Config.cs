@@ -17,6 +17,8 @@ namespace MiscBitsAndBobs
             public bool QuietMusicInGui;
             public bool AllowHandToolDestroy;
             public bool HalloweenNow;
+            public bool HideCreditsButtonOnMainMenu;
+            public bool CondenseXpBar;
         }
 
         public static Options GetOptions()
@@ -33,6 +35,9 @@ namespace MiscBitsAndBobs
             bool.TryParse(_con.Value("QuietMusicInGUI", "true"), out var quietMusicInGUI);
             _options.QuietMusicInGui = quietMusicInGUI;
 
+            bool.TryParse(_con.Value("CondenseXpBar", "true"), out var condenseXpBar);
+            _options.CondenseXpBar = condenseXpBar;
+
             bool.TryParse(_con.Value("ShowOnlyPersonalInventory", "false"), out var showOnlyPersonalInventory);
             _options.ShowOnlyPersonalInventory = showOnlyPersonalInventory;
 
@@ -44,6 +49,9 @@ namespace MiscBitsAndBobs
 
             bool.TryParse(_con.Value("HalloweenNow", "false"), out var halloweenNow);
             _options.HalloweenNow = halloweenNow;
+
+            bool.TryParse(_con.Value("HideCreditsButtonOnMainMenu", "true"), out var hideCreditsButtonOnMainMenu);
+            _options.HideCreditsButtonOnMainMenu = hideCreditsButtonOnMainMenu;
 
             _con.ConfigWrite();
 

@@ -130,4 +130,7 @@
 	<data name="SaveProgressSaved" xml:space="preserve">
 		<value>진행 상황 및 현재 위치가 저장됩니다.</value>
 	</data>
+	<data name="ExitButtonText" xml:space="preserve">
+		<value>데스크탑으로 나가기</value>
+	</data>
 </root>
