@@ -14,7 +14,6 @@ namespace Exhaustless
             public bool SpeedUpMeditation;
             public bool YawnMessage;
             public bool SpendHalfEnergy;
-            public bool AllowHandToolDestroy;
             public bool SpendHalfSanity;
             public bool AutoWakeFromMeditation;
             public bool MakeToolsLastLonger;
@@ -53,7 +52,6 @@ namespace Exhaustless
 
             bool.TryParse(_con.Value("SpendHalfEnergy", "true"), out var spendHalfEnergy);
             _options.SpendHalfEnergy = spendHalfEnergy;
-
 
             _con.ConfigWrite();
 

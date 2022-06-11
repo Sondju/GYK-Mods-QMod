@@ -61,16 +61,7 @@
     <VisualStudio AllowExistingFolder="true" />
   </ProjectExtensions>
   <PropertyGroup>
-    <PostBuildEvent>
-
-
-
-
-
-
-
-
-if $(ConfigurationName) == Release (
+    <PostBuildEvent>if $(ConfigurationName) == Release (
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\TreesNoMore\bin\Release\TreesNoMore.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\TreesNoMore\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\UltraWide\bin\Release\UltraWide.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\UltraWide\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\FogBeGone\bin\Release\FogBeGone.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\FogBeGone\" /K /D /H /Y
@@ -88,6 +79,7 @@ xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\QueueEverything\bin\Rele
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AppleTreesEnhanced\bin\Release\AppleTreesEnhanced.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AppleTreesEnhanced\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\MiscBitsAndBobs\bin\Release\MiscBitsAndBobs.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\MiscBitsAndBobs\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\INeedSticks\bin\Release\INeedSticks.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\INeedSticks\" /K /D /H /Y
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\TheSeedEqualizer\bin\Release\TheSeedEqualizer.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\TheSeedEqualizer\" /K /D /H /Y
 )
 if $(ConfigurationName) == Debug (
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\TreesNoMore\bin\Debug\TreesNoMore.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\TreesNoMore\" /K /D /H /Y
@@ -107,6 +99,7 @@ xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\QueueEverything\bin\Debu
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AppleTreesEnhanced\bin\Debug\AppleTreesEnhanced.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AppleTreesEnhanced\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\MiscBitsAndBobs\bin\Debug\MiscBitsAndBobs.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\MiscBitsAndBobs\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\INeedSticks\bin\Debug\INeedSticks.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\INeedSticks\" /K /D /H /Y
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\TheSeedEqualizer\bin\Debug\TheSeedEqualizer.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\TheSeedEqualizer\" /K /D /H /Y
 
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\TreesNoMore\bin\Debug\TreesNoMore.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\TreesNoMore\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\UltraWide\bin\Debug\UltraWide.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\UltraWide\" /K /D /H /Y
@@ -125,6 +118,7 @@ xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\QueueEverything\bin\Debu
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AppleTreesEnhanced\bin\Debug\AppleTreesEnhanced.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AppleTreesEnhanced\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\MiscBitsAndBobs\bin\Debug\MiscBitsAndBobs.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\MiscBitsAndBobs\" /K /D /H /Y
 xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\INeedSticks\bin\Debug\INeedSticks.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\INeedSticks\" /K /D /H /Y
+xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\TheSeedEqualizer\bin\Debug\TheSeedEqualizer.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\TheSeedEqualizer\" /K /D /H /Y
 )
 </PostBuildEvent>
   </PropertyGroup>

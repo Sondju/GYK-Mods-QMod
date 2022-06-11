@@ -37,13 +37,13 @@ namespace MiscBitsAndBobs
         public static class PatchCantDestroy
         {
             [HarmonyPrefix]
-            public static void Prefix(InventoryGUI __instance)
+            public static void Prefix(ref InventoryGUI __instance)
             {
                 if (!_cfg.AllowHandToolDestroy) return;
                 if (__instance == null) return;
                 var itemDef = __instance.selected_item?.definition;
                 if (itemDef == null) return;
-                Debug.Log($"ItemOver: {__instance.selected_item.id}");
+                //Debug.Log($"ItemOver: {__instance.selected_item.id}");
                 if (ToolItems.Contains(itemDef.type))
                 {
                     itemDef.player_cant_throw_out = false;
@@ -60,7 +60,7 @@ namespace MiscBitsAndBobs
             {
                 if (!_cfg.EnableToolAndPrayerStacking) return;
                 foreach (var itemDefinition in GameBalance.me.items_data
-                             .Where(itemDefinition => ToolItems.Contains(itemDefinition.type)))
+                             .Where(itemDefinition => ToolItems.Contains(itemDefinition.type) || itemDefinition.id.Contains("grave")))
                 {
                     itemDefinition.stack_count += 1000;
                     itemDefinition.base_count += 1000;
@@ -73,7 +73,7 @@ namespace MiscBitsAndBobs
         public static class PatchTavernInventorySize
         {
             [HarmonyPostfix]
-            private static void Postfix(WorldGameObject __instance)
+            private static void Postfix(ref WorldGameObject __instance)
             {
                 // File.AppendAllText("./qmods/objects.txt", __instance.obj_id + "\n");
                 if (TavernItems.Contains(__instance.obj_id))
@@ -116,7 +116,7 @@ namespace MiscBitsAndBobs
         public static class ShowInvOnly
         {
             [HarmonyPrefix]
-            private static void Prefix(InventoryPanelGUI __instance, ref MultiInventory multi_inventory)
+            private static void Prefix(ref InventoryPanelGUI __instance, ref MultiInventory multi_inventory)
             {
 
                 if (_cfg.DontShowEmptyRowsInInventory)

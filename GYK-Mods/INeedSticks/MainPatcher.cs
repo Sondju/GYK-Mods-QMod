@@ -24,7 +24,7 @@ namespace INeedSticks
         public static class CraftComponentPatch
         {
             [HarmonyPrefix]
-            public static void Prefix(CraftComponent __instance)
+            public static void Prefix(ref CraftComponent __instance)
             {
                 if (_newItem == null) return;
                 __instance?.crafts.Add(_newItem);
@@ -37,7 +37,7 @@ namespace INeedSticks
         public static class CraftComponentProcessFinishedCraftPatch
         {
             [HarmonyPrefix]
-            public static void Prefix(CraftComponent __instance)
+            public static void Prefix(ref CraftComponent __instance)
             {
                 if (!__instance.wgo.obj_id.Contains("mf_saw")) return;
                 if (!__instance.current_craft.id.Contains("wooden_stick")) return;
@@ -48,7 +48,7 @@ namespace INeedSticks
                     if (__instance.wgo.is_current_craft_gratitude)
                     {
                         __instance.wgo.PutToAllPossibleInventories(itemList, out var items);
-                        __instance.wgo.DropItems(items, Direction.None);
+                        __instance.wgo.DropItems(items);
                     }
                     else
                     {
@@ -82,6 +82,8 @@ namespace INeedSticks
             [HarmonyPrefix]
             public static void Prefix(ref CraftDefinition ____craft)
             {
+                if (GUIElements.me.craft.GetCrafteryWGO() == null) return;
+                if (!GUIElements.me.craft.GetCrafteryWGO().obj_id.Contains("mf_saw") && !MainGame.me.save.unlocked_techs.Contains("Circular")) return;
                 ____craft ??= _newItem;
             }
         }
@@ -169,6 +171,8 @@ namespace INeedSticks
                 newCd.enqueue_type = CraftDefinition.EnqueueType.CanEnqueue;
                 newCd.id = "wooden_stick";
                 _newItem = newCd;
+
+                if (GUIElements.me.craft.GetCrafteryWGO() == null) return;
                 if (!GUIElements.me.craft.GetCrafteryWGO().obj_id.Contains("mf_saw") && !MainGame.me.save.unlocked_techs.Contains("Circular")) return;
                 ___crafts.Add(_newItem);
                 ___crafts_inventory?.AddCraft(_newItem.id);

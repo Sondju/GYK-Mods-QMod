@@ -95,7 +95,7 @@ namespace QueueEverything
                 var streamReader = new StreamReader(path);
                 var text = streamReader.ReadLine();
                 var array = text?.Split('=');
-                _timeAdjustment = (float) Convert.ToDouble(array?[1]);
+                _timeAdjustment = (float)Convert.ToDouble(array?[1]);
             }
             catch (Exception)
             {
@@ -123,13 +123,13 @@ namespace QueueEverything
                 int num;
                 if (GlobalCraftControlGUI.is_global_control_active)
                 {
-                    num = (__instance.gratitude_points_craft_cost is not {has_expression: true}
+                    num = (__instance.gratitude_points_craft_cost is not { has_expression: true }
                         ? 0
                         : Mathf.RoundToInt(__instance.gratitude_points_craft_cost.EvaluateFloat(wgo)));
                 }
                 else
                 {
-                    num = (__instance.energy is not {has_expression: true}
+                    num = (__instance.energy is not { has_expression: true }
                         ? 0
                         : Mathf.RoundToInt(__instance.energy.EvaluateFloat(wgo)));
                 }
@@ -151,8 +151,8 @@ namespace QueueEverything
                     if (flag)
                     {
                         foreach (var equippedTool in from itemType in wgo.obj_def.tool_actions.action_tools
-                                 where itemType != ItemDefinition.ItemType.Hand
-                                 select MainGame.me.player.GetEquippedTool(itemType))
+                                                     where itemType != ItemDefinition.ItemType.Hand
+                                                     select MainGame.me.player.GetEquippedTool(itemType))
                         {
                             bool flag2;
                             if (equippedTool == null)
@@ -190,7 +190,7 @@ namespace QueueEverything
 
                         if (_exhaustless)
                         {
-                            var adjustedNum = (float) Math.Round(num / 2f, 2);
+                            var adjustedNum = (float)Math.Round(num / 2f, 2);
                             if (gratitudePoints < (smartExpression?.EvaluateFloat(MainGame.me.player) ?? 0f))
                             {
                                 if (adjustedNum % 1 == 0)
@@ -236,7 +236,7 @@ namespace QueueEverything
 
                         if (_exhaustless)
                         {
-                            var adjustedNum = (float) Math.Round(num / 2f, 2);
+                            var adjustedNum = (float)Math.Round(num / 2f, 2);
                             if (adjustedNum % 1 == 0)
                             {
                                 text = text + "[c](en)[/c]" + adjustedNum.ToString("0");
@@ -262,7 +262,7 @@ namespace QueueEverything
                     var found = Crafts.TryGetValue(__instance.id, out var value);
                     if (found)
                     {
-                        num4 = value is not {has_expression: true}
+                        num4 = value is not { has_expression: true }
                             ? 0
                             : value.EvaluateFloat(wgo);
                     }
@@ -315,7 +315,7 @@ namespace QueueEverything
                     }
                     else
                     {
-                        item.value = (int) Math.Round((double) value / 2, MidpointRounding.AwayFromZero);
+                        item.value = (int)Math.Round((double)value / 2, MidpointRounding.AwayFromZero);
                     }
 
                     var amount = item.value * multiplier;
@@ -421,7 +421,7 @@ namespace QueueEverything
                 _alreadyRun = true;
             }
         }
-        
+
         [HarmonyPatch(typeof(CraftItemGUI))]
         [HarmonyPatch(nameof(CraftItemGUI.Draw))]
         public static class CraftItemGuiDrawPatch
@@ -456,7 +456,7 @@ namespace QueueEverything
                     {
                         if (_cfg.HalfFireRequirements)
                         {
-                            item.value = (int) Math.Round((double) fireValue / 2, MidpointRounding.AwayFromZero);
+                            item.value = (int)Math.Round((double)fireValue / 2, MidpointRounding.AwayFromZero);
                         }
                         else
                         {
@@ -474,7 +474,7 @@ namespace QueueEverything
                 Crafts.TryGetValue(craft_definition.id, out var value);
                 if (_fasterCraft)
                 {
-                    var ct = value?.EvaluateFloat();
+                    var ct = value?.EvaluateFloat(crafteryWgo);
                     if (_timeAdjustment < 0)
                     {
                         ct *= _timeAdjustment;
@@ -503,7 +503,6 @@ namespace QueueEverything
                 _craftAmount = ____amount;
 
                 if (_alreadyRun) return;
-                var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
                 List<int> craftable = new();
                 List<int> notCraftable = new();
                 craftable.Clear();
@@ -589,7 +588,7 @@ namespace QueueEverything
 
                 if (_cfg.AutoMaxMultiQualCrafts)
                 {
-                    if (isMultiQualCraft && multiMin!=0)
+                    if (isMultiQualCraft && multiMin != 0)
                     {
                         _craftAmount = min;
                         ____amount = min;
@@ -621,7 +620,7 @@ namespace QueueEverything
         public static class CraftItemGuiOnCraftPressedPatch
         {
             [HarmonyPrefix]
-            public static void Prefix(ref CraftItemGUI __instance)
+            public static void Prefix(ref CraftItemGUI __instance, ref int ____amount)
             {
                 var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
 
@@ -631,13 +630,13 @@ namespace QueueEverything
                 float originalTimeFloat;
                 if (found)
                 {
-                    originalTimeFloat = value.EvaluateFloat(crafteryWgo, MainGame.me.player);
+                    originalTimeFloat = value.EvaluateFloat(crafteryWgo);
                 }
                 else
                 {
                     Crafts.Add(__instance.craft_definition.id, __instance.craft_definition.craft_time);
                     originalTimeFloat =
-                        __instance.craft_definition.craft_time.EvaluateFloat(crafteryWgo, MainGame.me.player);
+                        __instance.craft_definition.craft_time.EvaluateFloat(crafteryWgo);
                 }
 
 
@@ -658,19 +657,20 @@ namespace QueueEverything
                         time /= _timeAdjustment;
                     }
                 }
-
-                time *= _craftAmount;
-
+                // _craftAmount = ____amount;
+                time *= ____amount;
+                Debug.LogError($"[QueueEverything]: CraftTime: {time}");
                 if (time >= 300)
                 {
                     var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
                     Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
 
-
+                    var endTime = time / 60;
+                    var message = endTime % 1 == 0 ? $"Hmmm guess I'll come back in {time / 60:0} minutes..." : $"Hmmm guess I'll come back in roughly {time / 60:0} minutes...";
                     MainGame.me.player.Say(
                         !lang.Contains("en")
                             ? strings.Message
-                            : $"Hmmm guess I'll come back in roughly {time / 60:00} minutes...", null, false,
+                            : message, null, false,
                         SpeechBubbleGUI.SpeechBubbleType.Think,
                         SmartSpeechEngine.VoiceID.None, true);
                 }

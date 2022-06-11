@@ -42,62 +42,69 @@ namespace AutoLootHeavies
 
         private static Config.Options _cfg;
 
-        public static Vector3 LastKnownTimberLocation;
-        public static Vector3 LastKnownOreLocation;
-        public static Vector3 LastKnownStoneLocation;
-        public static float XAdjustment = 0;
-        public static float LastBubbleTime = 0;
+        private static Vector3 _lastKnownTimberLocation;
+        private static Vector3 _lastKnownOreLocation;
+        private static Vector3 _lastKnownStoneLocation;
+        private static float _xAdjustment;
+        private static float _lastBubbleTime;
 
-        public static int TimberPileCount;
-        public static int StonePileCount;
-        public static int OrePileCount;
-        public static int UsedTimberSlots;
-        public static int UsedStoneSlots;
-        public static int UsedOreSlots;
-        public static bool NeedScanning = true;
+        private static int _timberPileCount;
+        private static int _stonePileCount;
+        private static int _orePileCount;
+        private static int _usedTimberSlots;
+        private static int _usedStoneSlots;
+        private static int _usedOreSlots;
+        private static bool _needScanning = true;
 
-        public static int FreeTimberSlots;
-        public static int FreeStoneSlots;
-        public static int FreeOreSlots;
+        private static int _freeTimberSlots;
+        private static int _freeStoneSlots;
+        private static int _freeOreSlots;
 
-        public static List<WorldGameObject> StoredStockpiles = new();
+        private static List<WorldGameObject> _storedStockpiles = new();
 
-        public static List<Item> ItemsDidntFit = new();
-        public static List<Item> ItemsToInsert = new();
+        //public static List<Item> ItemsDidntFit = new();
+        private static readonly List<Item> ItemsToInsert = new();
 
-        public static Vector3 BlankVector3 = new(0, 0, 0);
+        private static readonly Vector3 BlankVector3 = new(0, 0, 0);
 
-        public static List<WorldGameObject> Objects;
-        public static WorldGameObject TimberTemp, OreTemp, StoneTemp;
+        private static List<WorldGameObject> _objects;
+        private static WorldGameObject _timberTemp, _oreTemp, _stoneTemp;
 
-        public static readonly string VectorPath = "./QMods/AutoLootHeavies/dont-touch.dat";
+        private const string VectorPath = "./QMods/AutoLootHeavies/dont-touch.dat";
 
-        public static bool VectorsLoaded;
+        private static bool _vectorsLoaded;
 
         private static readonly Dictionary<Vector3, string> VectorDictionary = new();
 
-        public static float LastScanTime;
-        public static float LastGetLocationScanTime;
+        private static float _lastScanTime;
+        private static float _lastGetLocationScanTime;
 
         public static void Patch()
         {
-            _cfg = Config.GetOptions();
+            try
+            {
+                _cfg = Config.GetOptions();
 
-            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.AutoLootHeavies");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
+                var harmony = new Harmony("p1xel8ted.GraveyardKeeper.AutoLootHeavies");
+                var assembly = Assembly.GetExecutingAssembly();
+                harmony.PatchAll(assembly);
 
-            VectorsLoaded = false;
-            NeedScanning = true;
+                _vectorsLoaded = false;
+                _needScanning = true;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[AutoLootHeavies]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            }
         }
 
-        public static void UpdateConfig()
+        private static void UpdateConfig()
         {
             Config.WriteOptions();
             _cfg = Config.GetOptions();
         }
 
-        public static bool GetLocations()
+        private static bool GetLocations()
         {
             if (!File.Exists(VectorPath)) return false;
 
@@ -119,7 +126,7 @@ namespace AutoLootHeavies
             return true;
         }
 
-        public static void DropOjectAndNull(BaseCharacterComponent __instance, Item item)
+        private static void DropOjectAndNull(BaseCharacterComponent __instance, Item item)
         {
             DropResGameObject.Drop(__instance.tf.position, item,
                 __instance.tf.parent,
@@ -130,7 +137,7 @@ namespace AutoLootHeavies
             __instance.SetOverheadItem(null);
         }
 
-        public static void ShowLootAddedIcon(Item item)
+        private static void ShowLootAddedIcon(Item item)
         {
             item.definition.item_size = 1;
             DropCollectGUI.OnDropCollected(item);
@@ -138,7 +145,7 @@ namespace AutoLootHeavies
             Sounds.PlaySound("pickup", null, true);
         }
 
-        public static bool PutToAllAndNull(BaseCharacterComponent __instance, WorldGameObject wgo,
+        private static bool PutToAllAndNull(BaseCharacterComponent __instance, WorldGameObject wgo,
             List<Item> itemsToInsert)
         {
             var pwo = MainGame.me.player;
@@ -162,9 +169,9 @@ namespace AutoLootHeavies
                 return true;
             }
 
-            if (Time.time - LastBubbleTime > 0.5f)
+            if (Time.time - _lastBubbleTime > 0.5f)
             {
-                LastBubbleTime = Time.time;
+                _lastBubbleTime = Time.time;
                 EffectBubblesManager.ShowImmediately(pwo.bubble_pos, GJL.L("not_enough_something", $"({GameSettings.me.language})"),
                     EffectBubblesManager.BubbleColor.Energy, true, 1f);
             }
@@ -172,7 +179,7 @@ namespace AutoLootHeavies
             return false;
         }
 
-        public static (int, int) GetGridLocation()
+        private static (int, int) GetGridLocation()
         {
             const int horizontal = 30;
             const int vertical = 5;
@@ -204,7 +211,7 @@ namespace AutoLootHeavies
             return spot;
         }
 
-        public static void TeleportItem(BaseCharacterComponent __instance, Item item, string type)
+        private static void TeleportItem(BaseCharacterComponent __instance, Item item, string type)
         {
             var pwo = MainGame.me.player;
             var needEnergy = 3f;
@@ -227,9 +234,9 @@ namespace AutoLootHeavies
                 {
                     var location = type switch
                     {
-                        Constants.FileKeys.Ore => LastKnownOreLocation,
-                        Constants.FileKeys.Timber => LastKnownTimberLocation,
-                        Constants.FileKeys.Stone => LastKnownStoneLocation,
+                        Constants.FileKeys.Ore => _lastKnownOreLocation,
+                        Constants.FileKeys.Timber => _lastKnownTimberLocation,
+                        Constants.FileKeys.Stone => _lastKnownStoneLocation,
                         _ => MainGame.me.player_pos
                     };
 
@@ -239,15 +246,15 @@ namespace AutoLootHeavies
                 {
                     var loc = GetGridLocation();
 
-                    XAdjustment = loc.Item1 * 75;
+                    _xAdjustment = loc.Item1 * 75;
 
                     var timber = _cfg.DesignatedTimberLocation;
                     var ore = _cfg.DesignatedOreLocation;
                     var stone = _cfg.DesignatedStoneLocation;
 
-                    timber.x += XAdjustment;
-                    ore.x += XAdjustment;
-                    stone.x += XAdjustment;
+                    timber.x += _xAdjustment;
+                    ore.x += _xAdjustment;
+                    stone.x += _xAdjustment;
 
                     var location = type switch
                     {
@@ -265,19 +272,19 @@ namespace AutoLootHeavies
             {
                 DropOjectAndNull(__instance, item);
 
-                if (Time.time - LastBubbleTime < 0.5f)
+                if (Time.time - _lastBubbleTime < 0.5f)
                 {
                     return;
                 }
 
-                LastBubbleTime = Time.time;
+                _lastBubbleTime = Time.time;
 
                 EffectBubblesManager.ShowImmediately(pwo.bubble_pos, GJL.L("not_enough_something", $"({GameSettings.me.language})"),
                     EffectBubblesManager.BubbleColor.Energy, true, 1f);
             }
         }
 
-        public static void ShowMessage(string message, bool noStockpilesInRange, bool storageNowFull,
+        private static void ShowMessage(string message, bool noStockpilesInRange, bool storageNowFull,
             bool cantStorageFull, string item)
         {
             var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
@@ -321,7 +328,7 @@ namespace AutoLootHeavies
         }
 
 
-        public static void ShowMessage(string msg, Vector3 pos)
+        private static void ShowMessage(string msg, Vector3 pos)
         {
             var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
@@ -341,7 +348,7 @@ namespace AutoLootHeavies
             }
         }
 
-        public static void GetClosestStockPile()
+        private static void GetClosestStockPile()
         {
             if (!MainGame.game_started) return;
             if (VectorDictionary.Count <= 0)
@@ -354,10 +361,10 @@ namespace AutoLootHeavies
 
             try
             {
-                LastKnownTimberLocation = VectorDictionary.Where(x => x.Value == Constants.FileKeys.Timber)
+                _lastKnownTimberLocation = VectorDictionary.Where(x => x.Value == Constants.FileKeys.Timber)
                     .ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key))
                     .Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
-                Debug.Log($"Closest Timber: {LastKnownTimberLocation}");
+                Debug.Log($"Closest Timber: {_lastKnownTimberLocation}");
             }
             catch (Exception)
             {
@@ -366,10 +373,10 @@ namespace AutoLootHeavies
 
             try
             {
-                LastKnownOreLocation = VectorDictionary.Where(x => x.Value == Constants.FileKeys.Ore)
+                _lastKnownOreLocation = VectorDictionary.Where(x => x.Value == Constants.FileKeys.Ore)
                     .ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key))
                     .Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
-                Debug.Log($"Closest Timber: {LastKnownOreLocation}");
+                Debug.Log($"Closest Timber: {_lastKnownOreLocation}");
             }
             catch (Exception)
             {
@@ -378,10 +385,10 @@ namespace AutoLootHeavies
 
             try
             {
-                LastKnownStoneLocation = VectorDictionary.Where(x => x.Value == Constants.FileKeys.Stone)
+                _lastKnownStoneLocation = VectorDictionary.Where(x => x.Value == Constants.FileKeys.Stone)
                     .ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key))
                     .Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
-                Debug.Log($"Closest Stone: {LastKnownStoneLocation}");
+                Debug.Log($"Closest Stone: {_lastKnownStoneLocation}");
             }
             catch (Exception)
             {
@@ -397,13 +404,13 @@ namespace AutoLootHeavies
             public static void Postfix()
             {
                 if (!_cfg.DistanceBasedTeleport) return;
-                if (Time.time - LastGetLocationScanTime < 10f)
+                if (Time.time - _lastGetLocationScanTime < 10f)
                 {
                     return;
                 }
 
                 GetClosestStockPile();
-                LastGetLocationScanTime = Time.time;
+                _lastGetLocationScanTime = Time.time;
             }
         }
 
@@ -492,18 +499,18 @@ namespace AutoLootHeavies
             {
                 if (MainGame.game_started)
                 {
-                    if (NeedScanning)
+                    if (_needScanning)
                     {
                         ScanStockpiles();
                         UpdateStockpiles();
                     }
 
-                    if (!VectorsLoaded)
+                    if (!_vectorsLoaded)
                     {
                         if (GetLocations())
                         {
                             GetClosestStockPile();
-                            VectorsLoaded = true;
+                            _vectorsLoaded = true;
                         }
                     }
                 }
@@ -512,24 +519,24 @@ namespace AutoLootHeavies
             }
         }
 
-        public static void ScanStockpiles()
+        private static void ScanStockpiles()
         {
-            if (NeedScanning)
+            if (_needScanning)
             {
-                NeedScanning = false;
+                _needScanning = false;
             }
             else
             {
-                LastScanTime = Time.time;
+                _lastScanTime = Time.time;
             }
 
-            Objects = Object.FindObjectsOfType<WorldGameObject>(includeInactive: false).Where(x =>
+            _objects = Object.FindObjectsOfType<WorldGameObject>(includeInactive: false).Where(x =>
                     x.obj_id.Contains(Constants.ItemObjectId.Timber) | x.obj_id.Contains(Constants.ItemObjectId.Ore) |
                     x.obj_id.Contains(Constants.ItemObjectId.Stone))
                 .ToList();
-            StoredStockpiles = Objects;
-            Debug.LogError($"StockPile Count: {StoredStockpiles.Count}, Object count: {Objects.Count}");
-            foreach (var obj in Objects.Where(obj => obj != null))
+            _storedStockpiles = _objects;
+            Debug.LogError($"StockPile Count: {_storedStockpiles.Count}, Object count: {_objects.Count}");
+            foreach (var obj in _objects.Where(obj => obj != null))
             {
                 bool found;
                 var vectorToAdd = new Vector3((float)Math.Ceiling(obj.pos3.x), (float)Math.Ceiling(obj.pos3.y),
@@ -561,42 +568,42 @@ namespace AutoLootHeavies
             }
         }
 
-        public static void UpdateStockpiles()
+        private static void UpdateStockpiles()
         {
-            TimberPileCount = 0;
-            StonePileCount = 0;
-            OrePileCount = 0;
-            UsedTimberSlots = 0;
-            UsedStoneSlots = 0;
-            UsedOreSlots = 0;
+            _timberPileCount = 0;
+            _stonePileCount = 0;
+            _orePileCount = 0;
+            _usedTimberSlots = 0;
+            _usedStoneSlots = 0;
+            _usedOreSlots = 0;
 
-            foreach (var obj in StoredStockpiles.Where(obj => obj != null))
+            foreach (var obj in _storedStockpiles.Where(obj => obj != null))
             {
                 if (obj.obj_id.Contains(Constants.ItemObjectId.Timber))
                 {
-                    UsedTimberSlots += obj.data.inventory.Count;
-                    TimberPileCount++;
-                    TimberTemp = obj;
+                    _usedTimberSlots += obj.data.inventory.Count;
+                    _timberPileCount++;
+                    _timberTemp = obj;
                 }
                 else if (obj.obj_id.Contains(Constants.ItemObjectId.Ore))
                 {
-                    UsedOreSlots += obj.data.inventory.Count;
-                    OrePileCount++;
-                    OreTemp = obj;
+                    _usedOreSlots += obj.data.inventory.Count;
+                    _orePileCount++;
+                    _oreTemp = obj;
                 }
                 else if (obj.obj_id.Contains(Constants.ItemObjectId.Stone))
                 {
-                    UsedStoneSlots += obj.data.inventory.Count;
-                    StonePileCount++;
-                    StoneTemp = obj;
+                    _usedStoneSlots += obj.data.inventory.Count;
+                    _stonePileCount++;
+                    _stoneTemp = obj;
                 }
 
             }
 
-            FreeTimberSlots = (9 * TimberPileCount) - UsedTimberSlots;
-            FreeStoneSlots = (6 * StonePileCount) - UsedStoneSlots;
-            FreeOreSlots = (7 * OrePileCount) - UsedOreSlots;
-          //  ShowMessage($"Free Timber: {FreeTimberSlots}, Free Stone: {FreeStoneSlots}, Free Ore: {FreeOreSlots}", false,false,false,"");
+            _freeTimberSlots = (9 * _timberPileCount) - _usedTimberSlots;
+            _freeStoneSlots = (6 * _stonePileCount) - _usedStoneSlots;
+            _freeOreSlots = (7 * _orePileCount) - _usedOreSlots;
+            //  ShowMessage($"Free Timber: {FreeTimberSlots}, Free Stone: {FreeStoneSlots}, Free Ore: {FreeOreSlots}", false,false,false,"");
         }
 
 
@@ -610,7 +617,7 @@ namespace AutoLootHeavies
             {
                 UpdateStockpiles();
 
-                if (Time.time - LastScanTime < _cfg.ScanIntervalInSeconds)
+                if (Time.time - _lastScanTime < _cfg.ScanIntervalInSeconds)
                 {
                     // Debug.LogError($"Been less than {_cfg.ScanIntervalInSeconds} seconds since last scan. Skipping.");
                     return;
@@ -647,11 +654,11 @@ namespace AutoLootHeavies
             public static bool Prefix(ref Item ___overhead_item,
                 out (bool wood, bool stone, bool iron, bool runCode) __state)
             {
-                string itemIdentifier = ___overhead_item.definition.id;
+                var itemIdentifier = ___overhead_item.definition.id;
 
-                bool itemIsLog = itemIdentifier.ToLower().Contains(Constants.ItemDefinitionId.Wood);
-                bool itemIsStone = itemIdentifier.Contains(Constants.ItemDefinitionId.Stone) || itemIdentifier.Contains(Constants.ItemDefinitionId.Marble);
-                bool itemIsOre = itemIdentifier.Contains(Constants.ItemDefinitionId.Ore);
+                var itemIsLog = itemIdentifier.ToLower().Contains(Constants.ItemDefinitionId.Wood);
+                var itemIsStone = itemIdentifier.Contains(Constants.ItemDefinitionId.Stone) || itemIdentifier.Contains(Constants.ItemDefinitionId.Marble);
+                var itemIsOre = itemIdentifier.Contains(Constants.ItemDefinitionId.Ore);
 
                 if (itemIsLog || itemIsStone || itemIsOre)
                 {
@@ -677,9 +684,9 @@ namespace AutoLootHeavies
 
 
                     var pWgo = MainGame.me.player;
-                    var tWgo = TimberTemp; //timber
-                    var sWgo = StoneTemp; //stone
-                    var oWgo = OreTemp; //iron ore
+                    var tWgo = _timberTemp; //timber
+                    var sWgo = _stoneTemp; //stone
+                    var oWgo = _oreTemp; //iron ore
 
                     bool success;
 
@@ -693,14 +700,14 @@ namespace AutoLootHeavies
 
 
                     ItemsToInsert.Clear();
-                    ItemsDidntFit.Clear();
+                    //ItemsDidntFit.Clear();
                     ItemsToInsert.Add(item);
 
                     if (__state.iron)
                     {
                         if (oWgo == null)
                         {
-                            if (LastKnownOreLocation == BlankVector3)
+                            if (_lastKnownOreLocation == BlankVector3)
                             {
                                 DropOjectAndNull(__instance, item);
                                 ShowMessage("", true, false, false, Constants.FileKeys.Ore);
@@ -728,7 +735,7 @@ namespace AutoLootHeavies
                         }
                         else
                         {
-                            switch (FreeOreSlots)
+                            switch (_freeOreSlots)
                             {
                                 //not sure how it can get to -1, but here because it did
                                 case < 0:
@@ -801,10 +808,10 @@ namespace AutoLootHeavies
                                         DropOjectAndNull(__instance, item);
                                     }
 
-                                    if (ItemsDidntFit.Count > 0)
-                                    {
-                                        ShowMessage("", false, false, true, Constants.FileKeys.Ore);
-                                    }
+                                    //if (ItemsDidntFit.Count > 0)
+                                    //{
+                                    //    ShowMessage("", false, false, true, Constants.FileKeys.Ore);
+                                    //}
 
                                     break;
                             }
@@ -814,7 +821,7 @@ namespace AutoLootHeavies
                     {
                         if (tWgo == null)
                         {
-                            if (LastKnownTimberLocation == BlankVector3)
+                            if (_lastKnownTimberLocation == BlankVector3)
                             {
                                 DropOjectAndNull(__instance, item);
                                 ShowMessage("", true, false, false, Constants.FileKeys.Timber);
@@ -842,7 +849,7 @@ namespace AutoLootHeavies
                         }
                         else
                         {
-                            switch (FreeTimberSlots)
+                            switch (_freeTimberSlots)
                             {
                                 //not sure how it can get to -1, but here because it did
                                 case < 0:
@@ -914,10 +921,10 @@ namespace AutoLootHeavies
                                         DropOjectAndNull(__instance, item);
                                     }
 
-                                    if (ItemsDidntFit.Count > 0)
-                                    {
-                                        ShowMessage("", false, false, true, Constants.FileKeys.Timber);
-                                    }
+                                    //if (ItemsDidntFit.Count > 0)
+                                    //{
+                                    //    ShowMessage("", false, false, true, Constants.FileKeys.Timber);
+                                    //}
 
                                     break;
                             }
@@ -927,7 +934,7 @@ namespace AutoLootHeavies
                     {
                         if (sWgo == null)
                         {
-                            if (LastKnownStoneLocation == BlankVector3)
+                            if (_lastKnownStoneLocation == BlankVector3)
                             {
                                 DropOjectAndNull(__instance, item);
                                 ShowMessage("", true, false, false, Constants.FileKeys.Stone);
@@ -955,7 +962,7 @@ namespace AutoLootHeavies
                         }
                         else
                         {
-                            switch (FreeStoneSlots)
+                            switch (_freeStoneSlots)
                             {
                                 //not sure how it can get to -1, but here because it did
                                 case < 0:
@@ -1029,10 +1036,10 @@ namespace AutoLootHeavies
                                         DropOjectAndNull(__instance, item);
                                     }
 
-                                    if (ItemsDidntFit.Count > 0)
-                                    {
-                                        ShowMessage("", false, false, true, Constants.FileKeys.Stone);
-                                    }
+                                    //if (ItemsDidntFit.Count > 0)
+                                    //{
+                                    //    ShowMessage("", false, false, true, Constants.FileKeys.Stone);
+                                    //}
 
                                     break;
                             }

@@ -9,7 +9,7 @@ namespace ThoughtfulReminders
 {
     public class MainPatcher
     {
-        public static int PrevDayOfWeek;
+        private static int _prevDayOfWeek;
         private static Config.Options _cfg;
         private static float _timeOfDayFloat;
 
@@ -33,7 +33,7 @@ namespace ThoughtfulReminders
             }
         }
 
-        public static void SayMessage(string msg)
+        private static void SayMessage(string msg)
         {
             var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
@@ -80,7 +80,7 @@ namespace ThoughtfulReminders
                 {
                     return;
                 }
-                if (PrevDayOfWeek == newDayOfWeek)
+                if (_prevDayOfWeek == newDayOfWeek)
                 {
                     return;
                 }
@@ -146,7 +146,7 @@ namespace ThoughtfulReminders
                             break;
                     }
                 }
-                PrevDayOfWeek = newDayOfWeek;
+                _prevDayOfWeek = newDayOfWeek;
             }
         }
     }

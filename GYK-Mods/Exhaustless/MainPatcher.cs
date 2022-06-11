@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using Exhaustless.lang;
 using HarmonyLib;
+using UnityEngine;
 
 namespace Exhaustless
 {
@@ -174,33 +175,11 @@ namespace Exhaustless
         public static class WorldGameObjectGetParamPatch
         {
             [HarmonyPostfix]
-            private static void Postfix(ref WorldGameObject __instance, ref string param_name, ref WorldGameObject ____data, ref bool __result)
+            private static void Postfix(ref WorldGameObject __instance, ref string param_name, ref Item ____data, ref float __result)
             {
-                if (param_name.Contains("tiredness"))
-                {
-                    if (____data.GetParam("tiredness", 0f) < 1200)
-                    {
-                        MainGame.me.player.Say("Tiredness less than 1200..", null, null,
-                            SpeechBubbleGUI.SpeechBubbleType.Think, SmartSpeechEngine.VoiceID.None, true);
-                        __result = false;
-                    }
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(WorldGameObject))]
-        [HarmonyPatch(nameof(WorldGameObject.SetParam))]
-        public static class WorldGameObjectSetParamPatch
-        {
-            [HarmonyPrefix]
-            private static void Prefix(ref string param_name, ref float value)
-            {
-                if (param_name.Contains("tiredness"))
-                {
-                    MainGame.me.player.Say("Tiredness set to 1200..", null, null,
-                        SpeechBubbleGUI.SpeechBubbleType.Think, SmartSpeechEngine.VoiceID.None, true);
-                    value = 1200f;
-                }
+                if (!param_name.Contains("tiredness")) return;
+                var tiredness = ____data.GetParam("tiredness", 0f);
+                __result = tiredness < 1200 ? 250 : 350;
             }
         }
     }
