@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Please fill to the best of your ability. Can never have too much info.
 title: "[BUG] Issue with mod/tool"
 labels: bug
 assignees: p1xel8ted
@@ -8,6 +8,8 @@ assignees: p1xel8ted
 ---
 
 **If the bug report is about QMod Manager Reloaded, a screenshot of the "Checklist" page must be attached. Any without will be ignored.**
+
+**Please include a screenshot of QMod Manager Reloaded so that I can see what mods you have installed and their load order.**
 
 **What mod/tool are you reporting a bug for?**
 - Mod/tool
