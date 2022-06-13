@@ -23,6 +23,9 @@
 	  <Deterministic>False</Deterministic>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Mono.Cecil.dll" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="icon.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -43,13 +46,13 @@
     <Reference Include="Mono.Cecil">
       <HintPath>Mono.Cecil.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil.Inject">
+      <HintPath>Mono.Cecil.Inject.dll</HintPath>
+    </Reference>
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <None Update="0Harmony.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Mono.Cecil.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

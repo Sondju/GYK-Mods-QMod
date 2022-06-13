@@ -21,6 +21,18 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_150FF115BC65BA669FF89F4EB9AC83D4"
+        "OwnerKey" = "8:_5DBCB2868C0BD94F3F26FEA5F00D1D77"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_150FF115BC65BA669FF89F4EB9AC83D4"
+        "OwnerKey" = "8:_2EFCEF6FAE9E485BB62435AC9E1AC228"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_2EFCEF6FAE9E485BB62435AC9E1AC228"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -75,6 +87,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_5DBCB2868C0BD94F3F26FEA5F00D1D77"
+        "OwnerKey" = "8:_2EFCEF6FAE9E485BB62435AC9E1AC228"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_8771EE93F37D5E5EC5792228B6D04112"
         "OwnerKey" = "8:_2EFCEF6FAE9E485BB62435AC9E1AC228"
         "MsmSig" = "8:_UNDEFINED"
@@ -100,7 +118,7 @@
         "Entry"
         {
         "MsmKey" = "8:_9C0BA1AD0E77EDEF25239C97486D62FD"
-        "OwnerKey" = "8:_F3A58E7541438B0C036DC08C61406AAD"
+        "OwnerKey" = "8:_5DBCB2868C0BD94F3F26FEA5F00D1D77"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -154,13 +172,19 @@
         "Entry"
         {
         "MsmKey" = "8:_D7C60C33C559BAA8DF8A80C8C29AE52B"
-        "OwnerKey" = "8:_F3A58E7541438B0C036DC08C61406AAD"
+        "OwnerKey" = "8:_2EFCEF6FAE9E485BB62435AC9E1AC228"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_D7C60C33C559BAA8DF8A80C8C29AE52B"
-        "OwnerKey" = "8:_2EFCEF6FAE9E485BB62435AC9E1AC228"
+        "OwnerKey" = "8:_150FF115BC65BA669FF89F4EB9AC83D4"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_D7C60C33C559BAA8DF8A80C8C29AE52B"
+        "OwnerKey" = "8:_5DBCB2868C0BD94F3F26FEA5F00D1D77"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -213,12 +237,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_F3A58E7541438B0C036DC08C61406AAD"
-        "OwnerKey" = "8:_2EFCEF6FAE9E485BB62435AC9E1AC228"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_F450C388FA25494390C5EB01E72F50C5"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -232,13 +250,19 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_2EFCEF6FAE9E485BB62435AC9E1AC228"
+        "OwnerKey" = "8:_5DBCB2868C0BD94F3F26FEA5F00D1D77"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_F3A58E7541438B0C036DC08C61406AAD"
+        "OwnerKey" = "8:_150FF115BC65BA669FF89F4EB9AC83D4"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_2EFCEF6FAE9E485BB62435AC9E1AC228"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -445,6 +469,37 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_150FF115BC65BA669FF89F4EB9AC83D4"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:Mono.Cecil.Inject, Version=1.2.7.0, Culture=neutral, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_150FF115BC65BA669FF89F4EB9AC83D4"
+                    {
+                    "Name" = "8:Mono.Cecil.Inject.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:Mono.Cecil.Inject.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_8DB1488A6F99426E8971F3C9D2B9A036"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_31B859C9557F4C62BB647F6508E1CB45"
             {
             "AssemblyRegister" = "3:1"
@@ -583,6 +638,37 @@
                     }
                 }
             "SourcePath" = "8:System.Text.Encodings.Web.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_8DB1488A6F99426E8971F3C9D2B9A036"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_5DBCB2868C0BD94F3F26FEA5F00D1D77"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:QModReloaded, Version=1.0.8199.21600, Culture=neutral, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_5DBCB2868C0BD94F3F26FEA5F00D1D77"
+                    {
+                    "Name" = "8:QModReloaded.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:QModReloaded.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_8DB1488A6F99426E8971F3C9D2B9A036"
@@ -848,37 +934,6 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_F3A58E7541438B0C036DC08C61406AAD"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:QModReloaded, Version=1.0.8188.41705, Culture=neutral, processorArchitecture=MSIL"
-                "ScatterAssemblies"
-                {
-                    "_F3A58E7541438B0C036DC08C61406AAD"
-                    {
-                    "Name" = "8:QModReloaded.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:QModReloaded.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_8DB1488A6F99426E8971F3C9D2B9A036"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_F450C388FA25494390C5EB01E72F50C5"
             {
             "SourcePath" = "8:..\\QModReloadedGUI\\icon.ico"
@@ -918,7 +973,7 @@
             }
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_8DB1488A6F99426E8971F3C9D2B9A036"
             {
-            "DefaultLocation" = "8:C:\\Program Files (x86)\\Steam\\steamapps\\common\\Graveyard Keeper\\Graveyard Keeper_Data\\Managed"
+            "DefaultLocation" = "8:C:\\Program Files (x86)\\p1xel8ted\\QMod Manager Reloaded"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -956,7 +1011,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:QMod Manager Reloaded"
         "ProductCode" = "8:{876DD0BF-7B54-4F17-B495-A0492C96C0F7}"
-        "PackageCode" = "8:{643A8992-3CC3-4E07-95BA-EEF4F12B5A45}"
+        "PackageCode" = "8:{5AB7A400-4539-4C84-8FA8-008146C2F60D}"
         "UpgradeCode" = "8:{6DA88B12-976C-4870-8B40-55D243D60614}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -1505,7 +1560,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_2EFCEF6FAE9E485BB62435AC9E1AC228"
             {
-            "SourcePath" = "8:..\\QModReloadedGUI\\obj\\Release Installer\\QModReloadedGUI.exe"
+            "SourcePath" = "8:..\\QModReloadedGUI\\obj\\Debug\\QModReloadedGUI.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_8DB1488A6F99426E8971F3C9D2B9A036"

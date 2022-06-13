@@ -32,8 +32,9 @@ public partial class FrmMain : Form
     private static readonly JsonSerializerOptions JsonOptions = new()
     { WriteIndented = true, IncludeFields = true, UnknownTypeHandling = JsonUnknownTypeHandling.JsonElement
     };
+    private static string _path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\"));
 
-public FrmMain()
+    public FrmMain()
     {
         InitializeComponent();
     }
@@ -81,33 +82,34 @@ public FrmMain()
         DgvLog.FirstDisplayedScrollingRowIndex = DgvLog.RowCount - 1;
     }
 
-    private void SetLocations(string directory)
+    private void SetLocations()
     {
-        if (directory == string.Empty)
+        _path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\"));
+        //var di = new DirectoryInfo(Path.Combine(Application.StartupPath,@"..\..", "Graveyard Keeper_Data\\Managed\\Graveyard Keeper.exe"));
+        var fi = new FileInfo(Path.Combine(_path, "Graveyard Keeper.exe"));
+        Console.WriteLine(@$"Path: {_path}");
+
+        if (fi.Exists)
         {
-            _gameLocation = Utilities.GetGameDirectory();
-            if (_gameLocation.found)
-            {
-                TxtGameLocation.Text = _gameLocation.location;
-                _modLocation = $@"{_gameLocation.location}\QMods";
-                TxtModFolderLocation.Text = _modLocation;
-                Properties.Settings.Default.GamePath = _gameLocation.location;
-                Properties.Settings.Default.Save();
-            }
-            else
-            {
-                TxtGameLocation.Text = @"Cannot locate automatically.Please browse for game location.";
-            }
+            LblPatched.Visible = true;
+            LblIntroPatched.Visible = true;
+            _gameLocation.found = true;
+            _gameLocation.location = _path;
+            TxtGameLocation.Text = _gameLocation.location;
+            _modLocation = Path.Combine(_gameLocation.location,"QMods");
+            TxtModFolderLocation.Text = _modLocation;
+            Properties.Settings.Default.GamePath = _gameLocation.location;
+            Properties.Settings.Default.Save();
+            LoadMods();
         }
         else
         {
-            _gameLocation.location = directory;
-            TxtGameLocation.Text = directory;
-            _modLocation = $@"{directory}\QMods";
-            TxtModFolderLocation.Text = _modLocation;
-            _gameLocation.found = true;
-            Properties.Settings.Default.GamePath = directory;
-            Properties.Settings.Default.Save();
+            LblPatched.Visible = false;
+            LblIntroPatched.Visible = false;
+            _gameLocation.found = false;
+            TxtGameLocation.Text = @"Looks like I'm not installed in the correct directory.";
+            MessageBox.Show(@"Please ensure I've been installed directly into the Managed directory within the Graveyard Keeper directory.", @"Wrong directory.",
+                MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
         }
 
         if (!_gameLocation.found) return;
@@ -269,6 +271,7 @@ public FrmMain()
     {
         try
         {
+            
             var modAssembly = AssemblyDefinition.ReadAssembly(mod);
 
             var toInspect = modAssembly.MainModule
@@ -326,7 +329,7 @@ public FrmMain()
         }
     }
 
-    public bool ModInList(string mod)
+    private bool ModInList(string mod)
     {
         return _modList.Any(x => x.DisplayName.ToLower().Contains(mod.ToLower()));
     }
@@ -336,7 +339,7 @@ public FrmMain()
 
         if (!_gameLocation.found) return;
 
-        _injector = new Injector(_gameLocation.location);
+        _injector = new Injector(_path);
         if (_injector.IsInjected())
         {
             LblPatched.Text = @"Mod Injector Installed";
@@ -399,60 +402,60 @@ public FrmMain()
         }
     }
 
+    private static bool IsSteamCopy()
+    {
+        return Directory.GetFiles(_path).Select(file => new FileInfo(file)).Any(sFile => sFile.Name.Contains("steam"));
+    }
+
     private void FrmMain_Load(object sender, EventArgs e)
     {
-        SetLocations(Properties.Settings.Default.GamePath);
-        LoadMods();
+        SetLocations();
+        //LoadMods();
         DgvMods.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         DgvMods.Sort(DgvMods.Columns[0], ListSortDirection.Ascending);
         DgvMods.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
         DgvMods.AllowUserToResizeRows = false;
 
-        if (!Properties.Settings.Default.AlertShown)
-        {
-            MessageBox.Show(
-                @"PLEASE READ: I have upgraded an integral DLL (Harmony 1 to Harmony 2) to the latest version available as the current one is quite old and the new one has " +
-                @"a greater toolkit - this means mods will need to be updated as well. All my mods have been updated, (its a single line of code) and I have updated other mods I use." +
-                @" These updated mods will be available on my GitHub until the original author updates. Please re-verify game files, and re-run the patch process. You will not be shown this again.", @"STOP", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            Properties.Settings.Default.AlertShown = true;
-            Properties.Settings.Default.Save();
-        }
+        if (Properties.Settings.Default.AlertShown) return;
+        MessageBox.Show(
+            @"PLEASE READ: I have upgraded an integral DLL (Harmony 1 to Harmony 2) to the latest version available as the current one is quite old and the new one has " +
+            @"a greater toolkit - this means mods will need to be updated as well. All my mods have been updated, (its a single line of code) and I have updated other mods I use." +
+            @" These updated mods will be available on my GitHub until the original author updates. Please re-verify game files, and re-run the patch process. You will not be shown this again.", @"STOP", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+        Properties.Settings.Default.AlertShown = true;
+        Properties.Settings.Default.Save();
 
-    }
-
-    private void BtnBrowse_Click(object sender, EventArgs e)
-    {
-        var result = DlgBrowse.ShowDialog();
-        if (result != DialogResult.OK) return;
-        var di = new DirectoryInfo(DlgBrowse.SelectedPath);
-        var fi = new FileInfo(di.FullName + "\\Graveyard Keeper.exe");
-        if (fi.Exists)
-        {
-            Console.WriteLine(di.ToString());
-            SetLocations(di.ToString());
-            LoadMods();
-        }
-        else
-        {
-            MessageBox.Show(@"Please select the directory containing Graveyard Keeper.exe", @"Wrong directory.",
-                MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-        }
     }
 
     private void RunGame()
     {
         try
         {
-            if (!Properties.Settings.Default.LaunchDirectly)
+            if (Properties.Settings.Default.LaunchDirectly)
             {
+                RunDirect();
+                return;
+            }
+
+            if (IsSteamCopy())
+            {
+                Console.WriteLine(@"Steam Copy: TRUE");
                 using var steam = new Process();
                 steam.StartInfo.FileName = "steam://rungameid/599140";
                 steam.Start();
             }
             else
             {
+                Console.WriteLine(@"Steam Copy: FALSE");
+                RunDirect();
+            }
+
+            void RunDirect()
+            {
+                Console.WriteLine(@"Running Direct: TRUE");
                 using var gyk = new Process();
                 gyk.StartInfo.FileName = Path.Combine(_gameLocation.location, "Graveyard Keeper.exe");
+                gyk.StartInfo.UseShellExecute = true;
+                gyk.StartInfo.WorkingDirectory = _gameLocation.location;
                 gyk.Start();
             }
         }
@@ -489,8 +492,7 @@ public FrmMain()
     private void BtnRemovePatch_Click(object sender, EventArgs e)
     {
         if (IsGameRunning()) return;
-        var (_, message) = _injector.Remove();
-        WriteLog(message);
+        WriteLog(_injector.Remove());
         CheckPatched();
     }
 
@@ -596,6 +598,7 @@ public FrmMain()
 
     private void ChecklistToolStripMenuItem1_Click(object sender, EventArgs e)
     {
+        if (!_gameLocation.found) return;
         _frmChecklist ??= new FrmChecklist(_injector, _gameLocation.location, _modLocation);
         _frmChecklist.ShowDialog();
         _frmChecklist = null;
@@ -703,6 +706,7 @@ public FrmMain()
 
     private void ModifyResolutionToolStripMenuItem_Click(object sender, EventArgs e)
     {
+        if (!_gameLocation.found) return;
         _frmResModifier ??= new FrmResModifier(_gameLocation.location);
         _frmResModifier.ShowDialog();
         _frmResModifier = null;
@@ -996,6 +1000,7 @@ public FrmMain()
 
     private void BtnLaunchModless_Click(object sender, EventArgs e)
     {
+        if (!_gameLocation.found) return;
         if (IsGameRunning()) return;
         foreach (var mod in _modList)
         {
