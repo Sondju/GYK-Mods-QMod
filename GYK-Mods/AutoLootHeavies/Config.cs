@@ -18,16 +18,18 @@ namespace AutoLootHeavies
             public Vector3 DesignatedStoneLocation;
             public float ScanIntervalInSeconds;
             public bool DisableImmersionMode;
-
         }
 
         public static void WriteOptions()
         {
             _con.UpdateValue("TeleportWhenStockPilesFull", _options.Teleportation.ToString());
             _con.UpdateValue("DistanceBasedTeleport", _options.DistanceBasedTeleport.ToString());
-            _con.UpdateValue("DesignatedTimberLocation", $"{_options.DesignatedTimberLocation.x},{_options.DesignatedTimberLocation.y},{_options.DesignatedTimberLocation.z}");
-            _con.UpdateValue("DesignatedOreLocation", $"{_options.DesignatedOreLocation.x},{_options.DesignatedOreLocation.y},{_options.DesignatedOreLocation.z}");
-            _con.UpdateValue("DesignatedStoneLocation", $"{_options.DesignatedStoneLocation.x},{_options.DesignatedStoneLocation.y},{_options.DesignatedStoneLocation.z}");
+            _con.UpdateValue("DesignatedTimberLocation",
+                $"{_options.DesignatedTimberLocation.x},{_options.DesignatedTimberLocation.y},{_options.DesignatedTimberLocation.z}");
+            _con.UpdateValue("DesignatedOreLocation",
+                $"{_options.DesignatedOreLocation.x},{_options.DesignatedOreLocation.y},{_options.DesignatedOreLocation.z}");
+            _con.UpdateValue("DesignatedStoneLocation",
+                $"{_options.DesignatedStoneLocation.x},{_options.DesignatedStoneLocation.y},{_options.DesignatedStoneLocation.z}");
         }
 
         public static Options GetOptions()
@@ -51,9 +53,12 @@ namespace AutoLootHeavies
             var tempO = _con.Value("DesignatedOreLocation", "-3712.003,6144,1294.643").Split(',');
             var tempS = _con.Value("DesignatedStoneLocation", "-3712.003,6144,1294.643").Split(',');
 
-            _options.DesignatedTimberLocation = new Vector3(float.Parse(tempT[0]), float.Parse(tempT[1]), float.Parse(tempT[2]));
-            _options.DesignatedOreLocation = new Vector3(float.Parse(tempO[0]), float.Parse(tempO[1]), float.Parse(tempO[2]));
-            _options.DesignatedStoneLocation = new Vector3(float.Parse(tempS[0]), float.Parse(tempS[1]), float.Parse(tempS[2]));
+            _options.DesignatedTimberLocation =
+                new Vector3(float.Parse(tempT[0]), float.Parse(tempT[1]), float.Parse(tempT[2]));
+            _options.DesignatedOreLocation =
+                new Vector3(float.Parse(tempO[0]), float.Parse(tempO[1]), float.Parse(tempO[2]));
+            _options.DesignatedStoneLocation =
+                new Vector3(float.Parse(tempS[0]), float.Parse(tempS[1]), float.Parse(tempS[2]));
 
             _con.ConfigWrite();
 

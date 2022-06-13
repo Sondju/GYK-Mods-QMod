@@ -1,14 +1,18 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using Exhaustless.lang;
 using HarmonyLib;
+using UnityEngine;
 
 namespace Exhaustless
 {
     public class MainPatcher
     {
         private static Config.Options _cfg;
+        private static string Lang { get; set; }
 
         public static void Patch()
         {
@@ -18,10 +22,24 @@ namespace Exhaustless
                 var harmony = new Harmony("p1xel8ted.GraveyardKeeper.exhaust-less");
                 var assembly = Assembly.GetExecutingAssembly();
                 harmony.PatchAll(assembly);
+
+                Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
             }
             catch (Exception)
             {
                 //  File.AppendAllText("./qmods/dura.txt", $"{ex.Message} - {ex.Source} - {ex.StackTrace}\n");
+            }
+        }
+
+        [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnClosePressed))]
+        public static class InGameMenuGuiOnClosePressedPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
             }
         }
 
@@ -72,7 +90,6 @@ namespace Exhaustless
         [HarmonyPatch(nameof(WaitingGUI.Update))]
         public static class PatchWaiting
         {
-
             [HarmonyPrefix]
             public static void Prefix()
             {
@@ -129,7 +146,8 @@ namespace Exhaustless
                         continue;
                     MainGame.me.player.EquipItem(item, -1, playerInv.is_bag ? playerInv : null);
                     MainGame.me.player.Say(
-                        $"{strings.LuckyHadAnotherPartOne} {item.definition.GetItemName()} {strings.LuckyHadAnotherPartTwo}", null, false,
+                        $"{strings.LuckyHadAnotherPartOne} {item.definition.GetItemName()} {strings.LuckyHadAnotherPartTwo}",
+                        null, false,
                         SpeechBubbleGUI.SpeechBubbleType.Think,
                         SmartSpeechEngine.VoiceID.None, true);
                 }
@@ -149,8 +167,7 @@ namespace Exhaustless
                 MainGame.me.player.hp += 0.25f;
             }
         }
-    
-     
+
 
         [HarmonyPatch(typeof(BuffsLogics))]
         [HarmonyPatch(nameof(BuffsLogics.AddBuff))]
@@ -167,40 +184,19 @@ namespace Exhaustless
                 }
             }
         }
-        
-        
+
+
         [HarmonyPatch(typeof(WorldGameObject))]
         [HarmonyPatch(nameof(WorldGameObject.GetParam))]
         public static class WorldGameObjectGetParamPatch
         {
             [HarmonyPostfix]
-            private static void Postfix(ref WorldGameObject __instance, ref string param_name, ref WorldGameObject ____data, ref bool __result)
+            private static void Postfix(ref WorldGameObject __instance, ref string param_name, ref Item ____data,
+                ref float __result)
             {
-                if (param_name.Contains("tiredness"))
-                {
-                    if (____data.GetParam("tiredness", 0f) < 1200)
-                    {
-                        MainGame.me.player.Say("Tiredness less than 1200..", null, null,
-                            SpeechBubbleGUI.SpeechBubbleType.Think, SmartSpeechEngine.VoiceID.None, true);
-                        __result = false;
-                    }
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(WorldGameObject))]
-        [HarmonyPatch(nameof(WorldGameObject.SetParam))]
-        public static class WorldGameObjectSetParamPatch
-        {
-            [HarmonyPrefix]
-            private static void Prefix(ref string param_name, ref float value)
-            {
-                if (param_name.Contains("tiredness"))
-                {
-                    MainGame.me.player.Say("Tiredness set to 1200..", null, null,
-                        SpeechBubbleGUI.SpeechBubbleType.Think, SmartSpeechEngine.VoiceID.None, true);
-                    value = 1200f;
-                }
+                if (!param_name.Contains("tiredness")) return;
+                var tiredness = ____data.GetParam("tiredness", 0f);
+                __result = tiredness < 1200 ? 250 : 350;
             }
         }
     }

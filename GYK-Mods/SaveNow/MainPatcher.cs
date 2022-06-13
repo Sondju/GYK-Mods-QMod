@@ -9,7 +9,6 @@ using System.Threading;
 using System.Timers;
 using HarmonyLib;
 using SaveNow.lang;
-using Steamworks;
 using UnityEngine;
 using Timer = System.Timers.Timer;
 
@@ -17,15 +16,16 @@ namespace SaveNow
 {
     public class MainPatcher
     {
-        public static Vector3 Pos;
-        public static float X, Y, Z;
-        public static string DataPath, SavePath;
+        private static Vector3 _pos;
+        private static string _dataPath;
+        private static string _savePath;
         private static readonly List<SaveSlotData> AllSaveGames = new();
         private static List<SaveSlotData> _sortedTrimmedSaveGames = new();
         private static Timer _aTimer;
         private static bool _canSave;
-        public static string CurrentSave;
-        public static Dictionary<string, Vector3> SaveLocationsDictionary = new();
+        private static string _currentSave;
+        private static readonly Dictionary<string, Vector3> SaveLocationsDictionary = new();
+        private static string Lang { get; set; }
 
         private static Config.Options _cfg;
 
@@ -33,32 +33,48 @@ namespace SaveNow
         {
             _cfg = Config.GetOptions();
             _aTimer = new Timer();
-            DataPath = "./QMods/SaveNow/dont-remove.dat";
-            SavePath = "./QMods/SaveNow/SaveBackup/";
+            _dataPath = "./QMods/SaveNow/dont-remove.dat";
+            _savePath = "./QMods/SaveNow/SaveBackup/";
 
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.SaveNow");
             var assembly = Assembly.GetExecutingAssembly();
             harmony.PatchAll(assembly);
 
             LoadSaveLocations();
+
+            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
         }
 
-        public static void WriteSavesToFile()
+
+        [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnClosePressed))]
+        public static class InGameMenuGuiOnClosePressedPatch
         {
-          using var file = new StreamWriter(DataPath, false);
-          foreach (var entry in SaveLocationsDictionary)
-          {
-              var result = entry.Value.ToString().Substring(1, entry.Value.ToString().Length - 2);
-              result = result.Replace(" ", "");
-              file.WriteLine("{0}={1}", entry.Key, result);
-          }
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+            }
         }
 
-        public static void LoadSaveLocations()
-        {
-            if (!File.Exists(DataPath)) return;
 
-            var lines = File.ReadAllLines(DataPath, Encoding.Default);
+        private static void WriteSavesToFile()
+        {
+            using var file = new StreamWriter(_dataPath, false);
+            foreach (var entry in SaveLocationsDictionary)
+            {
+                var result = entry.Value.ToString().Substring(1, entry.Value.ToString().Length - 2);
+                result = result.Replace(" ", "");
+                file.WriteLine("{0}={1}", entry.Key, result);
+            }
+        }
+
+        private static void LoadSaveLocations()
+        {
+            if (!File.Exists(_dataPath)) return;
+
+            var lines = File.ReadAllLines(_dataPath, Encoding.Default);
             foreach (var line in lines)
             {
                 if (!line.Contains('=')) continue;
@@ -69,8 +85,8 @@ namespace SaveNow
                     float.Parse(tempVector[1].Trim()), float.Parse(tempVector[2].Trim()));
 
                 var found = SaveLocationsDictionary.TryGetValue(saveName, out _);
-               // Debug.LogError(Path.Combine(PlatformSpecific.GetSaveFolder(), saveName+".dat"));
-                if(!File.Exists(Path.Combine(PlatformSpecific.GetSaveFolder(), saveName + ".dat"))) continue;
+                // Debug.LogError(Path.Combine(PlatformSpecific.GetSaveFolder(), saveName+".dat"));
+                if (!File.Exists(Path.Combine(PlatformSpecific.GetSaveFolder(), saveName + ".dat"))) continue;
                 if (!found)
                 {
                     SaveLocationsDictionary.Add(saveName, vectorToAdd);
@@ -78,14 +94,13 @@ namespace SaveNow
             }
         }
 
-        public static void ShowMessage(string msg, Vector3 pos, EffectBubblesManager.BubbleColor color = EffectBubblesManager.BubbleColor.Relation, float time = 3f)
+        private static void ShowMessage(string msg, Vector3 pos,
+            EffectBubblesManager.BubbleColor color = EffectBubblesManager.BubbleColor.Relation, float time = 3f)
         {
-            var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
             //the floaty bubbles are stuck in english apparently??
-            if (lang.Contains("ko") || lang.Contains("ja") || lang.Contains("zh"))
+            if (Lang.Contains("ko") || Lang.Contains("ja") || Lang.Contains("zh"))
             {
-
                 MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
                     SmartSpeechEngine.VoiceID.None, true);
             }
@@ -100,23 +115,22 @@ namespace SaveNow
         }
 
         //reads co-ords from player, and saves to file
-        public static bool SaveLocation(bool menuExit, string saveFile)
+        private static bool SaveLocation(bool menuExit, string saveFile)
         {
-            var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
 
-            Pos = MainGame.me.player.pos3;
-            CurrentSave = MainGame.me.save_slot.filename_no_extension;
+            _pos = MainGame.me.player.pos3;
+            _currentSave = MainGame.me.save_slot.filename_no_extension;
 
-            var overwrite = SaveLocationsDictionary.TryGetValue(CurrentSave, out _);
+            var overwrite = SaveLocationsDictionary.TryGetValue(_currentSave, out _);
             if (overwrite)
             {
-                SaveLocationsDictionary.Remove(CurrentSave);
-                SaveLocationsDictionary.Add(CurrentSave, Pos);
+                SaveLocationsDictionary.Remove(_currentSave);
+                SaveLocationsDictionary.Add(_currentSave, _pos);
             }
             else
             {
-                SaveLocationsDictionary.Add(CurrentSave, Pos);
+                SaveLocationsDictionary.Add(_currentSave, _pos);
             }
 
             WriteSavesToFile();
@@ -128,23 +142,23 @@ namespace SaveNow
                 {
                     if (_cfg.NewFileOnAutoSave)
                     {
-                        ShowMessage(strings.AutoSave + ": " + saveFile, Pos);
+                        ShowMessage(strings.AutoSave + ": " + saveFile, _pos);
                     }
                     else
                     {
-                        ShowMessage(strings.AutoSave + "!", Pos);
+                        ShowMessage(strings.AutoSave + "!", _pos);
                     }
                 }
                 else
                 {
-                    ShowMessage(strings.SaveMessage, Pos);
+                    ShowMessage(strings.SaveMessage, _pos);
                 }
             }
-            
+
             return true;
         }
 
-        public static void Resize<T>(List<T> list, int size)
+        private static void Resize<T>(List<T> list, int size)
         {
             var count = list.Count;
             if (size < count)
@@ -190,13 +204,13 @@ namespace SaveNow
                         Path.GetFileNameWithoutExtension(tFile.FullName) + ".dat");
                     var sInfo = Path.Combine(PlatformSpecific.GetSaveFolder(),
                         Path.GetFileNameWithoutExtension(tFile.FullName) + ".info");
-                    if (!Directory.Exists(SavePath))
+                    if (!Directory.Exists(_savePath))
                     {
-                        Directory.CreateDirectory(SavePath);
+                        Directory.CreateDirectory(_savePath);
                     }
 
-                    var dDat = SavePath + Path.GetFileNameWithoutExtension(tFile.FullName) + ".dat";
-                    var dInfo = SavePath + Path.GetFileNameWithoutExtension(tFile.FullName) + ".info";
+                    var dDat = _savePath + Path.GetFileNameWithoutExtension(tFile.FullName) + ".dat";
+                    var dInfo = _savePath + Path.GetFileNameWithoutExtension(tFile.FullName) + ".info";
 
                     if (_cfg.RemoveFromSaveListButKeepFile)
                     {
@@ -209,7 +223,7 @@ namespace SaveNow
                         }
                         catch (Exception e)
                         {
-                           Debug.Log($"Error backing up save games. {e.Message}");
+                            Debug.Log($"Error backing up save games. {e.Message}");
                         }
                     }
                     else
@@ -252,13 +266,13 @@ namespace SaveNow
 
 
         //reads co-ords from file and teleports player there
-        public static void RestoreLocation()
+        private static void RestoreLocation()
         {
-            var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
 
             var homeVector = new Vector3(2841, -6396, -1332);
-            var foundLocation = SaveLocationsDictionary.TryGetValue(MainGame.me.save_slot.filename_no_extension, out var posVector3 );
+            var foundLocation =
+                SaveLocationsDictionary.TryGetValue(MainGame.me.save_slot.filename_no_extension, out var posVector3);
             var pos = foundLocation ? posVector3 : homeVector;
             MainGame.me.player.PlaceAtPos(pos);
             if (!_cfg.TurnOffTravelMessages)
@@ -273,7 +287,9 @@ namespace SaveNow
             _aTimer.Start();
             if (!_cfg.DisableAutoSaveInfo)
             {
-                ShowMessage($"{strings.InfoAutoSave}: {_cfg.AutoSave}, {strings.InfoPeriod}: {_cfg.SaveInterval / 60000} {strings.InfoMinutes}, {strings.InfoNewSaveOnAutoSave}: {_cfg.NewFileOnAutoSave}, {strings.InfoSavesToKeep}: {_cfg.AutoSavesToKeep}", pos, EffectBubblesManager.BubbleColor.Red, 4f);
+                ShowMessage(
+                    $"{strings.InfoAutoSave}: {_cfg.AutoSave}, {strings.InfoPeriod}: {_cfg.SaveInterval / 60000} {strings.InfoMinutes}, {strings.InfoNewSaveOnAutoSave}: {_cfg.NewFileOnAutoSave}, {strings.InfoSavesToKeep}: {_cfg.AutoSavesToKeep}",
+                    pos, EffectBubblesManager.BubbleColor.Red, 4f);
             }
         }
 
@@ -293,8 +309,7 @@ namespace SaveNow
             //replaces the standard exit dialog with one that supports save on exit
             public static void Postfix(InGameMenuGUI __instance)
             {
-                var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
-                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
 
                 __instance.SetControllsActive(false);
                 __instance.OnClosePressed();
@@ -330,7 +345,7 @@ namespace SaveNow
             }
         }
 
-       // if this isn't here, when you sleep, it teleport you back to where the mod saved you last
+        // if this isn't here, when you sleep, it teleport you back to where the mod saved you last
         [HarmonyPatch(typeof(SleepGUI), "WakeUp")]
         public static class PatchSavePosWhenUsingBed
         {
@@ -338,6 +353,28 @@ namespace SaveNow
             public static void Prefix()
             {
                 SaveLocation(false, string.Empty);
+            }
+        }
+
+        //change exit menu based on config
+        [HarmonyPatch(typeof(InGameMenuGUI))]
+        [HarmonyPatch(nameof(InGameMenuGUI.Open))]
+        public static class PatchInGameMenuGUIOpen
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref InGameMenuGUI __instance)
+            {
+                if (__instance == null) return;
+                foreach (var comp in __instance.GetComponentsInChildren<UIButton>().Where(x => x.name.Contains("exit")))
+                {
+                    foreach (var label in comp.GetComponentsInChildren<UILabel>())
+                    {
+                        if (_cfg.ExitToDesktop)
+                        {
+                            label.text = strings.ExitButtonText;
+                        }
+                    }
+                }
             }
         }
 
@@ -377,56 +414,10 @@ namespace SaveNow
                     PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
                         delegate { SaveLocation(false, string.Empty); });
                 }
-                //if (Input.GetKeyUp(KeyCode.L))
-                //{
-                //    AutoSave();
-                //}
-                //if (Input.GetKeyUp(KeyCode.J))
-                //{
-                //    FixTrees();
-                //    MainGame.me.player.Say(MainGame.me.player.cur_gd_point, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
-                //        SmartSpeechEngine.VoiceID.None, true);
-                //}
             }
         }
 
-        //public static void FixTrees()
-        //{
-        //    MainGame.me.player.Say("Fixing bushes...hopefully..", null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
-        //        SmartSpeechEngine.VoiceID.None, true);
-
-        //    var bush1Items = WorldMap.GetWorldGameObjectsByObjId("bush_1");
-        //    var bush2Items = WorldMap.GetWorldGameObjectsByObjId("bush_2");
-        //    var bush3Items = WorldMap.GetWorldGameObjectsByObjId("bush_3");
-
-        //    MainGame.me.player.Say($"Bushes1: {bush1Items.Count}, Bushes2: {bush2Items.Count}, Bushes3: {bush3Items.Count}", null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
-        //        SmartSpeechEngine.VoiceID.None, true);
-
-        //    foreach (var item in bush1Items)
-        //    {
-        //        item.ReplaceWithObject("bush_1", true);
-        //        item.GetComponent<ChunkedGameObject>().Init(true);
-        //        item.TryStartCraft("bush_1_berry_respawn");
-
-        //    }
-        //    foreach (var item in bush2Items)
-        //    {
-        //        item.ReplaceWithObject("bush_2", true);
-        //        item.GetComponent<ChunkedGameObject>().Init(true);
-        //        item.TryStartCraft("bush_2_berry_respawn");
-
-        //    }
-
-        //    foreach (var item in bush3Items)
-        //    {
-        //        item.ReplaceWithObject("bush_3", true);
-        //        item.GetComponent<ChunkedGameObject>().Init(true);
-        //        item.TryStartCraft("bush_3_berry_respawn");
-
-        //    }
-        //}
-
-        public static void AutoSave()
+        private static void AutoSave()
         {
             if (EnvironmentEngine.me.IsTimeStopped()) return;
             if (!Application.isFocused) return;

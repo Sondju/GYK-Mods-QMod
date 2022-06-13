@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{37340A24-0BAD-4B0B-9221-6626B7344124}</ProjectGuid>
+    <ProjectGuid>{2A226EA2-0839-4FF6-8438-697D3CC83EBF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
     <AssemblyName>AddStraightToTable</AssemblyName>
@@ -18,6 +18,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>latest</LangVersion>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,36 +34,56 @@
     <RootNamespace>AddStraightToTable</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Config.cs" />
+    <Compile Include="ConfigReader.cs" />
     <Compile Include="MainPatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <Reference Include="0Harmony, Version=1.2.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
+      <Version>[3.3.3]</Version>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="UnityEngine.Modules" Version="2020.3.17" IncludeAssets="compile" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <Reference Include="0Harmony">
+      <HintPath>..\libs\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\libs\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />
   </ProjectExtensions>
+
   <PropertyGroup>
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
+
+  <Target Name="CopyMod" AfterTargets="Build">
+    <ItemGroup>
+      <MyDebugSourceFiles Include="bin\Debug\**\*.*" />
+      <MyReleaseSourceFiles Include="bin\Release\**\*.*" />
+    </ItemGroup>
+    <Message Text="Copying $(ProjectName) to QMod mod directory." Importance="High" />
+    <Copy SourceFiles="@(MyDebugSourceFiles)" DestinationFiles="H:\Games\steamapps\common\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Copy SourceFiles="@(MyReleaseSourceFiles)" DestinationFiles="H:\Games\steamapps\common\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Copy SourceFiles="@(MyDebugSourceFiles)" DestinationFiles="H:\GOG Games\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Copy SourceFiles="@(MyReleaseSourceFiles)" DestinationFiles="H:\GOG Games\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Delete Files="@(MyDebugSourceFiles)" />
+    <Delete Files="@(MyReleaseSourceFiles)" />
+    <Message Text="Finished copying $(ProjectName)" Importance="High" />
+  </Target>
+
 </Project>

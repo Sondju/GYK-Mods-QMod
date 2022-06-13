@@ -16,17 +16,17 @@ namespace LargerScale
             harmony.PatchAll(assembly);
         }
 
+        [HarmonyAfter("com.p1xel8ted.graveyardkeeper.UltraWide")]
         [HarmonyPatch(typeof(ResolutionConfig), nameof(ResolutionConfig.GetResolutionConfigOrNull))]
         public static class Patcher
         {
             [HarmonyPostfix]
-            public static void Postfix(ref ResolutionConfig __result)
+            public static void Postfix(int width, int height, ref ResolutionConfig __result)
             {
-                var config = new ResolutionConfig(_cfg.Width, _cfg.Height)
+                __result ??= new ResolutionConfig(width, height)
                 {
                     pixel_size = _cfg.GameScale,
                 };
-                __result = config;
             }
         }
     }

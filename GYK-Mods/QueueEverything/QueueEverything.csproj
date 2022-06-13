@@ -34,13 +34,38 @@
   <ItemGroup>
     <Compile Include="Config.cs" />
     <Compile Include="ConfigReader.cs" />
-    <Compile Include="MainPatcher.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="lang\strings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>strings.resx</DependentUpon>
     </Compile>
+    <Compile Include="MainPatcher.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
+      <Version>[3.3.3]</Version>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="UnityEngine.Modules" Version="2020.3.17" IncludeAssets="compile" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony" IncludeAssets="compile">
+      <HintPath>..\libs\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp" IncludeAssets="compile">
+      <HintPath>..\libs\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass" IncludeAssets="compile">
+      <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="lang\strings.de.resx" />
@@ -58,30 +83,22 @@
     <EmbeddedResource Include="lang\strings.ru.resx" />
     <EmbeddedResource Include="lang\strings.zh-CN.resx" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="0Harmony, Version=1.2.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />
   </ProjectExtensions>
+  <Target Name="CopyMod" AfterTargets="Build">
+    <ItemGroup>
+      <MyDebugSourceFiles Include="bin\Debug\**\*.*" />
+      <MyReleaseSourceFiles Include="bin\Release\**\*.*" />
+    </ItemGroup>
+    <Message Text="Copying $(ProjectName) to QMod mod directory." Importance="High" />
+    <Copy SourceFiles="@(MyDebugSourceFiles)" DestinationFiles="H:\Games\steamapps\common\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Copy SourceFiles="@(MyReleaseSourceFiles)" DestinationFiles="H:\Games\steamapps\common\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Copy SourceFiles="@(MyDebugSourceFiles)" DestinationFiles="H:\GOG Games\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Copy SourceFiles="@(MyReleaseSourceFiles)" DestinationFiles="H:\GOG Games\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Delete Files="@(MyDebugSourceFiles)" />
+    <Delete Files="@(MyReleaseSourceFiles)" />
+    <Message Text="Finished copying $(ProjectName)" Importance="High" />
+  </Target>
 </Project>

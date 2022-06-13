@@ -56,6 +56,7 @@ namespace LongerDays
                 {
                     result = (1f - __instance.GetTimeK() + 0.15f) * _seconds;
                 }
+
                 __result = result;
             }
         }
@@ -89,7 +90,6 @@ namespace LongerDays
             [HarmonyPostfix]
             public static void Postfix(ref float time_in_time_k, ref float __result)
             {
-                
                 __result = time_in_time_k * _seconds;
             }
         }

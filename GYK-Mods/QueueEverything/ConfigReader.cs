@@ -8,12 +8,14 @@ namespace QueueEverything
         private const string ConfigPath = "./QMods/QueueEverything/config.ini";
 
         private readonly Dictionary<string, string> _values = new();
-        public ConfigReader( )
+
+        public ConfigReader()
         {
             if (!File.Exists(ConfigPath))
             {
-                File.WriteAllText(ConfigPath,"");
+                File.WriteAllText(ConfigPath, "");
             }
+
             foreach (var line in File.ReadAllLines(ConfigPath))
             {
                 if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) return;
@@ -28,6 +30,7 @@ namespace QueueEverything
             {
                 return _values[name];
             }
+
             _values?.Add(name.Trim(), value?.Trim());
             return value;
         }
@@ -37,7 +40,6 @@ namespace QueueEverything
             using var file = new StreamWriter(ConfigPath, false);
             foreach (var entry in _values)
                 file.WriteLine("{0}={1}", entry.Key.Trim(), entry.Value.Trim());
-                
         }
     }
 }

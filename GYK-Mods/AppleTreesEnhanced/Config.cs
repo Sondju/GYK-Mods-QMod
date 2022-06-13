@@ -13,12 +13,16 @@ namespace AppleTreesEnhanced
             public bool IncludeGardenBerryBushes;
             public bool IncludeGardenTrees;
             public bool IncludeWorldBerryBushes;
+            public bool ShowHarvestReadyMessages;
         }
 
         public static Options GetOptions()
         {
             _options = new Options();
             _con = new ConfigReader();
+
+            bool.TryParse(_con.Value("ShowHarvestReadyMessages", "true"), out var showHarvestReadyMessages);
+            _options.ShowHarvestReadyMessages = showHarvestReadyMessages;
 
             bool.TryParse(_con.Value("IncludeGardenBerryBushes", "true"), out var includeGardenBerryBushes);
             _options.IncludeGardenBerryBushes = includeGardenBerryBushes;
