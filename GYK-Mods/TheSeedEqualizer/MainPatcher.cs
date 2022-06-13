@@ -41,7 +41,8 @@ namespace TheSeedEqualizer
                             {
                                 t.value = (int) Math.Ceiling(need.value * 1.05);
                                 t.min_value = SmartExpression.ParseExpression(t.value.ToString());
-                                t.max_value = SmartExpression.ParseExpression(((int)Math.Ceiling(need.value * 1.10)).ToString());
+                                t.max_value =
+                                    SmartExpression.ParseExpression(((int) Math.Ceiling(need.value * 1.10)).ToString());
                             }
                         });
                     });

@@ -24,8 +24,8 @@ namespace NewGameAtBottom
                 //this swaps it around, so that player games are first, and "New" game is at the bottom
                 var codes = new List<CodeInstruction>(instructions);
                 var codesToKeep = codes.GetRange(61, 14);
-                codes.RemoveRange(61,14);
-                codes.InsertRange(91,codesToKeep);
+                codes.RemoveRange(61, 14);
+                codes.InsertRange(91, codesToKeep);
                 return codes.AsEnumerable();
             }
         }

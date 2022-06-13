@@ -27,7 +27,7 @@ namespace LargerScale
             _options.Width = widthBool ? width : 1920;
 
             var heightBool = int.TryParse(_con.Value("Height", "1080"), out var height);
-            _options.Height = heightBool ? height: 1080;
+            _options.Height = heightBool ? height : 1080;
 
             _con.ConfigWrite();
 

@@ -12,6 +12,7 @@ namespace ThoughtfulReminders
         private static int _prevDayOfWeek;
         private static Config.Options _cfg;
         private static float _timeOfDayFloat;
+        private static string Lang { get; set; }
 
         public static void Patch()
         {
@@ -20,8 +21,23 @@ namespace ThoughtfulReminders
             harmony.PatchAll(assembly);
 
             _cfg = Config.GetOptions();
+
+            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
         }
-        
+
+
+        [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnClosePressed))]
+        public static class InGameMenuGuiOnClosePressedPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+            }
+        }
+
         [HarmonyPatch(typeof(TimeOfDay))]
         [HarmonyPatch(nameof(TimeOfDay.Update))]
         public static class TimeOfDayPatch
@@ -35,8 +51,7 @@ namespace ThoughtfulReminders
 
         private static void SayMessage(string msg)
         {
-            var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
             if (_cfg.SpeechBubbles)
             {
                 MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
@@ -45,9 +60,8 @@ namespace ThoughtfulReminders
             else
             {
                 //game doesn't appear to support these languages fonts in the effects bubbles aka floaty text
-                if (lang.Contains("ko") || lang.Contains("ja") || lang.Contains("zh"))
+                if (Lang.Contains("ko") || Lang.Contains("ja") || Lang.Contains("zh"))
                 {
-
                     MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
                         SmartSpeechEngine.VoiceID.None, true);
                 }
@@ -58,7 +72,6 @@ namespace ThoughtfulReminders
                         true, 4f);
                 }
             }
-
         }
 
 
@@ -69,27 +82,28 @@ namespace ThoughtfulReminders
             [HarmonyPostfix]
             public static void Postfix()
             {
-
                 if (!MainGame.game_started) return;
                 var newDayOfWeek = MainGame.me.save.day_of_week;
                 if (MainGame.me.player.is_dead)
                 {
                     return;
                 }
+
                 if (!Application.isFocused)
                 {
                     return;
                 }
+
                 if (_prevDayOfWeek == newDayOfWeek)
                 {
                     return;
                 }
+
                 if (_timeOfDayFloat is <= 0.22f or >= 0.25f) return;
 
                 if (_cfg.DaysOnly)
                 {
-                    var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
-                    Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+                    Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
                     switch (newDayOfWeek)
                     {
                         case 0: //day of Sloth
@@ -117,8 +131,7 @@ namespace ThoughtfulReminders
                 }
                 else
                 {
-                    var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
-                    Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+                    Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
                     switch (newDayOfWeek)
                     {
                         case 0: //day of Sloth
@@ -146,6 +159,7 @@ namespace ThoughtfulReminders
                             break;
                     }
                 }
+
                 _prevDayOfWeek = newDayOfWeek;
             }
         }

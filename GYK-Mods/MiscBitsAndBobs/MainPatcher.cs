@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using HarmonyLib;
 using System.Reflection;
+using System.Threading;
 using UnityEngine;
 
 namespace MiscBitsAndBobs
@@ -34,6 +35,7 @@ namespace MiscBitsAndBobs
             _cfg = Config.GetOptions();
         }
 
+
         [HarmonyPatch(typeof(InventoryGUI))]
         [HarmonyPatch(nameof(InventoryGUI.OnItemOver))]
         public static class PatchCantDestroy
@@ -63,7 +65,8 @@ namespace MiscBitsAndBobs
 
                 foreach (var itemDefinition in GameBalance.me.items_data
                              .Where(itemDefinition => itemDefinition != null)
-                             .Where(x => ToolItems.Contains(x.type) || x.id.Contains("book") || x.id.Contains("chapter") || x.id.Contains("grave") || x.id.Contains("pen")))
+                             .Where(x => ToolItems.Contains(x.type) || x.id.Contains("book") ||
+                                         x.id.Contains("chapter") || x.id.Contains("grave") || x.id.Contains("pen")))
                 {
                     itemDefinition.stack_count += 1000;
                     itemDefinition.base_count += 1000;
@@ -125,12 +128,11 @@ namespace MiscBitsAndBobs
             [HarmonyPostfix]
             public static void Postfix(ref bool ____inited)
             {
-                
                 if (!____inited || !MainGame.game_started || !_cfg.CondenseXpBar)
                 {
                     return;
                 }
-                
+
                 var r = MainGame.me.player.GetParam("r");
                 var g = MainGame.me.player.GetParam("g");
                 var b = MainGame.me.player.GetParam("b");
@@ -139,7 +141,7 @@ namespace MiscBitsAndBobs
                 if (r >= 1000)
                 {
                     r /= 1000f;
-                    var nSplit =r.ToString(CultureInfo.InvariantCulture).Split('.');
+                    var nSplit = r.ToString(CultureInfo.InvariantCulture).Split('.');
                     red = nSplit[1].StartsWith("0") ? $"(r){r:0}K" : $"(r){r:0.0}K";
                 }
                 else
@@ -221,8 +223,6 @@ namespace MiscBitsAndBobs
 
                 multi_inventory = multiInventory;
             }
-
-
         }
 
         //makes halloween an annual event instead of the original 2018...

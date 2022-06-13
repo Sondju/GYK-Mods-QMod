@@ -21,7 +21,7 @@ namespace ThoughtfulReminders
 
             bool.TryParse(_con.Value("SpeechBubbles", "true"), out var speechBubbles);
             _options.SpeechBubbles = speechBubbles;
-            
+
             bool.TryParse(_con.Value("DaysOnly", "false"), out var daysOnly);
             _options.DaysOnly = daysOnly;
 

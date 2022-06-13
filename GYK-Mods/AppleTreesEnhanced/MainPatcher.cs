@@ -10,6 +10,7 @@ namespace AppleTreesEnhanced
     public class MainPatcher
     {
         private static Config.Options _cfg;
+        private static string Lang { get; set; }
 
         private struct Constants
         {
@@ -53,14 +54,27 @@ namespace AppleTreesEnhanced
             var assembly = Assembly.GetExecutingAssembly();
             harmony.PatchAll(assembly);
             _cfg = Config.GetOptions();
+
+            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+        }
+
+        [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnClosePressed))]
+        public static class InGameMenuGuiOnClosePressedPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+            }
         }
 
         private static void ShowMessage(WorldGameObject obj, string message)
         {
             if (_cfg.ShowHarvestReadyMessages)
             {
-                var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
-                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
                 var newObjPos = obj.pos3;
 
                 if (obj.obj_id.Contains("berry"))

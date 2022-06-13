@@ -46,7 +46,7 @@ namespace Exhaustless
 
             bool.TryParse(_con.Value("SpeedUpMeditation", "true"), out var speedUpMeditation);
             _options.SpeedUpMeditation = speedUpMeditation;
-            
+
             bool.TryParse(_con.Value("YawnMessage", "true"), out var yawnMessage);
             _options.YawnMessage = yawnMessage;
 

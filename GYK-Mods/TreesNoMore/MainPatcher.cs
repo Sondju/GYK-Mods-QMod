@@ -7,7 +7,6 @@ namespace TreesNoMore
 {
     public class MainPatcher
     {
-
         public static void Patch()
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.TreesNoMore");
@@ -16,7 +15,7 @@ namespace TreesNoMore
         }
 
         [HarmonyPatch(typeof(WorldGameObject), "SmartInstantiate")]
-        public static class PatchLoadGame 
+        public static class PatchLoadGame
         {
             [HarmonyPrefix]
             public static void Prefix(ref WorldObjectPart prefab)

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{37340A24-0BAD-4B0B-9221-6626B7344124}</ProjectGuid>
+    <ProjectGuid>{2A226EA2-0839-4FF6-8438-697D3CC83EBF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
     <AssemblyName>AddStraightToTable</AssemblyName>
@@ -18,6 +18,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>latest</LangVersion>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,94 +34,49 @@
     <RootNamespace>AddStraightToTable</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Config.cs" />
+    <Compile Include="ConfigReader.cs" />
     <Compile Include="MainPatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <Reference Include="0Harmony, Version=1.2.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
+      <Version>[3.3.3]</Version>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="UnityEngine.Modules" Version="2020.3.17" IncludeAssets="compile" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <Reference Include="0Harmony">
+      <HintPath>..\libs\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\libs\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />
   </ProjectExtensions>
-  <PropertyGroup>
-    <PostBuildEvent>if $(ConfigurationName) == Release (
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\TreesNoMore\bin\Release\TreesNoMore.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\TreesNoMore\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\UltraWide\bin\Release\UltraWide.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\UltraWide\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\FogBeGone\bin\Release\FogBeGone.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\FogBeGone\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NewGameAtBottom\bin\Release\NewGameAtBottom.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NewGameAtBottom\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Release\SaveNow.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\SaveNow\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaustless\bin\Release\Exhaust-less.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\Exhaust-less\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoTimeForFishing\bin\Release\NoTimeForFishing.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoTimeForFishing\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\LargerScale\bin\Release\LargerScale.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\LargerScale\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AddStraightToTable\bin\Release\AddStraightToTable.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AddStraightToTable\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AutoLootHeavies\bin\Release\AutoLootHeavies.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AutoLootHeavies\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\ThoughtfulReminders\bin\Release\ThoughtfulReminders.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\ThoughtfulReminders\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoIntros\bin\Release\NoIntros.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoIntros\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\LongerDays\bin\Release\LongerDays.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\LongerDays\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\QueueEverything\bin\Release\QueueEverything.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\QueueEverything\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AppleTreesEnhanced\bin\Release\AppleTreesEnhanced.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AppleTreesEnhanced\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\MiscBitsAndBobs\bin\Release\MiscBitsAndBobs.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\MiscBitsAndBobs\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\INeedSticks\bin\Release\INeedSticks.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\INeedSticks\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\TheSeedEqualizer\bin\Release\TheSeedEqualizer.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\TheSeedEqualizer\" /K /D /H /Y
-)
-if $(ConfigurationName) == Debug (
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\TreesNoMore\bin\Debug\TreesNoMore.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\TreesNoMore\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\UltraWide\bin\Debug\UltraWide.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\UltraWide\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\FogBeGone\bin\Debug\FogBeGone.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\FogBeGone\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NewGameAtBottom\bin\Debug\NewGameAtBottom.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NewGameAtBottom\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Debug\SaveNow.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\SaveNow\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaustless\bin\Debug\Exhaust-less.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\Exhaust-less\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoTimeForFishing\bin\Debug\NoTimeForFishing.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoTimeForFishing\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\LargerScale\bin\Debug\LargerScale.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\LargerScale\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AddStraightToTable\bin\Debug\AddStraightToTable.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AddStraightToTable\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AutoLootHeavies\bin\Debug\AutoLootHeavies.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AutoLootHeavies\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\ThoughtfulReminders\bin\Debug\ThoughtfulReminders.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\ThoughtfulReminders\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoIntros\bin\Debug\NoIntros.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoIntros\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\LongerDays\bin\Debug\LongerDays.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\LongerDays\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\QueueEverything\bin\Debug\QueueEverything.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\QueueEverything\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AppleTreesEnhanced\bin\Debug\AppleTreesEnhanced.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AppleTreesEnhanced\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\MiscBitsAndBobs\bin\Debug\MiscBitsAndBobs.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\MiscBitsAndBobs\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\INeedSticks\bin\Debug\INeedSticks.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\INeedSticks\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\TheSeedEqualizer\bin\Debug\TheSeedEqualizer.pdb" "H:\Games\steamapps\common\Graveyard Keeper\QMods\TheSeedEqualizer\" /K /D /H /Y
-
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\TreesNoMore\bin\Debug\TreesNoMore.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\TreesNoMore\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\UltraWide\bin\Debug\UltraWide.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\UltraWide\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\FogBeGone\bin\Debug\FogBeGone.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\FogBeGone\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NewGameAtBottom\bin\Debug\NewGameAtBottom.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NewGameAtBottom\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\SaveNow\bin\Debug\SaveNow.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\SaveNow\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\Exhaustless\bin\Debug\Exhaust-less.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\Exhaust-less\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoTimeForFishing\bin\Debug\NoTimeForFishing.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoTimeForFishing\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\LargerScale\bin\Debug\LargerScale.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\LargerScale\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AddStraightToTable\bin\Debug\AddStraightToTable.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AddStraightToTable\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AutoLootHeavies\bin\Debug\AutoLootHeavies.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AutoLootHeavies\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\ThoughtfulReminders\bin\Debug\ThoughtfulReminders.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\ThoughtfulReminders\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\NoIntros\bin\Debug\NoIntros.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\NoIntros\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\LongerDays\bin\Debug\LongerDays.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\LongerDays\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\QueueEverything\bin\Debug\QueueEverything.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\QueueEverything\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\AppleTreesEnhanced\bin\Debug\AppleTreesEnhanced.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\AppleTreesEnhanced\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\MiscBitsAndBobs\bin\Debug\MiscBitsAndBobs.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\MiscBitsAndBobs\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\INeedSticks\bin\Debug\INeedSticks.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\INeedSticks\" /K /D /H /Y
-xcopy "H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\TheSeedEqualizer\bin\Debug\TheSeedEqualizer.dll" "H:\Games\steamapps\common\Graveyard Keeper\QMods\TheSeedEqualizer\" /K /D /H /Y
-)
-</PostBuildEvent>
-  </PropertyGroup>
+  <Target Name="CopyMod" AfterTargets="Build">
+    <ItemGroup>
+      <MyDebugSourceFiles Include="bin\Debug\**\*.*" />
+      <MyReleaseSourceFiles Include="bin\Release\**\*.*" />
+    </ItemGroup>
+    <Message Text="Copying $(ProjectName) to QMod mod directory." Importance="High" />
+    <Copy SourceFiles="@(MyDebugSourceFiles)" DestinationFiles="H:\Games\steamapps\common\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Copy SourceFiles="@(MyReleaseSourceFiles)" DestinationFiles="H:\Games\steamapps\common\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Copy SourceFiles="@(MyDebugSourceFiles)" DestinationFiles="H:\GOG Games\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Copy SourceFiles="@(MyReleaseSourceFiles)" DestinationFiles="H:\GOG Games\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Delete Files="@(MyDebugSourceFiles)" />
+    <Delete Files="@(MyReleaseSourceFiles)" />
+    <Message Text="Finished copying $(ProjectName)" Importance="High" />
+  </Target>
 </Project>

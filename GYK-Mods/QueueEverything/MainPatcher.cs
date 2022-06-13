@@ -9,6 +9,7 @@ using HarmonyLib;
 using QueueEverything.lang;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
+
 // ReSharper disable InconsistentNaming
 
 namespace QueueEverything
@@ -25,8 +26,10 @@ namespace QueueEverything
         private static WorldGameObject _previousWorldGameObject;
         private static bool _alreadyRun;
 
-        private static readonly string[] UnSafeCraftObjects = {
-            "mf_crematorium_corp", "garden_builddesk", "tree_garden_builddesk", "mf_crematorium", "grave_ground", "tile_church_semicircle_2floors"
+        private static readonly string[] UnSafeCraftObjects =
+        {
+            "mf_crematorium_corp", "garden_builddesk", "tree_garden_builddesk", "mf_crematorium", "grave_ground",
+            "tile_church_semicircle_2floors"
         };
 
         //private struct Constants
@@ -90,7 +93,6 @@ namespace QueueEverything
             [HarmonyPostfix]
             public static void Postfix(ref bool __result, WorldGameObject __state)
             {
-                
                 if (!UnSafeCraftObjects.Contains(__state.obj_id))
                 {
                     __result = true;
@@ -106,7 +108,7 @@ namespace QueueEverything
                 var streamReader = new StreamReader(path);
                 var text = streamReader.ReadLine();
                 var array = text?.Split('=');
-                _timeAdjustment = (float)Convert.ToDouble(array?[1]);
+                _timeAdjustment = (float) Convert.ToDouble(array?[1]);
             }
             catch (Exception)
             {
@@ -134,13 +136,13 @@ namespace QueueEverything
                 int num;
                 if (GlobalCraftControlGUI.is_global_control_active)
                 {
-                    num = (__instance.gratitude_points_craft_cost is not { has_expression: true }
+                    num = (__instance.gratitude_points_craft_cost is not {has_expression: true}
                         ? 0
                         : Mathf.RoundToInt(__instance.gratitude_points_craft_cost.EvaluateFloat(wgo)));
                 }
                 else
                 {
-                    num = (__instance.energy is not { has_expression: true }
+                    num = (__instance.energy is not {has_expression: true}
                         ? 0
                         : Mathf.RoundToInt(__instance.energy.EvaluateFloat(wgo)));
                 }
@@ -162,8 +164,8 @@ namespace QueueEverything
                     if (flag)
                     {
                         foreach (var equippedTool in from itemType in wgo.obj_def.tool_actions.action_tools
-                                                     where itemType != ItemDefinition.ItemType.Hand
-                                                     select MainGame.me.player.GetEquippedTool(itemType))
+                                 where itemType != ItemDefinition.ItemType.Hand
+                                 select MainGame.me.player.GetEquippedTool(itemType))
                         {
                             bool flag2;
                             if (equippedTool == null)
@@ -201,7 +203,7 @@ namespace QueueEverything
 
                         if (_exhaustless)
                         {
-                            var adjustedNum = (float)Math.Round(num / 2f, 2);
+                            var adjustedNum = (float) Math.Round(num / 2f, 2);
                             if (gratitudePoints < (smartExpression?.EvaluateFloat(MainGame.me.player) ?? 0f))
                             {
                                 if (adjustedNum % 1 == 0)
@@ -247,7 +249,7 @@ namespace QueueEverything
 
                         if (_exhaustless)
                         {
-                            var adjustedNum = (float)Math.Round(num / 2f, 2);
+                            var adjustedNum = (float) Math.Round(num / 2f, 2);
                             if (adjustedNum % 1 == 0)
                             {
                                 text = text + "[c](en)[/c]" + adjustedNum.ToString("0");
@@ -273,7 +275,7 @@ namespace QueueEverything
                     var found = Crafts.TryGetValue(__instance.id, out var value);
                     if (found)
                     {
-                        num4 = value is not { has_expression: true }
+                        num4 = value is not {has_expression: true}
                             ? 0
                             : value.EvaluateFloat(wgo);
                     }
@@ -326,7 +328,7 @@ namespace QueueEverything
                     }
                     else
                     {
-                        item.value = (int)Math.Round((double)value / 2, MidpointRounding.AwayFromZero);
+                        item.value = (int) Math.Round((double) value / 2, MidpointRounding.AwayFromZero);
                     }
 
                     var amount = item.value * multiplier;
@@ -396,11 +398,11 @@ namespace QueueEverything
             {
                 _alreadyRun = true;
                 var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
-                Debug.LogError($"[QueueEverything] CraftGUI Open CrafteryWGO: {crafteryWgo.obj_id}, {crafteryWgo.name}");
+                Debug.LogError(
+                    $"[QueueEverything] CraftGUI Open CrafteryWGO: {crafteryWgo.obj_id}, {crafteryWgo.name}");
                 if (string.Equals(crafteryWgo.obj_id, previousObjId)) return;
                 previousObjId = crafteryWgo.obj_id;
                 File.AppendAllText("./QMods/QueueEverything/interacted-objects.txt", crafteryWgo.obj_id + "\n");
-
             }
         }
 
@@ -418,7 +420,6 @@ namespace QueueEverything
                         if (!uiButton.name.Contains("craft")) continue;
                         __instance.gamepad_controller.SetFocusedItem(uiButton.GetComponent<GamepadNavigationItem>());
                         uiButton.gameObject.SetActive(true);
-
                     }
                 }
             }
@@ -475,7 +476,7 @@ namespace QueueEverything
                     {
                         if (_cfg.HalfFireRequirements)
                         {
-                            item.value = (int)Math.Round((double)fireValue / 2, MidpointRounding.AwayFromZero);
+                            item.value = (int) Math.Round((double) fireValue / 2, MidpointRounding.AwayFromZero);
                         }
                         else
                         {
@@ -517,7 +518,8 @@ namespace QueueEverything
         public static class CraftItemGuiRedrawPatch
         {
             [HarmonyPrefix]
-            public static void Prefix(ref CraftItemGUI __instance, ref List<string> ____multiquality_ids, ref int ____amount)
+            public static void Prefix(ref CraftItemGUI __instance, ref List<string> ____multiquality_ids,
+                ref int ____amount)
             {
                 _craftAmount = ____amount;
 

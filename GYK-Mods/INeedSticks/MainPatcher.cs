@@ -30,7 +30,6 @@ namespace INeedSticks
                 if (_newItem == null) return;
                 __instance?.crafts.Add(_newItem);
             }
-
         }
 
         [HarmonyPatch(typeof(CraftItemGUI), "OnCraftPressed", MethodType.Normal)]
@@ -41,7 +40,6 @@ namespace INeedSticks
             {
                 _craftWoodenStick = false || __instance.current_craft.id.Contains("wooden_stick");
             }
-
         }
 
         //again, the output of the new object seems to be ignored despite being processed, this manually drops the craft
@@ -83,7 +81,6 @@ namespace INeedSticks
                     __result = (12 * amount).ToString();
                 }
             }
-
         }
 
         //this is required as it seems impossible to add things to GameData that actually take effect, this stops it coming back null when it doesn't find "wooden_stick" in game data
@@ -95,7 +92,8 @@ namespace INeedSticks
             public static void Prefix(ref CraftDefinition ____craft)
             {
                 if (GUIElements.me.craft.GetCrafteryWGO() == null) return;
-                if (!GUIElements.me.craft.GetCrafteryWGO().obj_id.Contains("mf_saw") && !MainGame.me.save.unlocked_techs.Contains("Circular")) return;
+                if (!GUIElements.me.craft.GetCrafteryWGO().obj_id.Contains("mf_saw") &&
+                    !MainGame.me.save.unlocked_techs.Contains("Circular")) return;
                 if (_craftWoodenStick)
                 {
                     ____craft ??= _newItem;
@@ -105,11 +103,11 @@ namespace INeedSticks
 
         //creates and adds our new object on ui open. Will only add when user has unlocked circular saw, and is interacting with it
         [HarmonyPatch(typeof(BaseCraftGUI), "CommonOpen")]
-     
         public static class BaseCraftGuiCommonOpenPatch
         {
             [HarmonyPostfix]
-            public static void Postfix(ref BaseCraftGUI __instance, ref CraftComponent ___craft_component, ref CraftsInventory ___crafts_inventory, ref List<CraftDefinition> ___crafts)
+            public static void Postfix(ref BaseCraftGUI __instance, ref CraftComponent ___craft_component,
+                ref CraftsInventory ___crafts_inventory, ref List<CraftDefinition> ___crafts)
             {
                 var newCd = new CraftDefinition();
                 var cd = GameBalance.me.GetData<CraftDefinition>("wood1_2");
@@ -122,7 +120,10 @@ namespace INeedSticks
                 newCd.needs = cd.needs;
                 newCd.needs_from_wgo = cd.needs_from_wgo;
                 newCd.output = output;
-                newCd.output[0].min_value = SmartExpression.ParseExpression("6"); //don't think this actually does anything as I had to manually patch anyway
+                newCd.output[0].min_value =
+                    SmartExpression
+                        .ParseExpression(
+                            "6"); //don't think this actually does anything as I had to manually patch anyway
                 newCd.out_items_expressions = cd.out_items_expressions;
                 newCd.output_res_wgo = cd.output_res_wgo;
                 newCd.output_set_res_wgo = cd.output_set_res_wgo;
@@ -134,10 +135,17 @@ namespace INeedSticks
                 newCd.end_script = cd.end_script;
                 newCd.end_event = cd.end_event;
                 newCd.flag = cd.flag;
-                newCd.craft_time = SmartExpression.ParseExpression((cd.craft_time.EvaluateFloat() * 2).ToString(CultureInfo.InvariantCulture));
-                newCd.energy = SmartExpression.ParseExpression((cd.energy.EvaluateFloat() * 2).ToString(CultureInfo.InvariantCulture));
-                newCd.gratitude_points_craft_cost = SmartExpression.ParseExpression((cd.gratitude_points_craft_cost.EvaluateFloat() * 2).ToString(CultureInfo.InvariantCulture));
-                newCd.sanity = SmartExpression.ParseExpression((cd.sanity.EvaluateFloat() * 2).ToString(CultureInfo.InvariantCulture));
+                newCd.craft_time =
+                    SmartExpression.ParseExpression(
+                        (cd.craft_time.EvaluateFloat() * 2).ToString(CultureInfo.InvariantCulture));
+                newCd.energy =
+                    SmartExpression.ParseExpression(
+                        (cd.energy.EvaluateFloat() * 2).ToString(CultureInfo.InvariantCulture));
+                newCd.gratitude_points_craft_cost = SmartExpression.ParseExpression(
+                    (cd.gratitude_points_craft_cost.EvaluateFloat() * 2).ToString(CultureInfo.InvariantCulture));
+                newCd.sanity =
+                    SmartExpression.ParseExpression(
+                        (cd.sanity.EvaluateFloat() * 2).ToString(CultureInfo.InvariantCulture));
                 newCd.hidden = false;
                 newCd.needs_unlock = false;
                 newCd.icon = "i_stick";
@@ -188,7 +196,8 @@ namespace INeedSticks
                 _newItem = newCd;
 
                 if (GUIElements.me.craft.GetCrafteryWGO() == null) return;
-                if (!GUIElements.me.craft.GetCrafteryWGO().obj_id.Contains("mf_saw") && !MainGame.me.save.unlocked_techs.Contains("Circular")) return;
+                if (!GUIElements.me.craft.GetCrafteryWGO().obj_id.Contains("mf_saw") &&
+                    !MainGame.me.save.unlocked_techs.Contains("Circular")) return;
                 ___crafts.Add(_newItem);
                 ___crafts_inventory?.AddCraft(_newItem.id);
             }

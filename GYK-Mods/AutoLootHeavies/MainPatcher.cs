@@ -79,6 +79,8 @@ namespace AutoLootHeavies
         private static float _lastScanTime;
         private static float _lastGetLocationScanTime;
 
+        private static string Lang { get; set; }
+
         public static void Patch()
         {
             try
@@ -91,12 +93,28 @@ namespace AutoLootHeavies
 
                 _vectorsLoaded = false;
                 _needScanning = true;
+
+                Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
             }
             catch (Exception ex)
             {
                 Debug.LogError($"[AutoLootHeavies]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
             }
         }
+
+
+        [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnClosePressed))]
+        public static class InGameMenuGuiOnClosePressedPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+            }
+        }
+
 
         private static void UpdateConfig()
         {
@@ -154,6 +172,7 @@ namespace AutoLootHeavies
             {
                 needEnergy = 0f;
             }
+
             if (pwo.IsPlayerInvulnerable())
             {
                 needEnergy = 0f;
@@ -172,7 +191,8 @@ namespace AutoLootHeavies
             if (Time.time - _lastBubbleTime > 0.5f)
             {
                 _lastBubbleTime = Time.time;
-                EffectBubblesManager.ShowImmediately(pwo.bubble_pos, GJL.L("not_enough_something", $"({GameSettings.me.language})"),
+                EffectBubblesManager.ShowImmediately(pwo.bubble_pos,
+                    GJL.L("not_enough_something", $"({GameSettings.me.language})"),
                     EffectBubblesManager.BubbleColor.Energy, true, 1f);
             }
 
@@ -279,7 +299,8 @@ namespace AutoLootHeavies
 
                 _lastBubbleTime = Time.time;
 
-                EffectBubblesManager.ShowImmediately(pwo.bubble_pos, GJL.L("not_enough_something", $"({GameSettings.me.language})"),
+                EffectBubblesManager.ShowImmediately(pwo.bubble_pos,
+                    GJL.L("not_enough_something", $"({GameSettings.me.language})"),
                     EffectBubblesManager.BubbleColor.Energy, true, 1f);
             }
         }
@@ -335,7 +356,6 @@ namespace AutoLootHeavies
             //the floaty bubbles are stuck in english apparently??
             if (lang.Contains("ko") || lang.Contains("ja") || lang.Contains("zh"))
             {
-
                 MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
                     SmartSpeechEngine.VoiceID.None, true);
             }
@@ -539,8 +559,8 @@ namespace AutoLootHeavies
             foreach (var obj in _objects.Where(obj => obj != null))
             {
                 bool found;
-                var vectorToAdd = new Vector3((float)Math.Ceiling(obj.pos3.x), (float)Math.Ceiling(obj.pos3.y),
-                    (float)Math.Ceiling(obj.pos3.z));
+                var vectorToAdd = new Vector3((float) Math.Ceiling(obj.pos3.x), (float) Math.Ceiling(obj.pos3.y),
+                    (float) Math.Ceiling(obj.pos3.z));
                 if (obj.obj_id.Contains(Constants.ItemObjectId.Timber))
                 {
                     found = VectorDictionary.TryGetValue(vectorToAdd, out _);
@@ -597,7 +617,6 @@ namespace AutoLootHeavies
                     _stonePileCount++;
                     _stoneTemp = obj;
                 }
-
             }
 
             _freeTimberSlots = (9 * _timberPileCount) - _usedTimberSlots;
@@ -657,7 +676,8 @@ namespace AutoLootHeavies
                 var itemIdentifier = ___overhead_item.definition.id;
 
                 var itemIsLog = itemIdentifier.ToLower().Contains(Constants.ItemDefinitionId.Wood);
-                var itemIsStone = itemIdentifier.Contains(Constants.ItemDefinitionId.Stone) || itemIdentifier.Contains(Constants.ItemDefinitionId.Marble);
+                var itemIsStone = itemIdentifier.Contains(Constants.ItemDefinitionId.Stone) ||
+                                  itemIdentifier.Contains(Constants.ItemDefinitionId.Marble);
                 var itemIsOre = itemIdentifier.Contains(Constants.ItemDefinitionId.Ore);
 
                 if (itemIsLog || itemIsStone || itemIsOre)
@@ -1054,7 +1074,7 @@ namespace AutoLootHeavies
                 catch (Exception ex)
                 {
                     ShowMessage(
-                       strings.ErrorMsg,
+                        strings.ErrorMsg,
                         false,
                         false, false, "");
                     try

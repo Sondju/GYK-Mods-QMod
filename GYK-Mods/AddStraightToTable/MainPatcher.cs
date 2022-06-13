@@ -36,38 +36,38 @@ namespace AddStraightToTable
 
                     var inventory = ____parts_inventory;
                     var instance = __instance;
-                    GUIElements.me.resource_picker.Open(obj, delegate(Item item, InventoryWidget _)
+                    GUIElements.me.resource_picker.Open(obj, delegate (Item item, InventoryWidget _)
+                    {
+                        if (item == null || item.IsEmpty())
                         {
-                            if (item == null || item.IsEmpty())
-                            {
-                                return InventoryWidget.ItemFilterResult.Hide;
-                            }
+                            return InventoryWidget.ItemFilterResult.Hide;
+                        }
 
-                            if (item.definition.type != ItemDefinition.ItemType.BodyUniversalPart)
-                            {
-                                return InventoryWidget.ItemFilterResult.Inactive;
-                            }
+                        if (item.definition.type != ItemDefinition.ItemType.BodyUniversalPart)
+                        {
+                            return InventoryWidget.ItemFilterResult.Inactive;
+                        }
 
-                            var text = item.id;
-                            if (text.Contains(":"))
-                            {
-                                text = text.Split(':')[0];
-                            }
+                        var text = item.id;
+                        if (text.Contains(":"))
+                        {
+                            text = text.Split(':')[0];
+                        }
 
-                            text = text.Replace("_dark", "");
-                            if (inventory.data.inventory.Any(item2 =>
-                                    item2 != null && !item2.IsEmpty() && item2.id.StartsWith(text)))
-                            {
-                                return InventoryWidget.ItemFilterResult.Inactive;
-                            }
+                        text = text.Replace("_dark", "");
+                        if (inventory.data.inventory.Any(item2 =>
+                                item2 != null && !item2.IsEmpty() && item2.id.StartsWith(text)))
+                        {
+                            return InventoryWidget.ItemFilterResult.Inactive;
+                        }
 
-                            return instance.GetInsertCraftDefinition(item) == null ? InventoryWidget.ItemFilterResult.Inactive : InventoryWidget.ItemFilterResult.Active;
+                        return instance.GetInsertCraftDefinition(item) == null ? InventoryWidget.ItemFilterResult.Inactive : InventoryWidget.ItemFilterResult.Active;
 
-                        },
+                    },
                         __instance.OnItemForInsertionPicked);
                     return;
                 }
-          
+
                 var craftDefinition = (CraftDefinition)typeof(AutopsyGUI)
                     .GetMethod("GetExtractCraftDefinition", AccessTools.all)
                     ?.Invoke(__instance, new object[]

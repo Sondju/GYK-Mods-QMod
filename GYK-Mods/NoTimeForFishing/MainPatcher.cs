@@ -13,7 +13,7 @@ namespace NoTimeForFishing
             var assembly = Assembly.GetExecutingAssembly();
             harmony.PatchAll(assembly);
         }
-        
+
         [HarmonyPatch(typeof(FishLogic), "CalculateFishPos")]
         public class PatchCalculateFishPos
         {
@@ -35,9 +35,10 @@ namespace NoTimeForFishing
             }
 
             [HarmonyPostfix]
-            private static void Postfix(FishingGUI __instance, ref Item ____fish, ref float ____waiting_for_bite_delay, ref FishDefinition ____fish_def, ref FishPreset ____fish_preset)
+            private static void Postfix(FishingGUI __instance, ref Item ____fish, ref float ____waiting_for_bite_delay,
+                ref FishDefinition ____fish_def, ref FishPreset ____fish_preset)
             {
-                var fishy = (FishDefinition)typeof(FishingGUI)
+                var fishy = (FishDefinition) typeof(FishingGUI)
                     .GetMethod("GetRandomFish", AccessTools.all)
                     ?.Invoke(__instance, new object[]
                     {
@@ -49,10 +50,9 @@ namespace NoTimeForFishing
                 ____fish_preset = Resources.Load<FishPreset>("MiniGames/Fishing/" + ____fish_def.fish_preset);
                 typeof(FishingGUI).GetMethod("ChangeState", AccessTools.all)
                     ?.Invoke(__instance, new object[]
-                {
-                    FishingGUI.FishingState.WaitingForPulling
-                });
-                
+                    {
+                        FishingGUI.FishingState.WaitingForPulling
+                    });
             }
         }
 
@@ -65,27 +65,24 @@ namespace NoTimeForFishing
                 ___is_success_fishing = true;
                 typeof(FishingGUI).GetMethod("ChangeState", AccessTools.all)
                     ?.Invoke(__instance, new object[]
-                {
-                    FishingGUI.FishingState.Pulling
-                });
-                
+                    {
+                        FishingGUI.FishingState.Pulling
+                    });
             }
         }
-        
+
         [HarmonyPatch(typeof(FishingGUI), "UpdatePulling", null)]
         internal class PatchUpdatePulling
         {
-
             [HarmonyPostfix]
             private static void Postfix(FishingGUI __instance)
             {
                 typeof(FishingGUI).GetMethod("ChangeState", AccessTools.all)
                     ?.Invoke(__instance, new object[]
-                {
-                    FishingGUI.FishingState.TakingOut
-                });
+                    {
+                        FishingGUI.FishingState.TakingOut
+                    });
             }
         }
     }
 }
-    

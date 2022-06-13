@@ -12,7 +12,7 @@ namespace NoIntros
             var assembly = Assembly.GetExecutingAssembly();
             harmony.PatchAll(assembly);
         }
-        
+
         [HarmonyPatch(typeof(LBPreloader), "StartAnimations")]
         public static class NoIntroPatch
         {

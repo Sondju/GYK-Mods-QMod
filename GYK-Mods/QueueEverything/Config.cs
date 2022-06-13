@@ -34,7 +34,8 @@ namespace QueueEverything
             bool.TryParse(_con.Value("AutoSelectHighestQualRecipe", "true"), out var autoSelectHighestQualRecipe);
             _options.AutoSelectHighestQualRecipe = autoSelectHighestQualRecipe;
 
-            bool.TryParse(_con.Value("AutoSelectCraftButtonWithController", "true"), out var autoSelectCraftButtonWithController);
+            bool.TryParse(_con.Value("AutoSelectCraftButtonWithController", "true"),
+                out var autoSelectCraftButtonWithController);
             _options.AutoSelectCraftButtonWithController = autoSelectCraftButtonWithController;
 
             _con.ConfigWrite();
