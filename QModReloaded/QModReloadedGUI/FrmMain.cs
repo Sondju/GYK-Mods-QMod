@@ -11,6 +11,7 @@ using Mono.Cecil;
 using QModReloaded;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Mono.Cecil.Cil;
 
 namespace QModReloadedGUI;
 
@@ -31,8 +32,9 @@ public partial class FrmMain : Form
     private static readonly JsonSerializerOptions JsonOptions = new()
     { WriteIndented = true, IncludeFields = true, UnknownTypeHandling = JsonUnknownTypeHandling.JsonElement
     };
+    private static string _path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\"));
 
-public FrmMain()
+    public FrmMain()
     {
         InitializeComponent();
     }
@@ -47,44 +49,67 @@ public FrmMain()
         return true;
     }
 
-    public void WriteLog(string message)
+    private void WriteLog(string message, bool error = false)
     {
-        Utilities.WriteLog(message, _gameLocation.location);
-
-        if (TxtLog.Text.Length > 0)
-            TxtLog.AppendText(Environment.NewLine + message);
-        else
-
-            TxtLog.AppendText(message);
-    }
-
-    private void SetLocations(string directory)
-    {
-        if (directory == string.Empty)
+        
+        var dt = DateTime.Now;
+        var rowIndex = DgvLog.Rows.Add(dt.ToLongTimeString(), message);
+        var row = DgvLog.Rows[rowIndex];
+        if (error)
         {
-            _gameLocation = Utilities.GetGameDirectory();
-            if (_gameLocation.found)
-            {
-                TxtGameLocation.Text = _gameLocation.location;
-                _modLocation = $@"{_gameLocation.location}\QMods";
-                TxtModFolderLocation.Text = _modLocation;
-                Properties.Settings.Default.GamePath = _gameLocation.location;
-                Properties.Settings.Default.Save();
-            }
-            else
-            {
-                TxtGameLocation.Text = @"Cannot locate automatically.Please browse for game location.";
-            }
+            row.DefaultCellStyle.BackColor = Color.LightCoral;
+        }
+
+        string logMessage;
+        if (error)
+        {
+            logMessage = "-----------------------------------------\n";
+            logMessage += dt.ToShortDateString() + " " + dt.ToLongTimeString() + " : [ERROR] : " + message + "\n";
+            logMessage += "-----------------------------------------";
         }
         else
         {
-            _gameLocation.location = directory;
-            TxtGameLocation.Text = directory;
-            _modLocation = $@"{directory}\QMods";
-            TxtModFolderLocation.Text = _modLocation;
+            logMessage = dt.ToShortDateString() + " " + dt.ToLongTimeString() + " : " + message;
+        }
+        Utilities.WriteLog(logMessage, _gameLocation.location);
+
+        var errors = DgvLog.Rows.Cast<DataGridViewRow>().Count(r => r.DefaultCellStyle.BackColor == Color.LightCoral);
+        if (errors > 0)
+        {
+            LblErrors.Text = $@"Errors: {errors}";
+        }
+
+        DgvLog.FirstDisplayedScrollingRowIndex = DgvLog.RowCount - 1;
+    }
+
+    private void SetLocations()
+    {
+        _path = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\"));
+        //var di = new DirectoryInfo(Path.Combine(Application.StartupPath,@"..\..", "Graveyard Keeper_Data\\Managed\\Graveyard Keeper.exe"));
+        var fi = new FileInfo(Path.Combine(_path, "Graveyard Keeper.exe"));
+        Console.WriteLine(@$"Path: {_path}");
+
+        if (fi.Exists)
+        {
+            LblPatched.Visible = true;
+            LblIntroPatched.Visible = true;
             _gameLocation.found = true;
-            Properties.Settings.Default.GamePath = directory;
+            _gameLocation.location = _path;
+            TxtGameLocation.Text = _gameLocation.location;
+            _modLocation = Path.Combine(_gameLocation.location,"QMods");
+            TxtModFolderLocation.Text = _modLocation;
+            Properties.Settings.Default.GamePath = _gameLocation.location;
             Properties.Settings.Default.Save();
+            LoadMods();
+        }
+        else
+        {
+            LblPatched.Visible = false;
+            LblIntroPatched.Visible = false;
+            _gameLocation.found = false;
+            TxtGameLocation.Text = @"Looks like I'm not installed in the correct directory.";
+            MessageBox.Show(@"Please ensure I've been installed directly into the Managed directory within the Graveyard Keeper directory.", @"Wrong directory.",
+                MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
         }
 
         if (!_gameLocation.found) return;
@@ -184,11 +209,12 @@ public FrmMain()
                         var createResult = CreateJson(dllFile);
                         if (createResult == false)
                         {
-                            WriteLog("Error creating JSON file.");
+                            WriteLog("Error creating JSON file.", true);
                             continue;
                         }
 
-                        TxtLog.Text = "";
+                        DgvLog.Rows.Clear();
+                        LblErrors.Text = string.Empty;
                         LoadMods();
                         return;
                     }
@@ -199,7 +225,7 @@ public FrmMain()
                 var mod = QMod.FromJsonFile(Path.Combine(path, jsonFile));
                 if (mod == null)
                 {
-                    WriteLog($"{dllFileName} didn't have a valid json.");
+                    WriteLog($"{dllFileName} didn't have a valid json.", true);
                 }
                 else
                 {
@@ -207,13 +233,22 @@ public FrmMain()
                     if (!string.IsNullOrEmpty(mod.EntryMethod))
                     {
                         _modList.Add(mod);
-                        DgvMods.Rows.Add(mod.LoadOrder, mod.DisplayName, mod.Enable);
-
-                        WriteLog(mod.DisplayName + " added.");
+                        var isModCompatible = IsModCompatible(Path.Combine(mod.ModAssemblyPath, dllFileName));
+                        var rowIndex = DgvMods.Rows.Add(mod.LoadOrder, mod.DisplayName, mod.Enable, mod.Id);
+                        var row = DgvMods.Rows[rowIndex];
+                        if (!isModCompatible)
+                        {
+                            row.DefaultCellStyle.BackColor = Color.LightCoral;
+                            WriteLog(mod.DisplayName + " added, but it's not Harmony 2 compatible, and will not load without updating by the author.",true);
+                        }
+                        else
+                        {
+                            WriteLog(mod.DisplayName + " added.");
+                        }
                     }
                     else
                     {
-                        WriteLog(mod.DisplayName + " had issues and wasn't loaded.");
+                        WriteLog(mod.DisplayName + " had issues and wasn't loaded.", true);
                     }
                 }
             }
@@ -224,12 +259,41 @@ public FrmMain()
         }
         catch (Exception ex)
         {
-            WriteLog($"LoadMods() ERROR: {ex.Message}");
+            WriteLog($"LoadMods() ERROR: {ex.Message}", true);
         }
 
         CheckQueueEverything();
         CheckAllModsActive();
         CheckPatched();
+    }
+
+    private static bool IsModCompatible(string mod)
+    {
+        try
+        {
+            
+            var modAssembly = AssemblyDefinition.ReadAssembly(mod);
+
+            var toInspect = modAssembly.MainModule
+                .GetTypes()
+                .SelectMany(t => t.Methods
+                    .Where(m => m.HasBody)
+                    .Select(m => new { t, m }));
+
+            toInspect = toInspect.Where(x => x.m.Name is "Patch");
+
+            if (toInspect.Any(method => method.m.Body.Instructions.Where(instruction => instruction.Operand != null)
+                    .Any(instruction => instruction.OpCode == OpCodes.Newobj && instruction.Operand.ToString().Contains("HarmonyLib.Harmony"))))
+            {
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.WriteLog($"IsModCompatible(): Error, {ex.Message}");
+        }
+
+        return false;
     }
 
     private void CheckQueueEverything()
@@ -265,7 +329,7 @@ public FrmMain()
         }
     }
 
-    public bool ModInList(string mod)
+    private bool ModInList(string mod)
     {
         return _modList.Any(x => x.DisplayName.ToLower().Contains(mod.ToLower()));
     }
@@ -275,7 +339,7 @@ public FrmMain()
 
         if (!_gameLocation.found) return;
 
-        _injector = new Injector(_gameLocation.location);
+        _injector = new Injector(_path);
         if (_injector.IsInjected())
         {
             LblPatched.Text = @"Mod Injector Installed";
@@ -330,7 +394,7 @@ public FrmMain()
         }
         catch (FileNotFoundException)
         {
-            WriteLog("Assembly-CSharp.dll not found. Probably need to check that out.");
+            WriteLog("Assembly-CSharp.dll not found. Probably need to check that out.", true);
         }
         catch (Exception)
         {
@@ -338,61 +402,60 @@ public FrmMain()
         }
     }
 
+    private static bool IsSteamCopy()
+    {
+        return Directory.GetFiles(_path).Select(file => new FileInfo(file)).Any(sFile => sFile.Name.Contains("steam"));
+    }
+
     private void FrmMain_Load(object sender, EventArgs e)
     {
-        
-        SetLocations(Properties.Settings.Default.GamePath);
-        LoadMods();
+        SetLocations();
+        //LoadMods();
         DgvMods.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         DgvMods.Sort(DgvMods.Columns[0], ListSortDirection.Ascending);
         DgvMods.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
         DgvMods.AllowUserToResizeRows = false;
 
-        if (!Properties.Settings.Default.AlertShown)
-        {
-            MessageBox.Show(
-                @"PLEASE READ: I have upgraded an integral DLL (Harmony 1 to Harmony 2) to the latest version available as the current one is quite old and the new one has " +
-                @"a greater toolkit - this means mods will need to be updated as well. All my mods have been updated, (its a single line of code) and I have updated other mods I use." +
-                @" These updated mods will be available on my GitHub until the original author updates. Please re-verify game files, and re-run the patch process. You will not be shown this again.", @"STOP", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            Properties.Settings.Default.AlertShown = true;
-            Properties.Settings.Default.Save();
-        }
+        if (Properties.Settings.Default.AlertShown) return;
+        MessageBox.Show(
+            @"PLEASE READ: I have upgraded an integral DLL (Harmony 1 to Harmony 2) to the latest version available as the current one is quite old and the new one has " +
+            @"a greater toolkit - this means mods will need to be updated as well. All my mods have been updated, (its a single line of code) and I have updated other mods I use." +
+            @" These updated mods will be available on my GitHub until the original author updates. Please re-verify game files, and re-run the patch process. You will not be shown this again.", @"STOP", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+        Properties.Settings.Default.AlertShown = true;
+        Properties.Settings.Default.Save();
 
-    }
-
-    private void BtnBrowse_Click(object sender, EventArgs e)
-    {
-        var result = DlgBrowse.ShowDialog();
-        if (result != DialogResult.OK) return;
-        var di = new DirectoryInfo(DlgBrowse.SelectedPath);
-        var fi = new FileInfo(di.FullName + "\\Graveyard Keeper.exe");
-        if (fi.Exists)
-        {
-            Console.WriteLine(di.ToString());
-            SetLocations(di.ToString());
-            LoadMods();
-        }
-        else
-        {
-            MessageBox.Show(@"Please select the directory containing Graveyard Keeper.exe", @"Wrong directory.",
-                MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-        }
     }
 
     private void RunGame()
     {
         try
         {
-            if (!Properties.Settings.Default.LaunchDirectly)
+            if (Properties.Settings.Default.LaunchDirectly)
             {
+                RunDirect();
+                return;
+            }
+
+            if (IsSteamCopy())
+            {
+                Console.WriteLine(@"Steam Copy: TRUE");
                 using var steam = new Process();
                 steam.StartInfo.FileName = "steam://rungameid/599140";
                 steam.Start();
             }
             else
             {
+                Console.WriteLine(@"Steam Copy: FALSE");
+                RunDirect();
+            }
+
+            void RunDirect()
+            {
+                Console.WriteLine(@"Running Direct: TRUE");
                 using var gyk = new Process();
                 gyk.StartInfo.FileName = Path.Combine(_gameLocation.location, "Graveyard Keeper.exe");
+                gyk.StartInfo.UseShellExecute = true;
+                gyk.StartInfo.WorkingDirectory = _gameLocation.location;
                 gyk.Start();
             }
         }
@@ -429,8 +492,7 @@ public FrmMain()
     private void BtnRemovePatch_Click(object sender, EventArgs e)
     {
         if (IsGameRunning()) return;
-        var (_, message) = _injector.Remove();
-        WriteLog(message);
+        WriteLog(_injector.Remove());
         CheckPatched();
     }
 
@@ -502,7 +564,7 @@ public FrmMain()
         }
         else
         {
-            WriteLog(message);
+            WriteLog(message, true);
             MessageBox.Show(@"There was an issue patching out intros. Validate Steam files and try again.", @"Hmmm",
                 MessageBoxButtons.OK);
         }
@@ -525,7 +587,7 @@ public FrmMain()
         }
         catch (Exception)
         {
-            WriteLog("Issues toggling mod functionality.");
+            WriteLog("Issues toggling mod functionality.", true);
         }
     }
 
@@ -536,6 +598,7 @@ public FrmMain()
 
     private void ChecklistToolStripMenuItem1_Click(object sender, EventArgs e)
     {
+        if (!_gameLocation.found) return;
         _frmChecklist ??= new FrmChecklist(_injector, _gameLocation.location, _modLocation);
         _frmChecklist.ShowDialog();
         _frmChecklist = null;
@@ -583,7 +646,14 @@ public FrmMain()
             foreach (var zip in DlgFile.FileNames)
             {
                 var result = AddMod(zip);
-                if (result) WriteLog($"Extracted {zip}.");
+                if (result)
+                {
+                    WriteLog($"Extracted {zip}.");
+                }
+                else
+                {
+                    WriteLog($"Issue extracting {zip}.", true);
+                }
             }
 
         LoadMods();
@@ -624,8 +694,8 @@ public FrmMain()
         if (result != DialogResult.Yes) return;
         foreach (DataGridViewRow rows in DgvMods.SelectedRows)
         {
-            var modName = rows.Cells[1].Value.ToString();
-            var mod = _modList.FirstOrDefault(mod => mod.DisplayName == modName);
+            var modId = rows.Cells[3].Value.ToString();
+            var mod = _modList.FirstOrDefault(mod => mod.Id == modId);
             if (mod == null) return;
             Directory.Delete(mod.ModAssemblyPath, true);
             _modList.Remove(mod);
@@ -636,6 +706,7 @@ public FrmMain()
 
     private void ModifyResolutionToolStripMenuItem_Click(object sender, EventArgs e)
     {
+        if (!_gameLocation.found) return;
         _frmResModifier ??= new FrmResModifier(_gameLocation.location);
         _frmResModifier.ShowDialog();
         _frmResModifier = null;
@@ -656,7 +727,7 @@ public FrmMain()
         }
         catch (Exception)
         {
-            WriteLog($"Issue saving config: {_currentlySelectedModConfigLocation}");
+            WriteLog($"Issue saving config: {_currentlySelectedModConfigLocation}",true);
             throw;
         }
     }
@@ -751,11 +822,11 @@ public FrmMain()
         }
         catch (NullReferenceException ex)
         {
-            WriteLog($"List Mods ERROR: {ex.Message}");
+            WriteLog($"List Mods ERROR: {ex.Message}",true);
         }
         catch (Exception ex)
         {
-            WriteLog($"List Mods ERROR: {ex.Message}");
+            WriteLog($"List Mods ERROR: {ex.Message}",true);
         }
     }
 
@@ -879,11 +950,11 @@ public FrmMain()
         }
         catch (FileNotFoundException)
         {
-            WriteLog("A backed up Assembly-CSharp.dll could not be found.");
+            WriteLog("A backed up Assembly-CSharp.dll could not be found.",true);
         }
         catch (Exception ex)
         {
-            WriteLog($"An error occurred: {ex.Message}.");
+            WriteLog($"An error occurred: {ex.Message}.",true);
         }
     }
 
@@ -906,7 +977,7 @@ public FrmMain()
         }
         catch (Exception)
         {
-            WriteLog($"Issue locating folder for {modFound?.DisplayName}.");
+            WriteLog($"Issue locating folder for {modFound?.DisplayName}.",true);
         }
     }
     
@@ -929,6 +1000,7 @@ public FrmMain()
 
     private void BtnLaunchModless_Click(object sender, EventArgs e)
     {
+        if (!_gameLocation.found) return;
         if (IsGameRunning()) return;
         foreach (var mod in _modList)
         {

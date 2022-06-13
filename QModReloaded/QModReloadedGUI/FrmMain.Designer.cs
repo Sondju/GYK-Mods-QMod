@@ -35,14 +35,12 @@ namespace QModReloadedGUI
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             this.TxtGameLocation = new System.Windows.Forms.TextBox();
             this.TxtModFolderLocation = new System.Windows.Forms.TextBox();
-            this.BtnBrowse = new System.Windows.Forms.Button();
             this.LblGameLocation = new System.Windows.Forms.Label();
             this.LblModFolderLocation = new System.Windows.Forms.Label();
             this.LblInstalledMods = new System.Windows.Forms.Label();
             this.BtnPatch = new System.Windows.Forms.Button();
             this.LblModInfo = new System.Windows.Forms.Label();
             this.TxtModInfo = new System.Windows.Forms.TextBox();
-            this.DlgBrowse = new System.Windows.Forms.FolderBrowserDialog();
             this.BtnAddMod = new System.Windows.Forms.Button();
             this.BtnRemove = new System.Windows.Forms.Button();
             this.BtnRunGame = new System.Windows.Forms.PictureBox();
@@ -57,13 +55,12 @@ namespace QModReloadedGUI
             this.ChOrder = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ChMod = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ChEnabled = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.ChID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.BtnRestore = new System.Windows.Forms.Button();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checklistToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.LblLog = new System.Windows.Forms.Label();
-            this.TxtLog = new System.Windows.Forms.TextBox();
             this.ToolStrip = new System.Windows.Forms.ToolStrip();
             this.LblPatched = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
@@ -90,17 +87,23 @@ namespace QModReloadedGUI
             this.exitToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.ChkToggleMods = new System.Windows.Forms.CheckBox();
             this.ChkLaunchExeDirectly = new System.Windows.Forms.CheckBox();
+            this.DgvLog = new System.Windows.Forms.DataGridView();
+            this.ChTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.LblErrors = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.BtnRunGame)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.DgvMods)).BeginInit();
             this.ToolStrip.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.trayIconCtxMenu.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.DgvLog)).BeginInit();
             this.SuspendLayout();
             // 
             // TxtGameLocation
             // 
             this.TxtGameLocation.Location = new System.Drawing.Point(12, 29);
             this.TxtGameLocation.Name = "TxtGameLocation";
+            this.TxtGameLocation.ReadOnly = true;
             this.TxtGameLocation.Size = new System.Drawing.Size(469, 20);
             this.TxtGameLocation.TabIndex = 0;
             this.ToolTip.SetToolTip(this.TxtGameLocation, "Directory that contains Graveyard Keeper.exe");
@@ -113,19 +116,6 @@ namespace QModReloadedGUI
             this.TxtModFolderLocation.Size = new System.Drawing.Size(469, 20);
             this.TxtModFolderLocation.TabIndex = 1;
             this.ToolTip.SetToolTip(this.TxtModFolderLocation, "This cannot be changed due to the nature of QMods.");
-            // 
-            // BtnBrowse
-            // 
-            this.BtnBrowse.Location = new System.Drawing.Point(406, 53);
-            this.BtnBrowse.Margin = new System.Windows.Forms.Padding(1);
-            this.BtnBrowse.Name = "BtnBrowse";
-            this.BtnBrowse.Size = new System.Drawing.Size(75, 23);
-            this.BtnBrowse.TabIndex = 2;
-            this.BtnBrowse.Text = "&Browse";
-            this.ToolTip.SetToolTip(this.BtnBrowse, "Browse for directory manually if it fails to auto-detect.");
-            this.BtnBrowse.UseCompatibleTextRendering = true;
-            this.BtnBrowse.UseVisualStyleBackColor = true;
-            this.BtnBrowse.Click += new System.EventHandler(this.BtnBrowse_Click);
             // 
             // LblGameLocation
             // 
@@ -159,7 +149,7 @@ namespace QModReloadedGUI
             // 
             // BtnPatch
             // 
-            this.BtnPatch.Location = new System.Drawing.Point(218, 53);
+            this.BtnPatch.Location = new System.Drawing.Point(295, 53);
             this.BtnPatch.Margin = new System.Windows.Forms.Padding(1);
             this.BtnPatch.Name = "BtnPatch";
             this.BtnPatch.Size = new System.Drawing.Size(92, 23);
@@ -188,12 +178,12 @@ namespace QModReloadedGUI
             this.TxtModInfo.Name = "TxtModInfo";
             this.TxtModInfo.ReadOnly = true;
             this.TxtModInfo.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.TxtModInfo.Size = new System.Drawing.Size(250, 132);
+            this.TxtModInfo.Size = new System.Drawing.Size(250, 181);
             this.TxtModInfo.TabIndex = 11;
             // 
             // BtnAddMod
             // 
-            this.BtnAddMod.Location = new System.Drawing.Point(12, 436);
+            this.BtnAddMod.Location = new System.Drawing.Point(14, 529);
             this.BtnAddMod.Name = "BtnAddMod";
             this.BtnAddMod.Size = new System.Drawing.Size(75, 23);
             this.BtnAddMod.TabIndex = 13;
@@ -205,7 +195,7 @@ namespace QModReloadedGUI
             // 
             // BtnRemove
             // 
-            this.BtnRemove.Location = new System.Drawing.Point(93, 436);
+            this.BtnRemove.Location = new System.Drawing.Point(95, 529);
             this.BtnRemove.Name = "BtnRemove";
             this.BtnRemove.Size = new System.Drawing.Size(84, 23);
             this.BtnRemove.TabIndex = 14;
@@ -230,7 +220,7 @@ namespace QModReloadedGUI
             // 
             // BtnRemovePatch
             // 
-            this.BtnRemovePatch.Location = new System.Drawing.Point(312, 53);
+            this.BtnRemovePatch.Location = new System.Drawing.Point(389, 53);
             this.BtnRemovePatch.Margin = new System.Windows.Forms.Padding(1);
             this.BtnRemovePatch.Name = "BtnRemovePatch";
             this.BtnRemovePatch.Size = new System.Drawing.Size(92, 23);
@@ -243,7 +233,7 @@ namespace QModReloadedGUI
             // 
             // BtnRefresh
             // 
-            this.BtnRefresh.Location = new System.Drawing.Point(183, 436);
+            this.BtnRefresh.Location = new System.Drawing.Point(185, 529);
             this.BtnRefresh.Name = "BtnRefresh";
             this.BtnRefresh.Size = new System.Drawing.Size(53, 23);
             this.BtnRefresh.TabIndex = 18;
@@ -255,7 +245,7 @@ namespace QModReloadedGUI
             // 
             // BtnRemoveIntros
             // 
-            this.BtnRemoveIntros.Location = new System.Drawing.Point(467, 435);
+            this.BtnRemoveIntros.Location = new System.Drawing.Point(464, 528);
             this.BtnRemoveIntros.Name = "BtnRemoveIntros";
             this.BtnRemoveIntros.Size = new System.Drawing.Size(95, 23);
             this.BtnRemoveIntros.TabIndex = 20;
@@ -290,7 +280,7 @@ namespace QModReloadedGUI
             // 
             // BtnOpenLog
             // 
-            this.BtnOpenLog.Location = new System.Drawing.Point(242, 436);
+            this.BtnOpenLog.Location = new System.Drawing.Point(244, 529);
             this.BtnOpenLog.Name = "BtnOpenLog";
             this.BtnOpenLog.Size = new System.Drawing.Size(64, 23);
             this.BtnOpenLog.TabIndex = 29;
@@ -310,7 +300,8 @@ namespace QModReloadedGUI
             this.DgvMods.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.ChOrder,
             this.ChMod,
-            this.ChEnabled});
+            this.ChEnabled,
+            this.ChID});
             this.DgvMods.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             this.DgvMods.GridColor = System.Drawing.SystemColors.Control;
             this.DgvMods.Location = new System.Drawing.Point(13, 140);
@@ -318,7 +309,7 @@ namespace QModReloadedGUI
             this.DgvMods.ReadOnly = true;
             this.DgvMods.RowHeadersVisible = false;
             this.DgvMods.ShowEditingIcon = false;
-            this.DgvMods.Size = new System.Drawing.Size(293, 289);
+            this.DgvMods.Size = new System.Drawing.Size(293, 383);
             this.DgvMods.TabIndex = 35;
             this.ToolTip.SetToolTip(this.DgvMods, "Drag n Drop to re-order mods. Mods will load in the order they appear in this lis" +
         "t.");
@@ -358,9 +349,16 @@ namespace QModReloadedGUI
             this.ChEnabled.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.ChEnabled.Width = 52;
             // 
+            // ChID
+            // 
+            this.ChID.HeaderText = "ID";
+            this.ChID.Name = "ChID";
+            this.ChID.ReadOnly = true;
+            this.ChID.Visible = false;
+            // 
             // BtnRestore
             // 
-            this.BtnRestore.Location = new System.Drawing.Point(371, 435);
+            this.BtnRestore.Location = new System.Drawing.Point(368, 528);
             this.BtnRestore.Name = "BtnRestore";
             this.BtnRestore.Size = new System.Drawing.Size(95, 23);
             this.BtnRestore.TabIndex = 36;
@@ -394,27 +392,6 @@ namespace QModReloadedGUI
             this.aboutToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
             this.aboutToolStripMenuItem.Text = "&About";
             // 
-            // LblLog
-            // 
-            this.LblLog.AutoSize = true;
-            this.LblLog.Location = new System.Drawing.Point(13, 466);
-            this.LblLog.Name = "LblLog";
-            this.LblLog.Size = new System.Drawing.Size(23, 17);
-            this.LblLog.TabIndex = 23;
-            this.LblLog.Text = "Log";
-            this.LblLog.UseCompatibleTextRendering = true;
-            // 
-            // TxtLog
-            // 
-            this.TxtLog.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.TxtLog.Location = new System.Drawing.Point(12, 486);
-            this.TxtLog.Multiline = true;
-            this.TxtLog.Name = "TxtLog";
-            this.TxtLog.ReadOnly = true;
-            this.TxtLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.TxtLog.Size = new System.Drawing.Size(550, 108);
-            this.TxtLog.TabIndex = 24;
-            // 
             // ToolStrip
             // 
             this.ToolStrip.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -423,7 +400,7 @@ namespace QModReloadedGUI
             this.LblPatched,
             this.toolStripSeparator2,
             this.LblIntroPatched});
-            this.ToolStrip.Location = new System.Drawing.Point(0, 606);
+            this.ToolStrip.Location = new System.Drawing.Point(0, 762);
             this.ToolStrip.Name = "ToolStrip";
             this.ToolStrip.Size = new System.Drawing.Size(578, 25);
             this.ToolStrip.TabIndex = 25;
@@ -513,7 +490,7 @@ namespace QModReloadedGUI
             // LblConfig
             // 
             this.LblConfig.AutoSize = true;
-            this.LblConfig.Location = new System.Drawing.Point(312, 275);
+            this.LblConfig.Location = new System.Drawing.Point(309, 324);
             this.LblConfig.Name = "LblConfig";
             this.LblConfig.Size = new System.Drawing.Size(37, 17);
             this.LblConfig.TabIndex = 30;
@@ -523,11 +500,11 @@ namespace QModReloadedGUI
             // TxtConfig
             // 
             this.TxtConfig.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.TxtConfig.Location = new System.Drawing.Point(312, 295);
+            this.TxtConfig.Location = new System.Drawing.Point(312, 344);
             this.TxtConfig.Multiline = true;
             this.TxtConfig.Name = "TxtConfig";
             this.TxtConfig.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.TxtConfig.Size = new System.Drawing.Size(250, 134);
+            this.TxtConfig.Size = new System.Drawing.Size(250, 178);
             this.TxtConfig.TabIndex = 31;
             this.TxtConfig.KeyUp += new System.Windows.Forms.KeyEventHandler(this.TxtConfig_KeyUp);
             this.TxtConfig.Leave += new System.EventHandler(this.TxtConfig_Leave);
@@ -537,7 +514,7 @@ namespace QModReloadedGUI
             this.LblSaved.AutoSize = true;
             this.LblSaved.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LblSaved.ForeColor = System.Drawing.Color.Green;
-            this.LblSaved.Location = new System.Drawing.Point(355, 275);
+            this.LblSaved.Location = new System.Drawing.Point(352, 324);
             this.LblSaved.Name = "LblSaved";
             this.LblSaved.Size = new System.Drawing.Size(46, 17);
             this.LblSaved.TabIndex = 32;
@@ -626,7 +603,7 @@ namespace QModReloadedGUI
             // ChkLaunchExeDirectly
             // 
             this.ChkLaunchExeDirectly.AutoSize = true;
-            this.ChkLaunchExeDirectly.Location = new System.Drawing.Point(427, 462);
+            this.ChkLaunchExeDirectly.Location = new System.Drawing.Point(424, 555);
             this.ChkLaunchExeDirectly.Name = "ChkLaunchExeDirectly";
             this.ChkLaunchExeDirectly.Size = new System.Drawing.Size(135, 18);
             this.ChkLaunchExeDirectly.TabIndex = 38;
@@ -635,11 +612,62 @@ namespace QModReloadedGUI
             this.ChkLaunchExeDirectly.UseVisualStyleBackColor = true;
             this.ChkLaunchExeDirectly.CheckStateChanged += new System.EventHandler(this.ChkLaunchExeDirectly_CheckStateChanged);
             // 
+            // DgvLog
+            // 
+            this.DgvLog.AllowDrop = true;
+            this.DgvLog.AllowUserToAddRows = false;
+            this.DgvLog.AllowUserToDeleteRows = false;
+            this.DgvLog.BackgroundColor = System.Drawing.SystemColors.Control;
+            this.DgvLog.CausesValidation = false;
+            this.DgvLog.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
+            this.DgvLog.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.DgvLog.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.ChTime,
+            this.dataGridViewTextBoxColumn1});
+            this.DgvLog.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
+            this.DgvLog.GridColor = System.Drawing.SystemColors.Control;
+            this.DgvLog.Location = new System.Drawing.Point(12, 579);
+            this.DgvLog.MultiSelect = false;
+            this.DgvLog.Name = "DgvLog";
+            this.DgvLog.ReadOnly = true;
+            this.DgvLog.RowHeadersVisible = false;
+            this.DgvLog.ShowEditingIcon = false;
+            this.DgvLog.Size = new System.Drawing.Size(553, 171);
+            this.DgvLog.TabIndex = 39;
+            // 
+            // ChTime
+            // 
+            this.ChTime.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.ChTime.HeaderText = "Time";
+            this.ChTime.Name = "ChTime";
+            this.ChTime.ReadOnly = true;
+            this.ChTime.Width = 55;
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.dataGridViewTextBoxColumn1.HeaderText = "Log";
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            this.dataGridViewTextBoxColumn1.ReadOnly = true;
+            this.dataGridViewTextBoxColumn1.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewTextBoxColumn1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // LblErrors
+            // 
+            this.LblErrors.AutoSize = true;
+            this.LblErrors.ForeColor = System.Drawing.Color.Red;
+            this.LblErrors.Location = new System.Drawing.Point(9, 560);
+            this.LblErrors.Name = "LblErrors";
+            this.LblErrors.Size = new System.Drawing.Size(0, 13);
+            this.LblErrors.TabIndex = 40;
+            // 
             // FrmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(578, 631);
+            this.ClientSize = new System.Drawing.Size(578, 787);
+            this.Controls.Add(this.LblErrors);
+            this.Controls.Add(this.DgvLog);
             this.Controls.Add(this.ChkLaunchExeDirectly);
             this.Controls.Add(this.ChkToggleMods);
             this.Controls.Add(this.BtnRestore);
@@ -652,8 +680,6 @@ namespace QModReloadedGUI
             this.Controls.Add(this.BtnOpenGameDir);
             this.Controls.Add(this.ToolStrip);
             this.Controls.Add(this.menuStrip1);
-            this.Controls.Add(this.TxtLog);
-            this.Controls.Add(this.LblLog);
             this.Controls.Add(this.BtnRemoveIntros);
             this.Controls.Add(this.BtnRefresh);
             this.Controls.Add(this.BtnRemovePatch);
@@ -666,7 +692,6 @@ namespace QModReloadedGUI
             this.Controls.Add(this.LblInstalledMods);
             this.Controls.Add(this.LblModFolderLocation);
             this.Controls.Add(this.LblGameLocation);
-            this.Controls.Add(this.BtnBrowse);
             this.Controls.Add(this.TxtModFolderLocation);
             this.Controls.Add(this.TxtGameLocation);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -686,6 +711,7 @@ namespace QModReloadedGUI
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.trayIconCtxMenu.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.DgvLog)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -695,14 +721,12 @@ namespace QModReloadedGUI
 
         private TextBox TxtGameLocation;
         private TextBox TxtModFolderLocation;
-        private Button BtnBrowse;
         private Label LblGameLocation;
         private Label LblModFolderLocation;
         private Label LblInstalledMods;
         private Button BtnPatch;
         private Label LblModInfo;
         private TextBox TxtModInfo;
-        private FolderBrowserDialog DlgBrowse;
         private Button BtnAddMod;
         private Button BtnRemove;
         private PictureBox BtnRunGame;
@@ -714,8 +738,6 @@ namespace QModReloadedGUI
         private ToolStripMenuItem exitToolStripMenuItem;
         private ToolStripMenuItem checklistToolStripMenuItem;
         private ToolStripMenuItem aboutToolStripMenuItem;
-        private Label LblLog;
-        public TextBox TxtLog;
         private ToolStrip ToolStrip;
         private ToolStripLabel LblPatched;
         private ToolStripSeparator toolStripSeparator2;
@@ -734,9 +756,6 @@ namespace QModReloadedGUI
         private TextBox TxtConfig;
         private Label LblSaved;
         private DataGridView DgvMods;
-        private DataGridViewTextBoxColumn ChOrder;
-        private DataGridViewTextBoxColumn ChMod;
-        private DataGridViewCheckBoxColumn ChEnabled;
         private NotifyIcon trayIcon;
         private ContextMenuStrip trayIconCtxMenu;
         private ToolStripMenuItem restoreWindowToolStripMenuItem;
@@ -750,6 +769,14 @@ namespace QModReloadedGUI
         private CheckBox ChkToggleMods;
         private ToolStripMenuItem BtnLaunchModless;
         private CheckBox ChkLaunchExeDirectly;
+        private DataGridView DgvLog;
+        private DataGridViewTextBoxColumn ChTime;
+        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+        private Label LblErrors;
+        private DataGridViewTextBoxColumn ChOrder;
+        private DataGridViewTextBoxColumn ChMod;
+        private DataGridViewCheckBoxColumn ChEnabled;
+        private DataGridViewTextBoxColumn ChID;
     }
 }
 

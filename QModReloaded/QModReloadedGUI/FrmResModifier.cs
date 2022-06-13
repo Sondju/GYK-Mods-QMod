@@ -23,11 +23,11 @@ public partial class FrmResModifier : Form
     }
 
     private void ResModifier_Load(object sender, EventArgs e)
-    {
+    { 
         try
         {
             _resAssembly = AssemblyDefinition.ReadAssembly(Path.Combine(_gameLocation,
-        "Graveyard Keeper_Data\\Managed\\Assembly-CSharp.dll"));
+                "Graveyard Keeper_Data\\Managed\\Assembly-CSharp.dll"));
             var toInspect = _resAssembly.MainModule
                 .GetTypes()
                 .SelectMany(t => t.Methods

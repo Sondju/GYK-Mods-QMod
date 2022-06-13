@@ -65,6 +65,12 @@
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />
   </ProjectExtensions>
+
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+
   <Target Name="CopyMod" AfterTargets="Build">
     <ItemGroup>
       <MyDebugSourceFiles Include="bin\Debug\**\*.*" />
@@ -79,4 +85,5 @@
     <Delete Files="@(MyReleaseSourceFiles)" />
     <Message Text="Finished copying $(ProjectName)" Importance="High" />
   </Target>
+
 </Project>

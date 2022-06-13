@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace QModReloaded;
+namespace QModReloadedGUI;
 
 public static class Logger
 {
