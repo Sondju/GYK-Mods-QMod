@@ -18,8 +18,7 @@ namespace LongerDays
             _cfg = Config.GetOptions();
 
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.LongerDays");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             if (_cfg.Madness)
             {
@@ -41,7 +40,7 @@ namespace LongerDays
 
         [HarmonyPatch(typeof(TimeOfDay))]
         [HarmonyPatch(nameof(TimeOfDay.GetSecondsToTheMorning))]
-        public static class ModPatch0
+        public static class TimeOfDayGetSecondsToTheMorningPatch
         {
             [HarmonyPostfix]
             public static void Postfix(TimeOfDay __instance, ref float __result)
@@ -63,7 +62,7 @@ namespace LongerDays
 
         [HarmonyPatch(typeof(TimeOfDay))]
         [HarmonyPatch(nameof(TimeOfDay.GetSecondsToTheMidnight))]
-        public static class ModPatch1
+        public static class TimeOfDayGetSecondsToTheMidnightPatch
         {
             [HarmonyPostfix]
             public static void Postfix(TimeOfDay __instance, ref float __result)
@@ -74,7 +73,7 @@ namespace LongerDays
 
         [HarmonyPatch(typeof(TimeOfDay))]
         [HarmonyPatch(nameof(TimeOfDay.FromSecondsToTimeK))]
-        public static class ModPatch2
+        public static class TimeOfDayFromSecondsToTimeKPatch
         {
             [HarmonyPostfix]
             public static void Postfix(ref float time_in_secs, ref float __result)
@@ -85,7 +84,7 @@ namespace LongerDays
 
         [HarmonyPatch(typeof(TimeOfDay))]
         [HarmonyPatch(nameof(TimeOfDay.FromTimeKToSeconds))]
-        public static class ModPatch3
+        public static class TimeOfDayFromTimeKToSecondsPatch
         {
             [HarmonyPostfix]
             public static void Postfix(ref float time_in_time_k, ref float __result)
