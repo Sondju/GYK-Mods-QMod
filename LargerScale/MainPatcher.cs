@@ -12,13 +12,12 @@ namespace LargerScale
             _cfg = Config.GetOptions();
 
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.LargerScale");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
         [HarmonyAfter("com.p1xel8ted.graveyardkeeper.UltraWide")]
         [HarmonyPatch(typeof(ResolutionConfig), nameof(ResolutionConfig.GetResolutionConfigOrNull))]
-        public static class Patcher
+        public static class ResolutionConfigPatcher
         {
             [HarmonyPostfix]
             public static void Postfix(int width, int height, ref ResolutionConfig __result)
