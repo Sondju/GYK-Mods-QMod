@@ -38,8 +38,7 @@ namespace LongerDays
             }
         }
 
-        [HarmonyPatch(typeof(TimeOfDay))]
-        [HarmonyPatch(nameof(TimeOfDay.GetSecondsToTheMorning))]
+        [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.GetSecondsToTheMorning))]
         public static class TimeOfDayGetSecondsToTheMorningPatch
         {
             [HarmonyPostfix]
@@ -60,8 +59,7 @@ namespace LongerDays
             }
         }
 
-        [HarmonyPatch(typeof(TimeOfDay))]
-        [HarmonyPatch(nameof(TimeOfDay.GetSecondsToTheMidnight))]
+        [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.GetSecondsToTheMidnight))]
         public static class TimeOfDayGetSecondsToTheMidnightPatch
         {
             [HarmonyPostfix]
@@ -71,8 +69,7 @@ namespace LongerDays
             }
         }
 
-        [HarmonyPatch(typeof(TimeOfDay))]
-        [HarmonyPatch(nameof(TimeOfDay.FromSecondsToTimeK))]
+        [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.FromSecondsToTimeK))]
         public static class TimeOfDayFromSecondsToTimeKPatch
         {
             [HarmonyPostfix]
@@ -82,8 +79,7 @@ namespace LongerDays
             }
         }
 
-        [HarmonyPatch(typeof(TimeOfDay))]
-        [HarmonyPatch(nameof(TimeOfDay.FromTimeKToSeconds))]
+        [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.FromTimeKToSeconds))]
         public static class TimeOfDayFromTimeKToSecondsPatch
         {
             [HarmonyPostfix]
