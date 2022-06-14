@@ -9,12 +9,11 @@ namespace AddStraightToTable
         public static void Patch()
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.AddStraightToTable");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
         [HarmonyPatch(typeof(AutopsyGUI), "OnBodyItemPress")]
-        public static class PatchTable
+        public static class AutopsyGUIOnBodyItemPressPatch
         {
             [HarmonyPrefix]
             public static bool Prefix()
