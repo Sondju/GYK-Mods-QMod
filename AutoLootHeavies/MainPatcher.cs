@@ -88,8 +88,7 @@ namespace AutoLootHeavies
                 _cfg = Config.GetOptions();
 
                 var harmony = new Harmony("p1xel8ted.GraveyardKeeper.AutoLootHeavies");
-                var assembly = Assembly.GetExecutingAssembly();
-                harmony.PatchAll(assembly);
+                harmony.PatchAll(Assembly.GetExecutingAssembly());
 
                 _vectorsLoaded = false;
                 _needScanning = true;
@@ -308,8 +307,7 @@ namespace AutoLootHeavies
         private static void ShowMessage(string message, bool noStockpilesInRange, bool storageNowFull,
             bool cantStorageFull, string item)
         {
-            var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
             var msg = message;
             if (noStockpilesInRange)
             {
@@ -351,8 +349,7 @@ namespace AutoLootHeavies
 
         private static void ShowMessage(string msg, Vector3 pos)
         {
-            var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
             //the floaty bubbles are stuck in english apparently??
             if (lang.Contains("ko") || lang.Contains("ja") || lang.Contains("zh"))
             {
@@ -416,9 +413,8 @@ namespace AutoLootHeavies
             }
         }
 
-        [HarmonyPatch(typeof(MainGame))]
-        [HarmonyPatch(nameof(MainGame.Update))]
-        public class UpdateStockPiles
+        [HarmonyPatch(typeof(MainGame), nameof(MainGame.Update))]
+        public class MainGameUpdatePatch
         {
             [HarmonyPostfix]
             public static void Postfix()
@@ -435,9 +431,8 @@ namespace AutoLootHeavies
         }
 
         //hooks into the time of day update and saves if the K key was pressed
-        [HarmonyPatch(typeof(TimeOfDay))]
-        [HarmonyPatch(nameof(TimeOfDay.Update))]
-        public static class PatchSaveGame
+        [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
+        public static class TimeOfDayUpdatePatch
         {
             [HarmonyPrefix]
             public static void Prefix()
@@ -512,7 +507,7 @@ namespace AutoLootHeavies
         }
 
         [HarmonyPatch(typeof(MovementComponent), "UpdateMovement")]
-        public static class LoadLocations
+        public static class MovementComponentUpdateMovementPatch
         {
             [HarmonyPrefix]
             public static bool Prefix()
@@ -626,9 +621,8 @@ namespace AutoLootHeavies
         }
 
 
-        [HarmonyPatch(typeof(BaseCharacterComponent))]
-        [HarmonyPatch(nameof(BaseCharacterComponent.SetOverheadItem))]
-        public class SetPatching
+        [HarmonyPatch(typeof(BaseCharacterComponent), nameof(BaseCharacterComponent.SetOverheadItem))]
+        public class BaseCharacterComponentSetOverheadItemPatch
         {
             //this was prefix
             [HarmonyPostfix]
@@ -646,9 +640,8 @@ namespace AutoLootHeavies
             }
         }
 
-        [HarmonyPatch(typeof(PlatformSpecific))]
-        [HarmonyPatch(nameof(PlatformSpecific.SaveGame))]
-        public class PreSaveStockpileSave
+        [HarmonyPatch(typeof(PlatformSpecific), nameof(PlatformSpecific.SaveGame))]
+        public class PlatformSpecificSaveGamePatch
         {
             //save co-ords as the game saves
             [HarmonyPrefix]
@@ -665,9 +658,8 @@ namespace AutoLootHeavies
         }
 
 
-        [HarmonyPatch(typeof(BaseCharacterComponent))]
-        [HarmonyPatch(nameof(BaseCharacterComponent.DropOverheadItem))]
-        public class DropPatching
+        [HarmonyPatch(typeof(BaseCharacterComponent), nameof(BaseCharacterComponent.DropOverheadItem))]
+        public class BaseCharacterComponentDropOverheadItemPatch
         {
             [HarmonyPrefix]
             public static bool Prefix(ref Item ___overhead_item,
