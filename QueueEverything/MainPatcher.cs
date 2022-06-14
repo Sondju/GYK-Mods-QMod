@@ -25,6 +25,7 @@ namespace QueueEverything
         private static Config.Options _cfg;
         private static WorldGameObject _previousWorldGameObject;
         private static bool _alreadyRun;
+        private static string Lang { get; set; }
 
         private static readonly string[] UnSafeCraftObjects =
         {
@@ -34,8 +35,7 @@ namespace QueueEverything
 
         public static void ShowMessage(string msg)
         {
-            var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
             MainGame.me.player.Say(lang.StartsWith("en") ? msg : strings.Message, null, false,
                 SpeechBubbleGUI.SpeechBubbleType.Think,
                 SmartSpeechEngine.VoiceID.None, true);
@@ -51,6 +51,9 @@ namespace QueueEverything
             _fasterCraft = false;
             _exhaustless = false;
             _alreadyRun = false;
+            
+            Lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
 
             if (Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod"))
             {
@@ -67,7 +70,19 @@ namespace QueueEverything
                 LoadFasterCraftConfig();
             }
         }
-
+        
+        
+        [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnClosePressed))]
+        public static class InGameMenuGuiOnClosePressedPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+            }
+        }
+      
         [HarmonyPatch(typeof(CraftDefinition), nameof(CraftDefinition.CanCraftMultiple))]
         public static class CraftDefinitionCanCraftMultiplePatch
         {
