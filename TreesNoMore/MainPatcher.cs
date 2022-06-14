@@ -10,12 +10,11 @@ namespace TreesNoMore
         public static void Patch()
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.TreesNoMore");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
         [HarmonyPatch(typeof(WorldGameObject), "SmartInstantiate")]
-        public static class PatchLoadGame
+        public static class WorldGameObjectSmartInstantiatePatch
         {
             [HarmonyPrefix]
             public static void Prefix(ref WorldObjectPart prefab)
