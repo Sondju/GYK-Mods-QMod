@@ -42,8 +42,7 @@ namespace Exhaustless
             }
         }
 
-        [HarmonyPatch(typeof(CraftComponent))]
-        [HarmonyPatch(nameof(CraftComponent.TrySpendPlayerGratitudePoints))]
+        [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.TrySpendPlayerGratitudePoints))]
         public static class CraftComponentTrySpendPlayerGratitudePointsPatch
         {
             [HarmonyPrefix]
@@ -56,9 +55,8 @@ namespace Exhaustless
             }
         }
 
-        [HarmonyPatch(typeof(PlayerComponent))]
-        [HarmonyPatch(nameof(PlayerComponent.TrySpendEnergy))]
-        public static class PatchTrySpendEnergy
+        [HarmonyPatch(typeof(PlayerComponent), nameof(PlayerComponent.TrySpendEnergy))]
+        public static class PlayerComponentTrySpendEnergyPatch
         {
             [HarmonyPrefix]
             public static void Prefix(ref float need_energy)
@@ -70,9 +68,8 @@ namespace Exhaustless
             }
         }
 
-        [HarmonyPatch(typeof(PlayerComponent))]
-        [HarmonyPatch(nameof(PlayerComponent.SpendSanity))]
-        public static class PatchSpendSanity
+        [HarmonyPatch(typeof(PlayerComponent), nameof(PlayerComponent.SpendSanity))]
+        public static class PlayerComponentSpendSanityPatch
         {
             [HarmonyPrefix]
             public static void Prefix(ref float need_sanity)
@@ -85,9 +82,8 @@ namespace Exhaustless
         }
 
 
-        [HarmonyPatch(typeof(WaitingGUI))]
-        [HarmonyPatch(nameof(WaitingGUI.Update))]
-        public static class PatchWaiting
+        [HarmonyPatch(typeof(WaitingGUI), nameof(WaitingGUI.Update))]
+        public static class WaitingGUIUpdatePatch
         {
             [HarmonyPrefix]
             public static void Prefix()
@@ -111,9 +107,8 @@ namespace Exhaustless
             }
         }
 
-        [HarmonyPatch(typeof(WorldGameObject))]
-        [HarmonyPatch(nameof(WorldGameObject.EquipItem))]
-        public static class PatchToolDurabilitySpeed2
+        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.EquipItem))]
+        public static class WorldGameObjectEquipItemPatch
         {
             [HarmonyPostfix]
             public static void Postfix(ref Item item)
@@ -127,9 +122,8 @@ namespace Exhaustless
         }
 
 
-        [HarmonyPatch(typeof(MainGame))]
-        [HarmonyPatch(nameof(MainGame.OnEquippedToolBroken))]
-        public static class PatchBrokenTool
+        [HarmonyPatch(typeof(MainGame), nameof(MainGame.OnEquippedToolBroken))]
+        public static class MainGameOnEquippedToolBrokenPatch
         {
             [HarmonyPrefix]
             public static void Prefix()
@@ -154,9 +148,8 @@ namespace Exhaustless
         }
 
 
-        [HarmonyPatch(typeof(SleepGUI))]
-        [HarmonyPatch(nameof(SleepGUI.Update))]
-        public static class PatchSleeping
+        [HarmonyPatch(typeof(SleepGUI), nameof(SleepGUI.Update))]
+        public static class SleepGUIUpdatePatch
         {
             [HarmonyPrefix]
             public static void Prefix()
@@ -168,9 +161,8 @@ namespace Exhaustless
         }
 
 
-        [HarmonyPatch(typeof(BuffsLogics))]
-        [HarmonyPatch(nameof(BuffsLogics.AddBuff))]
-        public static class PatchBuff
+        [HarmonyPatch(typeof(BuffsLogics), nameof(BuffsLogics.AddBuff))]
+        public static class BuffsLogicsAddBuffPatch
         {
             [HarmonyPrefix]
             public static void Prefix(ref string buff_id)
@@ -185,8 +177,7 @@ namespace Exhaustless
         }
 
 
-        [HarmonyPatch(typeof(WorldGameObject))]
-        [HarmonyPatch(nameof(WorldGameObject.GetParam))]
+        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetParam))]
         public static class WorldGameObjectGetParamPatch
         {
             [HarmonyPostfix]
