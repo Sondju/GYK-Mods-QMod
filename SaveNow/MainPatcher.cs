@@ -37,8 +37,7 @@ namespace SaveNow
             _savePath = "./QMods/SaveNow/SaveBackup/";
 
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.SaveNow");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             LoadSaveLocations();
 
@@ -169,7 +168,7 @@ namespace SaveNow
 
         //games already loading, lets add some more work
         [HarmonyPatch(typeof(MainGame), "StartGameLoading")]
-        public static class TrimSaveCountBeforeOpening
+        public static class MainGameStartGameLoadingPatch
         {
             [HarmonyPrefix]
             public static void Prefix()
@@ -236,7 +235,7 @@ namespace SaveNow
         }
 
         [HarmonyPatch(typeof(SaveSlotsMenuGUI), "RedrawSlots")]
-        public static class ReadSaveSlots
+        public static class SaveSlotsMenuGUIRedrawSlotsPatch
         {
             //sorts the save list gui via newest to oldest (newest at top and highlights it). Also trims the list to the
             //amount specified in the config
@@ -299,7 +298,7 @@ namespace SaveNow
         }
 
         [HarmonyPatch(typeof(InGameMenuGUI), "OnPressedSaveAndExit")]
-        public static class PatchSaveAndExit
+        public static class InGameMenuGUIOnPressedSaveAndExitPatch
         {
             public static bool Prefix()
             {
@@ -347,7 +346,7 @@ namespace SaveNow
 
         // if this isn't here, when you sleep, it teleport you back to where the mod saved you last
         [HarmonyPatch(typeof(SleepGUI), "WakeUp")]
-        public static class PatchSavePosWhenUsingBed
+        public static class SleepGUIWakeUpPatch
         {
             [HarmonyPrefix]
             public static void Prefix()
@@ -381,7 +380,7 @@ namespace SaveNow
         //this is called last when loading a save game without patch
         [HarmonyPatch(typeof(GameSave))]
         [HarmonyPatch(nameof(GameSave.GlobalEventsCheck))]
-        public static class PatchLoadGame
+        public static class GameSaveGlobalEventsCheckPatch
         {
             [HarmonyPrefix]
             public static void Prefix()
@@ -391,7 +390,7 @@ namespace SaveNow
         }
 
         [HarmonyPatch(typeof(MovementComponent), "UpdateMovement", null)]
-        public static class CheckPlayerState
+        public static class MovementComponentUpdateMovementPatch
         {
             [HarmonyPostfix]
             public static void Postfix(MovementComponent __instance)
@@ -404,7 +403,7 @@ namespace SaveNow
         //hooks into the time of day update and saves if the K key was pressed
         [HarmonyPatch(typeof(TimeOfDay))]
         [HarmonyPatch(nameof(TimeOfDay.Update))]
-        public static class PatchSaveGame
+        public static class TimeOfDayUpdatePatch
         {
             [HarmonyPrefix]
             public static void Prefix()
