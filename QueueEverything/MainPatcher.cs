@@ -32,17 +32,6 @@ namespace QueueEverything
             "tile_church_semicircle_2floors"
         };
 
-        //private struct Constants
-        //{
-        //    public struct UnsafeCraftItems
-        //    {
-        //        public const string BuildDesk = "build";
-        //        public const string Crematorium = "crematorium";
-        //        public const string StainedGlass = "semicircle";
-        //        public const string Grave = "grave";
-        //    }
-        //}
-
         public static void ShowMessage(string msg)
         {
             var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
@@ -55,8 +44,7 @@ namespace QueueEverything
         public static void Patch()
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.QueueEverything");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             _cfg = Config.GetOptions();
 
@@ -80,8 +68,7 @@ namespace QueueEverything
             }
         }
 
-        [HarmonyPatch(typeof(CraftDefinition))]
-        [HarmonyPatch(nameof(CraftDefinition.CanCraftMultiple))]
+        [HarmonyPatch(typeof(CraftDefinition), nameof(CraftDefinition.CanCraftMultiple))]
         public static class CraftDefinitionCanCraftMultiplePatch
         {
             [HarmonyPrefix]
@@ -118,8 +105,7 @@ namespace QueueEverything
             }
         }
 
-        [HarmonyPatch(typeof(CraftDefinition))]
-        [HarmonyPatch(nameof(CraftDefinition.GetSpendTxt))]
+        [HarmonyPatch(typeof(CraftDefinition), nameof(CraftDefinition.GetSpendTxt))]
         public static class CraftDefinitionGetSpendTxtPatch
         {
             [HarmonyPrefix]
@@ -380,8 +366,7 @@ namespace QueueEverything
             }
         }
 
-        [HarmonyPatch(typeof(CraftGUI))]
-        [HarmonyPatch(nameof(CraftGUI.Open))]
+        [HarmonyPatch(typeof(CraftGUI), nameof(CraftGUI.Open))]
         public static class CraftGuiOpenPatch
         {
             private static string previousObjId;
@@ -406,8 +391,7 @@ namespace QueueEverything
             }
         }
 
-        [HarmonyPatch(typeof(CraftGUI))]
-        [HarmonyPatch(nameof(CraftGUI.ExpandItem))]
+        [HarmonyPatch(typeof(CraftGUI), nameof(CraftGUI.ExpandItem))]
         public static class CraftGuiExpandItemPatch
         {
             [HarmonyPostfix]
@@ -442,8 +426,7 @@ namespace QueueEverything
             }
         }
 
-        [HarmonyPatch(typeof(CraftItemGUI))]
-        [HarmonyPatch(nameof(CraftItemGUI.Draw))]
+        [HarmonyPatch(typeof(CraftItemGUI), nameof(CraftItemGUI.Draw))]
         public static class CraftItemGuiDrawPatch
         {
             [HarmonyPrefix]
@@ -513,8 +496,7 @@ namespace QueueEverything
             }
         }
 
-        [HarmonyPatch(typeof(CraftItemGUI))]
-        [HarmonyPatch(nameof(CraftItemGUI.Redraw))]
+        [HarmonyPatch(typeof(CraftItemGUI), nameof(CraftItemGUI.Redraw))]
         public static class CraftItemGuiRedrawPatch
         {
             [HarmonyPrefix]
@@ -637,7 +619,7 @@ namespace QueueEverything
         }
 
 
-        [HarmonyPatch(typeof(CraftItemGUI), "OnCraftPressed", MethodType.Normal)]
+        [HarmonyPatch(typeof(CraftItemGUI), "OnCraftPressed"]
         public static class CraftItemGuiOnCraftPressedPatch
         {
             [HarmonyPrefix]
