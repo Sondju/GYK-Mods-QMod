@@ -19,9 +19,8 @@ namespace INeedSticks
         }
 
         //adds our new object as an available craft as the game checks when starting the craft
-        [HarmonyPatch(typeof(CraftComponent))]
-        [HarmonyPatch(nameof(CraftComponent.Craft))]
-        public static class CraftComponentPatch
+        [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.Craft))]
+        public static class CraftComponentCraftPatch
         {
             [HarmonyPrefix]
             public static void Prefix(ref CraftComponent __instance)
@@ -31,8 +30,8 @@ namespace INeedSticks
             }
         }
 
-        [HarmonyPatch(typeof(CraftItemGUI), "OnCraftPressed", MethodType.Normal)]
-        public static class CraftItemGUIPatch
+        [HarmonyPatch(typeof(CraftItemGUI), "OnCraftPressed")]
+        public static class CraftItemGUIOnCraftPressedPatch
         {
             [HarmonyPrefix]
             public static void Prefix(ref CraftItemGUI __instance)
@@ -68,8 +67,7 @@ namespace INeedSticks
         }
 
         //setting minimum had no effect, this method updates the counter on the craft screen
-        [HarmonyPatch(typeof(WorldGameObject))]
-        [HarmonyPatch(nameof(WorldGameObject.GetCraftAmountCounter))]
+        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetCraftAmountCounter))]
         public static class WorldGameObjectGetCraftAmountCounterPatch
         {
             [HarmonyPostfix]
@@ -83,8 +81,8 @@ namespace INeedSticks
         }
 
         //this is required as it seems impossible to add things to GameData that actually take effect, this stops it coming back null when it doesn't find "wooden_stick" in game data
-        [HarmonyPatch(typeof(CraftComponent.CraftQueueItem))]
-        [HarmonyPatch("craft", MethodType.Getter)]
+        [HarmonyPatch(typeof(CraftComponent.CraftQueueItem), "craft", MethodType.Getter))]
+       // [HarmonyPatch("craft", MethodType.Getter)]
         public static class CraftComponentCraftQueueItemPatch
         {
             [HarmonyPrefix]
