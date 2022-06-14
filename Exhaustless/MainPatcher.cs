@@ -20,8 +20,7 @@ namespace Exhaustless
             {
                 _cfg = Config.GetOptions();
                 var harmony = new Harmony("p1xel8ted.GraveyardKeeper.exhaust-less");
-                var assembly = Assembly.GetExecutingAssembly();
-                harmony.PatchAll(assembly);
+                harmony.PatchAll(Assembly.GetExecutingAssembly());
 
                 Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
                 Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
@@ -106,7 +105,7 @@ namespace Exhaustless
                 if (MainGame.me.player.energy.EqualsOrMore(save.max_hp) &&
                     MainGame.me.player.hp.EqualsOrMore(save.max_energy))
                 {
-                    typeof(WaitingGUI).GetMethod("StopWaiting", BindingFlags.Instance | BindingFlags.NonPublic)
+                    typeof(WaitingGUI).GetMethod("StopWaiting", AccessTools.all)
                         ?.Invoke(__instance, null);
                 }
             }
