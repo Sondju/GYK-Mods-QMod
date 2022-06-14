@@ -35,8 +35,7 @@ namespace MiscBitsAndBobs
         }
 
 
-        [HarmonyPatch(typeof(InventoryGUI))]
-        [HarmonyPatch(nameof(InventoryGUI.OnItemOver))]
+        [HarmonyPatch(typeof(InventoryGUI), nameof(InventoryGUI.OnItemOver))]
         public static class InventoryGUIOnItemOverPatch
         {
             [HarmonyPrefix]
@@ -87,8 +86,7 @@ namespace MiscBitsAndBobs
             }
         }
 
-        [HarmonyPatch(typeof(GameGUI))]
-        [HarmonyPatch(nameof(GameGUI.Open))]
+        [HarmonyPatch(typeof(GameGUI), nameof(GameGUI.Open))]
         public static class GameGUIOpenPatch
         {
             [HarmonyPrefix]
@@ -101,8 +99,7 @@ namespace MiscBitsAndBobs
             }
         }
 
-        [HarmonyPatch(typeof(MainMenuGUI))]
-        [HarmonyPatch(nameof(MainMenuGUI.Open))]
+        [HarmonyPatch(typeof(MainMenuGUI), nameof(MainMenuGUI.Open))]
         public static class MainMenuGUIOpenPatch
         {
             [HarmonyPrefix]
@@ -120,8 +117,7 @@ namespace MiscBitsAndBobs
             }
         }
 
-        [HarmonyPatch(typeof(HUD))]
-        [HarmonyPatch(nameof(HUD.Update))]
+        [HarmonyPatch(typeof(HUD), nameof(HUD.Update))]
         public static class HudUpdatePatch
         {
             [HarmonyPostfix]
@@ -181,8 +177,7 @@ namespace MiscBitsAndBobs
             }
         }
 
-        [HarmonyPatch(typeof(GameGUI))]
-        [HarmonyPatch(nameof(GameGUI.Hide))]
+        [HarmonyPatch(typeof(GameGUI), nameof(GameGUI.Hide))]
         public static class GameGUIHidePatch
         {
             [HarmonyPrefix]
@@ -225,8 +220,7 @@ namespace MiscBitsAndBobs
         }
 
         //makes halloween an annual event instead of the original 2018...
-        [HarmonyPatch(typeof(GameSave))]
-        [HarmonyPatch(nameof(GameSave.GlobalEventsCheck))]
+        [HarmonyPatch(typeof(GameSave), nameof(GameSave.GlobalEventsCheck))]
         internal class GameSaveGlobalEventsCheckPatch
         {
             [HarmonyPrefix]
