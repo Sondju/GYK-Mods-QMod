@@ -10,12 +10,11 @@ namespace NoTimeForFishing
         public static void Patch()
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.NoTimeForFishing");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
         [HarmonyPatch(typeof(FishLogic), "CalculateFishPos")]
-        public class PatchCalculateFishPos
+        public class FishLogicCalculateFishPosPath
         {
             [HarmonyPrefix]
             public static void Prefix(ref float pos, ref float rod_zone_size)
@@ -26,7 +25,7 @@ namespace NoTimeForFishing
         }
 
         [HarmonyPatch(typeof(FishingGUI), "UpdateWaitingForBite", null)]
-        internal class PatchUpdateWaitingForBite
+        internal class FishingGUIUpdateWaitingForBitePatch
         {
             [HarmonyPrefix]
             public static void Prefix(ref float ____waiting_for_bite_delay)
@@ -57,7 +56,7 @@ namespace NoTimeForFishing
         }
 
         [HarmonyPatch(typeof(FishingGUI), "UpdateWaitingForPulling", null)]
-        internal class PatchUpdateWaitingForPulling
+        internal class FishingGUIUpdateWaitingForPullingPatch
         {
             [HarmonyPostfix]
             private static void PostFix(FishingGUI __instance, ref bool ___is_success_fishing)
@@ -72,7 +71,7 @@ namespace NoTimeForFishing
         }
 
         [HarmonyPatch(typeof(FishingGUI), "UpdatePulling", null)]
-        internal class PatchUpdatePulling
+        internal class FishingGUIUpdatePullingPatch
         {
             [HarmonyPostfix]
             private static void Postfix(FishingGUI __instance)
