@@ -8,13 +8,12 @@ namespace UltraWide
         public static void Patch()
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.UltraWide");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
         [HarmonyBefore("com.p1xel8ted.graveyardkeeper.LargerScale")]
         [HarmonyPatch(typeof(ResolutionConfig), nameof(ResolutionConfig.GetResolutionConfigOrNull))]
-        public static class ResPatcher
+        public static class ResolutionConfigGetResolutionConfigOrNullPatch
         {
             [HarmonyPostfix]
             public static void Postfix(int width, int height, ref ResolutionConfig __result)
