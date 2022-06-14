@@ -51,8 +51,7 @@ namespace AppleTreesEnhanced
         public static void Patch()
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.AppleTreesEnhanced");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
             _cfg = Config.GetOptions();
 
             Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
@@ -94,8 +93,7 @@ namespace AppleTreesEnhanced
         }
 
 
-        [HarmonyPatch(typeof(WorldGameObject))]
-        [HarmonyPatch(nameof(WorldGameObject.ReplaceWithObject))]
+        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.ReplaceWithObject))]
         public static class WorldGameObjectSmartInstantiate
         {
             [HarmonyPostfix]
