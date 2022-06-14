@@ -17,8 +17,7 @@ namespace ThoughtfulReminders
         public static void Patch()
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.ThoughtfulReminders");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             _cfg = Config.GetOptions();
 
@@ -38,9 +37,8 @@ namespace ThoughtfulReminders
             }
         }
 
-        [HarmonyPatch(typeof(TimeOfDay))]
-        [HarmonyPatch(nameof(TimeOfDay.Update))]
-        public static class TimeOfDayPatch
+        [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
+        public static class TimeOfDayUpdatePatch
         {
             [HarmonyPostfix]
             public static void Postfix(TimeOfDay __instance)
@@ -75,9 +73,8 @@ namespace ThoughtfulReminders
         }
 
 
-        [HarmonyPatch(typeof(MainGame))]
-        [HarmonyPatch(nameof(MainGame.Update))]
-        public static class ModPatch
+        [HarmonyPatch(typeof(MainGame), nameof(MainGame.Update))]
+        public static class MainGameUpdatePatch
         {
             [HarmonyPostfix]
             public static void Postfix()
