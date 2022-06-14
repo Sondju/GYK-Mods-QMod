@@ -12,9 +12,7 @@ namespace TheSeedEqualizer
         public static void Patch()
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.TheSeedEqualizer");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
-            Application.SetStackTraceLogType(LogType.Error, StackTraceLogType.None);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
         [HarmonyPatch(typeof(CraftComponent))]
@@ -49,9 +47,7 @@ namespace TheSeedEqualizer
                 }
                 catch (Exception ex)
                 {
-                    Application.SetStackTraceLogType(LogType.Error, StackTraceLogType.Full);
                     Debug.LogError($"[TheSeedEqualizer] {ex.Message}, {ex.Source}, {ex.StackTrace}");
-                    Application.SetStackTraceLogType(LogType.Error, StackTraceLogType.None);
                 }
             }
         }
