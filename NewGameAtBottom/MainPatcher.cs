@@ -10,12 +10,11 @@ namespace NewGameAtBottom
         public static void Patch()
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.NewGameAtBottom");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
         [HarmonyPatch(typeof(SaveSlotsMenuGUI), "RedrawSlots")]
-        public static class PatchSaveMenu
+        public static class SaveSlotsMenuGUIRedrawSlotsPatch
         {
             static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
             {
