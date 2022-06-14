@@ -17,7 +17,7 @@ namespace LargerScale
 
         [HarmonyAfter("com.p1xel8ted.graveyardkeeper.UltraWide")]
         [HarmonyPatch(typeof(ResolutionConfig), nameof(ResolutionConfig.GetResolutionConfigOrNull))]
-        public static class ResolutionConfigPatcher
+        public static class ResolutionConfigGetResolutionConfigOrNullPatch
         {
             [HarmonyPostfix]
             public static void Postfix(int width, int height, ref ResolutionConfig __result)
