@@ -9,12 +9,11 @@ namespace NoIntros
         public static void Patch()
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.NoIntros");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
         [HarmonyPatch(typeof(LBPreloader), "StartAnimations")]
-        public static class NoIntroPatch
+        public static class LBPreloaderStartAnimationsPatch
         {
             [HarmonyPrefix]
             public static void Prefix(LBPreloader __instance)
