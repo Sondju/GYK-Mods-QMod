@@ -8,13 +8,11 @@ namespace FogBeGone
         public static void Patch()
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.FogBeGone");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
-        [HarmonyPatch(typeof(SmartWeatherState))]
-        [HarmonyPatch(nameof(SmartWeatherState.Update))]
-        public static class WeatherPatch1
+        [HarmonyPatch(typeof(SmartWeatherState), nameof(SmartWeatherState.Update))]
+        public static class SmartWeatherStateUpdatePatch
         {
             [HarmonyPrefix]
             public static bool Prefix(SmartWeatherState __instance, ref bool ____previously_enabled,
