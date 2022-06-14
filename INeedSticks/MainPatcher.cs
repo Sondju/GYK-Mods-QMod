@@ -15,8 +15,7 @@ namespace INeedSticks
         public static void Patch()
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.INeedSticks");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
         //adds our new object as an available craft as the game checks when starting the craft
