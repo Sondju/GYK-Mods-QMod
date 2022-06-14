@@ -30,15 +30,14 @@ namespace MiscBitsAndBobs
         public static void Patch()
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs");
-            var assembly = Assembly.GetExecutingAssembly();
-            harmony.PatchAll(assembly);
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
             _cfg = Config.GetOptions();
         }
 
 
         [HarmonyPatch(typeof(InventoryGUI))]
         [HarmonyPatch(nameof(InventoryGUI.OnItemOver))]
-        public static class PatchCantDestroy
+        public static class InventoryGUIOnItemOverPatch
         {
             [HarmonyPrefix]
             public static void Prefix(ref InventoryGUI __instance)
@@ -56,7 +55,7 @@ namespace MiscBitsAndBobs
 
         //patch tools to be stack-able
         [HarmonyPatch(typeof(GameBalance), "LoadGameBalance")]
-        public static class PatchTools
+        public static class GameBalanceLoadGameBalancePatch
         {
             [HarmonyPostfix]
             private static void Postfix()
@@ -76,7 +75,7 @@ namespace MiscBitsAndBobs
 
         //makes the racks and the barman inventory larger
         [HarmonyPatch(typeof(WorldGameObject), "InitNewObject")]
-        public static class PatchTavernInventorySize
+        public static class WorldGameObjectInitNewObjectPatch
         {
             [HarmonyPostfix]
             private static void Postfix(ref WorldGameObject __instance)
@@ -90,7 +89,7 @@ namespace MiscBitsAndBobs
 
         [HarmonyPatch(typeof(GameGUI))]
         [HarmonyPatch(nameof(GameGUI.Open))]
-        public static class QuietMusicPatch1
+        public static class GameGUIOpenPatch
         {
             [HarmonyPrefix]
             public static void Prefix()
@@ -104,7 +103,7 @@ namespace MiscBitsAndBobs
 
         [HarmonyPatch(typeof(MainMenuGUI))]
         [HarmonyPatch(nameof(MainMenuGUI.Open))]
-        public static class PatchInGameMenuGUIOpen
+        public static class MainMenuGUIOpenPatch
         {
             [HarmonyPrefix]
             public static void Prefix(ref InGameMenuGUI __instance)
@@ -184,7 +183,7 @@ namespace MiscBitsAndBobs
 
         [HarmonyPatch(typeof(GameGUI))]
         [HarmonyPatch(nameof(GameGUI.Hide))]
-        public static class QuietMusicPatch2
+        public static class GameGUIHidePatch
         {
             [HarmonyPrefix]
             public static void Prefix()
@@ -198,7 +197,7 @@ namespace MiscBitsAndBobs
 
 
         [HarmonyPatch(typeof(InventoryPanelGUI), "DoOpening")]
-        public static class ShowInvOnly
+        public static class InventoryPanelGUIDoOpeningPatch
         {
             [HarmonyPrefix]
             private static void Prefix(ref InventoryPanelGUI __instance, ref MultiInventory multi_inventory)
@@ -228,7 +227,7 @@ namespace MiscBitsAndBobs
         //makes halloween an annual event instead of the original 2018...
         [HarmonyPatch(typeof(GameSave))]
         [HarmonyPatch(nameof(GameSave.GlobalEventsCheck))]
-        internal class PatchHalloweenEvent
+        internal class GameSaveGlobalEventsCheckPatch
         {
             [HarmonyPrefix]
             private static bool Prefix()
