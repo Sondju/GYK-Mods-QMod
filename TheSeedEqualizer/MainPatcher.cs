@@ -15,8 +15,7 @@ namespace TheSeedEqualizer
             harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
-        [HarmonyPatch(typeof(CraftComponent))]
-        [HarmonyPatch(nameof(CraftComponent.FillCraftsList))]
+        [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.FillCraftsList))]
         public static class CraftComponentFillCraftsListPatch
         {
             [HarmonyPrefix]
