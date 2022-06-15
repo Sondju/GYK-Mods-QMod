@@ -2,24 +2,23 @@ using System.Reflection;
 using HarmonyLib;
 using LazyBearGames.Preloader;
 
-namespace NoIntros
-{
-    public class MainPatcher
-    {
-        public static void Patch()
-        {
-            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.NoIntros");
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
-        }
+namespace NoIntros;
 
-        [HarmonyPatch(typeof(LBPreloader), "StartAnimations")]
-        public static class LBPreloaderStartAnimationsPatch
+public class MainPatcher
+{
+    public static void Patch()
+    {
+        var harmony = new Harmony("p1xel8ted.GraveyardKeeper.NoIntros");
+        harmony.PatchAll(Assembly.GetExecutingAssembly());
+    }
+
+    [HarmonyPatch(typeof(LBPreloader), "StartAnimations")]
+    public static class LbPreloaderStartAnimationsPatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix(LBPreloader __instance)
         {
-            [HarmonyPrefix]
-            public static void Prefix(LBPreloader __instance)
-            {
-                __instance.logos.Clear();
-            }
+            __instance.logos.Clear();
         }
     }
 }

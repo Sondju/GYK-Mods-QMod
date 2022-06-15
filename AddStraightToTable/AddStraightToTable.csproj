@@ -34,8 +34,6 @@
     <RootNamespace>AddStraightToTable</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Config.cs" />
-    <Compile Include="ConfigReader.cs" />
     <Compile Include="MainPatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -65,12 +63,10 @@
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />
   </ProjectExtensions>
-
   <PropertyGroup>
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
-
   <Target Name="CopyMod" AfterTargets="Build">
     <ItemGroup>
       <MyDebugSourceFiles Include="bin\Debug\**\*.*" />
@@ -85,5 +81,4 @@
     <Delete Files="@(MyReleaseSourceFiles)" />
     <Message Text="Finished copying $(ProjectName)" Importance="High" />
   </Target>
-
 </Project>

@@ -1,37 +1,36 @@
 ﻿using System;
 
-namespace LongerDays
+namespace LongerDays;
+
+public static class Config
 {
-    public static class Config
+    private static Options _options;
+    private static ConfigReader _con;
+
+    public static Options GetOptions()
     {
-        private static Options _options;
-        private static ConfigReader _con;
+        _options = new Options();
+        _con = new ConfigReader();
 
-        [Serializable]
-        public class Options
-        {
-            public bool DoubleLengthDays;
-            public bool EvenLongerDays;
-            public bool Madness;
-        }
+        bool.TryParse(_con.Value("DoubleLengthDays", "false"), out var doubleLengthDays);
+        _options.DoubleLengthDays = doubleLengthDays;
 
-        public static Options GetOptions()
-        {
-            _options = new Options();
-            _con = new ConfigReader();
+        bool.TryParse(_con.Value("EvenLongerDays", "false"), out var evenLongerDays);
+        _options.EvenLongerDays = evenLongerDays;
 
-            bool.TryParse(_con.Value("DoubleLengthDays", "false"), out var doubleLengthDays);
-            _options.DoubleLengthDays = doubleLengthDays;
+        bool.TryParse(_con.Value("Madness", "false"), out var madness);
+        _options.Madness = madness;
 
-            bool.TryParse(_con.Value("EvenLongerDays", "false"), out var evenLongerDays);
-            _options.EvenLongerDays = evenLongerDays;
+        _con.ConfigWrite();
 
-            bool.TryParse(_con.Value("Madness", "false"), out var madness);
-            _options.Madness = madness;
+        return _options;
+    }
 
-            _con.ConfigWrite();
-
-            return _options;
-        }
+    [Serializable]
+    public class Options
+    {
+        public bool DoubleLengthDays;
+        public bool EvenLongerDays;
+        public bool Madness;
     }
 }

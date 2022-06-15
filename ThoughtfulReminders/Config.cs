@@ -1,33 +1,32 @@
 ﻿using System;
 
-namespace ThoughtfulReminders
+namespace ThoughtfulReminders;
+
+public static class Config
 {
-    public class Config
+    private static Options _options;
+    private static ConfigReader _con;
+
+    public static Options GetOptions()
     {
-        private static Options _options;
-        private static ConfigReader _con;
+        _options = new Options();
+        _con = new ConfigReader();
 
-        [Serializable]
-        public class Options
-        {
-            public bool SpeechBubbles;
-            public bool DaysOnly;
-        }
+        bool.TryParse(_con.Value("SpeechBubbles", "true"), out var speechBubbles);
+        _options.SpeechBubbles = speechBubbles;
 
-        public static Options GetOptions()
-        {
-            _options = new Options();
-            _con = new ConfigReader();
+        bool.TryParse(_con.Value("DaysOnly", "false"), out var daysOnly);
+        _options.DaysOnly = daysOnly;
 
-            bool.TryParse(_con.Value("SpeechBubbles", "true"), out var speechBubbles);
-            _options.SpeechBubbles = speechBubbles;
+        _con.ConfigWrite();
 
-            bool.TryParse(_con.Value("DaysOnly", "false"), out var daysOnly);
-            _options.DaysOnly = daysOnly;
+        return _options;
+    }
 
-            _con.ConfigWrite();
-
-            return _options;
-        }
+    [Serializable]
+    public class Options
+    {
+        public bool SpeechBubbles;
+        public bool DaysOnly;
     }
 }

@@ -1,32 +1,31 @@
 using System.Reflection;
 using HarmonyLib;
 
-namespace LargerScale
+namespace LargerScale;
+
+public class MainPatcher
 {
-    public class MainPatcher
+    private static Config.Options _cfg;
+
+    public static void Patch()
     {
-        private static Config.Options _cfg;
+        _cfg = Config.GetOptions();
 
-        public static void Patch()
+        var harmony = new Harmony("p1xel8ted.GraveyardKeeper.LargerScale");
+        harmony.PatchAll(Assembly.GetExecutingAssembly());
+    }
+
+    [HarmonyAfter("com.p1xel8ted.graveyardkeeper.UltraWide")]
+    [HarmonyPatch(typeof(ResolutionConfig), nameof(ResolutionConfig.GetResolutionConfigOrNull))]
+    public static class ResolutionConfigGetResolutionConfigOrNullPatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(int width, int height, ref ResolutionConfig __result)
         {
-            _cfg = Config.GetOptions();
-
-            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.LargerScale");
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
-        }
-
-        [HarmonyAfter("com.p1xel8ted.graveyardkeeper.UltraWide")]
-        [HarmonyPatch(typeof(ResolutionConfig), nameof(ResolutionConfig.GetResolutionConfigOrNull))]
-        public static class ResolutionConfigGetResolutionConfigOrNullPatch
-        {
-            [HarmonyPostfix]
-            public static void Postfix(int width, int height, ref ResolutionConfig __result)
+            __result ??= new ResolutionConfig(width, height)
             {
-                __result ??= new ResolutionConfig(width, height)
-                {
-                    pixel_size = _cfg.GameScale,
-                };
-            }
+                pixel_size = _cfg.GameScale
+            };
         }
     }
 }
