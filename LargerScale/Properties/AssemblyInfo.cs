@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Larger Scale")]
-[assembly: AssemblyDescription("Increase (or decrease) the default pixel size.")]
+[assembly: AssemblyTitle("Increase (or decrease) the default pixel size.")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
 [assembly: AssemblyProduct("Larger Scale")]

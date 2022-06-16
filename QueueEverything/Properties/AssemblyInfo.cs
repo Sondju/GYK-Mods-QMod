@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Queue Everything!")]
-[assembly: AssemblyDescription("Makes everything* queuable.")]
+[assembly: AssemblyTitle("Makes everything* queuable.")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
 [assembly: AssemblyProduct("Queue Everything!*")]

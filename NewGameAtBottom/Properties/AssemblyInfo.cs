@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("New Game At Bottom")]
-[assembly: AssemblyDescription("Moves the New Game button to the bottom of the list.")]
+[assembly: AssemblyTitle("Moves the New Game button to the bottom of the save list.")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
 [assembly: AssemblyProduct("New Game ... At Bottom")]

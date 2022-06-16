@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Longer Days")]
-[assembly: AssemblyDescription("Increases the length of days by 50% or 100%.")]
+[assembly: AssemblyTitle("Increases the length of days by 50%, 100%, 150% or 200%.")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
 [assembly: AssemblyProduct("Longer Days")]

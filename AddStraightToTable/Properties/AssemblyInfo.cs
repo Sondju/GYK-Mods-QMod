@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Add Straight To Table")]
-[assembly: AssemblyDescription("Skips the confirm dialog on the autopsy table.")]
+[assembly: AssemblyTitle("Skips the confirm dialog on the autopsy table.")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
 [assembly: AssemblyProduct("Add Straight To Table!")]
