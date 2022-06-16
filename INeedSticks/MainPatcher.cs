@@ -1,8 +1,8 @@
+using HarmonyLib;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using HarmonyLib;
 using UnityEngine;
 
 namespace INeedSticks;
@@ -14,8 +14,15 @@ public class MainPatcher
 
     public static void Patch()
     {
-        var harmony = new Harmony("p1xel8ted.GraveyardKeeper.INeedSticks");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
+        try
+        {
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.INeedSticks");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[INeedSticks]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
     }
 
     //adds our new object as an available craft as the game checks when starting the craft

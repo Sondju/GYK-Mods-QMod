@@ -1,7 +1,8 @@
+using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using HarmonyLib;
+using UnityEngine;
 
 namespace NewGameAtBottom;
 
@@ -18,14 +19,23 @@ public class MainPatcher
     {
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            //originally a blank save called "new" gets added the list of saves first when the save UI is generated
-            //and then actual save games are added next, so New game is always at the top (dumb right)
-            //this swaps it around, so that player games are first, and "New" game is at the bottom
-            var codes = new List<CodeInstruction>(instructions);
-            var codesToKeep = codes.GetRange(61, 14);
-            codes.RemoveRange(61, 14);
-            codes.InsertRange(91, codesToKeep);
-            return codes.AsEnumerable();
+            try
+            {
+                //originally a blank save called "new" gets added the list of saves first when the save UI is generated
+                //and then actual save games are added next, so New game is always at the top (dumb right)
+                //this swaps it around, so that player games are first, and "New" game is at the bottom
+                var codes = new List<CodeInstruction>(instructions);
+                var codesToKeep = codes.GetRange(61, 14);
+                codes.RemoveRange(61, 14);
+                codes.InsertRange(91, codesToKeep);
+                return codes.AsEnumerable();
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[NewGameAtBottom]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            }
+
+            return null;
         }
     }
 }

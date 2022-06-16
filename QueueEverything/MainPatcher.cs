@@ -1,3 +1,5 @@
+using HarmonyLib;
+using QueueEverything.lang;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -5,14 +7,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using HarmonyLib;
-using QueueEverything.lang;
 using UnityEngine;
 
 // ReSharper disable InconsistentNaming
 
 namespace QueueEverything;
 
+[HarmonyAfter("p1xel8ted.GraveyardKeeper.exhaust-less", "com.glibfire.graveyardkeeper.fastercraft.mod", "com.graveyardkeeper.urbanvibes.maxbutton")]
 public static class MainPatcher
 {
     private static readonly Dictionary<string, SmartExpression> Crafts = new();
@@ -35,23 +36,30 @@ public static class MainPatcher
 
     public static void Patch()
     {
-        var harmony = new Harmony("p1xel8ted.GraveyardKeeper.QueueEverything");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
+        try
+        {
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.QueueEverything");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-        _cfg = Config.GetOptions();
+            _cfg = Config.GetOptions();
 
-        _fasterCraft = false;
-        _exhaustless = false;
-        _alreadyRun = false;
+            _fasterCraft = false;
+            _exhaustless = false;
+            _alreadyRun = false;
 
-        Lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
-        Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+            Lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
 
-        if (Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod")) _fasterCraft = true;
+            if (Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod")) _fasterCraft = true;
 
-        if (Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.exhaust-less")) _exhaustless = true;
+            if (Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.exhaust-less")) _exhaustless = true;
 
-        if (_fasterCraft) LoadFasterCraftConfig();
+            if (_fasterCraft) LoadFasterCraftConfig();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[QueueEverything]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
     }
 
     public static void ShowMessage(string msg)
@@ -70,7 +78,7 @@ public static class MainPatcher
             var streamReader = new StreamReader(path);
             var text = streamReader.ReadLine();
             var array = text?.Split('=');
-            _timeAdjustment = (float) Convert.ToDouble(array?[1], CultureInfo.InvariantCulture);
+            _timeAdjustment = (float)Convert.ToDouble(array?[1], CultureInfo.InvariantCulture);
         }
         catch (Exception)
         {
@@ -106,11 +114,11 @@ public static class MainPatcher
             var text = "";
             int num;
             if (GlobalCraftControlGUI.is_global_control_active)
-                num = __instance.gratitude_points_craft_cost is not {has_expression: true}
+                num = __instance.gratitude_points_craft_cost is not { has_expression: true }
                     ? 0
                     : Mathf.RoundToInt(__instance.gratitude_points_craft_cost.EvaluateFloat(wgo));
             else
-                num = __instance.energy is not {has_expression: true}
+                num = __instance.energy is not { has_expression: true }
                     ? 0
                     : Mathf.RoundToInt(__instance.energy.EvaluateFloat(wgo));
 
@@ -130,8 +138,8 @@ public static class MainPatcher
 
                 if (flag)
                     foreach (var equippedTool in from itemType in wgo.obj_def.tool_actions.action_tools
-                             where itemType != ItemDefinition.ItemType.Hand
-                             select MainGame.me.player.GetEquippedTool(itemType))
+                                                 where itemType != ItemDefinition.ItemType.Hand
+                                                 select MainGame.me.player.GetEquippedTool(itemType))
                     {
                         bool flag2;
                         if (equippedTool == null)
@@ -159,7 +167,7 @@ public static class MainPatcher
 
                     if (_exhaustless)
                     {
-                        var adjustedNum = (float) Math.Round(num / 2f, 2);
+                        var adjustedNum = (float)Math.Round(num / 2f, 2);
                         if (gratitudePoints < (smartExpression?.EvaluateFloat(MainGame.me.player) ?? 0f))
                         {
                             if (adjustedNum % 1 == 0)
@@ -190,7 +198,7 @@ public static class MainPatcher
 
                     if (_exhaustless)
                     {
-                        var adjustedNum = (float) Math.Round(num / 2f, 2);
+                        var adjustedNum = (float)Math.Round(num / 2f, 2);
                         if (adjustedNum % 1 == 0)
                             text = text + "[c](en)[/c]" + adjustedNum.ToString("0");
                         else
@@ -211,7 +219,7 @@ public static class MainPatcher
 
                 var found = Crafts.TryGetValue(__instance.id, out var value);
                 if (found)
-                    num4 = value is not {has_expression: true}
+                    num4 = value is not { has_expression: true }
                         ? 0
                         : value.EvaluateFloat(wgo);
 
@@ -250,7 +258,7 @@ public static class MainPatcher
                 if (!found)
                     FireCrafts.Add(__instance.id, item.value);
                 else
-                    item.value = (int) Math.Round((double) value / 2, MidpointRounding.AwayFromZero);
+                    item.value = (int)Math.Round((double)value / 2, MidpointRounding.AwayFromZero);
 
                 var amount = item.value * multiplier;
                 var text2 = amount % 1 == 0
@@ -389,7 +397,7 @@ public static class MainPatcher
                 else
                 {
                     if (_cfg.HalfFireRequirements)
-                        item.value = (int) Math.Round((double) fireValue / 2, MidpointRounding.AwayFromZero);
+                        item.value = (int)Math.Round((double)fireValue / 2, MidpointRounding.AwayFromZero);
                     else
                         item.value = fireValue;
                 }

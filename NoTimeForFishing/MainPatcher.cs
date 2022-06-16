@@ -1,6 +1,6 @@
-using System.Reflection;
 using Fishing;
 using HarmonyLib;
+using System.Reflection;
 using UnityEngine;
 
 namespace NoTimeForFishing;
@@ -9,8 +9,15 @@ public class MainPatcher
 {
     public static void Patch()
     {
-        var harmony = new Harmony("p1xel8ted.GraveyardKeeper.NoTimeForFishing");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
+        try
+        {
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.NoTimeForFishing");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[NoTimeForFishing]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
     }
 
     [HarmonyPatch(typeof(FishLogic), "CalculateFishPos")]
@@ -37,7 +44,7 @@ public class MainPatcher
         private static void Postfix(FishingGUI __instance, ref Item ____fish, ref float ____waiting_for_bite_delay,
             ref FishDefinition ____fish_def, ref FishPreset ____fish_preset)
         {
-            var fishy = (FishDefinition) typeof(FishingGUI)
+            var fishy = (FishDefinition)typeof(FishingGUI)
                 .GetMethod("GetRandomFish", AccessTools.all)
                 ?.Invoke(__instance, new object[]
                 {

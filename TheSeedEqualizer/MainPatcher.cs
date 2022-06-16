@@ -1,7 +1,7 @@
+using HarmonyLib;
 using System;
 using System.Linq;
 using System.Reflection;
-using HarmonyLib;
 using UnityEngine;
 
 namespace TheSeedEqualizer;
@@ -10,8 +10,15 @@ public class MainPatcher
 {
     public static void Patch()
     {
-        var harmony = new Harmony("p1xel8ted.GraveyardKeeper.TheSeedEqualizer");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
+        try
+        {
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.TheSeedEqualizer");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[TheSeedEqualizer]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
     }
 
     [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.FillCraftsList))]
@@ -35,10 +42,10 @@ public class MainPatcher
                         foreach (var t in craft.output.Where(t =>
                                      t.id.Contains("seed") || t.id.Contains("seeds")))
                         {
-                            t.value = (int) Math.Ceiling(need.value * 1.05);
+                            t.value = (int)Math.Ceiling(need.value * 1.05);
                             t.min_value = SmartExpression.ParseExpression(t.value.ToString());
                             t.max_value =
-                                SmartExpression.ParseExpression(((int) Math.Ceiling(need.value * 1.10)).ToString());
+                                SmartExpression.ParseExpression(((int)Math.Ceiling(need.value * 1.10)).ToString());
                         }
                     });
                 });

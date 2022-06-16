@@ -1,6 +1,8 @@
+using HarmonyLib;
+using System;
 using System.Linq;
 using System.Reflection;
-using HarmonyLib;
+using UnityEngine;
 
 namespace AddStraightToTable;
 
@@ -8,8 +10,15 @@ public static class MainPatcher
 {
     public static void Patch()
     {
-        var harmony = new Harmony("p1xel8ted.GraveyardKeeper.AddStraightToTable");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
+        try
+        {
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.AddStraightToTable");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[AddStraightToTable]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
     }
 
     [HarmonyPatch(typeof(AutopsyGUI), "OnBodyItemPress")]
@@ -32,7 +41,7 @@ public static class MainPatcher
 
                 var inventory = ____parts_inventory;
                 var instance = __instance;
-                GUIElements.me.resource_picker.Open(obj, delegate(Item item, InventoryWidget _)
+                GUIElements.me.resource_picker.Open(obj, delegate (Item item, InventoryWidget _)
                     {
                         if (item == null || item.IsEmpty()) return InventoryWidget.ItemFilterResult.Hide;
 
@@ -55,7 +64,7 @@ public static class MainPatcher
                 return;
             }
 
-            var craftDefinition = (CraftDefinition) typeof(AutopsyGUI)
+            var craftDefinition = (CraftDefinition)typeof(AutopsyGUI)
                 .GetMethod("GetExtractCraftDefinition", AccessTools.all)
                 ?.Invoke(__instance, new object[]
                 {

@@ -1,5 +1,6 @@
-using System.Reflection;
 using HarmonyLib;
+using System.Reflection;
+using UnityEngine;
 
 namespace LargerScale;
 
@@ -9,10 +10,17 @@ public class MainPatcher
 
     public static void Patch()
     {
-        _cfg = Config.GetOptions();
+        try
+        {
+            _cfg = Config.GetOptions();
 
-        var harmony = new Harmony("p1xel8ted.GraveyardKeeper.LargerScale");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.LargerScale");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[LargerScale]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
     }
 
     [HarmonyAfter("com.p1xel8ted.graveyardkeeper.UltraWide")]

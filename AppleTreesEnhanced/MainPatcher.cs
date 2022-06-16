@@ -1,8 +1,8 @@
+using AppleTreesEnhanced.lang;
+using HarmonyLib;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
-using AppleTreesEnhanced.lang;
-using HarmonyLib;
 using UnityEngine;
 
 namespace AppleTreesEnhanced;
@@ -14,12 +14,19 @@ public class MainPatcher
 
     public static void Patch()
     {
-        var harmony = new Harmony("p1xel8ted.GraveyardKeeper.AppleTreesEnhanced");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
-        _cfg = Config.GetOptions();
+        try
+        {
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.AppleTreesEnhanced");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
+            _cfg = Config.GetOptions();
 
-        Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-        Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[AppleTreesEnhanced]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
     }
 
     private static void ShowMessage(WorldGameObject obj, string message)
@@ -85,7 +92,6 @@ public class MainPatcher
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
         }
     }
-
 
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.ReplaceWithObject))]
     public static class WorldGameObjectSmartInstantiate

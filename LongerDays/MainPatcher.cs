@@ -1,5 +1,6 @@
-using System.Reflection;
 using HarmonyLib;
+using System.Reflection;
+using UnityEngine;
 
 namespace LongerDays;
 
@@ -7,6 +8,7 @@ public class MainPatcher
 {
     //public static float SecondsInDay = 450f; //0x increase
     private const float SecondsInDay50 = 675f; //0.5x increase
+
     private const float SecondsInDay100 = 900f; //2x increase
     private const float SecondsInDay150 = 1125f; //2.5x increase
     private const float SecondsInDay200 = 1350f; //3x increase
@@ -15,19 +17,26 @@ public class MainPatcher
 
     public static void Patch()
     {
-        _cfg = Config.GetOptions();
+        try
+        {
+            _cfg = Config.GetOptions();
 
-        var harmony = new Harmony("p1xel8ted.GraveyardKeeper.LongerDays");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.LongerDays");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-        if (_cfg.Madness)
-            _seconds = SecondsInDay200;
-        else if (_cfg.EvenLongerDays)
-            _seconds = SecondsInDay150;
-        else if (_cfg.DoubleLengthDays)
-            _seconds = SecondsInDay100;
-        else
-            _seconds = SecondsInDay50;
+            if (_cfg.Madness)
+                _seconds = SecondsInDay200;
+            else if (_cfg.EvenLongerDays)
+                _seconds = SecondsInDay150;
+            else if (_cfg.DoubleLengthDays)
+                _seconds = SecondsInDay100;
+            else
+                _seconds = SecondsInDay50;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[LongerDays]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
     }
 
     [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.GetSecondsToTheMorning))]

@@ -1,7 +1,7 @@
+using HarmonyLib;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
-using HarmonyLib;
 using ThoughtfulReminders.lang;
 using UnityEngine;
 
@@ -16,13 +16,20 @@ public class MainPatcher
 
     public static void Patch()
     {
-        var harmony = new Harmony("p1xel8ted.GraveyardKeeper.ThoughtfulReminders");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
+        try
+        {
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.ThoughtfulReminders");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-        _cfg = Config.GetOptions();
+            _cfg = Config.GetOptions();
 
-        Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-        Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[ThoughtfulReminders]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
     }
 
     private static void SayMessage(string msg)
@@ -46,7 +53,6 @@ public class MainPatcher
         }
     }
 
-
     [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnClosePressed))]
     public static class InGameMenuGuiOnClosePressedPatch
     {
@@ -67,7 +73,6 @@ public class MainPatcher
             _timeOfDayFloat = __instance.GetTimeK();
         }
     }
-
 
     [HarmonyPatch(typeof(MainGame), nameof(MainGame.Update))]
     public static class MainGameUpdatePatch
@@ -93,21 +98,27 @@ public class MainPatcher
                     case 0: //day of Sloth
                         SayMessage(strings.dSloth);
                         break;
+
                     case 1: //day of Pride
                         SayMessage(strings.dPride);
                         break;
+
                     case 2: //day of Lust
                         SayMessage(strings.dLust);
                         break;
+
                     case 3: //day of Gluttony
                         SayMessage(strings.dGluttony);
                         break;
+
                     case 4: //day of Envy
                         SayMessage(strings.dEnvy);
                         break;
+
                     case 5: //day of Wrath
                         SayMessage(strings.dWrath);
                         break;
+
                     default:
                         SayMessage(strings._default);
                         break;
@@ -121,23 +132,29 @@ public class MainPatcher
                     case 0: //day of Sloth
                         SayMessage(strings.dhSloth);
                         break;
+
                     case 1: //day of Pride
                         SayMessage(MainGame.me.save.unlocked_perks.Contains("p_preacher")
                             ? strings.dhPrideSermon
                             : strings.dhPride);
                         break;
+
                     case 2: //day of Lust
                         SayMessage(strings.dhLust);
                         break;
+
                     case 3: //day of Gluttony
                         SayMessage(strings.dhGluttony);
                         break;
+
                     case 4: //day of Envy
                         SayMessage(strings.dhEnvy);
                         break;
+
                     case 5: //day of Wrath
                         SayMessage(strings.dhWrath);
                         break;
+
                     default:
                         SayMessage(strings._default);
                         break;

@@ -1,9 +1,10 @@
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using HarmonyLib;
+using UnityEngine;
 
 namespace MiscBitsAndBobs;
 
@@ -24,14 +25,19 @@ public class MainPatcher
         ItemDefinition.ItemType.HeadArmor, ItemDefinition.ItemType.Sword, ItemDefinition.ItemType.Preach
     };
 
-
     public static void Patch()
     {
-        var harmony = new Harmony("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
-        _cfg = Config.GetOptions();
+        try
+        {
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
+            _cfg = Config.GetOptions();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[MiscBitsAndBobs]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
     }
-
 
     [HarmonyPatch(typeof(InventoryGUI), nameof(InventoryGUI.OnItemOver))]
     public static class InventoryGuiOnItemOverPatch
@@ -131,7 +137,6 @@ public class MainPatcher
                 red = $"(r){r}";
             }
 
-
             string green;
             if (g >= 1000)
             {
@@ -156,7 +161,6 @@ public class MainPatcher
                 blue = $"(b){b}";
             }
 
-
             foreach (var comp in GUIElements.me.hud.tech_points_bar.GetComponentsInChildren<UILabel>())
                 comp.text = $"{red} {green} {blue}";
         }
@@ -171,7 +175,6 @@ public class MainPatcher
             if (_cfg.QuietMusicInGui) SmartAudioEngine.me.SetDullMusicMode(false);
         }
     }
-
 
     [HarmonyPatch(typeof(InventoryPanelGUI), "DoOpening")]
     public static class InventoryPanelGuiDoOpeningPatch

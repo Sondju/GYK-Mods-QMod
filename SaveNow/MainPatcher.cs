@@ -1,3 +1,5 @@
+using HarmonyLib;
+using SaveNow.lang;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -7,8 +9,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Timers;
-using HarmonyLib;
-using SaveNow.lang;
 using UnityEngine;
 using Timer = System.Timers.Timer;
 
@@ -31,20 +31,26 @@ public class MainPatcher
 
     public static void Patch()
     {
-        _cfg = Config.GetOptions();
-        _aTimer = new Timer();
-        _dataPath = "./QMods/SaveNow/dont-remove.dat";
-        _savePath = "./QMods/SaveNow/SaveBackup/";
+        try
+        {
+            _cfg = Config.GetOptions();
+            _aTimer = new Timer();
+            _dataPath = "./QMods/SaveNow/dont-remove.dat";
+            _savePath = "./QMods/SaveNow/SaveBackup/";
 
-        var harmony = new Harmony("p1xel8ted.GraveyardKeeper.SaveNow");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.SaveNow");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-        LoadSaveLocations();
+            LoadSaveLocations();
 
-        Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-        Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[SaveNow]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
     }
-
 
     private static void WriteSavesToFile()
     {
@@ -144,7 +150,6 @@ public class MainPatcher
         if (size < count) list.RemoveRange(size, count - size);
     }
 
-
     //reads co-ords from file and teleports player there
     private static void RestoreLocation()
     {
@@ -198,7 +203,6 @@ public class MainPatcher
                 });
         }
     }
-
 
     [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnClosePressed))]
     public static class InGameMenuGuiOnClosePressedPatch
@@ -366,9 +370,9 @@ public class MainPatcher
         {
             if (__instance == null) return;
             foreach (var comp in __instance.GetComponentsInChildren<UIButton>().Where(x => x.name.Contains("exit")))
-            foreach (var label in comp.GetComponentsInChildren<UILabel>())
-                if (_cfg.ExitToDesktop)
-                    label.text = strings.ExitButtonText;
+                foreach (var label in comp.GetComponentsInChildren<UILabel>())
+                    if (_cfg.ExitToDesktop)
+                        label.text = strings.ExitButtonText;
         }
     }
 
@@ -393,7 +397,6 @@ public class MainPatcher
             _canSave = !__instance.player_controlled_by_script;
         }
     }
-
 
     //hooks into the time of day update and saves if the K key was pressed
     [HarmonyPatch(typeof(TimeOfDay))]

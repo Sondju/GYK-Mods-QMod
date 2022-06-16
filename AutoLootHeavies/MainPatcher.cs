@@ -1,3 +1,5 @@
+using AutoLootHeavies.lang;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -6,8 +8,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using AutoLootHeavies.lang;
-using HarmonyLib;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
@@ -77,7 +77,6 @@ public class MainPatcher
             Debug.LogError($"[AutoLootHeavies]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
         }
     }
-
 
     private static void UpdateConfig()
     {
@@ -165,11 +164,11 @@ public class MainPatcher
             for (var x = 0; x < grid.Length; ++x) grid[x] = new int[horizontal];
 
             for (var x = 0; x < grid.Length; ++x)
-            for (var y = 0; y < grid[x].Length; ++y)
-            {
-                var tu = (x, y);
-                if (!tupleList.Contains(tu)) tupleList.Add(tu);
-            }
+                for (var y = 0; y < grid[x].Length; ++y)
+                {
+                    var tu = (x, y);
+                    if (!tupleList.Contains(tu)) tupleList.Add(tu);
+                }
         }
 
         var spot = tupleList.RandomElement();
@@ -278,7 +277,6 @@ public class MainPatcher
             SmartSpeechEngine.VoiceID.None, true);
     }
 
-
     private static void ShowMessage(string msg, Vector3 pos)
     {
         Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
@@ -357,8 +355,8 @@ public class MainPatcher
         foreach (var obj in _objects.Where(obj => obj != null))
         {
             bool found;
-            var vectorToAdd = new Vector3((float) Math.Ceiling(obj.pos3.x), (float) Math.Ceiling(obj.pos3.y),
-                (float) Math.Ceiling(obj.pos3.z));
+            var vectorToAdd = new Vector3((float)Math.Ceiling(obj.pos3.x), (float)Math.Ceiling(obj.pos3.y),
+                (float)Math.Ceiling(obj.pos3.z));
             if (obj.obj_id.Contains(Constants.ItemObjectId.Timber))
             {
                 found = VectorDictionary.TryGetValue(vectorToAdd, out _);
@@ -436,7 +434,6 @@ public class MainPatcher
             public const string Ore = "mf_ore_1";
         }
     }
-
 
     [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnClosePressed))]
     public static class InGameMenuGuiOnClosePressedPatch
@@ -565,7 +562,6 @@ public class MainPatcher
         }
     }
 
-
     [HarmonyPatch(typeof(BaseCharacterComponent), nameof(BaseCharacterComponent.SetOverheadItem))]
     public class BaseCharacterComponentSetOverheadItemPatch
     {
@@ -599,7 +595,6 @@ public class MainPatcher
             }
         }
     }
-
 
     [HarmonyPatch(typeof(BaseCharacterComponent), nameof(BaseCharacterComponent.DropOverheadItem))]
     public class BaseCharacterComponentDropOverheadItemPatch
@@ -637,7 +632,6 @@ public class MainPatcher
                 var isAttacking = __instance.playing_animation | __instance.playing_work_animation |
                                   __instance.attack.performing_attack;
 
-
                 var pWgo = MainGame.me.player;
                 var tWgo = _timberTemp; //timber
                 var sWgo = _stoneTemp; //stone
@@ -652,7 +646,6 @@ public class MainPatcher
                     DropOjectAndNull(__instance, item);
                     return;
                 }
-
 
                 ItemsToInsert.Clear();
                 //ItemsDidntFit.Clear();

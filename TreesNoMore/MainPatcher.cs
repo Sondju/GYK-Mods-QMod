@@ -1,5 +1,6 @@
-using System.Reflection;
 using HarmonyLib;
+using System.Reflection;
+using UnityEngine;
 
 namespace TreesNoMore;
 
@@ -7,8 +8,15 @@ public class MainPatcher
 {
     public static void Patch()
     {
-        var harmony = new Harmony("p1xel8ted.GraveyardKeeper.TreesNoMore");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
+        try
+        {
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.TreesNoMore");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[TreesNoMore]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
     }
 
     [HarmonyPatch(typeof(WorldGameObject), "SmartInstantiate")]

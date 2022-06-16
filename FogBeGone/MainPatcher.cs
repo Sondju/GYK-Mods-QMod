@@ -1,5 +1,6 @@
-using System.Reflection;
 using HarmonyLib;
+using System.Reflection;
+using UnityEngine;
 
 namespace FogBeGone;
 
@@ -7,8 +8,15 @@ public class MainPatcher
 {
     public static void Patch()
     {
-        var harmony = new Harmony("p1xel8ted.GraveyardKeeper.FogBeGone");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
+        try
+        {
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.FogBeGone");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[FogBeGone]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
     }
 
     [HarmonyPatch(typeof(SmartWeatherState), nameof(SmartWeatherState.Update))]
@@ -28,15 +36,18 @@ public class MainPatcher
                     ____cur_amount = 0;
                     __instance.value = 0;
                     break;
+
                 case SmartWeatherState.WeatherType.Wind:
                     ____previously_enabled = true;
                     ____enabled = false;
                     ____cur_amount = 0;
                     __instance.value = 0;
                     break;
+
                 case SmartWeatherState.WeatherType.Rain:
                     ____previously_enabled = false;
                     break;
+
                 case SmartWeatherState.WeatherType.LUT:
                     break;
             }

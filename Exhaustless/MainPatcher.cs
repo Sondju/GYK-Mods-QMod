@@ -1,13 +1,15 @@
+using Exhaustless.lang;
+using HarmonyLib;
 using System;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using Exhaustless.lang;
-using HarmonyLib;
+using UnityEngine;
 
 namespace Exhaustless;
 
+[HarmonyBefore("p1xel8ted.GraveyardKeeper.QueueEverything")]
 public static class MainPatcher
 {
     private static Config.Options _cfg;
@@ -24,9 +26,9 @@ public static class MainPatcher
             Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            //  File.AppendAllText("./qmods/dura.txt", $"{ex.Message} - {ex.Source} - {ex.StackTrace}\n");
+            Debug.LogError($"[AppleTreesEnhanced]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
         }
     }
 
