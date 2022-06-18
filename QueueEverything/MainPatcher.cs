@@ -14,6 +14,7 @@ using UnityEngine;
 namespace QueueEverything;
 
 [HarmonyAfter("p1xel8ted.GraveyardKeeper.exhaust-less", "com.glibfire.graveyardkeeper.fastercraft.mod", "com.graveyardkeeper.urbanvibes.maxbutton")]
+[HarmonyBefore("p1xel8ted.GraveyardKeeper.INeedSticks")]
 public static class MainPatcher
 {
     private static readonly Dictionary<string, SmartExpression> Crafts = new();
@@ -59,6 +60,65 @@ public static class MainPatcher
         catch (Exception ex)
         {
             Debug.LogError($"[QueueEverything]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
+    }
+
+    [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.FillCraftsList))]
+    public static class CraftComponentFillCraftsListPatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix()
+        {
+            if (!_cfg.MakeEverythingAuto) return;
+            try
+            {
+                var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
+                GameBalance.me.craft_data.ForEach(craft =>
+                {
+                    if (craft.id.Contains("zombie") | craft.id.Contains("grow_desk_planting") | craft.id.Contains("refugee") |
+                        craft.id.Contains("grow_vineyard_planting")) return;
+                    if (!craft.is_auto)
+                    {
+                        var ct = craft.energy.EvaluateFloat(crafteryWgo, MainGame.me.player);
+                        ct /= 2; //don't know why its getting doubled
+                        Debug.LogError($"[QueueEverything]: Original CT {ct}");
+                        if (_fasterCraft)
+                        {
+                            if (_timeAdjustment < 0)
+                            {
+                                ct /= _timeAdjustment;
+                            }
+                            else
+                            {
+                                ct *= _timeAdjustment;
+                            }
+                            craft.craft_time = SmartExpression.ParseExpression(ct.ToString(CultureInfo.InvariantCulture));
+                        }
+                        else
+                        {
+                            craft.craft_time = SmartExpression.ParseExpression(ct.ToString(CultureInfo.InvariantCulture));
+                        }
+                        craft.energy = SmartExpression.ParseExpression("0");
+                        craft.is_auto = true;
+                        craft.needs.ForEach(need =>
+                        {
+                            need.value *= 2;
+                        });
+                        craft.output.ForEach(output =>
+                        {
+                            Debug.LogError($"[QueueEverything]: Output: {output.id}, Value: {output.value}");
+                            if (output.id is "r" or "g" or "b")
+                            {
+                                output.value /= 2;
+                            }
+                        });
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[QueueEverything] {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            }
         }
     }
 
@@ -407,23 +467,28 @@ public static class MainPatcher
             if (!found) Crafts.Add(craft_definition.id, craft_definition.craft_time);
 
             Crafts.TryGetValue(craft_definition.id, out var value);
+
             if (_fasterCraft)
             {
                 var ct = value?.EvaluateFloat(crafteryWgo);
-                if (_timeAdjustment < 0)
-                {
-                    ct *= _timeAdjustment;
-                    craft_definition.craft_time = SmartExpression.ParseExpression(ct.ToString());
-                }
-                else
-                {
-                    ct /= _timeAdjustment;
-                    craft_definition.craft_time = SmartExpression.ParseExpression(ct.ToString());
-                }
+              
+                    if (_timeAdjustment < 0)
+                    {
+                        ct *= _timeAdjustment;
+                        craft_definition.craft_time = SmartExpression.ParseExpression(ct.ToString());
+                    }
+                    else
+                    {
+                        ct /= _timeAdjustment;
+                        craft_definition.craft_time = SmartExpression.ParseExpression(ct.ToString());
+                    }
+
             }
             else
             {
-                craft_definition.craft_time = value;
+
+                    craft_definition.craft_time = value;
+                
             }
         }
     }
@@ -466,7 +531,8 @@ public static class MainPatcher
 
             // _craftAmount = ____amount;
             time *= ____amount;
-            Debug.LogError($"[QueueEverything]: CraftTime: {time}");
+            Debug.LogError($"[QueueEverything]: Item: {__instance.craft_definition.id}, CraftTime: {time}");
+            
             if (time >= 300)
             {
                 var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();

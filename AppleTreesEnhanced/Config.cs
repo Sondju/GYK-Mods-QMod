@@ -24,6 +24,9 @@ public static class Config
         bool.TryParse(_con.Value("IncludeGardenTrees", "true"), out var includeGardenTrees);
         _options.IncludeGardenTrees = includeGardenTrees;
 
+        bool.TryParse(_con.Value("RealisticHarvest", "true"), out var realisticHarvest);
+        _options.RealisticHarvest = realisticHarvest;
+
         _con.ConfigWrite();
 
         return _options;
@@ -36,5 +39,6 @@ public static class Config
         public bool IncludeGardenTrees;
         public bool IncludeWorldBerryBushes;
         public bool ShowHarvestReadyMessages;
+        public bool RealisticHarvest;
     }
 }

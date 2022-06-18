@@ -28,6 +28,10 @@ public static class Config
             out var autoSelectCraftButtonWithController);
         _options.AutoSelectCraftButtonWithController = autoSelectCraftButtonWithController;
 
+        bool.TryParse(_con.Value("MakeEverythingAuto", "false"),
+            out var makeEverythingAuto);
+        _options.MakeEverythingAuto = makeEverythingAuto;
+
         _con.ConfigWrite();
 
         return _options;
@@ -41,5 +45,6 @@ public static class Config
         public bool AutoMaxNormalCrafts;
         public bool AutoSelectHighestQualRecipe;
         public bool AutoSelectCraftButtonWithController;
+        public bool MakeEverythingAuto;
     }
 }

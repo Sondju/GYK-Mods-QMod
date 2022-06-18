@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Threading;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace AppleTreesEnhanced;
 
@@ -29,7 +30,7 @@ public class MainPatcher
         }
     }
 
-    private static void ShowMessage(WorldGameObject obj, string message)
+    private static void ShowMessage(WorldGameObject obj, string message, int qty)
     {
         if (_cfg.ShowHarvestReadyMessages)
         {
@@ -40,7 +41,7 @@ public class MainPatcher
 
             if (obj.obj_id.Contains("tree")) newObjPos.y += 250f;
 
-            EffectBubblesManager.ShowImmediately(newObjPos, message,
+            EffectBubblesManager.ShowImmediately(newObjPos, message + $" ({qty})",
                 EffectBubblesManager.BubbleColor.Relation,
                 true, 3f);
         }
@@ -102,7 +103,12 @@ public class MainPatcher
             if (string.Equals(new_obj_id, Constants.HarvestReady.GardenAppleTree))
             {
                 if (!_cfg.IncludeGardenTrees) return;
-                for (var i = 0; i < 15; i++)
+                var rand = 15;
+                if (_cfg.RealisticHarvest)
+                {
+                    rand = Random.Range(6, 16);
+                }
+                for (var i = 0; i < rand; i++)
                     __instance.DropItem(new Item(Constants.HarvestItem.AppleTree, 1), Direction.None, force: 5f,
                         check_walls: false);
 
@@ -111,12 +117,17 @@ public class MainPatcher
                 __instance.ReplaceWithObject(Constants.HarvestGrowing.GardenAppleTree, true);
                 __instance.GetComponent<ChunkedGameObject>().Init(true);
                 __instance.TryStartCraft(Constants.HarvestSpawner.GardenAppleTree);
-                ShowMessage(__instance, strings.ApplesReady);
+                ShowMessage(__instance, strings.ApplesReady, rand);
             }
             else if (string.Equals(new_obj_id, Constants.HarvestReady.GardenBerryBush))
             {
                 if (!_cfg.IncludeGardenBerryBushes) return;
-                for (var i = 0; i < 4; i++)
+                var rand = 4;
+                if (_cfg.RealisticHarvest)
+                {
+                    rand = Random.Range(2, 5);
+                }
+                for (var i = 0; i < rand; i++)
                     __instance.DropItem(new Item(Constants.HarvestItem.BerryBush, 1), Direction.None, force: 5f,
                         check_walls: false);
 
@@ -125,12 +136,17 @@ public class MainPatcher
                 __instance.ReplaceWithObject(Constants.HarvestGrowing.GardenBerryBush, true);
                 __instance.GetComponent<ChunkedGameObject>().Init(true);
                 __instance.TryStartCraft(Constants.HarvestSpawner.GardenBerryBush);
-                ShowMessage(__instance, strings.BerriesReady);
+                ShowMessage(__instance, strings.BerriesReady, rand);
             }
             else if (string.Equals(new_obj_id, Constants.HarvestReady.WorldBerryBush1))
             {
                 if (!_cfg.IncludeWorldBerryBushes) return;
-                for (var i = 0; i < 4; i++)
+                var rand = 4;
+                if (_cfg.RealisticHarvest)
+                {
+                    rand = Random.Range(2, 5);
+                }
+                for (var i = 0; i < rand; i++)
                     __instance.DropItem(new Item(Constants.HarvestItem.BerryBush, 1), Direction.None, force: 5f,
                         check_walls: false);
 
@@ -139,12 +155,17 @@ public class MainPatcher
                 __instance.ReplaceWithObject(Constants.HarvestGrowing.WorldBerryBush1, true);
                 __instance.GetComponent<ChunkedGameObject>().Init(true);
                 __instance.TryStartCraft(Constants.HarvestSpawner.WorldBerryBush1);
-                ShowMessage(__instance, strings.BerriesReady);
+                ShowMessage(__instance, strings.BerriesReady, rand);
             }
             else if (string.Equals(new_obj_id, Constants.HarvestReady.WorldBerryBush2))
             {
                 if (!_cfg.IncludeWorldBerryBushes) return;
-                for (var i = 0; i < 4; i++)
+                var rand = 4;
+                if (_cfg.RealisticHarvest)
+                {
+                    rand = Random.Range(2, 5);
+                }
+                for (var i = 0; i < rand; i++)
                     __instance.DropItem(new Item(Constants.HarvestItem.BerryBush, 1), Direction.None, force: 5f,
                         check_walls: false);
 
@@ -153,12 +174,17 @@ public class MainPatcher
                 __instance.ReplaceWithObject(Constants.HarvestGrowing.WorldBerryBush2, true);
                 __instance.GetComponent<ChunkedGameObject>().Init(true);
                 __instance.TryStartCraft(Constants.HarvestSpawner.WorldBerryBush2);
-                ShowMessage(__instance, strings.BerriesReady);
+                ShowMessage(__instance, strings.BerriesReady, rand);
             }
             else if (string.Equals(new_obj_id, Constants.HarvestReady.WorldBerryBush3))
             {
                 if (!_cfg.IncludeWorldBerryBushes) return;
-                for (var i = 0; i < 4; i++)
+                var rand = 4;
+                if (_cfg.RealisticHarvest)
+                {
+                    rand = Random.Range(2, 5);
+                }
+                for (var i = 0; i < rand; i++)
                     __instance.DropItem(new Item(Constants.HarvestItem.BerryBush, 1), Direction.None, force: 5f,
                         check_walls: false);
 
@@ -167,7 +193,7 @@ public class MainPatcher
                 __instance.ReplaceWithObject(Constants.HarvestGrowing.WorldBerryBush3, true);
                 __instance.GetComponent<ChunkedGameObject>().Init(true);
                 __instance.TryStartCraft(Constants.HarvestSpawner.WorldBerryBush3);
-                ShowMessage(__instance, strings.BerriesReady);
+                ShowMessage(__instance, strings.BerriesReady, rand);
             }
         }
     }

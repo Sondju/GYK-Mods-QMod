@@ -7,10 +7,12 @@ using UnityEngine;
 
 namespace INeedSticks;
 
+[HarmonyAfter("p1xel8ted.GraveyardKeeper.QueueEverything")]
 public class MainPatcher
 {
     private static CraftDefinition _newItem;
     private static bool _craftWoodenStick;
+    private static bool _queueEverything;
 
     public static void Patch()
     {
@@ -18,6 +20,8 @@ public class MainPatcher
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.INeedSticks");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
+
+            if (Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.QueueEverything")) _queueEverything = true;
         }
         catch (System.Exception ex)
         {
@@ -107,10 +111,11 @@ public class MainPatcher
         {
             var newCd = new CraftDefinition();
             var cd = GameBalance.me.GetData<CraftDefinition>("wood1_2");
+            var redOutputValue = _queueEverything ? 2 : 5;
             var output = new List<Item>
             {
                 new("stick", 12),
-                new("r", 5)
+                new("r", redOutputValue)
             };
             newCd.craft_in = cd.craft_in;
             newCd.needs = cd.needs;
