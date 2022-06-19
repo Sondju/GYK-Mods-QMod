@@ -25,7 +25,8 @@ public class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref WorldObjectPart prefab)
         {
-            if ((!MainGame.game_started && !MainGame.game_starting) || !prefab.name.Contains("tree")) return;
+            if ((!MainGame.game_started && !MainGame.game_starting) || !prefab.name.Contains("tree") || prefab.name.Contains("bees")) return;
+            Debug.LogError($"[TreesNoMore] {prefab.name}");
             if (prefab.name.Contains("apple")) return;
             prefab = null;
         }
