@@ -56,10 +56,11 @@ namespace IBuildWhereIWant
             {
                 foreach (var objectCraftDefinition in GameBalance.me.craft_obj_data.Where(x =>
                              x.build_type == ObjectCraftDefinition.BuildType.Put)
-                             .Where(c => !c.craft_time_is_zero)
                              .Where(a => a.icon.Length > 0)
                              .Where(b => !b.id.Contains("refugee")))
                 {
+                    Debug.Log(
+                        $"[IBuildWhereIWant] Object ID: {objectCraftDefinition.id}, Object name: {objectCraftDefinition.GetNameNonLocalized()}, Energy: {objectCraftDefinition.energy.EvaluateFloat()}");
                     var name = objectCraftDefinition.GetNameNonLocalized();
                     if (MainGame.me.save.IsCraftVisible(objectCraftDefinition) && !_nameList.Contains(name) && !_sortedList.Contains(objectCraftDefinition) )
                     {
@@ -99,7 +100,7 @@ namespace IBuildWhereIWant
 
             }
         }
-        
+
 
         [HarmonyPatch(typeof(BuildModeLogics), "CancelCurrentMode")]
         public static class BuildModeLogicsCancelCurrentModePatch
@@ -160,6 +161,26 @@ namespace IBuildWhereIWant
             public static void Postfix(ref bool __result)
             {
                 __result = true;
+            }
+        }
+
+        [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.CanBuild))]
+        internal class BuildModeLogicsCanBuildPatch
+        {
+            [HarmonyPrefix]
+            private static void CanBuild(BuildModeLogics __instance)
+            {
+                Traverse.Create(__instance).Field("_multi_inventory").SetValue(MainGame.me.player.GetMultiInventoryForInteraction());
+            }
+        }
+
+        [HarmonyPatch(typeof(BuildModeLogics), "DoPlace")]
+        internal class BuildModeLogicsDoPlacePatch
+        {
+            [HarmonyPrefix]
+            private static void DoPlace(BuildModeLogics __instance)
+            {
+                Traverse.Create(__instance).Field("_multi_inventory").SetValue(MainGame.me.player.GetMultiInventoryForInteraction());
             }
         }
     }
