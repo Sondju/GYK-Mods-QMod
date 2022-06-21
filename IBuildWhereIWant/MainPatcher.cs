@@ -168,9 +168,9 @@ namespace IBuildWhereIWant
         internal class BuildModeLogicsCanBuildPatch
         {
             [HarmonyPrefix]
-            private static void CanBuild(BuildModeLogics __instance)
+            private static void Prefix(BuildModeLogics __instance, ref MultiInventory ____multi_inventory)
             {
-                Traverse.Create(__instance).Field("_multi_inventory").SetValue(MainGame.me.player.GetMultiInventoryForInteraction());
+                ____multi_inventory = MainGame.me.player.GetMultiInventoryForInteraction();
             }
         }
 
@@ -178,9 +178,9 @@ namespace IBuildWhereIWant
         internal class BuildModeLogicsDoPlacePatch
         {
             [HarmonyPrefix]
-            private static void DoPlace(BuildModeLogics __instance)
+            private static void Prefix(BuildModeLogics __instance, ref MultiInventory ____multi_inventory)
             {
-                Traverse.Create(__instance).Field("_multi_inventory").SetValue(MainGame.me.player.GetMultiInventoryForInteraction());
+                ____multi_inventory = MainGame.me.player.GetMultiInventoryForInteraction();
             }
         }
     }
