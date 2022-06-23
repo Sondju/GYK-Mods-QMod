@@ -81,7 +81,6 @@ public static class MainPatcher
                     {
                         var ct = craft.energy.EvaluateFloat(crafteryWgo, MainGame.me.player);
                         ct /= 2; //don't know why its getting doubled
-                        Debug.LogError($"[QueueEverything]: Original CT {ct}");
                         if (_fasterCraft)
                         {
                             if (_timeAdjustment < 0)
@@ -106,7 +105,6 @@ public static class MainPatcher
                         });
                         craft.output.ForEach(output =>
                         {
-                            Debug.LogError($"[QueueEverything]: Output: {output.id}, Value: {output.value}");
                             if (output.id is "r" or "g" or "b")
                             {
                                 output.value /= 2;
@@ -396,8 +394,6 @@ public static class MainPatcher
         {
             _alreadyRun = true;
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
-            Debug.LogError(
-                $"[QueueEverything] CraftGUI Open CrafteryWGO: {crafteryWgo.obj_id}, {crafteryWgo.name}");
             if (string.Equals(crafteryWgo.obj_id, previousObjId)) return;
             previousObjId = crafteryWgo.obj_id;
             File.AppendAllText("./QMods/QueueEverything/interacted-objects.txt", crafteryWgo.obj_id + "\n");
@@ -499,6 +495,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref CraftItemGUI __instance, ref int ____amount)
         {
+            if (__instance.craft_definition.id.Contains("remove")) return;
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
 
             if (UnSafeCraftObjects.Contains(crafteryWgo.obj_id)) return;
@@ -508,6 +505,7 @@ public static class MainPatcher
             if (found)
             {
                 originalTimeFloat = value.EvaluateFloat(crafteryWgo);
+               // originalTimeFloat = value.EvaluateFloat(crafteryWgo);
             }
             else
             {
@@ -531,8 +529,7 @@ public static class MainPatcher
 
             // _craftAmount = ____amount;
             time *= ____amount;
-            Debug.LogError($"[QueueEverything]: Item: {__instance.craft_definition.id}, CraftTime: {time}");
-            
+
             if (time >= 300)
             {
                 var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();

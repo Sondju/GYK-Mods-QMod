@@ -296,18 +296,18 @@ public class MainPatcher
         if (!MainGame.game_started) return;
         if (VectorDictionary.Count <= 0)
         {
-            Debug.LogError("Nothing loaded in the Vector dictionary.");
+           // Debug.LogError("Nothing loaded in the Vector dictionary.");
             return;
         }
 
-        Debug.LogError($"Vector dictionary has {VectorDictionary.Count} vectors.");
+        //Debug.LogError($"Vector dictionary has {VectorDictionary.Count} vectors.");
 
         try
         {
             _lastKnownTimberLocation = VectorDictionary.Where(x => x.Value == Constants.FileKeys.Timber)
                 .ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key))
                 .Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
-            Debug.Log($"Closest Timber: {_lastKnownTimberLocation}");
+           // Debug.Log($"Closest Timber: {_lastKnownTimberLocation}");
         }
         catch (Exception)
         {
@@ -319,7 +319,7 @@ public class MainPatcher
             _lastKnownOreLocation = VectorDictionary.Where(x => x.Value == Constants.FileKeys.Ore)
                 .ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key))
                 .Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
-            Debug.Log($"Closest Timber: {_lastKnownOreLocation}");
+           // Debug.Log($"Closest Timber: {_lastKnownOreLocation}");
         }
         catch (Exception)
         {
@@ -331,7 +331,7 @@ public class MainPatcher
             _lastKnownStoneLocation = VectorDictionary.Where(x => x.Value == Constants.FileKeys.Stone)
                 .ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key))
                 .Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
-            Debug.Log($"Closest Stone: {_lastKnownStoneLocation}");
+            //Debug.Log($"Closest Stone: {_lastKnownStoneLocation}");
         }
         catch (Exception)
         {
@@ -351,7 +351,7 @@ public class MainPatcher
                 x.obj_id.Contains(Constants.ItemObjectId.Stone))
             .ToList();
         _storedStockpiles = _objects;
-        Debug.LogError($"StockPile Count: {_storedStockpiles.Count}, Object count: {_objects.Count}");
+       // Debug.LogError($"StockPile Count: {_storedStockpiles.Count}, Object count: {_objects.Count}");
         foreach (var obj in _objects.Where(obj => obj != null))
         {
             bool found;

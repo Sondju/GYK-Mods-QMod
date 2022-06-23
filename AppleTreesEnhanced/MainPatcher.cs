@@ -49,37 +49,36 @@ public class MainPatcher
 
     private struct Constants
     {
-        public struct HarvestReady
-        {
-            public const string GardenBerryBush = "bush_berry_garden_ready";
-            public const string WorldBerryBush1 = "bush_1_berry";
-            public const string WorldBerryBush2 = "bush_2_berry";
-            public const string WorldBerryBush3 = "bush_3_berry";
-            public const string GardenAppleTree = "tree_apple_garden_ready";
-        }
-
         public struct HarvestGrowing
         {
+            public const string GardenAppleTree = "tree_apple_garden_empty";
             public const string GardenBerryBush = "bush_berry_garden_empty";
             public const string WorldBerryBush1 = "bush_1";
             public const string WorldBerryBush2 = "bush_2";
             public const string WorldBerryBush3 = "bush_3";
-            public const string GardenAppleTree = "tree_apple_garden_empty";
-        }
-
-        public struct HarvestSpawner
-        {
-            public const string GardenBerryBush = "bush_berry_garden";
-            public const string WorldBerryBush1 = "bush_1_berry_respawn";
-            public const string WorldBerryBush2 = "bush_2_berry_respawn";
-            public const string WorldBerryBush3 = "bush_3_berry_respawn";
-            public const string GardenAppleTree = "tree_apple_garden_crops_growing";
         }
 
         public struct HarvestItem
         {
-            public const string BerryBush = "fruit:berry";
             public const string AppleTree = "fruit:apple_red_crop";
+            public const string BerryBush = "fruit:berry";
+        }
+
+        public struct HarvestReady
+        {
+            public const string GardenAppleTree = "tree_apple_garden_ready";
+            public const string GardenBerryBush = "bush_berry_garden_ready";
+            public const string WorldBerryBush1 = "bush_1_berry";
+            public const string WorldBerryBush2 = "bush_2_berry";
+            public const string WorldBerryBush3 = "bush_3_berry";
+        }
+        public struct HarvestSpawner
+        {
+            public const string GardenAppleTree = "tree_apple_garden_crops_growing";
+            public const string GardenBerryBush = "bush_berry_garden";
+            public const string WorldBerryBush1 = "bush_1_berry_respawn";
+            public const string WorldBerryBush2 = "bush_2_berry_respawn";
+            public const string WorldBerryBush3 = "bush_3_berry_respawn";
         }
     }
 
@@ -104,10 +103,12 @@ public class MainPatcher
             {
                 if (!_cfg.IncludeGardenTrees) return;
                 var rand = 15;
+
                 if (_cfg.RealisticHarvest)
                 {
                     rand = Random.Range(6, 16);
                 }
+
                 for (var i = 0; i < rand; i++)
                     __instance.DropItem(new Item(Constants.HarvestItem.AppleTree, 1), Direction.None, force: 5f,
                         check_walls: false);
@@ -123,10 +124,12 @@ public class MainPatcher
             {
                 if (!_cfg.IncludeGardenBerryBushes) return;
                 var rand = 4;
+
                 if (_cfg.RealisticHarvest)
                 {
                     rand = Random.Range(2, 5);
                 }
+
                 for (var i = 0; i < rand; i++)
                     __instance.DropItem(new Item(Constants.HarvestItem.BerryBush, 1), Direction.None, force: 5f,
                         check_walls: false);
@@ -142,10 +145,12 @@ public class MainPatcher
             {
                 if (!_cfg.IncludeWorldBerryBushes) return;
                 var rand = 4;
+
                 if (_cfg.RealisticHarvest)
                 {
                     rand = Random.Range(2, 5);
                 }
+
                 for (var i = 0; i < rand; i++)
                     __instance.DropItem(new Item(Constants.HarvestItem.BerryBush, 1), Direction.None, force: 5f,
                         check_walls: false);
@@ -161,10 +166,12 @@ public class MainPatcher
             {
                 if (!_cfg.IncludeWorldBerryBushes) return;
                 var rand = 4;
+
                 if (_cfg.RealisticHarvest)
                 {
                     rand = Random.Range(2, 5);
                 }
+
                 for (var i = 0; i < rand; i++)
                     __instance.DropItem(new Item(Constants.HarvestItem.BerryBush, 1), Direction.None, force: 5f,
                         check_walls: false);
@@ -180,10 +187,12 @@ public class MainPatcher
             {
                 if (!_cfg.IncludeWorldBerryBushes) return;
                 var rand = 4;
+
                 if (_cfg.RealisticHarvest)
                 {
                     rand = Random.Range(2, 5);
                 }
+
                 for (var i = 0; i < rand; i++)
                     __instance.DropItem(new Item(Constants.HarvestItem.BerryBush, 1), Direction.None, force: 5f,
                         check_walls: false);
