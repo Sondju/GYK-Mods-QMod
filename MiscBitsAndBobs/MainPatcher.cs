@@ -99,7 +99,7 @@ public class MainPatcher
     public static class MainMenuGuiOpenPatch
     {
         [HarmonyPrefix]
-        public static void Prefix(ref InGameMenuGUI __instance)
+        public static void Prefix(ref MainMenuGUI __instance)
         {
             if (!_cfg.HideCreditsButtonOnMainMenu) return;
             if (__instance == null) return;
