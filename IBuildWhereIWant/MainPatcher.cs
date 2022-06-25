@@ -157,7 +157,7 @@ namespace IBuildWhereIWant
             [HarmonyPrefix]
             [HarmonyPatch(nameof(BuildModeLogics.OnBuildCraftSelected))]
             private static void OnBuildCraftSelectedPrefix(ref string ____cur_build_zone_id, ref WorldZone ____cur_build_zone,
-                ref Bounds ____cur_build_zone_bounds, ref MultiInventory ____multi_inventory)
+                ref Bounds ____cur_build_zone_bounds)
             {
                 if (_craftAnywhere)
                 {

@@ -39,6 +39,9 @@ public static class Config
         bool.TryParse(_con.Value("HideCreditsButtonOnMainMenu", "true"), out var hideCreditsButtonOnMainMenu);
         _options.HideCreditsButtonOnMainMenu = hideCreditsButtonOnMainMenu;
 
+        bool.TryParse(_con.Value("SkipIntroVideoOnNewGame", "false"), out var skipIntroVideoOnNewGame);
+        _options.SkipIntroVideoOnNewGame = skipIntroVideoOnNewGame;
+
         _con.ConfigWrite();
 
         return _options;
@@ -56,5 +59,6 @@ public static class Config
         public bool HalloweenNow;
         public bool HideCreditsButtonOnMainMenu;
         public bool CondenseXpBar;
+        public bool SkipIntroVideoOnNewGame;
     }
 }

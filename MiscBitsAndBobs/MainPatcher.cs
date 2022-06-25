@@ -40,6 +40,19 @@ public class MainPatcher
         }
     }
 
+    [HarmonyPatch(typeof(Intro), nameof(Intro.ShowIntro))]
+    public static class GameSaveCreateNewSavePatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix()
+        {
+            if (_cfg.SkipIntroVideoOnNewGame)
+            {
+                Intro.need_show_first_intro = false;
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(InventoryGUI), nameof(InventoryGUI.OnItemOver))]
     public static class InventoryGuiOnItemOverPatch
     {

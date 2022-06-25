@@ -99,9 +99,9 @@ public class MainPatcher
         {
 
             if (!MainGame.game_started || !MainGame.loaded_from_scene_main || _updateDone) return;
-            var readyGardenTrees = Object.FindObjectsOfType<WorldGameObject>(false).Where(a => a.obj_id == "tree_apple_garden_ready");
-            var readyGardenBushes = Object.FindObjectsOfType<WorldGameObject>(false).Where(a => a.obj_id== "bush_berry_garden_ready");
-            var readyWorldBushes = Object.FindObjectsOfType<WorldGameObject>(false).Where(a => WorldReadyHarvests.Contains(a.obj_id));
+            var readyGardenTrees = Object.FindObjectsOfType<WorldGameObject>(true).Where(a => a.obj_id == "tree_apple_garden_ready");
+            var readyGardenBushes = Object.FindObjectsOfType<WorldGameObject>(true).Where(a => a.obj_id== "bush_berry_garden_ready");
+            var readyWorldBushes = Object.FindObjectsOfType<WorldGameObject>(true).Where(a => WorldReadyHarvests.Contains(a.obj_id));
 
             foreach (var item in readyGardenTrees)
             {
