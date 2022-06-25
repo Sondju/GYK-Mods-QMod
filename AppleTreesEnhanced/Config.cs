@@ -27,6 +27,9 @@ public static class Config
         bool.TryParse(_con.Value("RealisticHarvest", "true"), out var realisticHarvest);
         _options.RealisticHarvest = realisticHarvest;
 
+        bool.TryParse(_con.Value("SlowerAppleGrowth", "true"), out var slowerAppleGrowth);
+        _options.SlowerAppleGrowth = slowerAppleGrowth;
+
         _con.ConfigWrite();
 
         return _options;
@@ -40,5 +43,6 @@ public static class Config
         public bool IncludeWorldBerryBushes;
         public bool ShowHarvestReadyMessages;
         public bool RealisticHarvest;
+        public bool SlowerAppleGrowth;
     }
 }

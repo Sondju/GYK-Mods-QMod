@@ -103,10 +103,21 @@ public static class MainPatcher
                 var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
                 GameBalance.me.craft_data.ForEach(craft =>
                 {
+                    //if (craft.id.Contains("grave"))
+                    //{
+                    //    craft.craft_in.ForEach(ci =>
+                    //    {
+                    //        Debug.Log($"Craft: {craft.id}, Craft-in: {ci}");
+                    //    });
+                    //}
+
                     var zombieCraft = craft.craft_in.Any(craftIn => craftIn.Contains("zombie"));
+                    var graveCraft = craft.craft_in.Any(craftIn => craftIn.Contains("grave"));
+                    var bodyCraft = craft.craft_in.Any(craftIn => craftIn.Contains("mf_preparation"));
                     if (craft.id.Contains("zombie") | craft.id.Contains("grow_desk_planting") | craft.id.Contains("refugee") |
                         craft.id.Contains("grow_vineyard_planting") | craft.id.Contains("axe") | craft.id.Contains("hammer") | 
-                        craft.id.Contains("faith") | craft.id.Contains("shovel") | zombieCraft | craft.craft_type == CraftDefinition.CraftType.PrayCraft) return;
+                        craft.id.Contains("faith") | craft.id.Contains("shovel") | zombieCraft | graveCraft | bodyCraft | 
+                        craft.craft_type == CraftDefinition.CraftType.PrayCraft | craft.craft_time_is_zero) return;
 
                     if (craft.is_auto) return;
                     var ct = craft.energy.EvaluateFloat(crafteryWgo, MainGame.me.player);

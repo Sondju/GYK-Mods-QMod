@@ -42,6 +42,12 @@ public static class Config
         bool.TryParse(_con.Value("SkipIntroVideoOnNewGame", "false"), out var skipIntroVideoOnNewGame);
         _options.SkipIntroVideoOnNewGame = skipIntroVideoOnNewGame;
 
+        bool.TryParse(_con.Value("DisableCinematicLetterboxing", "true"), out var disableCinematicLetterboxing);
+        _options.DisableCinematicLetterboxing = disableCinematicLetterboxing;
+
+        bool.TryParse(_con.Value("SlowerZombieGardenGrowth", "true"), out var slowerZombieGardenGrowth);
+        _options.SlowerZombieGardenGrowth = slowerZombieGardenGrowth;
+
         _con.ConfigWrite();
 
         return _options;
@@ -60,5 +66,7 @@ public static class Config
         public bool HideCreditsButtonOnMainMenu;
         public bool CondenseXpBar;
         public bool SkipIntroVideoOnNewGame;
+        public bool DisableCinematicLetterboxing;
+        public bool SlowerZombieGardenGrowth;
     }
 }

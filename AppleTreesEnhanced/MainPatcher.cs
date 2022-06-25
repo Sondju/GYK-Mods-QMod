@@ -133,6 +133,22 @@ public class MainPatcher
         }
     }
 
+    [HarmonyPatch(typeof(GardenCustomDrawer))]
+    public static class GardenCustomDrawerGetCurrentGrowStagePatch
+    {
+        [HarmonyPatch(nameof(GardenCustomDrawer.Redraw))]
+        [HarmonyPrefix]
+        public static void RedrawPrefix(ref GardenCustomDrawer __instance, ref WorldGameObject wgo)
+        {
+            if (!_cfg.SlowerAppleGrowth) return;
+            if (!__instance.name.Contains("tree_apple_garden")) return;
+            var num = wgo.GetParam("growing", 0f);
+            var newNum = num / 2;
+            wgo.SetParam("growing", newNum);
+        }
+    }
+
+
     [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnClosePressed))]
     public static class InGameMenuGuiOnClosePressedPatch
     {

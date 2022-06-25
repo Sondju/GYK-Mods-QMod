@@ -40,6 +40,39 @@ public class MainPatcher
         }
     }
 
+
+
+    [HarmonyPatch(typeof(GardenCustomDrawer))]
+    public static class GardenCustomDrawerGetCurrentGrowStagePatch
+    {
+        [HarmonyPatch(nameof(GardenCustomDrawer.Redraw))]
+        [HarmonyPrefix]
+        public static void RedrawPrefix(ref GardenCustomDrawer __instance, ref WorldGameObject wgo)
+        {
+            if (!_cfg.SlowerZombieGardenGrowth) return;
+            if (!__instance.name.Contains("zombie_garden")) return;
+            var num = wgo.GetParam("growing", 0f);
+            var newNum = num / 2;
+            wgo.SetParam("growing", newNum);
+        }
+    }
+
+
+    [HarmonyPatch(typeof(CameraTools), nameof(CameraTools.TweenLetterbox))]
+    public static class GCameraToolsTweenLetterboxPatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix(ref bool show)
+        {
+            if (_cfg.DisableCinematicLetterboxing)
+            {
+                show = false;
+            }
+        }
+    }
+
+
+
     [HarmonyPatch(typeof(Intro), nameof(Intro.ShowIntro))]
     public static class GameSaveCreateNewSavePatch
     {
