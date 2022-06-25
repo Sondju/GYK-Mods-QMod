@@ -1,3 +1,4 @@
+using System.Linq;
 using HarmonyLib;
 using System.Reflection;
 
@@ -15,6 +16,12 @@ namespace MaxButtonControllerSupport
         private static CraftItemGUI _craftItemGui;
         private static WorldGameObject _crafteryWgo;
         private static SmartSlider _slider;
+
+        private static readonly string[] UnSafeCraftObjects =
+        {
+            "mf_crematorium_corp", "garden_builddesk", "tree_garden_builddesk", "mf_crematorium", "grave_ground",
+            "tile_church_semicircle_2floors", "mf_grindstone_1"
+        };
 
         public static void Patch()
         {
@@ -109,7 +116,7 @@ namespace MaxButtonControllerSupport
 
 
                 //Up = 10
-                if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(10) && _itemCountGuiOpen)
+                if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(10) && _itemCountGuiOpen && !UnSafeCraftObjects.Contains(_crafteryWgo.obj_id))
                 {
                     typeof(MaxButtonVendor).GetMethod("SetMaxPrice", AccessTools.all)
                         ?.Invoke(typeof(MaxButtonVendor), new object[]
@@ -120,7 +127,7 @@ namespace MaxButtonControllerSupport
                 }
 
                 //Down = 11
-                if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(11) && _itemCountGuiOpen)
+                if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(11) && _itemCountGuiOpen && !UnSafeCraftObjects.Contains(_crafteryWgo.obj_id))
                 {
                     typeof(MaxButtonVendor).GetMethod("SetSliderValue", AccessTools.all)
                         ?.Invoke(typeof(MaxButtonVendor), new object[]
@@ -133,7 +140,7 @@ namespace MaxButtonControllerSupport
 
 
                 //RT = 19
-                if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(19) && _craftGuiOpen)
+                if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(19) && _craftGuiOpen && !UnSafeCraftObjects.Contains(_crafteryWgo.obj_id))
                 {
                     typeof(MaxButtonCrafting).GetMethod("SetMaximumAmount", AccessTools.all)
                         ?.Invoke(typeof(MaxButtonCrafting), new object[]
@@ -145,7 +152,7 @@ namespace MaxButtonControllerSupport
                 }
 
                 //LT = 20
-                if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(20) && _craftGuiOpen)
+                if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(20) && _craftGuiOpen && !UnSafeCraftObjects.Contains(_crafteryWgo.obj_id))
                 {
                     typeof(MaxButtonCrafting).GetMethod("SetMinimumAmount", AccessTools.all)
                         ?.Invoke(typeof(MaxButtonCrafting), new object[]

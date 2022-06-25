@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using UnityEngine;
 
@@ -19,13 +20,19 @@ public static class MainPatcher
 {
     private static readonly Dictionary<string, SmartExpression> Crafts = new();
     private static readonly Dictionary<string, int> FireCrafts = new();
+    private static bool _unsafeInteraction;
 
     private static readonly string[] UnSafeCraftObjects =
     {
         "mf_crematorium_corp", "garden_builddesk", "tree_garden_builddesk", "mf_crematorium", "grave_ground",
-        "tile_church_semicircle_2floors"
+        "tile_church_semicircle_2floors", "mf_grindstone_1"
     };
 
+    private static readonly string[] UnSafeCraftZones =
+    {
+        "church"
+    };
+    
     private static bool _alreadyRun;
     private static Config.Options _cfg;
     private static int _craftAmount = 1;
@@ -63,54 +70,76 @@ public static class MainPatcher
         }
     }
 
+    [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
+    public static class WorldGameObjectInteractPatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix(ref WorldGameObject __instance)
+        {
+            if (UnSafeCraftZones.Contains(__instance.GetMyWorldZoneId()) || UnSafeCraftObjects.Contains(__instance.obj_id))
+            {
+                _unsafeInteraction = true;
+                Debug.Log($"[QueueEverything]: UNSAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
+            }
+            else
+            {
+                _unsafeInteraction = false;
+                Debug.Log($"[QueueEverything]: SAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
+            }
+            
+        }
+    }
+
     [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.FillCraftsList))]
     public static class CraftComponentFillCraftsListPatch
     {
         [HarmonyPrefix]
         public static void Prefix()
         {
+            if (_unsafeInteraction) return;
             if (!_cfg.MakeEverythingAuto) return;
             try
             {
                 var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
                 GameBalance.me.craft_data.ForEach(craft =>
                 {
+                    var zombieCraft = craft.craft_in.Any(craftIn => craftIn.Contains("zombie"));
                     if (craft.id.Contains("zombie") | craft.id.Contains("grow_desk_planting") | craft.id.Contains("refugee") |
-                        craft.id.Contains("grow_vineyard_planting")) return;
-                    if (!craft.is_auto)
+                        craft.id.Contains("grow_vineyard_planting") | craft.id.Contains("axe") | craft.id.Contains("hammer") | 
+                        craft.id.Contains("faith") | craft.id.Contains("shovel") | zombieCraft | craft.craft_type == CraftDefinition.CraftType.PrayCraft) return;
+
+                    if (craft.is_auto) return;
+                    var ct = craft.energy.EvaluateFloat(crafteryWgo, MainGame.me.player);
+                    ct /= 2; //don't know why its getting doubled
+                    if (_fasterCraft)
                     {
-                        var ct = craft.energy.EvaluateFloat(crafteryWgo, MainGame.me.player);
-                        ct /= 2; //don't know why its getting doubled
-                        if (_fasterCraft)
+                        if (_timeAdjustment < 0)
                         {
-                            if (_timeAdjustment < 0)
-                            {
-                                ct /= _timeAdjustment;
-                            }
-                            else
-                            {
-                                ct *= _timeAdjustment;
-                            }
-                            craft.craft_time = SmartExpression.ParseExpression(ct.ToString(CultureInfo.InvariantCulture));
+                            ct /= _timeAdjustment;
                         }
                         else
                         {
-                            craft.craft_time = SmartExpression.ParseExpression(ct.ToString(CultureInfo.InvariantCulture));
+                            ct *= _timeAdjustment;
                         }
-                        craft.energy = SmartExpression.ParseExpression("0");
-                        craft.is_auto = true;
-                        craft.needs.ForEach(need =>
-                        {
-                            need.value *= 2;
-                        });
-                        craft.output.ForEach(output =>
-                        {
-                            if (output.id is "r" or "g" or "b")
-                            {
-                                output.value /= 2;
-                            }
-                        });
+                        craft.craft_time = SmartExpression.ParseExpression(ct.ToString(CultureInfo.InvariantCulture));
                     }
+                    else
+                    {
+                        craft.craft_time = SmartExpression.ParseExpression(ct.ToString(CultureInfo.InvariantCulture));
+                    }
+                    craft.energy = SmartExpression.ParseExpression("0");
+                    craft.is_auto = true;
+                    craft.needs.ForEach(need =>
+                    {
+                        need.value *= 2;
+                    });
+                    craft.output.ForEach(output =>
+                    {
+                        if (output.id is "r" or "g" or "b")
+                        {
+                            output.value /= 2;
+                        }
+                    });
                 });
             }
             catch (Exception ex)
@@ -150,15 +179,10 @@ public static class MainPatcher
     public static class CraftDefinitionCanCraftMultiplePatch
     {
         [HarmonyPostfix]
-        public static void Postfix(ref bool __result, WorldGameObject __state)
+        public static void Postfix(ref bool __result)
         {
-            if (!UnSafeCraftObjects.Contains(__state.obj_id)) __result = true;
-        }
-
-        [HarmonyPrefix]
-        public static void Prefix(out WorldGameObject __state)
-        {
-            __state = GUIElements.me.craft.GetCrafteryWGO();
+            if (_unsafeInteraction) return;
+            __result = true;
         }
     }
 
@@ -169,6 +193,7 @@ public static class MainPatcher
         public static void Postfix(ref CraftDefinition __instance, ref WorldGameObject wgo, ref string __result,
             int multiplier = 1)
         {
+            if (_unsafeInteraction) return;
             var text = "";
             int num;
             if (GlobalCraftControlGUI.is_global_control_active)
@@ -374,6 +399,7 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref CraftGUI __instance, ref CraftItemGUI craft_item_gui)
         {
+            if (_unsafeInteraction) return;
             if (_cfg.AutoSelectCraftButtonWithController && LazyInput.gamepad_active)
                 foreach (var uiButton in craft_item_gui.GetComponentsInChildren<UIButton>())
                 {
@@ -392,8 +418,13 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix()
         {
+            if (_unsafeInteraction) return;
             _alreadyRun = true;
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
+            Debug.LogError(crafteryWgo != null
+                ? $"[QueueEverything]: {crafteryWgo.obj_id}"
+                : $"[QueueEverything]: Craftery WGO is null!");
+
             if (string.Equals(crafteryWgo.obj_id, previousObjId)) return;
             previousObjId = crafteryWgo.obj_id;
             File.AppendAllText("./QMods/QueueEverything/interacted-objects.txt", crafteryWgo.obj_id + "\n");
@@ -402,6 +433,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix()
         {
+            if (_unsafeInteraction) return;
             _craftAmount = 1;
             _alreadyRun = false;
         }
@@ -413,12 +445,14 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix()
         {
+            if (_unsafeInteraction) return;
             _alreadyRun = true;
         }
 
         [HarmonyPrefix]
         public static void Prefix()
         {
+            if (_unsafeInteraction) return;
             _craftAmount = 1;
             _alreadyRun = false;
         }
@@ -430,6 +464,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref CraftDefinition craft_definition, ref int ____amount)
         {
+            if (_unsafeInteraction) return;
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
 
             ____amount = 1;
@@ -495,10 +530,9 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref CraftItemGUI __instance, ref int ____amount)
         {
+            if (_unsafeInteraction) return;
             if (__instance.craft_definition.id.Contains("remove")) return;
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
-
-            if (UnSafeCraftObjects.Contains(crafteryWgo.obj_id)) return;
 
             var found = Crafts.TryGetValue(__instance.craft_definition.id, out var value);
             float originalTimeFloat;
@@ -556,6 +590,7 @@ public static class MainPatcher
         public static void Prefix(ref CraftItemGUI __instance, ref List<string> ____multiquality_ids,
             ref int ____amount)
         {
+            if (_unsafeInteraction) return;
             _craftAmount = ____amount;
 
             if (_alreadyRun) return;

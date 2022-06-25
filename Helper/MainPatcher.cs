@@ -33,7 +33,7 @@ namespace Helper
                 foreach (var comp in __instance.GetComponentsInChildren<UILabel>()
                              .Where(x => x.name.Contains("ver txt")))
                 {
-                    comp.text += ", [F7B000]QMod Reloaded Enabled[-]";
+                    comp.text += ", [F7B000] QMod Reloaded Enabled[-]";
                     comp.overflowMethod = UILabel.Overflow.ResizeFreely;
                     comp.multiLine = true;
                     comp.MakePixelPerfect();

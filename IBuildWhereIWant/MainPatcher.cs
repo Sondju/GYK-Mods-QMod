@@ -11,14 +11,14 @@ namespace IBuildWhereIWant
 {
     public class MainPatcher
     {
-        private static Config.Options _cfg;
-        private static WorldGameObject _buildDesk;
-        private static CraftsInventory _craftsInventory;
-        private static List<string> _hasRemoveCraftList;
         private static List<string> _alreadyAddedList;
         private static List<string> _alreadyAddedNameList;
-        private static bool _isTalkingWithNpc;
+        private static WorldGameObject _buildDesk;
+        private static WorldGameObject _buildDeskClone;
+        private static Config.Options _cfg;
         private static bool _craftAnywhere;
+        private static CraftsInventory _craftsInventory;
+        private static List<string> _hasRemoveCraftList;
 
         public static void Patch()
         {
@@ -49,6 +49,9 @@ namespace IBuildWhereIWant
             _alreadyAddedNameList ??= new List<string>();
             _buildDesk = Object.FindObjectsOfType<WorldGameObject>(true)
                 .FirstOrDefault(x => x.obj_id.Contains("build"));
+            _buildDeskClone = Object.Instantiate(_buildDesk);
+            _buildDeskClone.name = "buildanywhere_desk";
+            _buildDeskClone.obj_id = "buildanywhere_desk";
 
             foreach (var objectCraftDefinition in GameBalance.me.craft_obj_data.Where(objectCraftDefinition => objectCraftDefinition.build_type == ObjectCraftDefinition.BuildType.Remove))
             {
@@ -74,78 +77,10 @@ namespace IBuildWhereIWant
             }
 
             _craftAnywhere = true;
-            BuildModeLogics.last_build_desk = _buildDesk;
-            MainGame.me.build_mode_logics.SetCurrentBuildZone(_buildDesk?.obj_def.zone_id, "");
-            GUIElements.me.craft.OpenAsBuild(_buildDesk, _craftsInventory);
+            BuildModeLogics.last_build_desk = _buildDeskClone;
+            MainGame.me.build_mode_logics.SetCurrentBuildZone(_buildDeskClone?.obj_def.zone_id, "");
+            GUIElements.me.craft.OpenAsBuild(_buildDeskClone, _craftsInventory);
             MainGame.paused = false;
-        }
-
-        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
-        public static class WorldGameObjectInteractPatch
-        {
-            [HarmonyPrefix]
-            public static void Prefix(ref WorldGameObject __instance)
-            {
-                if (__instance.obj_def.interaction_type is ObjectDefinition.InteractionType.Builder)
-                {
-                    _craftAnywhere = false;
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
-        public static class TimeOfDayUpdatePatch
-        {
-            [HarmonyPrefix]
-            public static void Prefix()
-            {
-                if (!MainGame.game_started || MainGame.me.player.is_dead || MainGame.me.player.IsDisabled() ||
-                    MainGame.paused || _isTalkingWithNpc) return;
-
-                if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(6))
-                {
-                    OpenCraftAnywhere();
-                }
-
-                if (Input.GetKeyUp(KeyCode.Q))
-                {
-                    OpenCraftAnywhere();
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(SmartAudioEngine))]
-        public static class SmartAudioEngineOnStartNpcInteractionPatch
-        {
-            [HarmonyPatch(nameof(SmartAudioEngine.OnEndNPCInteraction))]
-            [HarmonyPostfix]
-            public static void OnEndPostfix()
-            {
-                _isTalkingWithNpc = false;
-            }
-
-            [HarmonyPatch(nameof(SmartAudioEngine.OnStartNPCInteraction))]
-            [HarmonyPostfix]
-            public static void OnStartPostfix()
-            {
-                _isTalkingWithNpc = true;
-            }
-        }
-
-        [HarmonyPatch(typeof(BaseGUI), nameof(BaseGUI.Open), typeof(bool))]
-        public static class BaseGuiOpenPatch
-        {
-            [HarmonyPrefix]
-            public static void Prefix(ref BaseGUI __instance)
-            {
-                if (_craftAnywhere)
-                {
-                    foreach (var comp in __instance.GetComponentsInChildren<UILabel>().Where(a => a.name.Contains("header")))
-                    {
-                        comp.text = "Craft anywhere";
-                    }
-                }
-            }
         }
 
         [HarmonyPatch(typeof(BuildGrid), nameof(BuildGrid.ShowBuildGrid))]
@@ -157,6 +92,80 @@ namespace IBuildWhereIWant
                 if (_cfg.DisableGrid)
                 {
                     show = false;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(BuildModeLogics))]
+        public static class BuildModeLogicsPatch
+        {
+            [HarmonyPrefix]
+            [HarmonyPatch("CancelCurrentMode")]
+            public static void CancelCurrentModePrefix()
+            {
+                if (_craftAnywhere)
+                {
+                    OpenCraftAnywhere();
+                }
+            }
+
+            [HarmonyPatch(nameof(BuildModeLogics.CanBuild))]
+            [HarmonyPrefix]
+            private static void CanBuildPrefix(ref MultiInventory ____multi_inventory)
+            {
+                ____multi_inventory = MainGame.me.player.GetMultiInventoryForInteraction();
+            }
+
+            [HarmonyPatch("DoPlace")]
+            [HarmonyPrefix]
+            private static void DoPlacePrefix(ref BuildModeLogics __instance, ref MultiInventory ____multi_inventory)
+            {
+                ____multi_inventory = MainGame.me.player.GetMultiInventoryForInteraction();
+                if (_craftAnywhere && MainGame.me.player.cur_zone.Length<=0)
+                {
+                    BuildGrid.ShowBuildGrid(false);
+                }
+            }
+
+            [HarmonyPrefix]
+            [HarmonyPatch("FocusCameraOnBuildZone")]
+            private static void FocusCameraOnBuildZonePrefix(ref string zone_id)
+            {
+                if (_craftAnywhere)
+                {
+                    zone_id = string.Empty;
+                }
+            }
+
+            [HarmonyPatch(nameof(BuildModeLogics.GetObjectRemoveCraftDefinition))]
+            [HarmonyPostfix]
+            private static void GetObjectRemoveCraftDefinitionPostfix(string obj_id, ref ObjectCraftDefinition __result)
+            {
+                if (_craftAnywhere)
+                {
+                    foreach (var objectCraftDefinition in GameBalance.me.craft_obj_data.Where(objectCraftDefinition =>
+                                 objectCraftDefinition.out_obj == obj_id && objectCraftDefinition.build_type ==
+                                 ObjectCraftDefinition.BuildType.Remove))
+                    {
+                        __result = objectCraftDefinition;
+                        return;
+                    }
+                    __result = null;
+                }
+            }
+
+            [HarmonyPrefix]
+            [HarmonyPatch(nameof(BuildModeLogics.OnBuildCraftSelected))]
+            private static void OnBuildCraftSelectedPrefix(ref string ____cur_build_zone_id, ref WorldZone ____cur_build_zone,
+                ref Bounds ____cur_build_zone_bounds, ref MultiInventory ____multi_inventory)
+            {
+                if (_craftAnywhere)
+                {
+                    BuildModeLogics.last_build_desk = _buildDeskClone;
+                    const string zone = "mf_wood";
+                    ____cur_build_zone_id = zone;
+                    ____cur_build_zone = WorldZone.GetZoneByID(zone, true);
+                    ____cur_build_zone_bounds = ____cur_build_zone.GetBounds();
                 }
             }
         }
@@ -179,77 +188,37 @@ namespace IBuildWhereIWant
             }
         }
 
-        [HarmonyPatch(typeof(BuildModeLogics))]
-        public static class BuildModeLogicsPatch
+        [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
+        public static class TimeOfDayUpdatePatch
         {
             [HarmonyPrefix]
-            [HarmonyPatch("CancelCurrentMode")]
-            public static void CancelCurrentModePrefix()
+            public static void Prefix()
             {
-                if (_craftAnywhere)
+                if (!MainGame.game_started || MainGame.me.player.is_dead || MainGame.me.player.IsDisabled() ||
+                    MainGame.paused || !BaseGUI.all_guis_closed) return;
+
+                if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(6))
+                {
+                    OpenCraftAnywhere();
+                }
+
+                if (Input.GetKeyUp(KeyCode.Q))
                 {
                     OpenCraftAnywhere();
                 }
             }
+        }
 
+        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
+        public static class WorldGameObjectInteractPatch
+        {
             [HarmonyPrefix]
-            [HarmonyPatch("FocusCameraOnBuildZone")]
-            private static void FocusCameraOnBuildZonePrefix(ref string zone_id)
+            public static void Prefix(ref WorldGameObject __instance)
             {
-                if (_craftAnywhere)
+                if (__instance.obj_def.interaction_type is not ObjectDefinition.InteractionType.None)
                 {
-                    zone_id = string.Empty;
+                    _craftAnywhere = false;
                 }
-            }
-
-            [HarmonyPrefix]
-            [HarmonyPatch(nameof(BuildModeLogics.OnBuildCraftSelected))]
-            private static void OnBuildCraftSelectedPrefix(ref string ____cur_build_zone_id, ref WorldZone ____cur_build_zone,
-                ref Bounds ____cur_build_zone_bounds, ref MultiInventory ____multi_inventory)
-            {
-                if (_craftAnywhere)
-                {
-                    BuildModeLogics.last_build_desk = _buildDesk;
-                    const string zone = "mf_wood";
-                    ____cur_build_zone_id = zone;
-                    ____cur_build_zone = WorldZone.GetZoneByID(zone, true);
-                    ____cur_build_zone_bounds = ____cur_build_zone.GetBounds();
-                }
-            }
-
-            [HarmonyPatch(nameof(BuildModeLogics.GetObjectRemoveCraftDefinition))]
-            [HarmonyPostfix]
-            private static void GetObjectRemoveCraftDefinitionPostfix(string obj_id, ref ObjectCraftDefinition __result)
-            {
-                if (_craftAnywhere)
-                {
-                    foreach (var objectCraftDefinition in GameBalance.me.craft_obj_data.Where(objectCraftDefinition =>
-                                 objectCraftDefinition.out_obj == obj_id && objectCraftDefinition.build_type ==
-                                 ObjectCraftDefinition.BuildType.Remove))
-                    {
-                        __result = objectCraftDefinition;
-                        return;
-                    }
-
-                    MainGame.me.player.Say($"Hmmm - I don't know how to remove {obj_id}...", null, false,
-                        SpeechBubbleGUI.SpeechBubbleType.Think,
-                        SmartSpeechEngine.VoiceID.None, true);
-                    __result = null;
-                }
-            }
-
-            [HarmonyPatch(nameof(BuildModeLogics.CanBuild))]
-            [HarmonyPrefix]
-            private static void CanBuildPrefix(ref MultiInventory ____multi_inventory)
-            {
-                ____multi_inventory = MainGame.me.player.GetMultiInventoryForInteraction();
-            }
-
-            [HarmonyPatch("DoPlace")]
-            [HarmonyPrefix]
-            private static void DoPlacePrefix(ref MultiInventory ____multi_inventory)
-            {
-                ____multi_inventory = MainGame.me.player.GetMultiInventoryForInteraction();
             }
         }
     }

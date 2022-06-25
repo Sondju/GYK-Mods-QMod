@@ -1,6 +1,7 @@
 using AppleTreesEnhanced.lang;
 using HarmonyLib;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using UnityEngine;
@@ -13,6 +14,13 @@ public class MainPatcher
     private static Config.Options _cfg;
     private static string Lang { get; set; }
 
+    private static readonly string[] WorldReadyHarvests = {
+        "bush_1_berry","bush_2_berry","bush_3_berry"
+    };
+
+    private static bool _updateDone;
+
+
     public static void Patch()
     {
         try
@@ -23,6 +31,7 @@ public class MainPatcher
 
             Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+            _updateDone = false;
         }
         catch (System.Exception ex)
         {
@@ -82,6 +91,48 @@ public class MainPatcher
         }
     }
 
+    [HarmonyPatch(typeof(MainGame), nameof(MainGame.Update))]
+    public static class MainGameUpdatePatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix()
+        {
+
+            if (!MainGame.game_started || !MainGame.loaded_from_scene_main || _updateDone) return;
+            var readyGardenTrees = Object.FindObjectsOfType<WorldGameObject>(false).Where(a => a.obj_id == "tree_apple_garden_ready");
+            var readyGardenBushes = Object.FindObjectsOfType<WorldGameObject>(false).Where(a => a.obj_id== "bush_berry_garden_ready");
+            var readyWorldBushes = Object.FindObjectsOfType<WorldGameObject>(false).Where(a => WorldReadyHarvests.Contains(a.obj_id));
+
+            foreach (var item in readyGardenTrees)
+            {
+                ProcessGardenAppleTree(item);
+            }
+
+            foreach (var item in readyGardenBushes)
+            {
+                ProcessGardenBerryBush(item);
+            }
+
+            foreach (var item in readyWorldBushes)
+            {
+                switch (item.obj_id)
+                {
+                    case Constants.HarvestReady.WorldBerryBush1:
+                        ProcessBerryBush1(item);
+                        break;
+                    case Constants.HarvestReady.WorldBerryBush2:
+                        ProcessBerryBush2(item);
+                        break;
+                    case Constants.HarvestReady.WorldBerryBush3:
+                        ProcessBerryBush3(item);
+                        break;
+                }
+            }
+
+            _updateDone = true;
+        }
+    }
+
     [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnClosePressed))]
     public static class InGameMenuGuiOnClosePressedPatch
     {
@@ -93,6 +144,172 @@ public class MainPatcher
         }
     }
 
+    private static void ProcessDropAndRespawn(WorldGameObject wgo, string replaceString, string craftString, string harvestItem, string message, int rand)
+    {
+        for (var i = 0; i < rand; i++)
+        {
+            var item = new Item(harvestItem, 1);
+            wgo.DropItem(item, Direction.None, force: 5f,
+                check_walls: false);
+        }
+
+        //Debug.LogWarning(
+        // $"[AppleTreesEnhanced] Intercepted {Constants.HarvestReady.GardenAppleTree}, dropping {Constants.HarvestItem.AppleTree}, setting object to {Constants.HarvestGrowing.GardenAppleTree} and starting craft of {Constants.HarvestSpawner.GardenAppleTree}");
+        wgo.ReplaceWithObject(replaceString, true);
+        wgo.GetComponent<ChunkedGameObject>().Init(true);
+        wgo.TryStartCraft(craftString);
+        ShowMessage(wgo, message, rand);
+    }
+
+    private static void ProcessGardenAppleTree(WorldGameObject wgo)
+    {
+        if (!_cfg.IncludeGardenTrees) return;
+        var rand = 15;
+
+        if (_cfg.RealisticHarvest)
+        {
+            rand = Random.Range(6, 16);
+        }
+
+        if (_cfg.RealisticHarvest)
+        {
+            var o = wgo;
+            var dropRand = Random.Range(2, 61);
+            GJTimer.AddTimer(dropRand, delegate
+            {
+                if (o.obj_id == Constants.HarvestGrowing.GardenAppleTree) return;
+                ProcessDropAndRespawn(o, Constants.HarvestGrowing.GardenAppleTree,
+                    Constants.HarvestSpawner.GardenAppleTree, Constants.HarvestItem.AppleTree,
+                    strings.ApplesReady, rand);
+            });
+        }
+        else
+        {
+            ProcessDropAndRespawn(wgo, Constants.HarvestGrowing.GardenAppleTree,
+                Constants.HarvestSpawner.GardenAppleTree, Constants.HarvestItem.AppleTree,
+                strings.ApplesReady, rand);
+        }
+    }
+
+    private static void ProcessGardenBerryBush(WorldGameObject wgo)
+    {
+        if (!_cfg.IncludeGardenBerryBushes) return;
+        var rand = 4;
+
+        if (_cfg.RealisticHarvest)
+        {
+            rand = Random.Range(2, 5);
+        }
+        if (_cfg.RealisticHarvest)
+        {
+            var o = wgo;
+            var dropRand = Random.Range(2, 61);
+            GJTimer.AddTimer(dropRand, delegate
+            {
+                if (o.obj_id == Constants.HarvestGrowing.GardenBerryBush) return;
+                ProcessDropAndRespawn(o, Constants.HarvestGrowing.GardenBerryBush,
+                    Constants.HarvestSpawner.GardenBerryBush, Constants.HarvestItem.BerryBush,
+                    strings.BerriesReady, rand);
+            });
+        }
+        else
+        {
+            ProcessDropAndRespawn(wgo, Constants.HarvestGrowing.GardenBerryBush,
+                Constants.HarvestSpawner.GardenBerryBush, Constants.HarvestItem.BerryBush,
+                strings.BerriesReady, rand);
+        }
+    }
+
+    private static void ProcessBerryBush1(WorldGameObject wgo)
+    {
+        if (!_cfg.IncludeWorldBerryBushes) return;
+        var rand = 4;
+
+        if (_cfg.RealisticHarvest)
+        {
+            rand = Random.Range(2, 5);
+        }
+
+        if (_cfg.RealisticHarvest)
+        {
+            var o = wgo;
+            var dropRand = Random.Range(2, 61);
+            GJTimer.AddTimer(dropRand, delegate
+            {
+                if (o.obj_id == Constants.HarvestGrowing.WorldBerryBush1) return;
+                ProcessDropAndRespawn(o, Constants.HarvestGrowing.WorldBerryBush1,
+                    Constants.HarvestSpawner.WorldBerryBush2, Constants.HarvestItem.BerryBush,
+                    strings.BerriesReady, rand);
+            });
+        }
+        else
+        {
+            ProcessDropAndRespawn(wgo, Constants.HarvestGrowing.WorldBerryBush1,
+                Constants.HarvestSpawner.WorldBerryBush1, Constants.HarvestItem.BerryBush,
+                strings.BerriesReady, rand);
+        }
+    }
+
+    private static void ProcessBerryBush2(WorldGameObject wgo)
+    {
+        if (!_cfg.IncludeWorldBerryBushes) return;
+        var rand = 4;
+
+        if (_cfg.RealisticHarvest)
+        {
+            rand = Random.Range(2, 5);
+        }
+
+        if (_cfg.RealisticHarvest)
+        {
+            var o = wgo;
+            var dropRand = Random.Range(2, 61);
+            GJTimer.AddTimer(dropRand, delegate
+            {
+                if (o.obj_id == Constants.HarvestGrowing.WorldBerryBush2) return;
+                ProcessDropAndRespawn(o, Constants.HarvestGrowing.WorldBerryBush2,
+                    Constants.HarvestSpawner.WorldBerryBush2, Constants.HarvestItem.BerryBush,
+                    strings.BerriesReady, rand);
+            });
+        }
+        else
+        {
+            ProcessDropAndRespawn(wgo, Constants.HarvestGrowing.WorldBerryBush2,
+                Constants.HarvestSpawner.WorldBerryBush2, Constants.HarvestItem.BerryBush,
+                strings.BerriesReady, rand);
+        }
+    }
+
+    private static void ProcessBerryBush3(WorldGameObject wgo)
+    {
+        if (!_cfg.IncludeWorldBerryBushes) return;
+        var rand = 4;
+
+        if (_cfg.RealisticHarvest)
+        {
+            rand = Random.Range(2, 5);
+        }
+
+        if (_cfg.RealisticHarvest)
+        {
+            var o = wgo;
+            var dropRand = Random.Range(2, 61);
+            GJTimer.AddTimer(dropRand, delegate
+            {
+                if (o.obj_id == Constants.HarvestGrowing.WorldBerryBush3) return;
+                ProcessDropAndRespawn(o, Constants.HarvestGrowing.WorldBerryBush3,
+                    Constants.HarvestSpawner.WorldBerryBush3, Constants.HarvestItem.BerryBush,
+                    strings.BerriesReady, rand);
+            });
+        }
+        else
+        {
+            ProcessDropAndRespawn(wgo, Constants.HarvestGrowing.WorldBerryBush3,
+                Constants.HarvestSpawner.WorldBerryBush3, Constants.HarvestItem.BerryBush,
+                strings.BerriesReady, rand);
+        }
+    }
+
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.ReplaceWithObject))]
     public static class WorldGameObjectSmartInstantiate
     {
@@ -101,108 +318,25 @@ public class MainPatcher
         {
             if (string.Equals(new_obj_id, Constants.HarvestReady.GardenAppleTree))
             {
-                if (!_cfg.IncludeGardenTrees) return;
-                var rand = 15;
+                ProcessGardenAppleTree(__instance);
 
-                if (_cfg.RealisticHarvest)
-                {
-                    rand = Random.Range(6, 16);
-                }
-
-                for (var i = 0; i < rand; i++)
-                    __instance.DropItem(new Item(Constants.HarvestItem.AppleTree, 1), Direction.None, force: 5f,
-                        check_walls: false);
-
-                Debug.LogWarning(
-                    $"[AppleTreesEnhanced] Intercepted {Constants.HarvestReady.GardenAppleTree}, dropping {Constants.HarvestItem.AppleTree}, setting object to {Constants.HarvestGrowing.GardenAppleTree} and starting craft of {Constants.HarvestSpawner.GardenAppleTree}");
-                __instance.ReplaceWithObject(Constants.HarvestGrowing.GardenAppleTree, true);
-                __instance.GetComponent<ChunkedGameObject>().Init(true);
-                __instance.TryStartCraft(Constants.HarvestSpawner.GardenAppleTree);
-                ShowMessage(__instance, strings.ApplesReady, rand);
             }
             else if (string.Equals(new_obj_id, Constants.HarvestReady.GardenBerryBush))
             {
-                if (!_cfg.IncludeGardenBerryBushes) return;
-                var rand = 4;
+                ProcessGardenBerryBush(__instance);
 
-                if (_cfg.RealisticHarvest)
-                {
-                    rand = Random.Range(2, 5);
-                }
-
-                for (var i = 0; i < rand; i++)
-                    __instance.DropItem(new Item(Constants.HarvestItem.BerryBush, 1), Direction.None, force: 5f,
-                        check_walls: false);
-
-                Debug.LogWarning(
-                    $"[AppleTreesEnhanced] Intercepted {Constants.HarvestReady.GardenBerryBush}, dropping {Constants.HarvestItem.BerryBush}, setting object to {Constants.HarvestGrowing.GardenBerryBush} and starting craft of {Constants.HarvestSpawner.GardenBerryBush}");
-                __instance.ReplaceWithObject(Constants.HarvestGrowing.GardenBerryBush, true);
-                __instance.GetComponent<ChunkedGameObject>().Init(true);
-                __instance.TryStartCraft(Constants.HarvestSpawner.GardenBerryBush);
-                ShowMessage(__instance, strings.BerriesReady, rand);
             }
             else if (string.Equals(new_obj_id, Constants.HarvestReady.WorldBerryBush1))
             {
-                if (!_cfg.IncludeWorldBerryBushes) return;
-                var rand = 4;
-
-                if (_cfg.RealisticHarvest)
-                {
-                    rand = Random.Range(2, 5);
-                }
-
-                for (var i = 0; i < rand; i++)
-                    __instance.DropItem(new Item(Constants.HarvestItem.BerryBush, 1), Direction.None, force: 5f,
-                        check_walls: false);
-
-                Debug.LogWarning(
-                    $"[AppleTreesEnhanced] Intercepted {Constants.HarvestReady.WorldBerryBush1}, dropping {Constants.HarvestItem.BerryBush}, setting object to {Constants.HarvestGrowing.WorldBerryBush1} and starting craft of {Constants.HarvestSpawner.WorldBerryBush1}");
-                __instance.ReplaceWithObject(Constants.HarvestGrowing.WorldBerryBush1, true);
-                __instance.GetComponent<ChunkedGameObject>().Init(true);
-                __instance.TryStartCraft(Constants.HarvestSpawner.WorldBerryBush1);
-                ShowMessage(__instance, strings.BerriesReady, rand);
+                ProcessBerryBush1(__instance);
             }
             else if (string.Equals(new_obj_id, Constants.HarvestReady.WorldBerryBush2))
             {
-                if (!_cfg.IncludeWorldBerryBushes) return;
-                var rand = 4;
-
-                if (_cfg.RealisticHarvest)
-                {
-                    rand = Random.Range(2, 5);
-                }
-
-                for (var i = 0; i < rand; i++)
-                    __instance.DropItem(new Item(Constants.HarvestItem.BerryBush, 1), Direction.None, force: 5f,
-                        check_walls: false);
-
-                Debug.LogWarning(
-                    $"[AppleTreesEnhanced] Intercepted {Constants.HarvestReady.WorldBerryBush2}, dropping {Constants.HarvestItem.BerryBush}, setting object to {Constants.HarvestGrowing.WorldBerryBush2} and starting craft of {Constants.HarvestSpawner.WorldBerryBush2}");
-                __instance.ReplaceWithObject(Constants.HarvestGrowing.WorldBerryBush2, true);
-                __instance.GetComponent<ChunkedGameObject>().Init(true);
-                __instance.TryStartCraft(Constants.HarvestSpawner.WorldBerryBush2);
-                ShowMessage(__instance, strings.BerriesReady, rand);
+                ProcessBerryBush2(__instance);
             }
             else if (string.Equals(new_obj_id, Constants.HarvestReady.WorldBerryBush3))
             {
-                if (!_cfg.IncludeWorldBerryBushes) return;
-                var rand = 4;
-
-                if (_cfg.RealisticHarvest)
-                {
-                    rand = Random.Range(2, 5);
-                }
-
-                for (var i = 0; i < rand; i++)
-                    __instance.DropItem(new Item(Constants.HarvestItem.BerryBush, 1), Direction.None, force: 5f,
-                        check_walls: false);
-
-                Debug.LogWarning(
-                    $"[AppleTreesEnhanced] Intercepted {Constants.HarvestReady.WorldBerryBush3}, dropping {Constants.HarvestItem.BerryBush}, setting object to {Constants.HarvestGrowing.WorldBerryBush3} and starting craft of {Constants.HarvestSpawner.WorldBerryBush3}");
-                __instance.ReplaceWithObject(Constants.HarvestGrowing.WorldBerryBush3, true);
-                __instance.GetComponent<ChunkedGameObject>().Init(true);
-                __instance.TryStartCraft(Constants.HarvestSpawner.WorldBerryBush3);
-                ShowMessage(__instance, strings.BerriesReady, rand);
+                ProcessBerryBush3(__instance);
             }
         }
     }
