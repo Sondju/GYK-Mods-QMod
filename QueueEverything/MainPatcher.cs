@@ -6,7 +6,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using UnityEngine;
 
@@ -25,19 +24,33 @@ public static class MainPatcher
     private static readonly string[] UnSafeCraftObjects =
     {
         "mf_crematorium_corp", "garden_builddesk", "tree_garden_builddesk", "mf_crematorium", "grave_ground",
-        "tile_church_semicircle_2floors", "mf_grindstone_1"
+        "tile_church_semicircle_2floors", "mf_grindstone_1", "zombie_garden_desk_1", "zombie_garden_desk_2", "zombie_garden_desk_3", 
+        "zombie_vineyard_desk_1", "zombie_vineyard_desk_2", "zombie_vineyard_desk_3"
     };
 
     private static readonly string[] UnSafeCraftZones =
     {
         "church"
     };
-    
+
+    private static readonly CraftDefinition.CraftType[] UnSafeCraftTypes =
+    {
+        CraftDefinition.CraftType.PrayCraft, CraftDefinition.CraftType.Fixing
+    };
+
+
+    private static readonly string[] UnSafeItems =
+    {
+        "zombie","grow_desk_planting","refugee","grow_vineyard_planting", "axe", "hammer", "faith", "shovel", "sword"
+    };
+
     private static bool _alreadyRun;
     private static Config.Options _cfg;
     private static int _craftAmount = 1;
     private static bool _exhaustless;
+
     private static bool _fasterCraft;
+
     private static WorldGameObject _previousWorldGameObject;
     private static float _timeAdjustment;
     private static string Lang { get; set; }
@@ -55,14 +68,13 @@ public static class MainPatcher
             _exhaustless = false;
             _alreadyRun = false;
 
-            Lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+              if (Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod")) _fasterCraft = true;
 
-            if (Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod")) _fasterCraft = true;
-
-            if (Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.exhaust-less")) _exhaustless = true;
+             if (Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.exhaust-less")) _exhaustless = true;
 
             if (_fasterCraft) LoadFasterCraftConfig();
+
+           
         }
         catch (Exception ex)
         {
@@ -79,14 +91,13 @@ public static class MainPatcher
             if (UnSafeCraftZones.Contains(__instance.GetMyWorldZoneId()) || UnSafeCraftObjects.Contains(__instance.obj_id))
             {
                 _unsafeInteraction = true;
-                Debug.Log($"[QueueEverything]: UNSAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
+                Debug.LogError($"[QueueEverything]: UNSAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
             }
             else
             {
                 _unsafeInteraction = false;
-                Debug.Log($"[QueueEverything]: SAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
+                Debug.LogError($"[QueueEverything]: SAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
             }
-            
         }
     }
 
@@ -103,7 +114,8 @@ public static class MainPatcher
                 var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
                 GameBalance.me.craft_data.ForEach(craft =>
                 {
-                    //if (craft.id.Contains("grave"))
+                    if (craft.is_auto) return;
+                    //if (craft.id.Contains("table"))
                     //{
                     //    craft.craft_in.ForEach(ci =>
                     //    {
@@ -112,14 +124,21 @@ public static class MainPatcher
                     //}
 
                     var zombieCraft = craft.craft_in.Any(craftIn => craftIn.Contains("zombie"));
-                    var graveCraft = craft.craft_in.Any(craftIn => craftIn.Contains("grave"));
-                    var bodyCraft = craft.craft_in.Any(craftIn => craftIn.Contains("mf_preparation"));
-                    if (craft.id.Contains("zombie") | craft.id.Contains("grow_desk_planting") | craft.id.Contains("refugee") |
-                        craft.id.Contains("grow_vineyard_planting") | craft.id.Contains("axe") | craft.id.Contains("hammer") | 
-                        craft.id.Contains("faith") | craft.id.Contains("shovel") | zombieCraft | graveCraft | bodyCraft | 
-                        craft.craft_type == CraftDefinition.CraftType.PrayCraft | craft.craft_time_is_zero) return;
+                    var refugeeCraft = craft.craft_in.Any(craftIn => craftIn.Contains("refugee"));
+                    var graveCraft = false;
+                    var bodyCraft = false;
+                    var cookingTableCraft = false;
+                    if (!_cfg.MakeHandTasksAuto)
+                    {
+                        graveCraft = craft.craft_in.Any(craftIn => craftIn.Contains("grave"));
+                        bodyCraft = craft.craft_in.Any(craftIn => craftIn.Contains("mf_preparation"));
+                        cookingTableCraft = craft.craft_in.Any(craftIn => craftIn.Contains("cooking_table") && !refugeeCraft);
+                    }
 
-                    if (craft.is_auto) return;
+                    if (UnSafeItems.Any(craft.id.Contains) | refugeeCraft | cookingTableCraft | zombieCraft | graveCraft | bodyCraft |
+                       UnSafeCraftTypes.Contains(craft.craft_type) | craft.craft_time_is_zero) return;
+
+                    
                     var ct = craft.energy.EvaluateFloat(crafteryWgo, MainGame.me.player);
                     ct /= 2; //don't know why its getting doubled
                     if (_fasterCraft)
@@ -146,9 +165,11 @@ public static class MainPatcher
                     });
                     craft.output.ForEach(output =>
                     {
-                        if (output.id is "r" or "g" or "b")
+                        if (output.id is not ("r" or "g" or "b")) return;
+                        output.value /= 2;
+                        if (output.value < 1)
                         {
-                            output.value /= 2;
+                            output.value = 1;
                         }
                     });
                 });
@@ -180,7 +201,6 @@ public static class MainPatcher
         }
         catch (Exception)
         {
-            Debug.LogError("Issue reading FasterCraft Config, disabling integration.");
             Debug.Log("Issue reading FasterCraft Config, disabling integration.");
             _fasterCraft = false;
         }
@@ -307,9 +327,7 @@ public static class MainPatcher
 
             if (__instance.is_auto)
             {
-                float num4 = 0; // = __instance.craft_time is not {has_expression: true}
-                //    ? 0
-                //    : __instance.craft_time.EvaluateFloat(wgo);
+                float num4 = 0; 
 
                 var found = Crafts.TryGetValue(__instance.id, out var value);
                 if (found)
@@ -432,9 +450,9 @@ public static class MainPatcher
             if (_unsafeInteraction) return;
             _alreadyRun = true;
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
-            Debug.LogError(crafteryWgo != null
-                ? $"[QueueEverything]: {crafteryWgo.obj_id}"
-                : $"[QueueEverything]: Craftery WGO is null!");
+            //Debug.LogError(crafteryWgo != null
+            //    ? $"[QueueEverything]: {crafteryWgo.obj_id}"
+            //    : $"[QueueEverything]: Craftery WGO is null!");
 
             if (string.Equals(crafteryWgo.obj_id, previousObjId)) return;
             previousObjId = crafteryWgo.obj_id;
@@ -513,24 +531,21 @@ public static class MainPatcher
             if (_fasterCraft)
             {
                 var ct = value?.EvaluateFloat(crafteryWgo);
-              
-                    if (_timeAdjustment < 0)
-                    {
-                        ct *= _timeAdjustment;
-                        craft_definition.craft_time = SmartExpression.ParseExpression(ct.ToString());
-                    }
-                    else
-                    {
-                        ct /= _timeAdjustment;
-                        craft_definition.craft_time = SmartExpression.ParseExpression(ct.ToString());
-                    }
 
+                if (_timeAdjustment < 0)
+                {
+                    ct *= _timeAdjustment;
+                    craft_definition.craft_time = SmartExpression.ParseExpression(ct.ToString());
+                }
+                else
+                {
+                    ct /= _timeAdjustment;
+                    craft_definition.craft_time = SmartExpression.ParseExpression(ct.ToString());
+                }
             }
             else
             {
-
-                    craft_definition.craft_time = value;
-                
+                craft_definition.craft_time = value;
             }
         }
     }
@@ -550,7 +565,7 @@ public static class MainPatcher
             if (found)
             {
                 originalTimeFloat = value.EvaluateFloat(crafteryWgo);
-               // originalTimeFloat = value.EvaluateFloat(crafteryWgo);
+                // originalTimeFloat = value.EvaluateFloat(crafteryWgo);
             }
             else
             {
@@ -692,8 +707,8 @@ public static class MainPatcher
         }
     }
 
-    [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnClosePressed))]
-    public static class InGameMenuGuiOnClosePressedPatch
+    [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
+    public static class GameSettingsApplyLanguageChange
     {
         [HarmonyPostfix]
         public static void Postfix()

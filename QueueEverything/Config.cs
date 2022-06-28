@@ -4,9 +4,8 @@ namespace QueueEverything;
 
 public static class Config
 {
-    private static Options _options;
     private static ConfigReader _con;
-
+    private static Options _options;
     public static Options GetOptions()
     {
         _options = new Options();
@@ -28,9 +27,13 @@ public static class Config
             out var autoSelectCraftButtonWithController);
         _options.AutoSelectCraftButtonWithController = autoSelectCraftButtonWithController;
 
-        bool.TryParse(_con.Value("MakeEverythingAuto", "false"),
+        bool.TryParse(_con.Value("MakeEverythingAuto", "true"),
             out var makeEverythingAuto);
         _options.MakeEverythingAuto = makeEverythingAuto;
+
+        bool.TryParse(_con.Value("MakeHandTasksAuto", "false"),
+            out var makeHandTasksAuto);
+        _options.MakeHandTasksAuto = makeHandTasksAuto;
 
         _con.ConfigWrite();
 
@@ -40,11 +43,12 @@ public static class Config
     [Serializable]
     public class Options
     {
-        public bool HalfFireRequirements;
         public bool AutoMaxMultiQualCrafts;
         public bool AutoMaxNormalCrafts;
-        public bool AutoSelectHighestQualRecipe;
         public bool AutoSelectCraftButtonWithController;
+        public bool AutoSelectHighestQualRecipe;
+        public bool HalfFireRequirements;
         public bool MakeEverythingAuto;
+        public bool MakeHandTasksAuto;
     }
 }

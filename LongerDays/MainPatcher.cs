@@ -1,17 +1,20 @@
 using HarmonyLib;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Emit;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace LongerDays;
 
 public class MainPatcher
 {
-    //public static float SecondsInDay = 450f; //0x increase
-    private const float SecondsInDay50 = 675f; //0.5x increase
+    //public static float SecondsInDay450 = 450f; //0x increase - game default
+    private const float SecondsInDay675 = 675f; //1.5x increase
 
-    private const float SecondsInDay100 = 900f; //2x increase
-    private const float SecondsInDay150 = 1125f; //2.5x increase
-    private const float SecondsInDay200 = 1350f; //3x increase
+    private const float SecondsInDay900 = 900f; //2x increase
+    private const float SecondsInDay1125 = 1125f; //2.5x increase
+    private const float SecondsInDay1350 = 1350f; //3x increase
     private static Config.Options _cfg;
     private static float _seconds;
 
@@ -22,16 +25,18 @@ public class MainPatcher
             _cfg = Config.GetOptions();
 
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.LongerDays");
+
             harmony.PatchAll(Assembly.GetExecutingAssembly());
+            Application.SetStackTraceLogType(LogType.Error, StackTraceLogType.None);
 
             if (_cfg.Madness)
-                _seconds = SecondsInDay200;
+                _seconds = SecondsInDay1350;
             else if (_cfg.EvenLongerDays)
-                _seconds = SecondsInDay150;
+                _seconds = SecondsInDay1125;
             else if (_cfg.DoubleLengthDays)
-                _seconds = SecondsInDay100;
+                _seconds = SecondsInDay900;
             else
-                _seconds = SecondsInDay50;
+                _seconds = SecondsInDay675;
         }
         catch (System.Exception ex)
         {
@@ -39,6 +44,51 @@ public class MainPatcher
         }
     }
 
+    [HarmonyPatch(typeof(EnvironmentEngine), nameof(EnvironmentEngine.Update))]
+    public static class EnvironmentEngineUpdatePatch
+    {
+        public static float GetTime()
+        {
+            var adj = GetTimeMulti();
+            var time = Time.deltaTime;
+            var newTime = time / adj;
+            return newTime;
+        }
+
+        [HarmonyTranspiler]
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var instructionsList = new List<CodeInstruction>(instructions);
+            var time = AccessTools.Property(typeof(Time), nameof(Time.deltaTime)).GetGetMethod();
+
+            foreach (var t in instructionsList)
+            {
+                var instruction = t;
+                if (instruction.opcode == OpCodes.Call && instruction.OperandIs(time))
+                {
+                    yield return instruction;
+                    instruction = new CodeInstruction(opcode: OpCodes.Call,
+                        operand: typeof(EnvironmentEngineUpdatePatch).GetMethod("GetTime"));
+                }
+                yield return instruction;
+            }
+        }
+    }
+
+    private static float GetTimeMulti()
+    {
+        var num = _seconds switch
+        {
+            SecondsInDay675 => 1.5f,
+            SecondsInDay900 => 2f,
+            SecondsInDay1125 => 2.5f,
+            SecondsInDay1350 => 3f,
+            _ => 1f
+        };
+        return num;
+    }
+
+    //only used by refugee cooking
     [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.GetSecondsToTheMorning))]
     public static class TimeOfDayGetSecondsToTheMorningPatch
     {
@@ -56,6 +106,7 @@ public class MainPatcher
         }
     }
 
+    //this is only used by flow canvas?
     [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.GetSecondsToTheMidnight))]
     public static class TimeOfDayGetSecondsToTheMidnightPatch
     {
@@ -66,6 +117,7 @@ public class MainPatcher
         }
     }
 
+    //used by weather systems
     [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.FromSecondsToTimeK))]
     public static class TimeOfDayFromSecondsToTimeKPatch
     {
@@ -73,16 +125,6 @@ public class MainPatcher
         public static void Postfix(ref float time_in_secs, ref float __result)
         {
             __result = time_in_secs / _seconds;
-        }
-    }
-
-    [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.FromTimeKToSeconds))]
-    public static class TimeOfDayFromTimeKToSecondsPatch
-    {
-        [HarmonyPostfix]
-        public static void Postfix(ref float time_in_time_k, ref float __result)
-        {
-            __result = time_in_time_k * _seconds;
         }
     }
 }

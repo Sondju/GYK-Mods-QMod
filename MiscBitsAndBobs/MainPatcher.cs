@@ -5,7 +5,6 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace MiscBitsAndBobs;
 
@@ -17,6 +16,16 @@ public class MainPatcher
     {
         "npc_tavern_barman", "tavern_cellar_rack", "tavern_cellar_rack_1", "tavern_cellar_rack_2",
         "tavern_cellar_rack_3", "tavern_cellar_rack_4", "tavern_cellar_rack_5"
+    };
+
+    private static readonly string[] MakeStackable =
+    {
+        "book","chapter","grave","pen"
+    };
+
+    private static readonly string[] DisableItemDurabilityCheck =
+    {
+        "flyer_bad_2"
     };
 
     private static readonly ItemDefinition.ItemType[] ToolItems =
@@ -40,24 +49,6 @@ public class MainPatcher
         }
     }
 
-
-
-    [HarmonyPatch(typeof(GardenCustomDrawer))]
-    public static class GardenCustomDrawerGetCurrentGrowStagePatch
-    {
-        [HarmonyPatch(nameof(GardenCustomDrawer.Redraw))]
-        [HarmonyPrefix]
-        public static void RedrawPrefix(ref GardenCustomDrawer __instance, ref WorldGameObject wgo)
-        {
-            if (!_cfg.SlowerZombieGardenGrowth) return;
-            if (!__instance.name.Contains("zombie_garden")) return;
-            var num = wgo.GetParam("growing", 0f);
-            var newNum = num / 2;
-            wgo.SetParam("growing", newNum);
-        }
-    }
-
-
     [HarmonyPatch(typeof(CameraTools), nameof(CameraTools.TweenLetterbox))]
     public static class GCameraToolsTweenLetterboxPatch
     {
@@ -70,8 +61,6 @@ public class MainPatcher
             }
         }
     }
-
-
 
     [HarmonyPatch(typeof(Intro), nameof(Intro.ShowIntro))]
     public static class GameSaveCreateNewSavePatch
@@ -100,6 +89,22 @@ public class MainPatcher
         }
     }
 
+    [HarmonyPatch(typeof(CraftDefinition), "takes_item_durability", MethodType.Getter)]
+    public static class CraftDefinitiontakesItemDurabilityPatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(ref CraftDefinition __instance, ref bool __result)
+        {
+            if (!_cfg.EnableToolAndPrayerStacking) return;
+            if (__instance == null) return;
+            if (DisableItemDurabilityCheck.Any(__instance.id.Contains))
+            {
+                __result = false;
+            }
+            // Debug.LogError($"[MiscBitsAndBobs] Def: {__instance.id}, Dur: {__instance.dur_needs_item}");
+        }
+    }
+
     //patch tools to be stack-able
     [HarmonyPatch(typeof(GameBalance), "LoadGameBalance")]
     public static class GameBalanceLoadGameBalancePatch
@@ -111,8 +116,7 @@ public class MainPatcher
 
             foreach (var itemDefinition in GameBalance.me.items_data
                          .Where(itemDefinition => itemDefinition != null)
-                         .Where(x => ToolItems.Contains(x.type) || x.id.Contains("book") ||
-                                     x.id.Contains("chapter") || x.id.Contains("grave") || x.id.Contains("pen")))
+                         .Where(x => ToolItems.Contains(x.type) || MakeStackable.Any(x.id.Contains)))
             {
                 itemDefinition.stack_count += 1000;
                 itemDefinition.base_count += 1000;

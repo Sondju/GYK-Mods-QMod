@@ -204,8 +204,8 @@ public class MainPatcher
         }
     }
 
-    [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnClosePressed))]
-    public static class InGameMenuGuiOnClosePressedPatch
+    [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
+    public static class GameSettingsApplyLanguageChange
     {
         [HarmonyPostfix]
         public static void Postfix()

@@ -2,10 +2,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7AA09579-E618-4333-B4AF-A95C6715A673}</ProjectGuid>
+    <ProjectGuid>{4C76C274-5207-4C2E-9DB0-2E69ABA7ED9B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
-    <AssemblyName>IBuildWhereIWant</AssemblyName>
+    <AssemblyName>BeamMeUpGerry</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -29,7 +29,7 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <RootNamespace>IBuildWhereIWant</RootNamespace>
+    <RootNamespace>BeamMeUpGerry</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
@@ -64,7 +64,6 @@
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="lang\strings.de.resx">
       <SubType>Designer</SubType>

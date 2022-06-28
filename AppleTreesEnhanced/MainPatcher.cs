@@ -9,17 +9,18 @@ using Random = UnityEngine.Random;
 
 namespace AppleTreesEnhanced;
 
+[HarmonyAfter("p1xel8ted.GraveyardKeeper.LongerDays")]
 public class MainPatcher
 {
     private static Config.Options _cfg;
     private static string Lang { get; set; }
+    private static float _lastRunTime;
 
     private static readonly string[] WorldReadyHarvests = {
         "bush_1_berry","bush_2_berry","bush_3_berry"
     };
 
     private static bool _updateDone;
-
 
     public static void Patch()
     {
@@ -28,9 +29,6 @@ public class MainPatcher
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.AppleTreesEnhanced");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             _cfg = Config.GetOptions();
-
-            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
             _updateDone = false;
         }
         catch (System.Exception ex)
@@ -39,7 +37,7 @@ public class MainPatcher
         }
     }
 
-    private static void ShowMessage(WorldGameObject obj, string message, int qty)
+    private static void ShowMessage(WorldGameObject obj, string message)
     {
         if (_cfg.ShowHarvestReadyMessages)
         {
@@ -50,7 +48,7 @@ public class MainPatcher
 
             if (obj.obj_id.Contains("tree")) newObjPos.y += 250f;
 
-            EffectBubblesManager.ShowImmediately(newObjPos, message + $" ({qty})",
+            EffectBubblesManager.ShowImmediately(newObjPos, message,
                 EffectBubblesManager.BubbleColor.Relation,
                 true, 3f);
         }
@@ -81,6 +79,7 @@ public class MainPatcher
             public const string WorldBerryBush2 = "bush_2_berry";
             public const string WorldBerryBush3 = "bush_3_berry";
         }
+
         public struct HarvestSpawner
         {
             public const string GardenAppleTree = "tree_apple_garden_crops_growing";
@@ -97,10 +96,32 @@ public class MainPatcher
         [HarmonyPostfix]
         public static void Postfix()
         {
-
             if (!MainGame.game_started || !MainGame.loaded_from_scene_main || _updateDone) return;
+
+            var dudTrees = Object.FindObjectsOfType<WorldGameObject>(true)
+                .Where(a => a.obj_id == Constants.HarvestGrowing.GardenAppleTree).Where(b => b.progress <= 0);
+            var dudTreeCount = 0;
+            foreach (var dudTree in dudTrees)
+            {
+                dudTreeCount++;
+                ProcessRespawn(dudTree, Constants.HarvestGrowing.GardenAppleTree,
+                    Constants.HarvestSpawner.GardenAppleTree);
+                Debug.Log($"[AppleTreesEnhanced] Fixed DudGardenTree {dudTreeCount}");
+            }
+
+            var dudBushes = Object.FindObjectsOfType<WorldGameObject>(true)
+                .Where(a => a.obj_id == Constants.HarvestGrowing.GardenBerryBush).Where(b => b.progress <= 0);
+            var dudBushCount = 0;
+            foreach (var dudBush in dudBushes)
+            {
+                dudBushCount++;
+                ProcessRespawn(dudBush, Constants.HarvestGrowing.GardenBerryBush,
+                    Constants.HarvestSpawner.GardenBerryBush);
+                Debug.Log($"[AppleTreesEnhanced] Fixed DudGardenBush {dudBushCount}");
+            }
+            
             var readyGardenTrees = Object.FindObjectsOfType<WorldGameObject>(true).Where(a => a.obj_id == "tree_apple_garden_ready");
-            var readyGardenBushes = Object.FindObjectsOfType<WorldGameObject>(true).Where(a => a.obj_id== "bush_berry_garden_ready");
+            var readyGardenBushes = Object.FindObjectsOfType<WorldGameObject>(true).Where(a => a.obj_id == "bush_berry_garden_ready");
             var readyWorldBushes = Object.FindObjectsOfType<WorldGameObject>(true).Where(a => WorldReadyHarvests.Contains(a.obj_id));
 
             foreach (var item in readyGardenTrees)
@@ -120,9 +141,11 @@ public class MainPatcher
                     case Constants.HarvestReady.WorldBerryBush1:
                         ProcessBerryBush1(item);
                         break;
+
                     case Constants.HarvestReady.WorldBerryBush2:
                         ProcessBerryBush2(item);
                         break;
+
                     case Constants.HarvestReady.WorldBerryBush3:
                         ProcessBerryBush3(item);
                         break;
@@ -133,24 +156,8 @@ public class MainPatcher
         }
     }
 
-    [HarmonyPatch(typeof(GardenCustomDrawer))]
-    public static class GardenCustomDrawerGetCurrentGrowStagePatch
-    {
-        [HarmonyPatch(nameof(GardenCustomDrawer.Redraw))]
-        [HarmonyPrefix]
-        public static void RedrawPrefix(ref GardenCustomDrawer __instance, ref WorldGameObject wgo)
-        {
-            if (!_cfg.SlowerAppleGrowth) return;
-            if (!__instance.name.Contains("tree_apple_garden")) return;
-            var num = wgo.GetParam("growing", 0f);
-            var newNum = num / 2;
-            wgo.SetParam("growing", newNum);
-        }
-    }
-
-
-    [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnClosePressed))]
-    public static class InGameMenuGuiOnClosePressedPatch
+    [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
+    public static class GameSettingsApplyLanguageChange
     {
         [HarmonyPostfix]
         public static void Postfix()
@@ -158,6 +165,13 @@ public class MainPatcher
             Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
         }
+    }
+
+    private static void ProcessRespawn(WorldGameObject wgo, string replaceString, string craftString)
+    {
+        wgo.ReplaceWithObject(replaceString, true);
+        wgo.GetComponent<ChunkedGameObject>().Init(true);
+        wgo.TryStartCraft(craftString);
     }
 
     private static void ProcessDropAndRespawn(WorldGameObject wgo, string replaceString, string craftString, string harvestItem, string message, int rand)
@@ -174,7 +188,7 @@ public class MainPatcher
         wgo.ReplaceWithObject(replaceString, true);
         wgo.GetComponent<ChunkedGameObject>().Init(true);
         wgo.TryStartCraft(craftString);
-        ShowMessage(wgo, message, rand);
+        ShowMessage(wgo, message);
     }
 
     private static void ProcessGardenAppleTree(WorldGameObject wgo)
@@ -254,7 +268,7 @@ public class MainPatcher
             {
                 if (o.obj_id == Constants.HarvestGrowing.WorldBerryBush1) return;
                 ProcessDropAndRespawn(o, Constants.HarvestGrowing.WorldBerryBush1,
-                    Constants.HarvestSpawner.WorldBerryBush2, Constants.HarvestItem.BerryBush,
+                    Constants.HarvestSpawner.WorldBerryBush1, Constants.HarvestItem.BerryBush,
                     strings.BerriesReady, rand);
             });
         }
@@ -335,12 +349,10 @@ public class MainPatcher
             if (string.Equals(new_obj_id, Constants.HarvestReady.GardenAppleTree))
             {
                 ProcessGardenAppleTree(__instance);
-
             }
             else if (string.Equals(new_obj_id, Constants.HarvestReady.GardenBerryBush))
             {
                 ProcessGardenBerryBush(__instance);
-
             }
             else if (string.Equals(new_obj_id, Constants.HarvestReady.WorldBerryBush1))
             {

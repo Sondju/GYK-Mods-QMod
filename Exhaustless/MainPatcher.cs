@@ -22,18 +22,15 @@ public static class MainPatcher
             _cfg = Config.GetOptions();
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.exhaust-less");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
-
-            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
         }
         catch (Exception ex)
         {
-            Debug.LogError($"[AppleTreesEnhanced]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Debug.LogError($"[Exhaust-less]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
         }
     }
 
-    [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnClosePressed))]
-    public static class InGameMenuGuiOnClosePressedPatch
+    [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
+    public static class GameSettingsApplyLanguageChange
     {
         [HarmonyPostfix]
         public static void Postfix()
@@ -74,7 +71,7 @@ public static class MainPatcher
     }
 
     [HarmonyPatch(typeof(WaitingGUI), nameof(WaitingGUI.Update))]
-    public static class WaitingGUIUpdatePatch
+    public static class WaitingGuiUpdatePatch
     {
         [HarmonyPrefix]
         public static void Prefix()
@@ -114,9 +111,11 @@ public static class MainPatcher
         public static void Prefix()
         {
             if (!_cfg.AutoEquipNewTool) return;
-            var equippedTool = MainGame.me.player.GetEquippedTool();
+            var equippedTool = MainGame.me.player.GetEquippedTool(); 
             var save = MainGame.me.save;
             var playerInv = save.GetSavedPlayerInventory();
+
+
             foreach (var item in playerInv.inventory.Where(item =>
                          item.definition.type == equippedTool.definition.type))
             {

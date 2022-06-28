@@ -69,12 +69,21 @@ public class MainPatcher
             _vectorsLoaded = false;
             _needScanning = true;
 
-            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
         }
         catch (Exception ex)
         {
             Debug.LogError($"[AutoLootHeavies]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
+    }
+
+    [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
+    public static class GameSettingsApplyLanguageChange
+    {
+        [HarmonyPostfix]
+        public static void Postfix()
+        {
+            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
         }
     }
 
@@ -432,17 +441,6 @@ public class MainPatcher
             public const string Timber = "mf_timber_1";
             public const string Stone = "mf_stones_1";
             public const string Ore = "mf_ore_1";
-        }
-    }
-
-    [HarmonyPatch(typeof(InGameMenuGUI), nameof(InGameMenuGUI.OnClosePressed))]
-    public static class InGameMenuGuiOnClosePressedPatch
-    {
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
         }
     }
 
