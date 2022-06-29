@@ -46,9 +46,8 @@
     <PackageReference Include="UnityEngine.Modules" Version="2020.3.17" IncludeAssets="compile" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="0Harmony" IncludeAssets="compile">
-      <HintPath>..\libs\0Harmony.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp" IncludeAssets="compile">
       <HintPath>..\libs\Assembly-CSharp.dll</HintPath>

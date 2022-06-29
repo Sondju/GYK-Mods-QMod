@@ -9,14 +9,26 @@ namespace LongerDays;
 
 public class MainPatcher
 {
+    private const float SecondsInDay1125 = 1125f;
+
+    //2.5x increase
+    private const float SecondsInDay1350 = 1350f;
+
     //public static float SecondsInDay450 = 450f; //0x increase - game default
     private const float SecondsInDay675 = 675f; //1.5x increase
 
     private const float SecondsInDay900 = 900f; //2x increase
-    private const float SecondsInDay1125 = 1125f; //2.5x increase
-    private const float SecondsInDay1350 = 1350f; //3x increase
+ //3x increase
     private static Config.Options _cfg;
     private static float _seconds;
+
+    public static float GetTime()
+    {
+        var adj = GetTimeMulti();
+        var time = Time.deltaTime;
+        var newTime = time / adj;
+        return newTime;
+    }
 
     public static void Patch()
     {
@@ -43,18 +55,22 @@ public class MainPatcher
             Debug.LogError($"[LongerDays]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
         }
     }
+    private static float GetTimeMulti()
+    {
+        var num = _seconds switch
+        {
+            SecondsInDay675 => 1.5f,
+            SecondsInDay900 => 2f,
+            SecondsInDay1125 => 2.5f,
+            SecondsInDay1350 => 3f,
+            _ => 1f
+        };
+        return num;
+    }
 
     [HarmonyPatch(typeof(EnvironmentEngine), nameof(EnvironmentEngine.Update))]
     public static class EnvironmentEngineUpdatePatch
     {
-        public static float GetTime()
-        {
-            var adj = GetTimeMulti();
-            var time = Time.deltaTime;
-            var newTime = time / adj;
-            return newTime;
-        }
-
         [HarmonyTranspiler]
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -68,24 +84,32 @@ public class MainPatcher
                 {
                     yield return instruction;
                     instruction = new CodeInstruction(opcode: OpCodes.Call,
-                        operand: typeof(EnvironmentEngineUpdatePatch).GetMethod("GetTime"));
+                        operand: typeof(MainPatcher).GetMethod("GetTime"));
                 }
                 yield return instruction;
             }
         }
     }
-
-    private static float GetTimeMulti()
+    //used by weather systems
+    [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.FromSecondsToTimeK))]
+    public static class TimeOfDayFromSecondsToTimeKPatch
     {
-        var num = _seconds switch
+        [HarmonyPostfix]
+        public static void Postfix(ref float time_in_secs, ref float __result)
         {
-            SecondsInDay675 => 1.5f,
-            SecondsInDay900 => 2f,
-            SecondsInDay1125 => 2.5f,
-            SecondsInDay1350 => 3f,
-            _ => 1f
-        };
-        return num;
+            __result = time_in_secs / _seconds;
+        }
+    }
+
+    //this is only used by flow canvas?
+    [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.GetSecondsToTheMidnight))]
+    public static class TimeOfDayGetSecondsToTheMidnightPatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(TimeOfDay __instance, ref float __result)
+        {
+            __result = (1f - __instance.GetTimeK()) * _seconds;
+        }
     }
 
     //only used by refugee cooking
@@ -103,28 +127,6 @@ public class MainPatcher
                 result = (1f - __instance.GetTimeK() + 0.15f) * _seconds;
 
             __result = result;
-        }
-    }
-
-    //this is only used by flow canvas?
-    [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.GetSecondsToTheMidnight))]
-    public static class TimeOfDayGetSecondsToTheMidnightPatch
-    {
-        [HarmonyPostfix]
-        public static void Postfix(TimeOfDay __instance, ref float __result)
-        {
-            __result = (1f - __instance.GetTimeK()) * _seconds;
-        }
-    }
-
-    //used by weather systems
-    [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.FromSecondsToTimeK))]
-    public static class TimeOfDayFromSecondsToTimeKPatch
-    {
-        [HarmonyPostfix]
-        public static void Postfix(ref float time_in_secs, ref float __result)
-        {
-            __result = time_in_secs / _seconds;
         }
     }
 }

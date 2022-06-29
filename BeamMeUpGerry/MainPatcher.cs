@@ -43,6 +43,7 @@ namespace BeamMeUpGerry
             public static void Postfix(string answer)
             {
                 _showCooldownReadyAlert = !string.Equals("cancel", answer);
+
             }
         }
 

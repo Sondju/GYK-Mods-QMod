@@ -99,7 +99,6 @@ public class MainPatcher
         Constants.HarvestReady.WorldBerryBush1, Constants.HarvestReady.WorldBerryBush2,Constants.HarvestReady.WorldBerryBush3
     };
 
-
     [HarmonyPatch(typeof(MainGame), nameof(MainGame.Update))]
     public static class MainGameUpdatePatch
     {
@@ -150,7 +149,6 @@ public class MainPatcher
             {
                 ProcessGardenBeeHive(item);
             }
-
 
             foreach (var item in readyGardenTrees)
             {
