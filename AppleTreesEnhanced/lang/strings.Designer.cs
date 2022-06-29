@@ -77,5 +77,14 @@ namespace AppleTreesEnhanced.lang {
                 return ResourceManager.GetString("BerriesReady", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Honey harvest ready!.
+        /// </summary>
+        public static string HoneyReady {
+            get {
+                return ResourceManager.GetString("HoneyReady", resourceCulture);
+            }
+        }
     }
 }

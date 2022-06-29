@@ -118,12 +118,12 @@
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
 	<data name="ApplesReady" xml:space="preserve">
-    <value>Apple harvest ready!</value>
-  </data>
+		<value>リンゴの収穫準備ができました！</value>
+	</data>
 	<data name="BerriesReady" xml:space="preserve">
-    <value>Berry harvest ready!</value>
-  </data>
+		<value>ベリー収穫の準備ができました！</value>
+	</data>
 	<data name="HoneyReady" xml:space="preserve">
-    <value>Honey harvest ready!</value>
-  </data>
+		<value>蜂蜜の収穫の準備ができました！</value>
+	</data>
 </root>

@@ -14,11 +14,6 @@ public class MainPatcher
 {
     private static Config.Options _cfg;
     private static string Lang { get; set; }
-    private static float _lastRunTime;
-
-    private static readonly string[] WorldReadyHarvests = {
-        "bush_1_berry","bush_2_berry","bush_3_berry"
-    };
 
     private static bool _updateDone;
 
@@ -46,6 +41,8 @@ public class MainPatcher
 
             if (obj.obj_id.Contains("berry")) newObjPos.y += 100f;
 
+            if (obj.obj_id.Contains("bee")) newObjPos.y += 100f;
+
             if (obj.obj_id.Contains("tree")) newObjPos.y += 250f;
 
             EffectBubblesManager.ShowImmediately(newObjPos, message,
@@ -63,6 +60,7 @@ public class MainPatcher
             public const string WorldBerryBush1 = "bush_1";
             public const string WorldBerryBush2 = "bush_2";
             public const string WorldBerryBush3 = "bush_3";
+            public const string BeeHouse = "beehouse_1";
         }
 
         public struct HarvestItem
@@ -78,6 +76,7 @@ public class MainPatcher
             public const string WorldBerryBush1 = "bush_1_berry";
             public const string WorldBerryBush2 = "bush_2_berry";
             public const string WorldBerryBush3 = "bush_3_berry";
+            public const string BeeHouse = "beehouse_2";
         }
 
         public struct HarvestSpawner
@@ -87,8 +86,19 @@ public class MainPatcher
             public const string WorldBerryBush1 = "bush_1_berry_respawn";
             public const string WorldBerryBush2 = "bush_2_berry_respawn";
             public const string WorldBerryBush3 = "bush_3_berry_respawn";
+            public const string BeeHouse = "honey_production";
+        }
+
+        public struct OutputItems
+        {
+            public const string Bee = "bee";
         }
     }
+
+    private static readonly string[] WorldReadyHarvests = {
+        Constants.HarvestReady.WorldBerryBush1, Constants.HarvestReady.WorldBerryBush2,Constants.HarvestReady.WorldBerryBush3
+    };
+
 
     [HarmonyPatch(typeof(MainGame), nameof(MainGame.Update))]
     public static class MainGameUpdatePatch
@@ -97,6 +107,17 @@ public class MainPatcher
         public static void Postfix()
         {
             if (!MainGame.game_started || !MainGame.loaded_from_scene_main || _updateDone) return;
+
+            var dudBees = Object.FindObjectsOfType<WorldGameObject>(true)
+                .Where(a => a.obj_id == Constants.HarvestGrowing.BeeHouse).Where(b => b.progress <= 0)
+                .Where(IsPlayerBeeHive);
+            var dudBeesCount = 0;
+            foreach (var dudBee in dudBees)
+            {
+                dudBeesCount++;
+                ProcessBeeRespawn(dudBee);
+                Debug.Log($"[AppleTreesEnhanced] Fixed DudBee {dudBeesCount}");
+            }
 
             var dudTrees = Object.FindObjectsOfType<WorldGameObject>(true)
                 .Where(a => a.obj_id == Constants.HarvestGrowing.GardenAppleTree).Where(b => b.progress <= 0);
@@ -119,10 +140,17 @@ public class MainPatcher
                     Constants.HarvestSpawner.GardenBerryBush);
                 Debug.Log($"[AppleTreesEnhanced] Fixed DudGardenBush {dudBushCount}");
             }
-            
-            var readyGardenTrees = Object.FindObjectsOfType<WorldGameObject>(true).Where(a => a.obj_id == "tree_apple_garden_ready");
-            var readyGardenBushes = Object.FindObjectsOfType<WorldGameObject>(true).Where(a => a.obj_id == "bush_berry_garden_ready");
+            var readyBees = Object.FindObjectsOfType<WorldGameObject>(true).Where(a => a.obj_id == Constants.HarvestReady.BeeHouse)
+                .Where(IsPlayerBeeHive);
+            var readyGardenTrees = Object.FindObjectsOfType<WorldGameObject>(true).Where(a => a.obj_id == Constants.HarvestReady.GardenAppleTree);
+            var readyGardenBushes = Object.FindObjectsOfType<WorldGameObject>(true).Where(a => a.obj_id == Constants.HarvestReady.GardenBerryBush);
             var readyWorldBushes = Object.FindObjectsOfType<WorldGameObject>(true).Where(a => WorldReadyHarvests.Contains(a.obj_id));
+
+            foreach (var item in readyBees)
+            {
+                ProcessGardenBeeHive(item);
+            }
+
 
             foreach (var item in readyGardenTrees)
             {
@@ -174,6 +202,23 @@ public class MainPatcher
         wgo.TryStartCraft(craftString);
     }
 
+    private static void ProcessBeeRespawn(WorldGameObject wgo)
+    {
+        wgo.ReplaceWithObject(Constants.HarvestGrowing.BeeHouse, true);
+        wgo.GetComponent<ChunkedGameObject>().Init(true);
+        wgo.TryStartCraft(Constants.HarvestSpawner.BeeHouse);
+    }
+
+    private static void ProcessBeeDropAndRespawn(WorldGameObject wgo)
+    {
+        var list = ResModificator.ProcessItemsListBeforeDrop(wgo.obj_def.drop_items, wgo, null, null);
+        wgo.DropItems(list);
+        wgo.ReplaceWithObject(Constants.HarvestGrowing.BeeHouse, true);
+        wgo.GetComponent<ChunkedGameObject>().Init(true);
+        wgo.TryStartCraft(Constants.HarvestSpawner.BeeHouse);
+        ShowMessage(wgo, strings.HoneyReady);
+    }
+
     private static void ProcessDropAndRespawn(WorldGameObject wgo, string replaceString, string craftString, string harvestItem, string message, int rand)
     {
         for (var i = 0; i < rand; i++)
@@ -183,12 +228,30 @@ public class MainPatcher
                 check_walls: false);
         }
 
-        //Debug.LogWarning(
-        // $"[AppleTreesEnhanced] Intercepted {Constants.HarvestReady.GardenAppleTree}, dropping {Constants.HarvestItem.AppleTree}, setting object to {Constants.HarvestGrowing.GardenAppleTree} and starting craft of {Constants.HarvestSpawner.GardenAppleTree}");
         wgo.ReplaceWithObject(replaceString, true);
         wgo.GetComponent<ChunkedGameObject>().Init(true);
         wgo.TryStartCraft(craftString);
         ShowMessage(wgo, message);
+    }
+
+    private static void ProcessGardenBeeHive(WorldGameObject wgo)
+    {
+        if (!_cfg.IncludeGardenBeeHives) return;
+
+        if (_cfg.RealisticHarvest)
+        {
+            var o = wgo;
+            var dropRand = Random.Range(2, 61);
+            GJTimer.AddTimer(dropRand, delegate
+            {
+                if (o.obj_id == Constants.HarvestGrowing.BeeHouse) return;
+                ProcessBeeDropAndRespawn(o);
+            });
+        }
+        else
+        {
+            ProcessBeeDropAndRespawn(wgo);
+        }
     }
 
     private static void ProcessGardenAppleTree(WorldGameObject wgo)
@@ -248,6 +311,11 @@ public class MainPatcher
                 Constants.HarvestSpawner.GardenBerryBush, Constants.HarvestItem.BerryBush,
                 strings.BerriesReady, rand);
         }
+    }
+
+    private static bool IsPlayerBeeHive(WorldGameObject wgo)
+    {
+        return wgo.obj_def.drop_items.Exists(a => a.id.Equals(Constants.OutputItems.Bee));
     }
 
     private static void ProcessBerryBush1(WorldGameObject wgo)
@@ -346,7 +414,11 @@ public class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref WorldGameObject __instance, ref string new_obj_id)
         {
-            if (string.Equals(new_obj_id, Constants.HarvestReady.GardenAppleTree))
+            if (string.Equals(new_obj_id, Constants.HarvestReady.BeeHouse) && IsPlayerBeeHive(__instance))
+            {
+                ProcessGardenBeeHive(__instance);
+            }
+            else if (string.Equals(new_obj_id, Constants.HarvestReady.GardenAppleTree))
             {
                 ProcessGardenAppleTree(__instance);
             }
