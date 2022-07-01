@@ -1,10 +1,12 @@
 using AppleTreesEnhanced.lang;
 using HarmonyLib;
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using UnityEngine;
+using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 namespace AppleTreesEnhanced;
@@ -92,6 +94,8 @@ public class MainPatcher
         public struct OutputItems
         {
             public const string Bee = "bee";
+            public const string Honey = "honey";
+            public const string Wax = "beeswax";
         }
     }
 
@@ -182,6 +186,44 @@ public class MainPatcher
         }
     }
 
+    private static readonly string[] SellThesePlease =
+    {
+        Constants.OutputItems.Bee,Constants.OutputItems.Wax,Constants.OutputItems.Honey
+    };
+
+    [HarmonyPatch(typeof(Vendor), nameof(Vendor.CanBuyItem), typeof(ItemDefinition), typeof(bool))]
+    public static class VendorCanBuyItemPatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(ref Vendor __instance, ref ItemDefinition item_def, ref bool __result)
+        {
+            if (!_cfg.BeeKeeperBuyback) return;
+            if (!__instance.id.Contains(Constants.OutputItems.Bee)) return;
+            if (item_def == null) return;
+            if (SellThesePlease.Any(item_def.id.Equals))
+            {
+                __result = true;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Vendor), nameof(Vendor.CanTradeItem), typeof(ItemDefinition))]
+    public static class VendorCanTradeItemPatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(ref Vendor __instance, ref ItemDefinition item_def, ref bool __result)
+        {
+            if (!_cfg.BeeKeeperBuyback) return;
+            if (!__instance.id.Contains(Constants.OutputItems.Bee)) return;
+            if (item_def == null) return;
+            if (SellThesePlease.Any(item_def.id.Equals))
+            {
+                __result = true;
+            }
+        }
+    }
+
+
     [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
     public static class GameSettingsApplyLanguageChange
     {
@@ -210,6 +252,10 @@ public class MainPatcher
     private static void ProcessBeeDropAndRespawn(WorldGameObject wgo)
     {
         var list = ResModificator.ProcessItemsListBeforeDrop(wgo.obj_def.drop_items, wgo, null, null);
+        foreach (var item in list.Where(item => item.value > 1))
+        {
+            item.value = 1;
+        }
         wgo.DropItems(list);
         wgo.ReplaceWithObject(Constants.HarvestGrowing.BeeHouse, true);
         wgo.GetComponent<ChunkedGameObject>().Init(true);
@@ -239,7 +285,7 @@ public class MainPatcher
         if (_cfg.RealisticHarvest)
         {
             var o = wgo;
-            var dropRand = Random.Range(2, 61);
+            var dropRand = Random.Range(2, 16);
             GJTimer.AddTimer(dropRand, delegate
             {
                 if (o.obj_id == Constants.HarvestGrowing.BeeHouse) return;
@@ -259,13 +305,13 @@ public class MainPatcher
 
         if (_cfg.RealisticHarvest)
         {
-            rand = Random.Range(6, 16);
+            rand = Random.Range(5, 11);
         }
 
         if (_cfg.RealisticHarvest)
         {
             var o = wgo;
-            var dropRand = Random.Range(2, 61);
+            var dropRand = Random.Range(2, 16);
             GJTimer.AddTimer(dropRand, delegate
             {
                 if (o.obj_id == Constants.HarvestGrowing.GardenAppleTree) return;
@@ -289,12 +335,12 @@ public class MainPatcher
 
         if (_cfg.RealisticHarvest)
         {
-            rand = Random.Range(2, 5);
+            rand = Random.Range(1, 4);
         }
         if (_cfg.RealisticHarvest)
         {
             var o = wgo;
-            var dropRand = Random.Range(2, 61);
+            var dropRand = Random.Range(2, 16);
             GJTimer.AddTimer(dropRand, delegate
             {
                 if (o.obj_id == Constants.HarvestGrowing.GardenBerryBush) return;
@@ -323,13 +369,13 @@ public class MainPatcher
 
         if (_cfg.RealisticHarvest)
         {
-            rand = Random.Range(2, 5);
+            rand = Random.Range(1, 3);
         }
 
         if (_cfg.RealisticHarvest)
         {
             var o = wgo;
-            var dropRand = Random.Range(2, 61);
+            var dropRand = Random.Range(2, 16);
             GJTimer.AddTimer(dropRand, delegate
             {
                 if (o.obj_id == Constants.HarvestGrowing.WorldBerryBush1) return;
@@ -353,13 +399,13 @@ public class MainPatcher
 
         if (_cfg.RealisticHarvest)
         {
-            rand = Random.Range(2, 5);
+            rand = Random.Range(1, 3);
         }
 
         if (_cfg.RealisticHarvest)
         {
             var o = wgo;
-            var dropRand = Random.Range(2, 61);
+            var dropRand = Random.Range(2, 16);
             GJTimer.AddTimer(dropRand, delegate
             {
                 if (o.obj_id == Constants.HarvestGrowing.WorldBerryBush2) return;
@@ -383,13 +429,13 @@ public class MainPatcher
 
         if (_cfg.RealisticHarvest)
         {
-            rand = Random.Range(2, 5);
+            rand = Random.Range(1, 3);
         }
 
         if (_cfg.RealisticHarvest)
         {
             var o = wgo;
-            var dropRand = Random.Range(2, 61);
+            var dropRand = Random.Range(2, 16);
             GJTimer.AddTimer(dropRand, delegate
             {
                 if (o.obj_id == Constants.HarvestGrowing.WorldBerryBush3) return;
@@ -405,7 +451,6 @@ public class MainPatcher
                 strings.BerriesReady, rand);
         }
     }
-    
 
     [HarmonyPatch(typeof(WorldGameObject))]
     public static class WorldGameObjectSmartInstantiate

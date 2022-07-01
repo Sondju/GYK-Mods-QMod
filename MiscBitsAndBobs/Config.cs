@@ -45,6 +45,9 @@ public static class Config
         bool.TryParse(_con.Value("DisableCinematicLetterboxing", "true"), out var disableCinematicLetterboxing);
         _options.DisableCinematicLetterboxing = disableCinematicLetterboxing;
 
+        bool.TryParse(_con.Value("KitsuneKitoMode", "false"), out var kitsuneKitoMode);
+        _options.KitsuneKitoMode = kitsuneKitoMode;
+
         _con.ConfigWrite();
 
         return _options;
@@ -64,5 +67,6 @@ public static class Config
         public bool CondenseXpBar;
         public bool SkipIntroVideoOnNewGame;
         public bool DisableCinematicLetterboxing;
+        public bool KitsuneKitoMode;
     }
 }

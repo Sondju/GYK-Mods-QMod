@@ -49,14 +49,10 @@ public class MainPatcher
             switch (__instance.type)
             {
                 case SmartWeatherState.WeatherType.Fog:
-                    ____previously_enabled = false;
-                    ____enabled = true;
-                    ____cur_amount = 4;
-                    __instance.value = 4;
-                    //____previously_enabled = true;
-                    //  ____enabled = false;
-                    // ____cur_amount = 0;
-                    // __instance.value = 0;
+                    ____previously_enabled = true;
+                    ____enabled = false;
+                    ____cur_amount = 0;
+                    __instance.value = 0;
                     break;
 
                 case SmartWeatherState.WeatherType.Wind:
@@ -67,12 +63,8 @@ public class MainPatcher
                     break;
 
                 case SmartWeatherState.WeatherType.Rain:
-                    ____previously_enabled = true;
+                    ____previously_enabled = false;
                     ____enabled = false;
-                    ____cur_amount = 0;
-                    __instance.value = 0;
-                    //____previously_enabled = false;
-                    // ____enabled = false;
                     break;
 
                 case SmartWeatherState.WeatherType.LUT:

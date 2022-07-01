@@ -20,19 +20,20 @@ public class MainPatcher
 
     private static readonly string[] MakeStackable =
     {
-        "book","chapter","grave","pen"
+        "book","chapter","pen"
     };
 
-    private static readonly string[] DisableItemDurabilityCheck =
+    private static readonly ItemDefinition.ItemType[] GraveItems =
     {
-        "flyer_bad_2"
+        ItemDefinition.ItemType.GraveStone, ItemDefinition.ItemType.GraveFence, ItemDefinition.ItemType.GraveCover,
+        ItemDefinition.ItemType.GraveStoneReq, ItemDefinition.ItemType.GraveFenceReq, ItemDefinition.ItemType.GraveCoverReq,
     };
 
     private static readonly ItemDefinition.ItemType[] ToolItems =
     {
         ItemDefinition.ItemType.Axe, ItemDefinition.ItemType.Shovel, ItemDefinition.ItemType.Hammer,
         ItemDefinition.ItemType.Pickaxe, ItemDefinition.ItemType.FishingRod, ItemDefinition.ItemType.BodyArmor,
-        ItemDefinition.ItemType.HeadArmor, ItemDefinition.ItemType.Sword, ItemDefinition.ItemType.Preach
+        ItemDefinition.ItemType.HeadArmor, ItemDefinition.ItemType.Sword, ItemDefinition.ItemType.Preach,
     };
 
     public static void Patch()
@@ -89,15 +90,44 @@ public class MainPatcher
         }
     }
 
+    [HarmonyPatch(typeof(DropResGameObject), nameof(DropResGameObject.CollectDrop))]
+    public static class DropResGameObjectCollectDrop
+    {
+        //set stack size back up before collecting
+        [HarmonyPrefix]
+        public static void Prefix(ref DropResGameObject __instance)
+        {
+            if (!GraveItems.Contains(__instance.res.definition.type)) return;
+            __instance.res.definition.stack_count = 1000;
+            __instance.res.definition.base_count = 1000;
+
+        }
+    }
+
+    [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.GetRemoveCraftForItem))]
+    public static class GameBalanceGetRemoveCraftForItemPatch
+    {
+        //needed for grave removals to work
+        [HarmonyPostfix]
+        public static void Postfix(ref CraftDefinition __result)
+        {
+            foreach (var item in __result.output.Where(a => GraveItems.Contains(a.definition.type)))
+            {
+                item.definition.stack_count = 1;
+                item.definition.base_count = 1;
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(CraftDefinition), "takes_item_durability", MethodType.Getter)]
-    public static class CraftDefinitiontakesItemDurabilityPatch
+    public static class CraftDefinitionTakesItemDurabilityPatch
     {
         [HarmonyPostfix]
         public static void Postfix(ref CraftDefinition __instance, ref bool __result)
         {
             if (!_cfg.EnableToolAndPrayerStacking) return;
             if (__instance == null) return;
-            if (__instance.needs.Exists(item => item.id.Equals("pen:ink_pen")) && __instance.dur_needs_item>0)
+            if (__instance.needs.Exists(item => item.id.Equals("pen:ink_pen")) && __instance.dur_needs_item > 0)
             {
                 __result = false;
             }
@@ -112,14 +142,24 @@ public class MainPatcher
         [HarmonyPostfix]
         private static void Postfix()
         {
-            if (!_cfg.EnableToolAndPrayerStacking) return;
-
-            foreach (var itemDefinition in GameBalance.me.items_data
-                         .Where(itemDefinition => itemDefinition != null)
-                         .Where(x => ToolItems.Contains(x.type) || MakeStackable.Any(x.id.Contains)))
+            
+            if (_cfg.KitsuneKitoMode)
             {
-                itemDefinition.stack_count += 1000;
-                itemDefinition.base_count += 1000;
+                foreach (var cd in GameBalance.me.craft_data.Where(cd => cd.id.Equals("set_grave_bot_wd_1")))
+                {
+                    cd.output[0].id = "b";
+                }
+            }
+
+            if (_cfg.EnableToolAndPrayerStacking)
+            {
+                foreach (var item in GameBalance.me.items_data.Where(item =>
+                             ToolItems.Contains(item.type) || GraveItems.Contains(item.type) ||
+                             MakeStackable.Any(item.id.Contains)))
+                {
+                    item.stack_count += 1000;
+                    item.base_count += 1000;
+                }
             }
         }
     }

@@ -30,6 +30,9 @@ public static class Config
         bool.TryParse(_con.Value("IncludeGardenBeeHives", "true"), out var includeGardenBeeHives);
         _options.IncludeGardenBeeHives = includeGardenBeeHives;
 
+        bool.TryParse(_con.Value("BeeKeeperBuyback", "true"), out var beeKeeperBuyback);
+        _options.BeeKeeperBuyback = beeKeeperBuyback;
+
         _con.ConfigWrite();
 
         return _options;
@@ -44,5 +47,6 @@ public static class Config
         public bool ShowHarvestReadyMessages;
         public bool RealisticHarvest;
         public bool IncludeGardenBeeHives;
+        public bool BeeKeeperBuyback;
     }
 }
