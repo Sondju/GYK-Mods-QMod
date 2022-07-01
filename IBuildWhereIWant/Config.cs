@@ -24,5 +24,6 @@ public static class Config
     public class Options
     {
         public bool DisableGrid;
+        public bool DisableGreyRemoveOverlay;
     }
 }

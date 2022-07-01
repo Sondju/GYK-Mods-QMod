@@ -45,9 +45,6 @@ public static class Config
         bool.TryParse(_con.Value("DisableCinematicLetterboxing", "true"), out var disableCinematicLetterboxing);
         _options.DisableCinematicLetterboxing = disableCinematicLetterboxing;
 
-        bool.TryParse(_con.Value("SlowerZombieGardenGrowth", "true"), out var slowerZombieGardenGrowth);
-        _options.SlowerZombieGardenGrowth = slowerZombieGardenGrowth;
-
         _con.ConfigWrite();
 
         return _options;
@@ -67,6 +64,5 @@ public static class Config
         public bool CondenseXpBar;
         public bool SkipIntroVideoOnNewGame;
         public bool DisableCinematicLetterboxing;
-        public bool SlowerZombieGardenGrowth;
     }
 }

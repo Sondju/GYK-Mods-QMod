@@ -1,3 +1,4 @@
+using FlowCanvas.Nodes;
 using HarmonyLib;
 using IBuildWhereIWant.lang;
 using Rewired;
@@ -153,9 +154,20 @@ namespace IBuildWhereIWant
             }
         }
 
+
         [HarmonyPatch(typeof(BuildModeLogics))]
         public static class BuildModeLogicsPatch
         {
+            [HarmonyPostfix]
+            [HarmonyPatch(nameof(BuildModeLogics.EnterRemoveMode))]
+            public static void BuildModeLogicsEnterRemoveMode(ref GameObject ____remove_grey_spr)
+            {
+                if (_cfg.DisableGreyRemoveOverlay)
+                {
+                    ____remove_grey_spr.SetActive(false);
+                }
+            }
+
             [HarmonyPrefix]
             [HarmonyPatch("CancelCurrentMode")]
             public static void CancelCurrentModePrefix()

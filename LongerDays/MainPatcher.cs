@@ -1,4 +1,5 @@
 using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -18,9 +19,13 @@ public class MainPatcher
     private const float SecondsInDay675 = 675f; //1.5x increase
 
     private const float SecondsInDay900 = 900f; //2x increase
- //3x increase
+
+                                                //3x increase
     private static Config.Options _cfg;
+
     private static float _seconds;
+
+    //private static Assembly _assembly;
 
     public static float GetTime()
     {
@@ -37,9 +42,9 @@ public class MainPatcher
             _cfg = Config.GetOptions();
 
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.LongerDays");
-
             harmony.PatchAll(Assembly.GetExecutingAssembly());
-            Application.SetStackTraceLogType(LogType.Error, StackTraceLogType.None);
+
+            // _assembly = AppDomain.CurrentDomain.GetAssemblies().First(a => a.Location.EndsWith("Assembly-CSharp.dll"));
 
             if (_cfg.Madness)
                 _seconds = SecondsInDay1350;
@@ -50,11 +55,12 @@ public class MainPatcher
             else
                 _seconds = SecondsInDay675;
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             Debug.LogError($"[LongerDays]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
         }
     }
+
     private static float GetTimeMulti()
     {
         var num = _seconds switch
@@ -66,6 +72,43 @@ public class MainPatcher
             _ => 1f
         };
         return num;
+    }
+
+    ////[HarmonyPatch] // make sure Harmony inspects the class
+    ////public static class MyPatches
+    ////{
+    ////    public static IEnumerable<MethodBase> TargetMethods()
+    ////    {
+    ////        return AccessTools.GetTypesFromAssembly(Assembly.GetEntryAssembly())
+    ////            .SelectMany(type => type.GetMethods()).Where(method =>
+    ////            {
+    ////                for (var i = 0; i < method.GetParameters().Length; i++)
+    ////                {
+    ////                    var pi = method.GetParameters()[i];
+    ////                    if (pi.Name == "delta_time") return true;
+    ////                }
+    ////                return false;
+    ////            });
+    ////    }
+
+    ////    [HarmonyPrefix]
+    ////    public static void Prefix(object[] __args, MethodBase __originalMethod)
+    ////    {
+    ////        var parameters = __originalMethod.GetParameters();
+    ////        Debug.Log($"Method {__originalMethod.FullDescription()}:");
+    ////        for (var i = 0; i < __args.Length; i++)
+    ////            Debug.Log($"{parameters[i].Name} of type {parameters[i].ParameterType} is {__args[i]}");
+    ////    }
+    ////}
+
+    [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.UpdateAllCrafts))]
+    public static class CraftComponentUpdateAllCraftsPatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix(ref float delta_time)
+        {
+            delta_time = GetTime();
+        }
     }
 
     [HarmonyPatch(typeof(EnvironmentEngine), nameof(EnvironmentEngine.Update))]
@@ -88,6 +131,16 @@ public class MainPatcher
                 }
                 yield return instruction;
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(ItemsDurabilityManager), nameof(ItemsDurabilityManager.EveryFrameUpdate))]
+    public static class ItemsDurabilityManagerEveryFrameUpdatePatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix(ref float delta_time)
+        {
+            delta_time = GetTime();
         }
     }
     //used by weather systems

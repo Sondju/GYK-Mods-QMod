@@ -405,12 +405,14 @@ public class MainPatcher
                 strings.BerriesReady, rand);
         }
     }
+    
 
-    [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.ReplaceWithObject))]
+    [HarmonyPatch(typeof(WorldGameObject))]
     public static class WorldGameObjectSmartInstantiate
     {
         [HarmonyPostfix]
-        public static void Postfix(ref WorldGameObject __instance, ref string new_obj_id)
+        [HarmonyPatch(nameof(WorldGameObject.ReplaceWithObject))]
+        public static void WorldGameObjectReplaceWithObjectPostfix(ref WorldGameObject __instance, ref string new_obj_id)
         {
             if (string.Equals(new_obj_id, Constants.HarvestReady.BeeHouse) && IsPlayerBeeHive(__instance))
             {

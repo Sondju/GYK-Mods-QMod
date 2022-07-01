@@ -1,10 +1,10 @@
-using System;
+using BeamMeUpGerry.lang;
 using HarmonyLib;
 using Rewired;
+using System;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
-using BeamMeUpGerry.lang;
 using UnityEngine;
 
 namespace BeamMeUpGerry
@@ -42,8 +42,15 @@ namespace BeamMeUpGerry
             [HarmonyPostfix]
             public static void Postfix(string answer)
             {
-                _showCooldownReadyAlert = !string.Equals("cancel", answer);
-
+                // _showCooldownReadyAlert = !
+                if (string.Equals("cancel", answer))
+                {
+                    _showCooldownReadyAlert = false;
+                }
+                else
+                {
+                    _showCooldownReadyAlert = true;
+                }
             }
         }
 
@@ -95,7 +102,6 @@ namespace BeamMeUpGerry
             }
         }
 
-
         [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
         public static class TimeOfDayUpdatePatch
         {
@@ -116,7 +122,6 @@ namespace BeamMeUpGerry
                 }
             }
 
-
             [HarmonyPostfix]
             public static void Postfix()
             {
@@ -124,7 +129,7 @@ namespace BeamMeUpGerry
                     MainGame.paused || !BaseGUI.all_guis_closed) return;
                 var item = GetHearthstone();
                 if (item == null) return;
-                if (item.GetGrayedCooldownPercent() <= 0 && _showCooldownReadyAlert)
+                if (item.GetGrayedCooldownPercent() <= 0 && _showCooldownReadyAlert && !_cfg.DisableCooldown)
                 {
                     _showCooldownReadyAlert = false;
                     ShowMessage(strings.Ready);

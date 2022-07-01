@@ -97,11 +97,11 @@ public class MainPatcher
         {
             if (!_cfg.EnableToolAndPrayerStacking) return;
             if (__instance == null) return;
-            if (DisableItemDurabilityCheck.Any(__instance.id.Contains))
+            if (__instance.needs.Exists(item => item.id.Equals("pen:ink_pen")) && __instance.dur_needs_item>0)
             {
                 __result = false;
             }
-            // Debug.LogError($"[MiscBitsAndBobs] Def: {__instance.id}, Dur: {__instance.dur_needs_item}");
+            //Debug.LogError($"[MiscBitsAndBobs] Def: {__instance.id}, Dur: {__instance.dur_needs_item}");
         }
     }
 
