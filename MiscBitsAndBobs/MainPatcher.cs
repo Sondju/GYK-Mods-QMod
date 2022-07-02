@@ -11,6 +11,7 @@ namespace MiscBitsAndBobs;
 public class MainPatcher
 {
     private static Config.Options _cfg;
+    private static WorldGameObject _wgo;
 
     private static readonly string[] TavernItems =
     {
@@ -76,6 +77,38 @@ public class MainPatcher
         }
     }
 
+    [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
+    public static class WorldGameObjectInteractPatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix(WorldGameObject __instance, WorldGameObject other_obj)
+        {
+            if (!MainGame.game_started || __instance == null) return;
+            if (other_obj == MainGame.me.player)
+            {
+                _wgo = __instance;
+            }
+        }
+    }
+    
+
+
+    [HarmonyPatch(typeof(CraftComponent), "End")]
+    public static class GraveGuiOnCraftPatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(ref CraftComponent __instance)
+        {
+            if (!_cfg.KitsuneKitoMode) return;
+            if (!MainGame.game_started || __instance == null) return;
+            if (__instance.last_craft_id.Equals("set_grave_bot_wd_1"))
+            {
+                //Debug.LogError($"Object: {_wgo.obj_id}, Craft: {__instance.last_craft_id}");
+                TechPointsDrop.Drop(_wgo.pos3, 0, 0, 1);
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(InventoryGUI), nameof(InventoryGUI.OnItemOver))]
     public static class InventoryGuiOnItemOverPatch
     {
@@ -100,7 +133,6 @@ public class MainPatcher
             if (!GraveItems.Contains(__instance.res.definition.type)) return;
             __instance.res.definition.stack_count = 1000;
             __instance.res.definition.base_count = 1000;
-
         }
     }
 
@@ -136,21 +168,12 @@ public class MainPatcher
     }
 
     //patch tools to be stack-able
-    [HarmonyPatch(typeof(GameBalance), "LoadGameBalance")]
+    [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
     public static class GameBalanceLoadGameBalancePatch
     {
         [HarmonyPostfix]
         private static void Postfix()
         {
-            
-            if (_cfg.KitsuneKitoMode)
-            {
-                foreach (var cd in GameBalance.me.craft_data.Where(cd => cd.id.Equals("set_grave_bot_wd_1")))
-                {
-                    cd.output[0].id = "b";
-                }
-            }
-
             if (_cfg.EnableToolAndPrayerStacking)
             {
                 foreach (var item in GameBalance.me.items_data.Where(item =>
@@ -267,27 +290,6 @@ public class MainPatcher
         }
     }
 
-    [HarmonyPatch(typeof(InventoryPanelGUI), "DoOpening")]
-    public static class InventoryPanelGuiDoOpeningPatch
-    {
-        [HarmonyPrefix]
-        private static void Prefix(ref InventoryPanelGUI __instance, ref MultiInventory multi_inventory)
-        {
-            if (_cfg.DontShowEmptyRowsInInventory) __instance.dont_show_empty_rows = true;
-
-            if (!_cfg.ShowOnlyPersonalInventory) return;
-            var multiInventory = new MultiInventory();
-            var num = 0;
-            foreach (var inventory in multi_inventory.all)
-            {
-                multiInventory.AddInventory(inventory);
-                num++;
-                if (num == 1) break;
-            }
-
-            multi_inventory = multiInventory;
-        }
-    }
 
     //makes halloween an annual event instead of the original 2018...
     [HarmonyPatch(typeof(GameSave), nameof(GameSave.GlobalEventsCheck))]

@@ -24,12 +24,6 @@ public static class Config
         bool.TryParse(_con.Value("CondenseXpBar", "true"), out var condenseXpBar);
         _options.CondenseXpBar = condenseXpBar;
 
-        bool.TryParse(_con.Value("ShowOnlyPersonalInventory", "false"), out var showOnlyPersonalInventory);
-        _options.ShowOnlyPersonalInventory = showOnlyPersonalInventory;
-
-        bool.TryParse(_con.Value("DontShowEmptyRowsInInventory", "true"), out var dontShowEmptyRowsInInventory);
-        _options.DontShowEmptyRowsInInventory = dontShowEmptyRowsInInventory;
-
         bool.TryParse(_con.Value("AllowHandToolDestroy", "true"), out var allowHandToolDestroy);
         _options.AllowHandToolDestroy = allowHandToolDestroy;
 
@@ -58,8 +52,6 @@ public static class Config
     {
         public int TavernInvIncrease;
         public bool EnableToolAndPrayerStacking;
-        public bool ShowOnlyPersonalInventory;
-        public bool DontShowEmptyRowsInInventory;
         public bool QuietMusicInGui;
         public bool AllowHandToolDestroy;
         public bool HalloweenNow;
