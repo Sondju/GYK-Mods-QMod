@@ -97,6 +97,8 @@ namespace WheresMaStorage
             [HarmonyPrefix]
             public static void Prefix(ref InventoryPanelGUI __instance, ref MultiInventory multi_inventory)
             {
+                Debug.LogError($"[WMS]: Panels: {__instance.name}, {__instance.gameObject.name}");
+                if (__instance.name.Contains("vendor")) return;
                 if (_cfg.DontShowEmptyRowsInInventory)
                 {
                     __instance.dont_show_empty_rows = true;
@@ -169,7 +171,7 @@ namespace WheresMaStorage
                 foreach (var worldZoneDef in GameBalance.me.world_zones_data)
                 {
                     if (!IncludedZones.Contains(worldZoneDef.id)) continue;
-                    var worldZone = WorldZone.GetZoneByID(worldZoneDef.id);
+                    var worldZone = WorldZone.GetZoneByID(worldZoneDef.id, false);
                     if (worldZone == null) continue;
                     var worldZoneMulti = worldZone.GetMultiInventory(player_mi: MultiInventory.PlayerMultiInventory.ExcludePlayer, sortWGOS: true);
                     if (worldZoneMulti != null)
@@ -189,7 +191,10 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryWidget __instance, ref InventoryWidget.ItemFilterDelegate filter_delegate, ref List<BaseItemCellGUI> ___items)
             {
+
                 if (!_cfg.HideInvalidSelections) return;
+                if (__instance.gameObject.transform.parent.transform.parent.transform.parent.name.Contains("vendor"))
+                    return;
                 foreach (var baseItemCellGui in ___items)
                 {
                     switch (filter_delegate(baseItemCellGui.item, __instance))
