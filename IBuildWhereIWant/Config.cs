@@ -15,6 +15,9 @@ public static class Config
         bool.TryParse(_con.Value("DisableGrid", "true"), out var disableGrid);
         _options.DisableGrid = disableGrid;
 
+        bool.TryParse(_con.Value("DisableGreyRemoveOverlay", "true"), out var disableGreyRemoveOverlay);
+        _options.DisableGreyRemoveOverlay = disableGreyRemoveOverlay;
+
         _con.ConfigWrite();
 
         return _options;

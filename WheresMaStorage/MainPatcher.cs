@@ -90,6 +90,7 @@ namespace WheresMaStorage
             }
         }
 
+        //todo: fix the ShowOnlyPersonalInventory only showing the first tier for vendors
         [HarmonyPatch(typeof(InventoryPanelGUI), "DoOpening")]
         public static class InventoryPanelGuiDoOpeningPatch
         {
@@ -136,6 +137,7 @@ namespace WheresMaStorage
             }
         }
 
+        //todo: Test the mod isn't crashing with a new game 
         [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetMultiInventory))]
         public static class WorldGameObjectGetMultiInventoryPatch
         {
@@ -168,6 +170,7 @@ namespace WheresMaStorage
                 {
                     if (!IncludedZones.Contains(worldZoneDef.id)) continue;
                     var worldZone = WorldZone.GetZoneByID(worldZoneDef.id);
+                    if (worldZone == null) continue;
                     var worldZoneMulti = worldZone.GetMultiInventory(player_mi: MultiInventory.PlayerMultiInventory.ExcludePlayer, sortWGOS: true);
                     if (worldZoneMulti != null)
                     {

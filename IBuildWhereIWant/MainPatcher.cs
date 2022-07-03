@@ -1,11 +1,9 @@
-using FlowCanvas.Nodes;
 using HarmonyLib;
 using IBuildWhereIWant.lang;
 using Rewired;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -19,8 +17,10 @@ namespace IBuildWhereIWant
         private static WorldGameObject _buildDesk;
         private static WorldGameObject _buildDeskClone;
         private static Config.Options _cfg;
+
         private static bool _craftAnywhere;
         private static CraftsInventory _craftsInventory;
+
         private static Dictionary<string, string> _craftDictionary;
         private const string Zone = "mf_wood";
 
@@ -85,7 +85,7 @@ namespace IBuildWhereIWant
                     : "[IBuildWhereIWant]: Unable to locate a build desk.");
 
             _buildDeskClone ??= Object.Instantiate(_buildDesk);
-           // _buildDeskClone.obj_def = _buildDesk.obj_def;
+            // _buildDeskClone.obj_def = _buildDesk.obj_def;
             _buildDeskClone.name = BuildDesk;
             //_buildDeskClone.obj_id = BuildDesk;
 
@@ -126,8 +126,7 @@ namespace IBuildWhereIWant
                 craftList.ForEach(craft => { _craftsInventory.AddCraft(craft.Value); });
             }
 
-            _craftAnywhere = true;
-
+             _craftAnywhere = true;
 
             //BuildModeLogics.last_build_desk = _buildDesk;
             //MainGame.me.build_mode_logics.SetCurrentBuildZone(_buildDesk.obj_def.zone_id, "");
@@ -135,25 +134,43 @@ namespace IBuildWhereIWant
             //MainGame.paused = false;
 
             BuildModeLogics.last_build_desk = _buildDeskClone;
-           // Debug.LogError($"BuildDesk Zone: {_buildDesk.obj_def.zone_id}, Clone Zone: {_buildDeskClone.obj_def.zone_id}");
+            // Debug.LogError($"BuildDesk Zone: {_buildDesk.obj_def.zone_id}, Clone Zone: {_buildDeskClone.obj_def.zone_id}");
             MainGame.me.build_mode_logics.SetCurrentBuildZone(_buildDeskClone.obj_def.zone_id, "");
             GUIElements.me.craft.OpenAsBuild(_buildDeskClone, _craftsInventory);
             MainGame.paused = false;
         }
 
-        [HarmonyPatch(typeof(BuildGrid), nameof(BuildGrid.ShowBuildGrid))]
-        public static class BuildGridShowBuildGridPatch
+        //private static bool IsCraftAnywhere()
+        //{
+        //    return BuildModeLogics.last_build_desk.name.Equals(BuildDesk);
+        //}
+
+
+
+        [HarmonyPatch(typeof(BuildGrid))]
+        public static class BuildGridPatch
         {
             [HarmonyPrefix]
-            public static void Prefix(ref bool show)
+            [HarmonyPatch(nameof(BuildGrid.ShowBuildGrid))]
+            public static void ShowBuildGridPrefix(ref bool show)
             {
                 if (_cfg.DisableGrid)
                 {
                     show = false;
                 }
             }
-        }
 
+            [HarmonyPrefix]
+            [HarmonyPatch(nameof(BuildGrid.ClearPreviousTotemRadius))]
+            public static void ClearPreviousTotemRadiusPrefix(ref bool apply_colors)
+            {
+                if (_cfg.DisableGrid)
+                {
+                    apply_colors = false;
+                }
+            }
+
+        }
 
         [HarmonyPatch(typeof(BuildModeLogics))]
         public static class BuildModeLogicsPatch

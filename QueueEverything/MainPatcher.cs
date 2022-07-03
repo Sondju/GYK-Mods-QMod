@@ -617,6 +617,13 @@ public static class MainPatcher
             ref int ____amount)
         {
             if (_unsafeInteraction) return;
+            if (__instance.craft_definition.id.Contains("remove"))
+            {
+                _craftAmount = 1;
+                ____amount = 1;
+                return;
+            }
+
             _craftAmount = ____amount;
 
             if (_alreadyRun) return;
@@ -686,20 +693,21 @@ public static class MainPatcher
             var min = multiMin <= 0 ? m1 : Math.Min(m1, multiMin);
 
             if (_cfg.AutoMaxMultiQualCrafts)
+            {
                 if (isMultiQualCraft && multiMin != 0)
                 {
                     _craftAmount = min;
                     ____amount = min;
                 }
+            }
 
             if (_cfg.AutoMaxNormalCrafts)
-                if (!isMultiQualCraft)
-                    if (notCraftable.Count <= 0)
-                    {
-                        _craftAmount = min;
-                        ____amount = min;
-                    }
-
+            {
+                if (isMultiQualCraft) return;
+                if (notCraftable.Count > 0) return;
+                _craftAmount = min;
+                ____amount = min;
+            }
             //message += "Max Craftable: " + min + "\n";
             //message += "Ingredient list count: " + craftable.Count + "\n";
             //message += "---------------------\n";
