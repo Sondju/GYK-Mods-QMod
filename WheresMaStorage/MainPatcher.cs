@@ -9,9 +9,15 @@ namespace WheresMaStorage
     public class MainPatcher
     {
         private static Config.Options _cfg;
+        private static bool _alreadyRun;
 
         private static WorldGameObject _wgo;
-        private static bool _talkingToNpc;
+        // private static bool _talkingToNpc;
+
+        private static readonly string[] WidgetsPartials =
+        {
+            "mf_stones",  "mf_ore",  "mf_timber",  "tavern", "refugee",  "storage",  "pump"
+        };
 
         private static readonly string[] IncludedZones =
         {
@@ -33,18 +39,25 @@ namespace WheresMaStorage
             "zombie_sawmill",
             "player_tavern_cellar",
             "refugees_camp",
-            "souls",
-            "players_tavern",
-            //"tavern",
-            //"vilage"
+            "players_tavern"
         };
 
         public static void Patch()
         {
-            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.WheresMaStorage");
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
+            try
+            {
+                _cfg = Config.GetOptions();
+                _alreadyRun = false;
 
-            _cfg = Config.GetOptions();
+                var harmony = new Harmony("p1xel8ted.GraveyardKeeper.WheresMaStorage");
+                harmony.PatchAll(Assembly.GetExecutingAssembly());
+
+                _cfg = Config.GetOptions();
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[WheresMaStorage]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            }
         }
 
         [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
@@ -53,6 +66,8 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix()
             {
+                if (_alreadyRun) return;
+                _alreadyRun = true;
                 foreach (var od in GameBalance.me.objs_data.Where(od => od.interaction_type == ObjectDefinition.InteractionType.Chest))
                 {
                     od.inventory_size += _cfg.AdditionalInventorySpace;
@@ -65,7 +80,6 @@ namespace WheresMaStorage
             }
         }
 
-
         [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
         public static class WorldGameObjectInteractPatch
         {
@@ -73,6 +87,7 @@ namespace WheresMaStorage
             public static void Prefix(WorldGameObject __instance, WorldGameObject other_obj)
             {
                 if (!MainGame.game_started || __instance == null) return;
+                Debug.LogError($"[WMS]: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
                 if (other_obj == MainGame.me.player)
                 {
                     _wgo = __instance;
@@ -90,7 +105,6 @@ namespace WheresMaStorage
             }
         }
 
-        //todo: fix the ShowOnlyPersonalInventory only showing the first tier for vendors
         [HarmonyPatch(typeof(InventoryPanelGUI), "DoOpening")]
         public static class InventoryPanelGuiDoOpeningPatch
         {
@@ -104,27 +118,43 @@ namespace WheresMaStorage
                     __instance.dont_show_empty_rows = true;
                 }
 
-
                 if (_cfg.ShowOnlyPersonalInventory || (_wgo != null && _wgo.obj_def.interaction_type is ObjectDefinition.InteractionType.Chest))
                 {
                     var onlyMineInventory = new MultiInventory();
                     onlyMineInventory.AddInventory(multi_inventory.all[0]);
                     multi_inventory = onlyMineInventory;
                 }
-                else
-                {
-                    var myInv = new MultiInventory();
-                    multi_inventory.all.ForEach(inv =>
-                    {
-                        if (inv == null) return;
-                        if (inv._obj_id.Contains("refugee") || inv._obj_id.Contains("pump") || inv._obj_id.Contains("reputation") || inv._obj_id.Contains("builddesk") ||
-                            inv.name.Contains("stockpile")) return;
-                        if (inv.data.inventory.Count <= 0) return;
-                        myInv.AddInventory(inv);
-                        // Debug.LogError($"[MBB] Inv Name: {inv.name}, Obj ID: {inv._obj_id}");
-                    });
+            }
 
-                    multi_inventory = myInv;
+            [HarmonyPostfix]
+            public static void Postfix(ref InventoryPanelGUI __instance, ref List<UIWidget> ____separators, ref List<InventoryWidget> ____widgets, ref List<CustomInventoryWidget> ____custom_widgets)
+            {
+                if (__instance.name.Contains("vendor")) return;
+                foreach (var sep in ____separators)
+                {
+                    sep.Hide();
+                }
+
+                foreach (var customWidget in ____custom_widgets)
+                {
+                    var id = customWidget.inventory_data.id;
+
+                    if (WidgetsPartials.Any(id.Contains))
+                    {
+                        customWidget.Deactivate();
+                    }
+                }
+
+                foreach (var inventoryWidget in ____widgets)
+                {
+                    var id = inventoryWidget.inventory_data.id;
+
+                    {
+                        if (WidgetsPartials.Any(id.Contains))
+                        {
+                            inventoryWidget.Deactivate();
+                        }
+                    }
                 }
             }
         }
@@ -139,7 +169,6 @@ namespace WheresMaStorage
             }
         }
 
-        //todo: Test the mod isn't crashing with a new game 
         [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetMultiInventory))]
         public static class WorldGameObjectGetMultiInventoryPatch
         {
@@ -147,16 +176,20 @@ namespace WheresMaStorage
             public static void Postfix(
                 WorldGameObject __instance,
                 ref MultiInventory __result,
-                bool include_toolbelt = false)
+                // List<WorldGameObject> exceptions = null,
+                //string force_world_zone = "",
+                //MultiInventory.PlayerMultiInventory player_mi = MultiInventory.PlayerMultiInventory.DontChange,
+                bool include_toolbelt = false
+                // bool sortWGOS = false,
+                // bool include_bags = false
+                )
             {
+                if (__instance.obj_def.interaction_type != ObjectDefinition.InteractionType.Craft &&
+                    !__instance.is_player) return;
+
                 if (!_cfg.SharedCraftInventory) return;
-                if (!__instance.is_player) return;
 
-
-                var worldZoneInventories = new List<Inventory>
-                {
-                    new(MainGame.me.player.data, "Player", string.Empty)
-                };
+                var worldZoneInventories = new List<Inventory> { new(MainGame.me.player.data, "Player", string.Empty) };
 
                 if (include_toolbelt)
                 {
@@ -168,16 +201,15 @@ namespace WheresMaStorage
                     worldZoneInventories.Add(new Inventory(data, "Toolbelt", string.Empty));
                 }
 
-                foreach (var worldZoneDef in GameBalance.me.world_zones_data)
+                // foreach (var worldZoneDef in GameBalance.me.world_zones_data)
+                foreach (var worldZoneDef in GameBalance.me.world_zones_data.Where(a => IncludedZones.Contains(a.id)))
                 {
-                    if (!IncludedZones.Contains(worldZoneDef.id)) continue;
+                    // Debug.LogError($"[WMS]: ZoneData: {worldZoneDef.id}");
                     var worldZone = WorldZone.GetZoneByID(worldZoneDef.id, false);
                     if (worldZone == null) continue;
                     var worldZoneMulti = worldZone.GetMultiInventory(player_mi: MultiInventory.PlayerMultiInventory.ExcludePlayer, sortWGOS: true);
-                    if (worldZoneMulti != null)
-                    {
-                        worldZoneInventories.AddRange(worldZoneMulti.Where(inv => inv != null).Where(inv => inv.data.inventory.Count > 0));
-                    }
+                    if (worldZoneMulti == null) continue;
+                    worldZoneInventories.AddRange(worldZoneMulti.Where(i => i != null && i.data.inventory.Count != 0));
                 }
 
                 __result = new MultiInventory();
@@ -191,7 +223,6 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryWidget __instance, ref InventoryWidget.ItemFilterDelegate filter_delegate, ref List<BaseItemCellGUI> ___items)
             {
-
                 if (!_cfg.HideInvalidSelections) return;
                 if (__instance.gameObject.transform.parent.transform.parent.transform.parent.name.Contains("vendor"))
                     return;
@@ -202,7 +233,8 @@ namespace WheresMaStorage
                         case InventoryWidget.ItemFilterResult.Active:
                             baseItemCellGui.SetGrayState(false);
                             break;
-                            case InventoryWidget.ItemFilterResult.Inactive:
+
+                        case InventoryWidget.ItemFilterResult.Inactive:
                             baseItemCellGui.Deactivate();
                             break;
 
@@ -214,13 +246,11 @@ namespace WheresMaStorage
                             baseItemCellGui.DrawUnknown();
                             break;
                     }
- 
                 }
                 typeof(InventoryWidget).GetMethod("RecalculateWidgetSize", AccessTools.all)
                     ?.Invoke(__instance, new object[]
                     {
                     });
-
             }
         }
     }

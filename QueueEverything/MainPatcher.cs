@@ -25,12 +25,18 @@ public static class MainPatcher
     {
         "mf_crematorium_corp", "garden_builddesk", "tree_garden_builddesk", "mf_crematorium", "grave_ground",
         "tile_church_semicircle_2floors", "mf_grindstone_1", "zombie_garden_desk_1", "zombie_garden_desk_2", "zombie_garden_desk_3", 
-        "zombie_vineyard_desk_1", "zombie_vineyard_desk_2", "zombie_vineyard_desk_3", "graveyard_builddesk"
+        "zombie_vineyard_desk_1", "zombie_vineyard_desk_2", "zombie_vineyard_desk_3", "graveyard_builddesk", "blockage_H_low", "blockage_V_low"
+        ,"blockage_H_high", "blockage_V_high", "wood_obstacle_v"
     };
 
     private static readonly string[] UnSafeCraftZones =
     {
         "church"
+    };
+
+    private static readonly string[] UnSafePartials =
+    {
+        "blockage", "obstacle"
     };
 
     private static readonly CraftDefinition.CraftType[] UnSafeCraftTypes =
@@ -88,7 +94,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref WorldGameObject __instance)
         {
-            if (UnSafeCraftZones.Contains(__instance.GetMyWorldZoneId()) || UnSafeCraftObjects.Contains(__instance.obj_id))
+            if (UnSafeCraftZones.Contains(__instance.GetMyWorldZoneId()) || UnSafePartials.Any(__instance.obj_id.Contains) || UnSafeCraftObjects.Contains(__instance.obj_id))
             {
                 _unsafeInteraction = true;
                 Debug.LogError($"[QueueEverything]: UNSAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");

@@ -165,7 +165,7 @@ public class MainPatcher
         _aTimer.AutoReset = true;
         _aTimer.Elapsed += OnTimedEvent;
         _aTimer.Interval = _cfg.SaveInterval;
-        _aTimer.Enabled = _cfg.AutoSave;
+        _aTimer.Enabled = true;
         _aTimer.Start();
         if (!_cfg.DisableAutoSaveInfo)
             ShowMessage(
@@ -175,7 +175,10 @@ public class MainPatcher
 
     private static void OnTimedEvent(object source, ElapsedEventArgs e)
     {
-        AutoSave();
+        if (_cfg.AutoSave)
+        {
+            AutoSave();
+        }
     }
 
     private static void AutoSave()

@@ -306,10 +306,6 @@ public class MainPatcher
         if (_cfg.RealisticHarvest)
         {
             rand = Random.Range(5, 11);
-        }
-
-        if (_cfg.RealisticHarvest)
-        {
             var o = wgo;
             var dropRand = Random.Range(2, 16);
             GJTimer.AddTimer(dropRand, delegate
@@ -336,9 +332,6 @@ public class MainPatcher
         if (_cfg.RealisticHarvest)
         {
             rand = Random.Range(1, 4);
-        }
-        if (_cfg.RealisticHarvest)
-        {
             var o = wgo;
             var dropRand = Random.Range(2, 16);
             GJTimer.AddTimer(dropRand, delegate
@@ -370,10 +363,6 @@ public class MainPatcher
         if (_cfg.RealisticHarvest)
         {
             rand = Random.Range(1, 3);
-        }
-
-        if (_cfg.RealisticHarvest)
-        {
             var o = wgo;
             var dropRand = Random.Range(2, 16);
             GJTimer.AddTimer(dropRand, delegate
@@ -400,10 +389,6 @@ public class MainPatcher
         if (_cfg.RealisticHarvest)
         {
             rand = Random.Range(1, 3);
-        }
-
-        if (_cfg.RealisticHarvest)
-        {
             var o = wgo;
             var dropRand = Random.Range(2, 16);
             GJTimer.AddTimer(dropRand, delegate
@@ -430,10 +415,6 @@ public class MainPatcher
         if (_cfg.RealisticHarvest)
         {
             rand = Random.Range(1, 3);
-        }
-
-        if (_cfg.RealisticHarvest)
-        {
             var o = wgo;
             var dropRand = Random.Range(2, 16);
             GJTimer.AddTimer(dropRand, delegate
