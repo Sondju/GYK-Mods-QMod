@@ -62,6 +62,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WheresMaStorage", "WheresMaStorage\WheresMaStorage.csproj", "{24C8C61B-50FE-4814-9146-C59875A99CCF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShippingBoxMod", "ShippingBoxMod\ShippingBoxMod.csproj", "{59844D78-0F3A-4E2F-A66B-19B262ED3026}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -160,6 +162,10 @@ Global
 		{24C8C61B-50FE-4814-9146-C59875A99CCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24C8C61B-50FE-4814-9146-C59875A99CCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24C8C61B-50FE-4814-9146-C59875A99CCF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59844D78-0F3A-4E2F-A66B-19B262ED3026}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59844D78-0F3A-4E2F-A66B-19B262ED3026}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59844D78-0F3A-4E2F-A66B-19B262ED3026}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59844D78-0F3A-4E2F-A66B-19B262ED3026}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

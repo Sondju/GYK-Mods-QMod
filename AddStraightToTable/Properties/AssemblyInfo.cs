@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Skips the confirm dialog on the autopsy table.")]
 [assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyConfiguration("AddStraightToTable")]
 [assembly: AssemblyCompany("p1xel8ted")]
 [assembly: AssemblyProduct("Add Straight To Table!")]
 [assembly: AssemblyCopyright("")]

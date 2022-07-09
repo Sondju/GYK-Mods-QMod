@@ -66,7 +66,7 @@ namespace WheresMaStorage
             }
         }
 
-        private static void SetInventorySizeText(BaseInventoryWidget inventoryWidget)
+        private static void SetInventorySizeText(BaseInventoryWidget inventoryWidget, InventoryPanelGUI inventoryPanelGUI)
         {
             if (!_cfg.ShowWorldZoneInTitles && !_cfg.ShowUsedSpaceInTitles) return;
 
@@ -104,8 +104,8 @@ namespace WheresMaStorage
             inventoryWidget.header_label.overflowMethod = UILabel.Overflow.ResizeFreely;
 
             // currentText[0] = currentText[0].Trim();
-            var isPlayer = objId.ToLowerInvariant().Contains(Player) || objId.ToLowerInvariant().Contains("test");
-
+            // var isPlayer = objId.ToLowerInvariant().Contains(Player) || objId.ToLowerInvariant().Contains("test");
+            var isPlayer = inventoryPanelGUI.name.ToLowerInvariant().Contains(Player) || (inventoryPanelGUI.name.ToLowerInvariant().Contains(Multi) && _wgo == null);
             //   var header = string.Concat(isPlayer ? strings.Player : currentText[0], isPlayer ? $" - {used}/{cap}" : _cfg.ShowWorldZoneInTitles ? $" ({wzLabel}) - {used}/{cap}" : $" - {used}/{cap}");
 
             var header = isPlayer ? strings.Player : objId;
@@ -201,6 +201,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryPanelGUI __instance, ref List<UIWidget> ____separators, ref List<InventoryWidget> ____widgets, ref List<CustomInventoryWidget> ____custom_widgets)
             {
+                Debug.LogError($"[WMS]: Panel Name: {__instance.name}");
                 var isChest = __instance.name.ToLowerInvariant().Contains(Chest);
                 var isVendor = __instance.name.ToLowerInvariant().Contains(Vendor);
                 var isPlayer = __instance.name.ToLowerInvariant().Contains(Player) || (__instance.name.ToLowerInvariant().Contains(Multi) && _wgo == null);
@@ -217,7 +218,7 @@ namespace WheresMaStorage
                 {
                     foreach (var inventoryWidget in ____widgets)
                     {
-                        SetInventorySizeText(inventoryWidget);
+                        SetInventorySizeText(inventoryWidget, __instance);
                     }
                 }
 
@@ -332,13 +333,14 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryPanelGUI __instance, ref List<InventoryWidget> ____widgets)
             {
+                Debug.LogError($"[WMS]: ReDraw Hit");
                 var isChest = __instance.name.ToLowerInvariant().Contains(Chest);
                 var isPlayer = __instance.name.ToLowerInvariant().Contains(Player) || (__instance.name.ToLowerInvariant().Contains(Multi) && _wgo == null);
                 if ((isPlayer || isChest) && _cfg.ShowUsedSpaceInTitles)
                 {
-                    foreach (var inventoryWidget in ____widgets)
+                    foreach (var inventoryWidget in ____widgets.Where(a=>!a.header_label.text.ToLowerInvariant().Contains("shipping")))
                     {
-                        SetInventorySizeText(inventoryWidget);
+                        SetInventorySizeText(inventoryWidget, __instance);
                     }
                 }
             }

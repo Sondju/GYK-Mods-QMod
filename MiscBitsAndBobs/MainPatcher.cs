@@ -5,7 +5,11 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using DarkTonic.MasterAudio;
+using UnityEngine;
+using UnityEngine.UIElements.StyleSheets;
 using Debug = UnityEngine.Debug;
+using Object = UnityEngine.Object;
 
 namespace MiscBitsAndBobs;
 
@@ -51,6 +55,35 @@ public class MainPatcher
         catch (Exception ex)
         {
             Debug.LogError($"[MiscBitsAndBobs]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
+    }
+
+    [HarmonyPatch(typeof(MasterAudio), nameof(MasterAudio.PlaySound))]
+    public static class MasterAudioPlaySoundPatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix(string sType, ref float volumePercentage)
+        {
+            if (sType.Contains("foot"))
+            {
+                volumePercentage = 0.25f;
+            }
+        }
+    }
+
+
+    [HarmonyPatch(typeof(LeaveTrailComponent), "LeaveTrail")]
+    public static class LeaveTrailComponentLeaveTrailPatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(TrailDefinition ____trail_definition, Ground.GroudType ____trail_type, float ____dirty_amount, List<TrailObject> ____all_trails)
+        {
+            //Debug.LogError($"[MBB]: Dirty Amount: {____dirty_amount}");
+            if (!_cfg.LessenFootprintImpact) return;
+            var byType = ____trail_definition.GetByType(____trail_type);
+            if (____all_trails.Count <= 0) return;
+            var trailObject = ____all_trails[____all_trails.Count - 1];
+            trailObject.SetColor(byType.color, ____dirty_amount / 1.75f);
         }
     }
 

@@ -42,6 +42,9 @@ public static class Config
         bool.TryParse(_con.Value("KitsuneKitoMode", "false"), out var kitsuneKitoMode);
         _options.KitsuneKitoMode = kitsuneKitoMode;
 
+        bool.TryParse(_con.Value("LessenFootprintImpact", "true"), out var lessenFootprintImpact);
+        _options.LessenFootprintImpact = lessenFootprintImpact;
+
         _con.ConfigWrite();
 
         return _options;
@@ -60,5 +63,6 @@ public static class Config
         public bool SkipIntroVideoOnNewGame;
         public bool DisableCinematicLetterboxing;
         public bool KitsuneKitoMode;
+        public bool LessenFootprintImpact;
     }
 }

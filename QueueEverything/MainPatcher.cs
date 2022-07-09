@@ -95,15 +95,16 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref WorldGameObject __instance)
         {
+
             if (UnSafeCraftZones.Contains(__instance.GetMyWorldZoneId()) || UnSafePartials.Any(__instance.obj_id.Contains) || UnSafeCraftObjects.Contains(__instance.obj_id))
             {
                 _unsafeInteraction = true;
-            Debug.LogError($"[QueueEverything]: UNSAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
+            Debug.LogError($"[QueueEverything]: UNSAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
             }
             else
             {
                 _unsafeInteraction = false;
-                Debug.LogError($"[QueueEverything]: UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
+                Debug.LogError($"[QueueEverything]: UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
             }
         }
     }
