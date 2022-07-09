@@ -17,10 +17,36 @@ namespace MaxButtonControllerSupport
         private static WorldGameObject _crafteryWgo;
         private static SmartSlider _slider;
 
+        private static bool _unsafeInteraction;
+
         private static readonly string[] UnSafeCraftObjects =
         {
             "mf_crematorium_corp", "garden_builddesk", "tree_garden_builddesk", "mf_crematorium", "grave_ground",
-            "tile_church_semicircle_2floors", "mf_grindstone_1"
+            "tile_church_semicircle_2floors", "mf_grindstone_1", "zombie_garden_desk_1", "zombie_garden_desk_2", "zombie_garden_desk_3",
+            "zombie_vineyard_desk_1", "zombie_vineyard_desk_2", "zombie_vineyard_desk_3", "graveyard_builddesk", "blockage_H_low", "blockage_V_low",
+            "blockage_H_high", "blockage_V_high", "wood_obstacle_v", "refugee_camp_garden_bed", "refugee_camp_garden_bed_1", "refugee_camp_garden_bed_2",
+            "refugee_camp_garden_bed_3"
+        };
+
+        private static readonly string[] UnSafeCraftZones =
+        {
+            "church"
+        };
+
+        private static readonly string[] UnSafePartials =
+        {
+            "blockage", "obstacle", "builddesk", "fix", "broken"
+        };
+
+        private static readonly CraftDefinition.CraftType[] UnSafeCraftTypes =
+        {
+            CraftDefinition.CraftType.PrayCraft, CraftDefinition.CraftType.Fixing
+        };
+
+
+        private static readonly string[] UnSafeItems =
+        {
+            "zombie","grow_desk_planting","refugee","grow_vineyard_planting", "axe", "hammer", "faith", "shovel", "sword",
         };
 
         public static void Patch()
@@ -106,6 +132,25 @@ namespace MaxButtonControllerSupport
         }
 
 
+        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
+        public static class WorldGameObjectInteractPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref WorldGameObject __instance)
+            {
+                if (UnSafeCraftZones.Contains(__instance.GetMyWorldZoneId()) || UnSafePartials.Any(__instance.obj_id.Contains) || UnSafeCraftObjects.Contains(__instance.obj_id))
+                {
+                    _unsafeInteraction = true;
+                   // Debug.LogError($"[QueueEverything]: UNSAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
+                }
+                else
+                {
+                    _unsafeInteraction = false;
+                   // Debug.LogError($"[QueueEverything]: UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
         public static class TimeOfDayUpdatePatchMbcs
         {
@@ -140,9 +185,10 @@ namespace MaxButtonControllerSupport
 
 
                 //RT = 19
-                if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(19) && _craftGuiOpen && !UnSafeCraftObjects.Contains(_crafteryWgo.obj_id))
+                if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(19) && _craftGuiOpen && !_unsafeInteraction)
                 {
                     if (_craftItemGui.current_craft.needs.Any(need => need.is_multiquality)) return;
+                    if (_craftItemGui.current_craft.one_time_craft) return;
                     typeof(MaxButtonCrafting).GetMethod("SetMaximumAmount", AccessTools.all)
                         ?.Invoke(typeof(MaxButtonCrafting), new object[]
                         {
@@ -153,9 +199,10 @@ namespace MaxButtonControllerSupport
                 }
 
                 //LT = 20
-                if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(20) && _craftGuiOpen && !UnSafeCraftObjects.Contains(_crafteryWgo.obj_id))
+                if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(20) && _craftGuiOpen && !_unsafeInteraction)
                 {
                     if (_craftItemGui.current_craft.needs.Any(need => need.is_multiquality)) return;
+                    if (_craftItemGui.current_craft.one_time_craft) return;
                     typeof(MaxButtonCrafting).GetMethod("SetMinimumAmount", AccessTools.all)
                         ?.Invoke(typeof(MaxButtonCrafting), new object[]
                         {

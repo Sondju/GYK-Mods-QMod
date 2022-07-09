@@ -8,9 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using System.Timers;
 using UnityEngine;
-using Timer = System.Timers.Timer;
 
 namespace SaveNow;
 
@@ -21,7 +19,6 @@ public class MainPatcher
     private static string _savePath;
     private static readonly List<SaveSlotData> AllSaveGames = new();
     private static List<SaveSlotData> _sortedTrimmedSaveGames = new();
-    private static Timer _aTimer;
     private static bool _canSave;
     private static string _currentSave;
     private static readonly Dictionary<string, Vector3> SaveLocationsDictionary = new();
@@ -34,7 +31,6 @@ public class MainPatcher
         try
         {
             _cfg = Config.GetOptions();
-            _aTimer = new Timer();
             _dataPath = "./QMods/SaveNow/dont-remove.dat";
             _savePath = "./QMods/SaveNow/SaveBackup/";
 
@@ -42,9 +38,6 @@ public class MainPatcher
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             LoadSaveLocations();
-
-            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
         }
         catch (Exception ex)
         {
@@ -162,24 +155,21 @@ public class MainPatcher
         MainGame.me.player.PlaceAtPos(pos);
         if (!_cfg.TurnOffTravelMessages) ShowMessage(strings.Rush, pos);
 
-        _aTimer.AutoReset = true;
-        _aTimer.Elapsed += OnTimedEvent;
-        _aTimer.Interval = _cfg.SaveInterval;
-        _aTimer.Enabled = true;
-        _aTimer.Start();
+        StartTimer();
         if (!_cfg.DisableAutoSaveInfo)
             ShowMessage(
-                $"{strings.InfoAutoSave}: {_cfg.AutoSave}, {strings.InfoPeriod}: {_cfg.SaveInterval / 60000} {strings.InfoMinutes}, {strings.InfoNewSaveOnAutoSave}: {_cfg.NewFileOnAutoSave}, {strings.InfoSavesToKeep}: {_cfg.AutoSavesToKeep}",
+                $"{strings.InfoAutoSave}: {_cfg.AutoSave}, {strings.InfoPeriod}: {_cfg.SaveInterval / 60} {strings.InfoMinutes}, {strings.InfoNewSaveOnAutoSave}: {_cfg.NewFileOnAutoSave}, {strings.InfoSavesToKeep}: {_cfg.AutoSavesToKeep}",
                 pos, EffectBubblesManager.BubbleColor.Red, 4f);
     }
 
-    private static void OnTimedEvent(object source, ElapsedEventArgs e)
+    private static void StartTimer()
     {
         if (_cfg.AutoSave)
         {
-            AutoSave();
+            GJTimer.AddTimer(_cfg.SaveInterval, AutoSave);
         }
     }
+
 
     private static void AutoSave()
     {
@@ -205,6 +195,8 @@ public class MainPatcher
                     GUIElements.me.ShowSavingStatus(false);
                 });
         }
+
+        StartTimer();
     }
 
     [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]

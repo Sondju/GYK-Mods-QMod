@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace SaveNow;
 
@@ -12,7 +13,7 @@ public static class Config
         _options = new Options();
         _con = new ConfigReader();
 
-        int.TryParse(_con.Value("SaveInterval", "900000"), out var saveInterval);
+        int.TryParse(_con.Value("SaveInterval", "600"),NumberStyles.Integer, CultureInfo.InvariantCulture, out var saveInterval);
         _options.SaveInterval = saveInterval;
 
         bool.TryParse(_con.Value("AutoSave", "true"), out var autoSave);
@@ -21,7 +22,7 @@ public static class Config
         bool.TryParse(_con.Value("NewFileOnAutoSave", "true"), out var newFileOnAutoSave);
         _options.NewFileOnAutoSave = newFileOnAutoSave;
 
-        int.TryParse(_con.Value("AutoSavesToKeep", "5"), out var autoSavesToKeep);
+        int.TryParse(_con.Value("AutoSavesToKeep", "5"), NumberStyles.Integer, CultureInfo.InvariantCulture, out var autoSavesToKeep);
         _options.AutoSavesToKeep = autoSavesToKeep;
 
         bool.TryParse(_con.Value("DisableAutoSaveInfo", "false"), out var disableAutoSaveInfo);
@@ -48,7 +49,7 @@ public static class Config
     [Serializable]
     public class Options
     {
-        public int SaveInterval = 900000;
+        public int SaveInterval = 600;
         public bool AutoSave = true;
         public bool NewFileOnAutoSave;
         public int AutoSavesToKeep = 5;

@@ -25,8 +25,9 @@ public static class MainPatcher
     {
         "mf_crematorium_corp", "garden_builddesk", "tree_garden_builddesk", "mf_crematorium", "grave_ground",
         "tile_church_semicircle_2floors", "mf_grindstone_1", "zombie_garden_desk_1", "zombie_garden_desk_2", "zombie_garden_desk_3", 
-        "zombie_vineyard_desk_1", "zombie_vineyard_desk_2", "zombie_vineyard_desk_3", "graveyard_builddesk", "blockage_H_low", "blockage_V_low"
-        ,"blockage_H_high", "blockage_V_high", "wood_obstacle_v"
+        "zombie_vineyard_desk_1", "zombie_vineyard_desk_2", "zombie_vineyard_desk_3", "graveyard_builddesk", "blockage_H_low", "blockage_V_low",
+        "blockage_H_high", "blockage_V_high", "wood_obstacle_v", "refugee_camp_garden_bed", "refugee_camp_garden_bed_1", "refugee_camp_garden_bed_2",
+        "refugee_camp_garden_bed_3"
     };
 
     private static readonly string[] UnSafeCraftZones =
@@ -36,7 +37,7 @@ public static class MainPatcher
 
     private static readonly string[] UnSafePartials =
     {
-        "blockage", "obstacle"
+        "blockage", "obstacle", "builddesk", "fix", "broken"
     };
 
     private static readonly CraftDefinition.CraftType[] UnSafeCraftTypes =
@@ -47,7 +48,7 @@ public static class MainPatcher
 
     private static readonly string[] UnSafeItems =
     {
-        "zombie","grow_desk_planting","refugee","grow_vineyard_planting", "axe", "hammer", "faith", "shovel", "sword"
+        "zombie","grow_desk_planting","refugee","grow_vineyard_planting", "axe", "hammer", "faith", "shovel", "sword", 
     };
 
     private static bool _alreadyRun;
@@ -97,12 +98,12 @@ public static class MainPatcher
             if (UnSafeCraftZones.Contains(__instance.GetMyWorldZoneId()) || UnSafePartials.Any(__instance.obj_id.Contains) || UnSafeCraftObjects.Contains(__instance.obj_id))
             {
                 _unsafeInteraction = true;
-                Debug.LogError($"[QueueEverything]: UNSAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
+            Debug.LogError($"[QueueEverything]: UNSAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
             }
             else
             {
                 _unsafeInteraction = false;
-                Debug.LogError($"[QueueEverything]: SAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
+                Debug.LogError($"[QueueEverything]: UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
             }
         }
     }
@@ -120,6 +121,10 @@ public static class MainPatcher
                 var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
                 GameBalance.me.craft_data.ForEach(craft =>
                 {
+                    //if (craft.one_time_craft)
+                    //{
+                    //    Debug.LogError($"[QE]: OneTimeCraft: {craft.id}");
+                    //}
                     if (craft.is_auto) return;
                     //if (craft.id.Contains("table"))
                     //{
@@ -141,8 +146,8 @@ public static class MainPatcher
                         cookingTableCraft = craft.craft_in.Any(craftIn => craftIn.Contains("cooking_table") && !refugeeCraft);
                     }
 
-                    if (UnSafeItems.Any(craft.id.Contains) | refugeeCraft | cookingTableCraft | zombieCraft | graveCraft | bodyCraft |
-                       UnSafeCraftTypes.Contains(craft.craft_type) | craft.craft_time_is_zero) return;
+                    if (UnSafeItems.Any(craft.id.Contains) || refugeeCraft || cookingTableCraft || zombieCraft || graveCraft || bodyCraft ||
+                       UnSafeCraftTypes.Contains(craft.craft_type) || craft.craft_time_is_zero) return;
 
                     
                     var ct = craft.energy.EvaluateFloat(crafteryWgo, MainGame.me.player);
@@ -216,9 +221,13 @@ public static class MainPatcher
     public static class CraftDefinitionCanCraftMultiplePatch
     {
         [HarmonyPostfix]
-        public static void Postfix(ref bool __result)
+        public static void Postfix(ref CraftDefinition __instance, ref bool __result)
         {
-            if (_unsafeInteraction) return;
+            if (_unsafeInteraction || __instance.one_time_craft)
+            {
+                Debug.LogError($"[QueueEverything]: Unsafe Craft: {__instance.id}");
+                return;
+            }
             __result = true;
         }
     }
@@ -374,9 +383,20 @@ public static class MainPatcher
             {
                 var found = FireCrafts.TryGetValue(__instance.id, out var value);
                 if (!found)
+                {
                     FireCrafts.Add(__instance.id, item.value);
+                }
                 else
-                    item.value = (int)Math.Round((double)value / 2, MidpointRounding.AwayFromZero);
+                {
+                    if (_cfg.HalfFireRequirements)
+                    {
+                        item.value = (int) Math.Round((double) value / 2, MidpointRounding.AwayFromZero);
+                    }
+                    else
+                    {
+                        item.value = value;
+                    }
+                }
 
                 var amount = item.value * multiplier;
                 var text2 = amount % 1 == 0
@@ -499,7 +519,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref CraftDefinition craft_definition, ref int ____amount)
         {
-            if (_unsafeInteraction) return;
+            if (_unsafeInteraction || craft_definition.one_time_craft) return;
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
 
             ____amount = 1;
@@ -562,8 +582,10 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref CraftItemGUI __instance, ref int ____amount)
         {
+           // if (__instance == null) return;
+           // Debug.LogError($"[QueueEverything]: Craft: {__instance.craft_definition.id}, Energy Expression: {__instance.craft_definition.energy.has_expression}, Time Expression: {__instance.craft_definition.craft_time.has_expression} One time: {__instance.craft_definition.one_time_craft}");
             if (_unsafeInteraction) return;
-            if (__instance.craft_definition.id.Contains("remove")) return;
+            if (__instance.craft_definition.id.Contains("remove") || __instance.craft_definition.one_time_craft) return;
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
 
             var found = Crafts.TryGetValue(__instance.craft_definition.id, out var value);
@@ -623,7 +645,7 @@ public static class MainPatcher
             ref int ____amount)
         {
             if (_unsafeInteraction) return;
-            if (__instance.craft_definition.id.Contains("remove"))
+            if (__instance.craft_definition.id.Contains("remove") || __instance.craft_definition.one_time_craft)
             {
                 _craftAmount = 1;
                 ____amount = 1;

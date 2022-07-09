@@ -64,7 +64,6 @@ public class MainPatcher
 
                 case SmartWeatherState.WeatherType.Rain:
                     ____previously_enabled = false;
-                    ____enabled = false;
                     break;
 
                 case SmartWeatherState.WeatherType.LUT:

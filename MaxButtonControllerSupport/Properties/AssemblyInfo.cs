@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Adds controller support to the MaxButton mod. Please ensure its loaded after MaxButton.")]
 [assembly: AssemblyCompany("p1xel8ted")]
 [assembly: AssemblyProduct("MaxButton Controller Support")]
-[assembly: AssemblyVersion("1.1")]
-[assembly: AssemblyFileVersion("1.1")]
+[assembly: AssemblyVersion("1.3")]
+[assembly: AssemblyFileVersion("1.3")]
 [assembly: NeutralResourcesLanguage("en")]
 
 [assembly: AssemblyDescription("")]

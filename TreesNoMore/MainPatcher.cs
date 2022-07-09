@@ -1,4 +1,5 @@
 using HarmonyLib;
+using System;
 using System.Reflection;
 using UnityEngine;
 
@@ -13,9 +14,31 @@ public class MainPatcher
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.TreesNoMore");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
             Debug.LogError($"[TreesNoMore]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+        }
+    }
+
+    //makes the racks and the barman inventory larger
+    [HarmonyPatch(typeof(WorldGameObject), "InitNewObject")]
+    public static class WorldGameObjectInitNewObjectPatch
+    {
+        [HarmonyPostfix]
+        private static void Postfix(ref WorldGameObject __instance)
+        {
+            if (__instance == null) return;
+            if (__instance.obj_id.Contains("stump"))
+            {
+                UnityEngine.Object.Destroy(__instance.gameObject);
+            }
+        }
+
+        [HarmonyFinalizer]
+        public static Exception Finalizer()
+        {
+            //Debug.LogError($"[TreesNoMore]: Stopped a stump spawning!");
+            return null;
         }
     }
 
@@ -25,10 +48,17 @@ public class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref WorldObjectPart prefab)
         {
+            if (prefab == null) return;
             if ((!MainGame.game_started && !MainGame.game_starting) || !prefab.name.Contains("tree") || prefab.name.Contains("bees")) return;
-            Debug.LogError($"[TreesNoMore] {prefab.name}");
             if (prefab.name.Contains("apple")) return;
             prefab = null;
+        }
+
+        [HarmonyFinalizer]
+        public static Exception Finalizer()
+        {
+           // Debug.LogError($"[TreesNoMore]: Stopped a tree spawning!");
+            return null;
         }
     }
 }

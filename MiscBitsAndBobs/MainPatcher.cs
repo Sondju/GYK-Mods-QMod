@@ -1,10 +1,11 @@
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace MiscBitsAndBobs;
 
@@ -12,6 +13,8 @@ public class MainPatcher
 {
     private static Config.Options _cfg;
     private static WorldGameObject _wgo;
+    private static readonly List<string> LoadedMods = new();
+    private const string WheresMaStorage = "WheresMaStorage";
 
     private static readonly string[] TavernItems =
     {
@@ -90,8 +93,6 @@ public class MainPatcher
             }
         }
     }
-    
-
 
     [HarmonyPatch(typeof(CraftComponent), "End")]
     public static class GraveGuiOnCraftPatch
@@ -130,9 +131,10 @@ public class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref DropResGameObject __instance)
         {
-            if (!GraveItems.Contains(__instance.res.definition.type)) return;
-            __instance.res.definition.stack_count = 1000;
-            __instance.res.definition.base_count = 1000;
+            if (LoadedMods.Contains(WheresMaStorage)) return;
+                if (!GraveItems.Contains(__instance.res.definition.type)) return;
+            __instance.res.definition.stack_count = 9999;
+            // __instance.res.definition.base_count = 1000;
         }
     }
 
@@ -143,10 +145,11 @@ public class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref CraftDefinition __result)
         {
+            if (LoadedMods.Contains(WheresMaStorage)) return;
             foreach (var item in __result.output.Where(a => GraveItems.Contains(a.definition.type)))
             {
                 item.definition.stack_count = 1;
-                item.definition.base_count = 1;
+                //item.definition.base_count = 1;
             }
         }
     }
@@ -157,6 +160,7 @@ public class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref CraftDefinition __instance, ref bool __result)
         {
+            if (LoadedMods.Contains(WheresMaStorage)) return;
             if (!_cfg.EnableToolAndPrayerStacking) return;
             if (__instance == null) return;
             if (__instance.needs.Exists(item => item.id.Equals("pen:ink_pen")) && __instance.dur_needs_item > 0)
@@ -174,14 +178,15 @@ public class MainPatcher
         [HarmonyPostfix]
         private static void Postfix()
         {
+            if (LoadedMods.Contains(WheresMaStorage)) return;
             if (_cfg.EnableToolAndPrayerStacking)
             {
                 foreach (var item in GameBalance.me.items_data.Where(item =>
                              ToolItems.Contains(item.type) || GraveItems.Contains(item.type) ||
                              MakeStackable.Any(item.id.Contains)))
                 {
+                    if (item.stack_count >= 1000) continue;
                     item.stack_count += 1000;
-                    item.base_count += 1000;
                 }
             }
         }
@@ -194,8 +199,12 @@ public class MainPatcher
         [HarmonyPostfix]
         private static void Postfix(ref WorldGameObject __instance)
         {
+            if (LoadedMods.Contains(WheresMaStorage)) return;
             if (TavernItems.Contains(__instance.obj_id))
+            {
+                Debug.LogError($"[MBB]: TavernStorage InitNewObject Hit");
                 __instance.data.SetInventorySize(__instance.obj_def.inventory_size + _cfg.TavernInvIncrease);
+            }
         }
     }
 
@@ -223,6 +232,29 @@ public class MainPatcher
             {
                 comp.SetState(UIButtonColor.State.Disabled, true);
                 comp.SetActive(false);
+            }
+        }
+
+        [HarmonyPostfix]
+        public static void Postfix()
+        {
+            try
+            {
+                var mods = AppDomain.CurrentDomain.GetAssemblies()
+             .Where(a => a.Location.ToLowerInvariant().Contains("qmods"));
+                LoadedMods.Clear();
+                foreach (var mod in mods)
+                {
+                    var modInfo = FileVersionInfo.GetVersionInfo(mod.Location);
+                    if (!string.IsNullOrEmpty(modInfo.Comments))
+                    {
+                        LoadedMods.Add(modInfo.Comments);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Loaded Mod: {ex.Message}");
             }
         }
     }
@@ -289,7 +321,6 @@ public class MainPatcher
             if (_cfg.QuietMusicInGui) SmartAudioEngine.me.SetDullMusicMode(false);
         }
     }
-
 
     //makes halloween an annual event instead of the original 2018...
     [HarmonyPatch(typeof(GameSave), nameof(GameSave.GlobalEventsCheck))]

@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Storage & Inventory Tweaks")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("WheresMaStorage")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
 [assembly: AssemblyProduct("Where's Ma' Storage!")]

@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Implements an auto-save, and save anywhere at any time system.")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("SaveNow")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
 [assembly: AssemblyProduct("Save Now!")]
@@ -29,6 +29,6 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("7.1")]
-[assembly: AssemblyFileVersion("7.1")]
+[assembly: AssemblyVersion("7.2")]
+[assembly: AssemblyFileVersion("7.2")]
 [assembly: NeutralResourcesLanguage("en")]

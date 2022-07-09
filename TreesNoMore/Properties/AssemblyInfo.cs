@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Stops trees respawning, even afte removing the stump.")]
+[assembly: AssemblyTitle("Stops trees respawning, even after removing the stump.")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
@@ -29,6 +29,6 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.2")]
-[assembly: AssemblyFileVersion("2.2")]
+[assembly: AssemblyVersion("2.3")]
+[assembly: AssemblyFileVersion("2.3")]
 [assembly: NeutralResourcesLanguage("en")]
