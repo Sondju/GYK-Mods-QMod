@@ -1,3 +1,4 @@
+using System.IO;
 using HarmonyLib;
 using System.Linq;
 using System.Reflection;
@@ -6,11 +7,17 @@ namespace Helper
 {
     public class MainPatcher
     {
-
+        private const string DisablePath = "./QMods/disable";
+        private static bool _disableMods;
         public static void Patch()
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.QModHelper");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
+            _disableMods = File.Exists(DisablePath);
+            if (_disableMods)
+            {
+                File.Delete(DisablePath);
+            }
         }
         
         [HarmonyPatch(typeof(MainMenuGUI), nameof(MainMenuGUI.Open))]
@@ -33,7 +40,14 @@ namespace Helper
                 foreach (var comp in __instance.GetComponentsInChildren<UILabel>()
                              .Where(x => x.name.Contains("ver txt")))
                 {
-                    comp.text += ", [F7B000] QMod Reloaded Enabled[-]";
+                    if (_disableMods)
+                    {
+                        comp.text += ", [F7B000] QMod Reloaded[-] [F70000]Disabled[-]";
+                    }
+                    else
+                    {
+                        comp.text += ", [F7B000] QMod Reloaded[-] [2BFF00]Enabled[-]";
+                    }
                     comp.overflowMethod = UILabel.Overflow.ResizeFreely;
                     comp.multiLine = true;
                     comp.MakePixelPerfect();
