@@ -33,7 +33,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
+    <Compile Include="InternalConfig.cs" />
     <Compile Include="ConfigReader.cs" />
+    <Compile Include="InternalConfigReader.cs" />
     <Compile Include="MainPatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

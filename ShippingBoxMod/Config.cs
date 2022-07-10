@@ -7,19 +7,13 @@ public static class Config
     private static Options _options;
     private static ConfigReader _con;
 
-
-    public static void WriteOptions()
-    {
-        _con.UpdateValue("ShippingBoxBuilt", _options.ShippingBoxBuilt.ToString());
-    }
-
     public static Options GetOptions()
     {
         _options = new Options();
         _con = new ConfigReader();
 
-        bool.TryParse(_con.Value("ShippingBoxBuilt", "false"), out var shippingBoxBuilt);
-        _options.ShippingBoxBuilt = shippingBoxBuilt;
+        bool.TryParse(_con.Value("ShowSoldMessagesOnPlayer", "true"), out var showSoldMessagesOnPlayer);
+        _options.ShowSoldMessagesOnPlayer = showSoldMessagesOnPlayer;
 
         _con.ConfigWrite();
 
@@ -29,6 +23,6 @@ public static class Config
     [Serializable]
     public class Options
     {
-        public bool ShippingBoxBuilt;
+        public bool ShowSoldMessagesOnPlayer = true;
     }
 }

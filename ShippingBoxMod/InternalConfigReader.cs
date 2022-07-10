@@ -3,13 +3,13 @@ using System.IO;
 
 namespace ShippingBoxMod;
 
-public class ConfigReader
+public class InternalConfigReader
 {
-    private const string ConfigPath = "./QMods/ShippingBoxMod/config.ini";
+    private const string ConfigPath = "./QMods/ShippingBoxMod/dont-touch.dat";
 
     private readonly Dictionary<string, string> _values = new();
 
-    public ConfigReader()
+    public InternalConfigReader()
     {
         if (!File.Exists(ConfigPath)) File.WriteAllText(ConfigPath, "");
 

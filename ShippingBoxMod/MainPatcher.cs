@@ -1,11 +1,8 @@
 using HarmonyLib;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using FlowCanvas.Nodes.Refugees;
 using UnityEngine;
-using static HarmonyLib.Code;
 using Object = UnityEngine.Object;
 
 namespace ShippingBoxMod
@@ -14,6 +11,7 @@ namespace ShippingBoxMod
     {
         private static bool _shippingBuild;
         private static WorldGameObject _shippingBox;
+        private static InternalConfig.Options _internalCfg;
         private static Config.Options _cfg;
         private static bool _usingShippingBox;
         private static WorldGameObject _myVendor;
@@ -24,7 +22,13 @@ namespace ShippingBoxMod
         {
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.ShippingBoxMod");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
+            _internalCfg = InternalConfig.GetOptions();
             _cfg = Config.GetOptions();
+        }
+
+        private static void ShowIntroMessage()
+        {
+            GUIElements.me.dialog.OpenOK("Thanks for installing this yet-to-be-named-mod.", null, "- The shipping box is limited to 10 spaces.\n- You can only build one.\n- Once items go in, they don't come out.\n- Items in the box are sold when the day ends (moon a little past the church bell tower).\n- You get approx. 25% less than selling directly to T3 tavern dude.\n- Quest items should be greyed out, but keep any eye out and let me know otherwise.", true, "Enjoy! - p1xel8ted");
         }
 
         [HarmonyPatch(typeof(MainGame), nameof(MainGame.Update))]
@@ -34,23 +38,31 @@ namespace ShippingBoxMod
             public static void Postfix()
             {
                 if (!MainGame.game_started) return;
-                if (_cfg.ShippingBoxBuilt && _shippingBox==null)
+
+                if (_internalCfg.ShowIntroMessage)
                 {
-                
+                    ShowIntroMessage();
+                    _internalCfg.ShowIntroMessage = false;
+                    UpdateInternalConfig();
+                }
+                if (_internalCfg.ShippingBoxBuilt && _shippingBox == null)
+                {
                     _shippingBox = Object.FindObjectsOfType<WorldGameObject>(true)
                         .FirstOrDefault(x => string.Equals(x.custom_tag, ShippingBoxTag));
                     if (_shippingBox == null)
                     {
                         Debug.LogError("[SB]: No Shipping Box Found!");
-                        _cfg.ShippingBoxBuilt = false;
+                        _internalCfg.ShippingBoxBuilt = false;
                     }
                     else
                     {
                         Debug.LogError($"[SB]: Found Shipping Box at {_shippingBox.grid_pos}");
-                        _cfg.ShippingBoxBuilt = true;
+                        _internalCfg.ShippingBoxBuilt = true;
+                        _shippingBox.data.drop_zone_id = ShippingBoxTag;
+                        _shippingBox.data.SetInventorySize(10);
                     }
 
-                    UpdateConfig();
+                    UpdateInternalConfig();
                 }
             }
         }
@@ -65,9 +77,52 @@ namespace ShippingBoxMod
                 {
                     Debug.LogError($"[SB]: Removed Shipping Box!");
                     _shippingBox = null;
-                    _cfg.ShippingBoxBuilt = false;
-                    UpdateConfig();
+                    _internalCfg.ShippingBoxBuilt = false;
+                    UpdateInternalConfig();
                 }
+            }
+        }
+
+        [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs", "p1xel8ted.GraveyardKeeper.WheresMaStorage")]
+        [HarmonyPatch(typeof(ChestGUI), nameof(ChestGUI.Open))]
+        public static class ChestGuiOpenPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref ChestGUI __instance)
+            {
+                if (__instance == null || !_usingShippingBox) return;
+
+                foreach (var inventory in __instance.player_panel.multi_inventory.all.Where(i => i.data.inventory.Count > 0))
+                {
+                    foreach (var item in inventory.data.inventory.Where(item => item.definition.player_cant_throw_out))
+                    {
+                        var itemCellGuiForItem = __instance.player_panel.GetItemCellGuiForItem(item);
+                        itemCellGuiForItem.SetInactiveState();
+                    }
+                }
+
+                foreach (var inventory in __instance.chest_panel.multi_inventory.all.Where(i => i.data.inventory.Count > 0))
+                {
+                    foreach (var item in inventory.data.inventory)
+                    {
+                        var itemCellGuiForItem = __instance.chest_panel.GetItemCellGuiForItem(item);
+                        if (itemCellGuiForItem != null)
+                        {
+                            itemCellGuiForItem.SetInactiveState();
+                        }
+                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(ChestGUI), "OnPressedBack")]
+        public static class ChestGuiOnClosePressedPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref ChestGUI __instance)
+            {
+                if (__instance == null) return;
+                _usingShippingBox = false;
             }
         }
 
@@ -75,16 +130,18 @@ namespace ShippingBoxMod
         public static class WorldGameObjectInteractPatch
         {
             [HarmonyPrefix]
-            public static void Prefix(ref WorldGameObject __instance)
+            public static void Prefix(ref WorldGameObject __instance, ref WorldGameObject other_obj)
             {
                 if (string.Equals(__instance.custom_tag, ShippingBoxTag))
                 {
-                    Debug.LogError($"[SB]: Prefix Found Shipping Box!");
-                    _shippingBox = __instance;
-                    _cfg.ShippingBoxBuilt = true;
-                    UpdateConfig();
+                    Debug.LogError($"[SB]: Prefix Found Shipping Box! {__instance.data.drop_zone_id}, Other: {other_obj.obj_id}");
+                    _internalCfg.ShippingBoxBuilt = true;
+                    UpdateInternalConfig();
                     _usingShippingBox = true;
+                    __instance.data.drop_zone_id = ShippingBoxTag;
+                    __instance.data.SetInventorySize(10);
                     __instance.data.money = GetEarnings(__instance);
+                    _shippingBox = __instance;
                 }
                 //else
                 //{
@@ -93,10 +150,10 @@ namespace ShippingBoxMod
             }
         }
 
-        private static void UpdateConfig()
+        private static void UpdateInternalConfig()
         {
-            Config.WriteOptions();
-            _cfg = Config.GetOptions();
+            InternalConfig.WriteOptions();
+            _internalCfg = InternalConfig.GetOptions();
         }
 
         [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.ReplaceWithObject))]
@@ -105,16 +162,17 @@ namespace ShippingBoxMod
             [HarmonyPostfix]
             public static void Postfix(ref WorldGameObject __instance, ref string new_obj_id)
             {
-            
                 if (string.Equals(new_obj_id, "mf_box_stuff") && _shippingBuild)
                 {
                     Debug.LogError($"[SB]: Shipping Build: Built Shipping Box!");
                     __instance.custom_tag = ShippingBoxTag;
-                    
-                   // _shippingBoxBuilt = true;
+
+                    // _shippingBoxBuilt = true;
+                    __instance.data.SetInventorySize(10);
+                    __instance.data.drop_zone_id = ShippingBoxTag;
                     _shippingBox = __instance;
-                    _cfg.ShippingBoxBuilt = true;
-                    UpdateConfig();
+                    _internalCfg.ShippingBoxBuilt = true;
+                    UpdateInternalConfig();
                 }
             }
         }
@@ -126,7 +184,7 @@ namespace ShippingBoxMod
             [HarmonyPostfix]
             public static void Postfix(ref bool __result, ref CraftDefinition cd)
             {
-                if (_cfg.ShippingBoxBuilt && _shippingBox != null)
+                if (_internalCfg.ShippingBoxBuilt && _shippingBox != null)
                 {
                     if (cd.id.Contains(ShippingItem))
                     {
@@ -142,6 +200,7 @@ namespace ShippingBoxMod
             [HarmonyPostfix]
             public static void Postfix(ref Vendor __instance, ref bool __result)
             {
+                if (__instance == null || _myVendor == null || _myVendor.vendor == null) return;
                 if (__instance.Equals(_myVendor.vendor))
                 {
                     __result = true;
@@ -164,7 +223,6 @@ namespace ShippingBoxMod
             }
         }
 
-
         private static float GetEarnings(WorldGameObject shippingBox)
         {
             var vendor = WorldMap.GetNPCByObjID("npc_tavern owner");
@@ -186,7 +244,6 @@ namespace ShippingBoxMod
                 var totalCount = shippingBox.data.GetTotalCount(item.id);
                 for (var i = 0; i < totalCount; i++)
                 {
-
                     num += Mathf.Round(myTrader.GetSingleItemCostInPlayerInventory(item, -i) * 100f) / 100f;
                 }
             }
@@ -215,7 +272,6 @@ namespace ShippingBoxMod
                     __instance.money_label.text = Trading.FormatMoney(GetEarnings(_shippingBox), true);
                 }
             }
-
         }
 
         [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
@@ -239,14 +295,13 @@ namespace ShippingBoxMod
             }
         }
 
-
         [HarmonyPatch(typeof(EnvironmentEngine), "OnEndOfDay")]
         public static class EnvironmentEngineOnEndOfDayPatch
         {
             [HarmonyPostfix]
             public static void Postfix()
             {
-                if (_cfg.ShippingBoxBuilt && _shippingBox != null)
+                if (_internalCfg.ShippingBoxBuilt && _shippingBox != null)
                 {
                     foreach (var item in _shippingBox.data.inventory)
                     {
@@ -260,13 +315,28 @@ namespace ShippingBoxMod
                     Stats.PlayerAddMoney(num, "Shipping Box");
                     MainGame.me.player.data.money += num;
                     var money = Trading.FormatMoney(num, true);
-                    Sounds.PlaySound("coins_sound", _shippingBox.pos3, true, 0f);
+
+                    Vector3 position;
+                    float time;
+                    if (_cfg.ShowSoldMessagesOnPlayer)
+                    {
+                        position = MainGame.me.player_pos;
+                        position.y += 125f;
+                        time = 4f;
+                    }
+                    else
+                    {
+                        position = _shippingBox.pos3;
+                        position.y += 100f;
+                        time = 7f;
+                    }
+
+                    Sounds.PlaySound("coins_sound", position, true, 0f);
                     _shippingBox.data.inventory.Clear();
-                    EffectBubblesManager.ShowImmediately(_shippingBox.pos3, $"Earned ${money}!", EffectBubblesManager.BubbleColor.Green, true, 7f);
+                    EffectBubblesManager.ShowImmediately(position, $"Earned ${money}!", EffectBubblesManager.BubbleColor.Green, true, time);
                 }
             }
         }
-
 
         [HarmonyPatch(typeof(BaseCraftGUI), "CommonOpen")]
         public static class GameBalanceLoadGameBalancePatch
@@ -348,11 +418,10 @@ namespace ShippingBoxMod
                 if (wgo.obj_id.Contains("zombie")) return;
                 if (!wgo.obj_id.Contains("mf_wood_builddesk")) return;
 
-                if (_cfg.ShippingBoxBuilt || _shippingBox != null) return;
+                if (_internalCfg.ShippingBoxBuilt || _shippingBox != null) return;
 
                 ___crafts.Add(newCd);
                 ___crafts_inventory?.AddCraft(newCd.id);
-
             }
         }
     }

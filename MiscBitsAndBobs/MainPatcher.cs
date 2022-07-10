@@ -6,8 +6,6 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using DarkTonic.MasterAudio;
-using UnityEngine;
-using UnityEngine.UIElements.StyleSheets;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
@@ -64,6 +62,7 @@ public class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(string sType, ref float volumePercentage)
         {
+            if (!_cfg.LessenFootstepSound) return;
             if (sType.Contains("foot"))
             {
                 volumePercentage = 0.25f;
@@ -83,7 +82,7 @@ public class MainPatcher
             var byType = ____trail_definition.GetByType(____trail_type);
             if (____all_trails.Count <= 0) return;
             var trailObject = ____all_trails[____all_trails.Count - 1];
-            trailObject.SetColor(byType.color, ____dirty_amount / 1.75f);
+            trailObject.SetColor(byType.color, ____dirty_amount / 1.50f);
         }
     }
 
@@ -143,19 +142,25 @@ public class MainPatcher
         }
     }
 
-    [HarmonyPatch(typeof(InventoryGUI), nameof(InventoryGUI.OnItemOver))]
-    public static class InventoryGuiOnItemOverPatch
-    {
-        [HarmonyPrefix]
-        public static void Prefix(ref InventoryGUI __instance)
-        {
-            if (!_cfg.AllowHandToolDestroy) return;
-            if (__instance == null) return;
-            var itemDef = __instance.selected_item?.definition;
-            if (itemDef == null) return;
-            if (ToolItems.Contains(itemDef.type)) itemDef.player_cant_throw_out = false;
-        }
-    }
+    //[HarmonyPatch(typeof(InventoryGUI), nameof(InventoryGUI.OnItemOver))]
+    //public static class InventoryGuiOnItemOverPatch
+    //{
+    //    [HarmonyPrefix]
+    //    public static void Prefix(ref InventoryGUI __instance)
+    //    {
+    //        //if (__instance == null) return;
+
+    //        //Debug.LogError(__instance.selected_item.definition.linked_craft != null
+    //        //    ? $"[MBB]: Item: {__instance.selected_item.id}, CantDestroy: {__instance.selected_item.definition.player_cant_throw_out}, Unique: {__instance.selected_item.is_unique}, OneTime: {__instance.selected_item.definition.linked_craft.one_time_craft}"
+    //        //    : $"[MBB]: Item: {__instance.selected_item.id}, CantDestroy: {__instance.selected_item.definition.player_cant_throw_out}, Unique: {__instance.selected_item.is_unique}");
+
+    //        if (!_cfg.AllowHandToolDestroy) return;
+    //        if (__instance == null) return;
+    //        var itemDef = __instance.selected_item?.definition;
+    //        if (itemDef == null) return;
+    //        if (ToolItems.Contains(itemDef.type)) itemDef.player_cant_throw_out = false;
+    //    }
+    //}
 
     [HarmonyPatch(typeof(DropResGameObject), nameof(DropResGameObject.CollectDrop))]
     public static class DropResGameObjectCollectDrop
@@ -211,7 +216,16 @@ public class MainPatcher
         [HarmonyPostfix]
         private static void Postfix()
         {
+            if (_cfg.AllowHandToolDestroy)
+            {
+                foreach (var itemDef in GameBalance.me.items_data.Where(a => ToolItems.Contains(a.type)))
+                {
+                    itemDef.player_cant_throw_out = false;
+                }
+            }
+
             if (LoadedMods.Contains(WheresMaStorage)) return;
+
             if (_cfg.EnableToolAndPrayerStacking)
             {
                 foreach (var item in GameBalance.me.items_data.Where(item =>

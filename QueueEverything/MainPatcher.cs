@@ -27,7 +27,8 @@ public static class MainPatcher
         "tile_church_semicircle_2floors", "mf_grindstone_1", "zombie_garden_desk_1", "zombie_garden_desk_2", "zombie_garden_desk_3", 
         "zombie_vineyard_desk_1", "zombie_vineyard_desk_2", "zombie_vineyard_desk_3", "graveyard_builddesk", "blockage_H_low", "blockage_V_low",
         "blockage_H_high", "blockage_V_high", "wood_obstacle_v", "refugee_camp_garden_bed", "refugee_camp_garden_bed_1", "refugee_camp_garden_bed_2",
-        "refugee_camp_garden_bed_3"
+        "refugee_camp_garden_bed_3", "carrot_box", "elevator_top", "zombie_crafting_table", "mf_balsamation","mf_balsamation_1","mf_balsamation_2",
+        "mf_balsamation_3"
     };
 
     private static readonly string[] UnSafeCraftZones =
@@ -37,7 +38,7 @@ public static class MainPatcher
 
     private static readonly string[] UnSafePartials =
     {
-        "blockage", "obstacle", "builddesk", "fix", "broken"
+        "blockage", "obstacle", "builddesk", "fix", "broken", "elevator"
     };
 
     private static readonly CraftDefinition.CraftType[] UnSafeCraftTypes =
@@ -48,7 +49,7 @@ public static class MainPatcher
 
     private static readonly string[] UnSafeItems =
     {
-        "zombie","grow_desk_planting","refugee","grow_vineyard_planting", "axe", "hammer", "faith", "shovel", "sword", 
+        "zombie","grow_desk_planting","refugee","grow_vineyard_planting", "axe", "hammer", "faith", "shovel", "sword", "mf_balsamation"
     };
 
     private static bool _alreadyRun;
@@ -99,12 +100,12 @@ public static class MainPatcher
             if (UnSafeCraftZones.Contains(__instance.GetMyWorldZoneId()) || UnSafePartials.Any(__instance.obj_id.Contains) || UnSafeCraftObjects.Contains(__instance.obj_id))
             {
                 _unsafeInteraction = true;
-            Debug.LogError($"[QueueEverything]: UNSAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
+            Debug.Log($"[QueueEverything]: UNSAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
             }
             else
             {
                 _unsafeInteraction = false;
-                Debug.LogError($"[QueueEverything]: UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
+                Debug.Log($"[QueueEverything]: UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
             }
         }
     }
@@ -120,13 +121,13 @@ public static class MainPatcher
             try
             {
                 var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
-                GameBalance.me.craft_data.ForEach(craft =>
+                foreach (var craft in GameBalance.me.craft_data)
                 {
                     //if (craft.one_time_craft)
                     //{
                     //    Debug.LogError($"[QE]: OneTimeCraft: {craft.id}");
                     //}
-                    if (craft.is_auto) return;
+                    if (craft.is_auto) continue;
                     //if (craft.id.Contains("table"))
                     //{
                     //    craft.craft_in.ForEach(ci =>
@@ -148,7 +149,7 @@ public static class MainPatcher
                     }
 
                     if (UnSafeItems.Any(craft.id.Contains) || refugeeCraft || cookingTableCraft || zombieCraft || graveCraft || bodyCraft ||
-                       UnSafeCraftTypes.Contains(craft.craft_type) || craft.craft_time_is_zero) return;
+                       UnSafeCraftTypes.Contains(craft.craft_type) || craft.craft_time_is_zero || craft.one_time_craft) continue;
 
                     
                     var ct = craft.energy.EvaluateFloat(crafteryWgo, MainGame.me.player);
@@ -184,7 +185,7 @@ public static class MainPatcher
                             output.value = 1;
                         }
                     });
-                });
+                }
             }
             catch (Exception ex)
             {
@@ -226,7 +227,7 @@ public static class MainPatcher
         {
             if (_unsafeInteraction || __instance.one_time_craft)
             {
-                Debug.LogError($"[QueueEverything]: Unsafe Craft: {__instance.id}");
+                Debug.Log($"[QueueEverything]: Unsafe Craft: {__instance.id}");
                 return;
             }
             __result = true;
@@ -619,7 +620,7 @@ public static class MainPatcher
             // _craftAmount = ____amount;
             time *= ____amount;
 
-            if (time >= 300)
+            if (time >= 300 && !_cfg.DisableComeBackLaterThoughts)
             {
                 var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
                 Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);

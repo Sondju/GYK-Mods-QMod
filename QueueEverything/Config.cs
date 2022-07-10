@@ -35,6 +35,10 @@ public static class Config
             out var makeHandTasksAuto);
         _options.MakeHandTasksAuto = makeHandTasksAuto;
 
+        bool.TryParse(_con.Value("DisableComeBackLaterThoughts", "false"),
+            out var disableComeBackLaterThoughts);
+        _options.DisableComeBackLaterThoughts = disableComeBackLaterThoughts;
+
         _con.ConfigWrite();
 
         return _options;
@@ -50,5 +54,6 @@ public static class Config
         public bool HalfFireRequirements;
         public bool MakeEverythingAuto;
         public bool MakeHandTasksAuto;
+        public bool DisableComeBackLaterThoughts;
     }
 }

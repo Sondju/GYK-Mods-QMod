@@ -14,11 +14,11 @@ public static class Config
         _con.UpdateValue("TeleportWhenStockPilesFull", _options.Teleportation.ToString());
         _con.UpdateValue("DistanceBasedTeleport", _options.DistanceBasedTeleport.ToString());
         _con.UpdateValue("DesignatedTimberLocation",
-            $"{_options.DesignatedTimberLocation.x},{_options.DesignatedTimberLocation.y},{_options.DesignatedTimberLocation.z}");
+            $"{_options.DesignatedTimberLocation.x},{_options.DesignatedTimberLocation.y},{_options.DesignatedTimberLocation.z}".ToString(CultureInfo.InvariantCulture));
         _con.UpdateValue("DesignatedOreLocation",
-            $"{_options.DesignatedOreLocation.x},{_options.DesignatedOreLocation.y},{_options.DesignatedOreLocation.z}");
+            $"{_options.DesignatedOreLocation.x},{_options.DesignatedOreLocation.y},{_options.DesignatedOreLocation.z}".ToString(CultureInfo.InvariantCulture));
         _con.UpdateValue("DesignatedStoneLocation",
-            $"{_options.DesignatedStoneLocation.x},{_options.DesignatedStoneLocation.y},{_options.DesignatedStoneLocation.z}");
+            $"{_options.DesignatedStoneLocation.x},{_options.DesignatedStoneLocation.y},{_options.DesignatedStoneLocation.z}".ToString(CultureInfo.InvariantCulture));
     }
 
     public static Options GetOptions()
@@ -38,9 +38,9 @@ public static class Config
         float.TryParse(_con.Value("ScanIntervalInSeconds", "30"), out var scanIntervalInSeconds);
         _options.ScanIntervalInSeconds = scanIntervalInSeconds;
 
-        var tempT = _con.Value("DesignatedTimberLocation", "-3712.003,6144,1294.643").Split(',');
-        var tempO = _con.Value("DesignatedOreLocation", "-3712.003,6144,1294.643").Split(',');
-        var tempS = _con.Value("DesignatedStoneLocation", "-3712.003,6144,1294.643").Split(',');
+        var tempT = _con.Value("DesignatedTimberLocation", "-3712.003,6144,1294.643".ToString(CultureInfo.InvariantCulture)).Split(',');
+        var tempO = _con.Value("DesignatedOreLocation", "-3712.003,6144,1294.643".ToString(CultureInfo.InvariantCulture)).Split(',');
+        var tempS = _con.Value("DesignatedStoneLocation", "-3712.003,6144,1294.643".ToString(CultureInfo.InvariantCulture)).Split(',');
 
         _options.DesignatedTimberLocation =
             new Vector3(float.Parse(tempT[0], CultureInfo.InvariantCulture), float.Parse(tempT[1], CultureInfo.InvariantCulture), float.Parse(tempT[2], CultureInfo.InvariantCulture));
