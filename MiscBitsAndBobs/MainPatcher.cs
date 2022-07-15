@@ -210,7 +210,7 @@ public class MainPatcher
         }
     }
 
-    private static int count = 0;
+
     //patch tools to be stack-able
     [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
     public static class GameBalanceLoadGameBalancePatch
@@ -227,8 +227,7 @@ public class MainPatcher
             }
 
             if (LoadedMods.Contains(WheresMaStorage)) return;
-            count++;
-            Debug.LogError($"[MiscBitsAndBobs] {count} WheresMaStorage Detected: Skipping Stack Changes");
+
             if (_cfg.EnableToolAndPrayerStacking)
             {
                 foreach (var item in GameBalance.me.items_data.Where(item =>

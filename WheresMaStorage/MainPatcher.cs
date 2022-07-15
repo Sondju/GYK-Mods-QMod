@@ -12,11 +12,13 @@ using WheresMaStorage.lang;
 
 namespace WheresMaStorage
 {
+    [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
     public class MainPatcher
     {
         private const string Barman = "barman";
         private const string Chest = "chest";
         private const string Church = "church_pulpit";
+        private const string Grindstone = "grindstone";
         private const string Multi = "multi";
         private const string NpcBarman = "npc_tavern_barman";
         private const string Player = "player";
@@ -25,8 +27,6 @@ namespace WheresMaStorage
         private const string Tavern = "tavern";
         private const string TavernCellar = "tavern_cellar";
         private const string Vendor = "vendor";
-        private const string Grindstone = "grindstone";
-
         private static readonly string[] AlwaysHidePartials =
         {
             "refugee_camp_well", "refugee_camp_tent", "pump", "pallet"
@@ -38,20 +38,22 @@ namespace WheresMaStorage
             ItemDefinition.ItemType.GraveStoneReq, ItemDefinition.ItemType.GraveFenceReq, ItemDefinition.ItemType.GraveCoverReq,
         };
 
-        //private static readonly List<Inventory> ResourceCraftInventories = new();
-        //private static readonly List<Inventory> WorldInventories = new();
-        private static MultiInventory _mi = new();
-
         private static readonly string[] StockpileWidgetsPartials =
-        {
+                {
             "mf_stones",  "mf_ore",  "mf_timber"
         };
 
         private static Config.Options _cfg;
-        private static bool _gameBalanceAlreadyRun;
-        private static int _invSize;
-        private static bool _isChest, _isBarman, _isTavernCellar, _isRefugee, _isChurchPulpit, _isGrindstone, _isCraft, _isVendor;
 
+        private static bool _gameBalanceAlreadyRun;
+
+        private static int _invSize;
+
+        private static bool _isChest, _isBarman, _isTavernCellar, _isRefugee, _isChurchPulpit, _isGrindstone, _isCraft, _isVendor, _zombie;
+
+        //private static readonly List<Inventory> ResourceCraftInventories = new();
+        //private static readonly List<Inventory> WorldInventories = new();
+        private static MultiInventory _mi = new();
         private static WorldGameObject _wgo, _previousWgo;
 
         private static string Lang { get; set; }
@@ -138,19 +140,58 @@ namespace WheresMaStorage
             inventoryWidget.header_label.text = header;
         }
 
+        private static void SetOthersFalse()
+        {
+            _isVendor = false;
+            _isCraft = false;
+            _isChest = false;
+            _isBarman = false;
+            _isTavernCellar = false;
+            _isRefugee = false;
+            _isChurchPulpit = false;
+            _isGrindstone = false;
+        }
+
         private static void wl(string message)
         {
             Debug.LogError($"[WMS]: {message}");
         }
 
-        //stops unnecessary log spam
-        [HarmonyPatch(typeof(MultiInventory), "IsEmpty")]
-        public static class MultiInventoryIsEmptyPatch
+        [HarmonyPatch(typeof(AutopsyGUI))]
+        public static class AutopsyGuiPatch
         {
-            [HarmonyPrefix]
-            public static void Prefix(ref bool print_log)
+            internal static IEnumerable<MethodBase> TargetMethods()
             {
-                print_log = false;
+                var inner = typeof(AutopsyGUI).GetNestedType("<>c__DisplayClass23_0", AccessTools.all)
+                            ?? throw new Exception("Inner Not Found");
+
+                foreach (var method in inner.GetMethods(AccessTools.all))
+                {
+                    if (method.Name.Contains("<OnBodyItemPress>") && method.GetParameters().Length == 2)
+                    {
+                        yield return method;
+                    }
+                }
+            }
+
+            [HarmonyTranspiler]
+            [CanBeNull]
+            private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator gen, MethodBase original)
+            {
+                var instructionsList = new List<CodeInstruction>(instructions);
+                if (!_cfg.HideInvalidSelections) return instructionsList.AsEnumerable();
+                instructionsList[5].opcode = OpCodes.Ldc_I4_1;
+
+                return instructionsList.AsEnumerable();
+
+                //var str = string.Empty;
+                //var codes = new List<CodeInstruction>(instructions);
+                //for (int i = 0; i < codes.Count; i++)
+                //{
+                //    str += ($"IL:[{i}] - {codes[i].opcode} - {codes[i].operand}\n");
+                //}
+                //File.WriteAllText("./qmods/il.txt", str);
+                //return codes.AsEnumerable();
             }
         }
 
@@ -160,10 +201,12 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref BaseCraftGUI __instance, ref MultiInventory __result)
             {
+                // if (_zombie) return;
                 __result = _mi;
             }
         }
 
+        [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
         //fixes not being able to craft paper based things i.e flyers due to stack size changes
         [HarmonyPatch(typeof(CraftDefinition), "takes_item_durability", MethodType.Getter)]
         public static class CraftDefinitionTakesItemDurabilityPatch
@@ -179,6 +222,7 @@ namespace WheresMaStorage
             }
         }
 
+        [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
         [HarmonyPatch(typeof(DropResGameObject), nameof(DropResGameObject.CollectDrop))]
         public static class DropResGameObjectCollectDrop
         {
@@ -191,6 +235,7 @@ namespace WheresMaStorage
             }
         }
 
+        [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
         [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.GetRemoveCraftForItem))]
         public static class GameBalanceGetRemoveCraftForItemPatch
         {
@@ -205,6 +250,7 @@ namespace WheresMaStorage
             }
         }
 
+        [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
         [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
         public static class GameBalanceLoadGameBalancePatch
         {
@@ -221,6 +267,10 @@ namespace WheresMaStorage
                 foreach (var id in GameBalance.me.items_data.Where(id => id.stack_count is > 1 and < 999))
                 {
                     id.stack_count = _cfg.StackSizeForStackables;
+                }
+
+                foreach (var id in GameBalance.me.items_data.Where(id => id.base_count is > 1 and < 999))
+                {
                     id.base_count = _cfg.StackSizeForStackables;
                 }
             }
@@ -272,7 +322,6 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryPanelGUI __instance, ref MultiInventory multi_inventory, ref List<UIWidget> ____separators, ref List<InventoryWidget> ____widgets, ref List<CustomInventoryWidget> ____custom_widgets)
             {
-          
                 var isChestPanel = __instance.name.ToLowerInvariant().Contains(Chest);
                 var isVendorPanel = __instance.name.ToLowerInvariant().Contains(Vendor);
                 var isPlayerPanel = __instance.name.ToLowerInvariant().Contains(Player) || (__instance.name.ToLowerInvariant().Contains(Multi) && _wgo == null);
@@ -347,6 +396,25 @@ namespace WheresMaStorage
             }
         }
 
+        [HarmonyPatch(typeof(InventoryPanelGUI), nameof(InventoryPanelGUI.Redraw))]
+        public static class InventoryPanelGuiRedrawPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref InventoryPanelGUI __instance, ref List<InventoryWidget> ____widgets)
+            {
+                var isChest = __instance.name.ToLowerInvariant().Contains(Chest);
+                var isPlayer = __instance.name.ToLowerInvariant().Contains(Player) || (__instance.name.ToLowerInvariant().Contains(Multi) && _wgo == null);
+
+                if ((isPlayer || isChest) && _cfg.ShowUsedSpaceInTitles)
+                {
+                    foreach (var inventoryWidget in ____widgets.Where(a => !a.header_label.text.ToLowerInvariant().Contains("gerry")))
+                    {
+                        SetInventorySizeText(inventoryWidget, __instance);
+                    }
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(InventoryPanelGUI), nameof(InventoryPanelGUI.SetGrayToNotMainWidgets))]
         public static class InventoryPanelGuiSetGrayToNotMainWidgets
         {
@@ -406,6 +474,16 @@ namespace WheresMaStorage
             }
         }
 
+        //stops unnecessary log spam
+        [HarmonyPatch(typeof(MultiInventory), "IsEmpty")]
+        public static class MultiInventoryIsEmptyPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref bool print_log)
+            {
+                print_log = false;
+            }
+        }
         [HarmonyPatch(typeof(OrganEnhancerGUI))]
         public static class OrganEnhancerGuiPatch
         {
@@ -435,75 +513,24 @@ namespace WheresMaStorage
                 return instructionsList.AsEnumerable();
             }
         }
-
-        [HarmonyPatch(typeof(AutopsyGUI))]
-        public static class AutopsyGuiPatch
+        //with the stack size changes, the game doesn't remove the prayer item on pray (i cant actually find where it does this at all). now it does.
+        [HarmonyPatch(typeof(PrayCraftGUI), nameof(PrayCraftGUI.OnPrayButtonPressed))]
+        public static class PrayCraftGuiOnPrayButtonPressedPatch
         {
-            internal static IEnumerable<MethodBase> TargetMethods()
+            [HarmonyPrefix]
+            public static void Prefix(ref PrayCraftGUI __instance, ref Item ____selected_item)
             {
-                var inner = typeof(AutopsyGUI).GetNestedType("<>c__DisplayClass23_0", AccessTools.all)
-                            ?? throw new Exception("Inner Not Found");
-
-                foreach (var method in inner.GetMethods(AccessTools.all))
+                if (__instance == null) return;
+                foreach (var inv in _mi.all)
                 {
-                    if (method.Name.Contains("<OnBodyItemPress>") && method.GetParameters().Length == 2)
+                    foreach (var item in inv.data.inventory)
                     {
-                        yield return method;
+                        if (item != ____selected_item) continue;
+                        inv.data.RemoveItemNoCheck(item, 1);
+                        wl($"[PrayCraftGUI.OnPrayButtonPressed]: Remove 1x {____selected_item.id}.");
                     }
                 }
             }
-
-            [HarmonyTranspiler]
-            [CanBeNull]
-            private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator gen, MethodBase original)
-            {
-                var instructionsList = new List<CodeInstruction>(instructions);
-                if (!_cfg.HideInvalidSelections) return instructionsList.AsEnumerable();
-                instructionsList[5].opcode = OpCodes.Ldc_I4_1;
-
-                return instructionsList.AsEnumerable();
-
-                //var str = string.Empty;
-                //var codes = new List<CodeInstruction>(instructions);
-                //for (int i = 0; i < codes.Count; i++)
-                //{
-                //    str += ($"IL:[{i}] - {codes[i].opcode} - {codes[i].operand}\n");
-                //}
-                //File.WriteAllText("./qmods/il.txt", str);
-                //return codes.AsEnumerable();
-            }
-        }
-
-        [HarmonyPatch(typeof(InventoryPanelGUI), nameof(InventoryPanelGUI.Redraw))]
-        public static class InventoryPanelGuiRedrawPatch
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref InventoryPanelGUI __instance, ref List<InventoryWidget> ____widgets)
-            {
-
-                var isChest = __instance.name.ToLowerInvariant().Contains(Chest);
-                var isPlayer = __instance.name.ToLowerInvariant().Contains(Player) || (__instance.name.ToLowerInvariant().Contains(Multi) && _wgo == null);
-
-                if ((isPlayer || isChest) && _cfg.ShowUsedSpaceInTitles)
-                {
-                    foreach (var inventoryWidget in ____widgets.Where(a => !a.header_label.text.ToLowerInvariant().Contains("gerry")))
-                    {
-                        SetInventorySizeText(inventoryWidget, __instance);
-                    }
-                }
-            }
-        }
-
-        private static void SetOthersFalse()
-        {
-            _isVendor = false;
-            _isCraft = false;
-            _isChest = false;
-            _isBarman = false;
-            _isTavernCellar = false;
-            _isRefugee = false;
-            _isChurchPulpit = false;
-            _isGrindstone = false;
         }
 
         [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetMultiInventory))]
@@ -516,6 +543,9 @@ namespace WheresMaStorage
                 bool include_toolbelt = false
             )
             {
+                //_zombie = __instance.has_linked_worker;
+
+                //_zombie = false;
                 if (!_cfg.SharedCraftInventory) return;
 
                 if (_cfg.CacheEligibleInventories && __instance == _previousWgo)
@@ -540,11 +570,6 @@ namespace WheresMaStorage
 
                 if (__instance.is_player || __instance == _wgo || __instance.has_linked_worker)
                 {
-                    if (__instance.has_linked_worker)
-                    {
-                        wl($"[WorldGameObject.GetMultiInventory] Fresh inventory sent to {__instance.obj_id}.");
-                    }
-
                     wl(__instance.is_player
                         ? $"[WorldGameObject.GetMultiInventory] Fresh inventory sent to Player."
                         : $"[WorldGameObject.GetMultiInventory] Fresh inventory sent to {__instance.obj_id}.");
@@ -552,9 +577,9 @@ namespace WheresMaStorage
                     _mi = new MultiInventory();
                     var playerInv = new Inventory(MainGame.me.player.data, "Player", string.Empty);
                     playerInv.data.SetInventorySize(_invSize);
-                   
+
                     _mi.AddInventory(playerInv);
-           
+
                     if (include_toolbelt)
                     {
                         var data = new Item
@@ -624,26 +649,20 @@ namespace WheresMaStorage
                 _isGrindstone = __instance.obj_id.ToLowerInvariant().Contains(Grindstone);
             }
         }
-
-        //with the stack size changes, the game doesn't remove the prayer item on pray (i cant actually find where it does this at all). now it does.
-        [HarmonyPatch(typeof(PrayCraftGUI), nameof(PrayCraftGUI.OnPrayButtonPressed))]
-        public static class PrayCraftGuiOnPrayButtonPressedPatch
-        {
-            [HarmonyPrefix]
-            public static void Prefix(ref PrayCraftGUI __instance, ref Item ____selected_item)
-            {
-                if (__instance == null) return;
-                foreach (var inv in _mi.all)
-                {
-                    foreach (var item in inv.data.inventory)
-                    {
-                        if (item != ____selected_item) continue;
-                        inv.data.RemoveItemNoCheck(item, 1);
-                        wl($"[PrayCraftGUI.OnPrayButtonPressed]: Remove 1x {____selected_item.id}.");
-                    }
-                }
-            }
-        }
+        
+        
+        //[HarmonyPatch(typeof(MultiInventory), nameof(MultiInventory.GetTotalCount))]
+        //public static class MultiInventoryGetTotalCountPatch
+        //{
+        //    [HarmonyPostfix]
+        //    public static void Postfix(ref string item_id, ref int __result)
+        //    {
+        //        if (!_zombie) return;
+        //        var s = item_id;
+        //        var count = _mi.all.Sum(inv => inv.data.GetTotalCount(s));
+        //        __result = count;
+        //    }
+        //}
 
     }
 }
