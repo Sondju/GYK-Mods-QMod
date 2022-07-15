@@ -221,6 +221,7 @@ namespace WheresMaStorage
                 foreach (var id in GameBalance.me.items_data.Where(id => id.stack_count is > 1 and < 999))
                 {
                     id.stack_count = _cfg.StackSizeForStackables;
+                    id.base_count = _cfg.StackSizeForStackables;
                 }
             }
         }
@@ -525,32 +526,35 @@ namespace WheresMaStorage
                         var newInv = _mi.all.Where(a => !a.name.Contains("Toolbelt")).ToList();
                         pMi.SetInventories(newInv);
                         __result = pMi;
-                        //wl($"[WorldGameObject.GetMultiInventory] Cached player inventory sent to Player.");
+                        wl($"[WorldGameObject.GetMultiInventory] Cached player inventory sent to Player.");
                         return;
                     }
 
-                    //wl(__instance.is_player
-                    //    ? $"[WorldGameObject.GetMultiInventory] Cached inventory sent to Player."
-                    //    : $"[WorldGameObject.GetMultiInventory] Cached inventory sent to {__instance.obj_id}.");
+                    wl(__instance.is_player
+                        ? $"[WorldGameObject.GetMultiInventory] Cached inventory sent to Player."
+                        : $"[WorldGameObject.GetMultiInventory] Cached inventory sent to {__instance.obj_id}.");
 
                     __result = _mi;
                     return;
                 }
 
-                //  MultiInventory mi = new MultiInventory();
-                // WorldInventories.Clear();
-                if (__instance.is_player || __instance == _wgo)
+                if (__instance.is_player || __instance == _wgo || __instance.has_linked_worker)
                 {
-                    //wl(__instance.is_player
-                    //    ? $"[WorldGameObject.GetMultiInventory] Fresh inventory sent to Player."
-                    //    : $"[WorldGameObject.GetMultiInventory] Fresh inventory sent to {__instance.obj_id}.");
+                    if (__instance.has_linked_worker)
+                    {
+                        wl($"[WorldGameObject.GetMultiInventory] Fresh inventory sent to {__instance.obj_id}.");
+                    }
+
+                    wl(__instance.is_player
+                        ? $"[WorldGameObject.GetMultiInventory] Fresh inventory sent to Player."
+                        : $"[WorldGameObject.GetMultiInventory] Fresh inventory sent to {__instance.obj_id}.");
                     _previousWgo = __instance;
                     _mi = new MultiInventory();
                     var playerInv = new Inventory(MainGame.me.player.data, "Player", string.Empty);
                     playerInv.data.SetInventorySize(_invSize);
-                    //  WorldInventories.Add(playerInv);
+                   
                     _mi.AddInventory(playerInv);
-                    // include_toolbelt = false;
+           
                     if (include_toolbelt)
                     {
                         var data = new Item
@@ -620,5 +624,26 @@ namespace WheresMaStorage
                 _isGrindstone = __instance.obj_id.ToLowerInvariant().Contains(Grindstone);
             }
         }
+
+        //with the stack size changes, the game doesn't remove the prayer item on pray (i cant actually find where it does this at all). now it does.
+        [HarmonyPatch(typeof(PrayCraftGUI), nameof(PrayCraftGUI.OnPrayButtonPressed))]
+        public static class PrayCraftGuiOnPrayButtonPressedPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref PrayCraftGUI __instance, ref Item ____selected_item)
+            {
+                if (__instance == null) return;
+                foreach (var inv in _mi.all)
+                {
+                    foreach (var item in inv.data.inventory)
+                    {
+                        if (item != ____selected_item) continue;
+                        inv.data.RemoveItemNoCheck(item, 1);
+                        wl($"[PrayCraftGUI.OnPrayButtonPressed]: Remove 1x {____selected_item.id}.");
+                    }
+                }
+            }
+        }
+
     }
 }
