@@ -65,7 +65,8 @@ public class MainPatcher
             if (!_cfg.LessenFootstepSound) return;
             if (sType.Contains("foot"))
             {
-                volumePercentage = 0.25f;
+                Debug.LogError($"[MBB]: Footstep Volume: {volumePercentage}");
+                //volumePercentage = 0.25f;
             }
         }
     }
@@ -82,7 +83,7 @@ public class MainPatcher
             var byType = ____trail_definition.GetByType(____trail_type);
             if (____all_trails.Count <= 0) return;
             var trailObject = ____all_trails[____all_trails.Count - 1];
-            trailObject.SetColor(byType.color, ____dirty_amount / 1.50f);
+            trailObject.SetColor(byType.color, ____dirty_amount / 2.0f);
         }
     }
 
@@ -249,7 +250,7 @@ public class MainPatcher
             if (LoadedMods.Contains(WheresMaStorage)) return;
             if (TavernItems.Contains(__instance.obj_id))
             {
-                Debug.LogError($"[MBB]: TavernStorage InitNewObject Hit");
+               // Debug.LogError($"[MBB]: TavernStorage InitNewObject Hit");
                 __instance.data.SetInventorySize(__instance.obj_def.inventory_size + _cfg.TavernInvIncrease);
             }
         }

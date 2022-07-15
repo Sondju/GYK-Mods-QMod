@@ -1,13 +1,21 @@
 using HarmonyLib;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net.Configuration;
 using System.Reflection;
-using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace AddStraightToTable;
 
 public static class MainPatcher
 {
+    private static readonly List<string> LoadedMods = new();
+    private const string WheresMaStorage = "WheresMaStorage";
+    private static Config.Options _cfg;
+    private static bool _wms;
+
     public static void Patch()
     {
         try
@@ -21,12 +29,45 @@ public static class MainPatcher
         }
     }
 
+
+    [HarmonyPatch(typeof(MainMenuGUI), nameof(MainMenuGUI.Open))]
+    public static class MainMenuGuiOpenPatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix()
+        {
+            try
+            {
+                var mods = AppDomain.CurrentDomain.GetAssemblies()
+                    .Where(a => a.Location.ToLowerInvariant().Contains("qmods"));
+                LoadedMods.Clear();
+                foreach (var mod in mods)
+                {
+                    var modInfo = FileVersionInfo.GetVersionInfo(mod.Location);
+                    if (!string.IsNullOrEmpty(modInfo.Comments))
+                    {
+                        LoadedMods.Add(modInfo.Comments);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Loaded Mod: {ex.Message}");
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(AutopsyGUI), "OnBodyItemPress")]
     public static class AutopsyGuiOnBodyItemPressPatch
     {
         [HarmonyPrefix]
         public static bool Prefix()
         {
+            if (LoadedMods.Contains(WheresMaStorage))
+            {
+                _wms = true;
+                _cfg = Config.GetOptions();
+            }
             return false;
         }
 
@@ -43,7 +84,16 @@ public static class MainPatcher
                 var instance = __instance;
                 GUIElements.me.resource_picker.Open(obj, delegate (Item item, InventoryWidget _)
                     {
-                        if (item == null || item.IsEmpty()) return InventoryWidget.ItemFilterResult.Hide;
+                        if (item == null || item.IsEmpty())
+                        {
+                            if (_wms && _cfg.HideInvalidSelections)
+                            {
+                                return InventoryWidget.ItemFilterResult.Inactive;
+                            }
+
+                            return InventoryWidget.ItemFilterResult.Hide;
+
+                        }
 
                         if (item.definition.type != ItemDefinition.ItemType.BodyUniversalPart)
                             return InventoryWidget.ItemFilterResult.Inactive;

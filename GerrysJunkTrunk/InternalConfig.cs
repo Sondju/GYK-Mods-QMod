@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ShippingBoxMod;
+namespace GerrysJunkTrunk;
 
 public static class InternalConfig
 {

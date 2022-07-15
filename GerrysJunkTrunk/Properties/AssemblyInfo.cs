@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ShippingBoxMod")]
+[assembly: AssemblyTitle("Items placed in Gerry's trunk, will be sold overnight. Not sure who he's selling to, but they have deep pockets.")]
 [assembly: AssemblyDescription("ShippingBoxMod")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
-[assembly: AssemblyProduct("ShippingBoxMod")]
+[assembly: AssemblyProduct("Gerry's Junk Trunk")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

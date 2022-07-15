@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace ShippingBoxMod;
+namespace GerrysJunkTrunk;
 
 public class InternalConfigReader
 {
-    private const string ConfigPath = "./QMods/ShippingBoxMod/dont-touch.dat";
+    private const string ConfigPath = "./QMods/GerrysJunkTrunk/dont-touch.dat";
 
     private readonly Dictionary<string, string> _values = new();
 

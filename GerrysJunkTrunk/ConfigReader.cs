@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace ShippingBoxMod;
+namespace GerrysJunkTrunk;
 
 public class ConfigReader
 {
-    private const string ConfigPath = "./QMods/ShippingBoxMod/config.ini";
+    private const string ConfigPath = "./QMods/GerrysJunkTrunk/config.ini";
 
     private readonly Dictionary<string, string> _values = new();
 

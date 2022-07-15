@@ -1,11 +1,15 @@
 using HarmonyLib;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using GerrysJunkTrunk.lang;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace ShippingBoxMod
+namespace GerrysJunkTrunk
 {
     public class MainPatcher
     {
@@ -17,18 +21,46 @@ namespace ShippingBoxMod
         private static WorldGameObject _myVendor;
         private const string ShippingItem = "shipping";
         private const string ShippingBoxTag = "shipping_box";
+        private static readonly Dictionary<string, int> StackSizeBackups = new();
+        private static string Lang { get; set; }
 
         public static void Patch()
         {
-            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.ShippingBoxMod");
+            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.GerrysJunkTrunk");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             _internalCfg = InternalConfig.GetOptions();
             _cfg = Config.GetOptions();
         }
 
+        [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
+        public static class GameSettingsApplyLanguageChange
+        {
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+            }
+        }
+
         private static void ShowIntroMessage()
         {
-            GUIElements.me.dialog.OpenOK("Thanks for installing this yet-to-be-named-mod.", null, "- The shipping box is limited to 10 spaces.\n- You can only build one.\n- Once items go in, they don't come out.\n- Items in the box are sold when the day ends (moon a little past the church bell tower).\n- You get approx. 25% less than selling directly to T3 tavern dude.\n- Quest items should be greyed out, but keep any eye out and let me know otherwise.", true, "Enjoy! - p1xel8ted");
+            GUIElements.me.dialog.OpenOK(strings.Message1, null, $"{strings.Message2}\n{strings.Message3}\n{strings.Message4}\n{strings.Message5}\n{strings.Message6}\n{strings.Message7}", true, strings.Message8);
+        }
+
+        private static bool UnlockedFullPrice()
+        {
+            return MainGame.me.save.unlocked_techs.Exists(a => a.ToLowerInvariant().Equals("Best friend".ToLowerInvariant()));
+        }
+
+        private static bool UnlockedShippingBox()
+        {
+            return MainGame.me.save.unlocked_techs.Exists(a => a.ToLowerInvariant().Equals("Wood processing".ToLowerInvariant()));
+        }
+
+        private static bool UnlockedShippingBoxExpansion()
+        {
+            return MainGame.me.save.unlocked_techs.Exists(a => a.ToLowerInvariant().Equals("Engineer".ToLowerInvariant()));
         }
 
         [HarmonyPatch(typeof(MainGame), nameof(MainGame.Update))]
@@ -45,6 +77,8 @@ namespace ShippingBoxMod
                     _internalCfg.ShowIntroMessage = false;
                     UpdateInternalConfig();
                 }
+
+                if (!UnlockedShippingBox()) return;
                 if (_internalCfg.ShippingBoxBuilt && _shippingBox == null)
                 {
                     _shippingBox = Object.FindObjectsOfType<WorldGameObject>(true)
@@ -56,10 +90,15 @@ namespace ShippingBoxMod
                     }
                     else
                     {
-                        Debug.LogError($"[SB]: Found Shipping Box at {_shippingBox.grid_pos}");
+                        Debug.LogError($"[SB]: Found Shipping Box at {_shippingBox.pos3}");
                         _internalCfg.ShippingBoxBuilt = true;
                         _shippingBox.data.drop_zone_id = ShippingBoxTag;
-                        _shippingBox.data.SetInventorySize(10);
+                        var invSize = 10;
+                        if (UnlockedShippingBoxExpansion())
+                        {
+                            invSize = 20;
+                        }
+                        _shippingBox.data.SetInventorySize(invSize);
                     }
 
                     UpdateInternalConfig();
@@ -83,6 +122,125 @@ namespace ShippingBoxMod
             }
         }
 
+        [HarmonyPatch(typeof(TechTreeGUIItem), "InitGamepadTooltip")]
+        public static class TechTreeGuiItemInitGamepadTooltip
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref TechTreeGUIItem __instance)
+            {
+                if (__instance == null) return;
+                {
+                    var component = __instance.GetComponent<Tooltip>();
+                    if (__instance.tech_id.ToLowerInvariant().Contains("Wood processing".ToLowerInvariant()))
+                    {
+                        component.AddData(new BubbleWidgetSeparatorData());
+                        component.AddData(new BubbleWidgetTextData(strings.Stage1Header, UITextStyles.TextStyle.HintTitle));
+                        component.AddData(new BubbleWidgetTextData(strings.Stage1Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                    }
+
+                    if (__instance.tech_id.ToLowerInvariant().Contains("Engineer".ToLowerInvariant()))
+                    {
+                        component.AddData(new BubbleWidgetSeparatorData());
+                        component.AddData(new BubbleWidgetTextData(strings.Stage2Header, UITextStyles.TextStyle.HintTitle));
+                        component.AddData(new BubbleWidgetTextData(strings.Stage2Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                    }
+
+                    if (__instance.tech_id.ToLowerInvariant().Contains("Best friend".ToLowerInvariant()))
+                    {
+                        component.AddData(new BubbleWidgetSeparatorData());
+                        component.AddData(new BubbleWidgetTextData(strings.Stage3Header, UITextStyles.TextStyle.HintTitle));
+                        component.AddData(new BubbleWidgetTextData(strings.Stage3Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(TechUnlock), nameof(TechUnlock.GetTooltip), typeof(Tooltip))]
+        public static class TechUnlockGetTooltipPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref TechUnlock __instance, ref Tooltip tooltip)
+            {
+                if (__instance != null)
+                {
+                    if (LazyInput.gamepad_active) return;
+                    var name = __instance.GetData().name;
+
+                    if (name.ToLowerInvariant().Contains("Wooden plank".ToLowerInvariant()))
+                    {
+                        tooltip.AddData(new BubbleWidgetBlankSeparatorData());
+                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage1Header, UITextStyles.TextStyle.HintTitle, NGUIText.Alignment.Left));
+                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage1Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                    }
+
+                    if (name.ToLowerInvariant().Contains("Engineer".ToLowerInvariant()))
+                    {
+                        tooltip.AddData(new BubbleWidgetBlankSeparatorData());
+                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage2Header, UITextStyles.TextStyle.HintTitle, NGUIText.Alignment.Left));
+                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage2Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                    }
+
+                    if (name.ToLowerInvariant().Contains("Jeweler".ToLowerInvariant()))
+                    {
+                        tooltip.AddData(new BubbleWidgetBlankSeparatorData());
+                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage3Header, UITextStyles.TextStyle.HintTitle, NGUIText.Alignment.Left));
+                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage3Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                    }
+                }
+            }
+        }
+
+        [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs", "p1xel8ted.GraveyardKeeper.WheresMaStorage")]
+        [HarmonyPatch(typeof(ChestGUI), "MoveItem", typeof(Item), typeof(int), typeof(bool), typeof(Item), typeof(bool))]
+        public static class ChestGuiMoveItemPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref ChestGUI __instance)
+            {
+                if (__instance == null || !_usingShippingBox) return;
+
+                UpdateItemStates(ref __instance);
+            }
+        }
+
+        private static void UpdateItemStates(ref ChestGUI __instance)
+        {
+            foreach (var inventory in __instance.player_panel.multi_inventory.all.Where(i => i.data.inventory.Count > 0))
+            {
+                foreach (var item in inventory.data.inventory)
+                {
+                    var itemCellGuiForItem = __instance.player_panel.GetItemCellGuiForItem(item);
+                    itemCellGuiForItem.SetInactiveState(false);
+                }
+
+                foreach (var item in inventory.data.inventory.Where(item => item.definition.player_cant_throw_out))
+                {
+                    var itemCellGuiForItem = __instance.player_panel.GetItemCellGuiForItem(item);
+                    itemCellGuiForItem.SetInactiveState();
+                }
+            }
+
+            foreach (var inventory in __instance.chest_panel.multi_inventory.all.Where(i => i.data.inventory.Count > 0))
+            {
+                inventory.is_locked = true;
+                foreach (var item in inventory.data.inventory)
+                {
+                    var itemCellGuiForItem = __instance.chest_panel.GetItemCellGuiForItem(item);
+                    if (itemCellGuiForItem != null)
+                    {
+                        itemCellGuiForItem.SetInactiveState();
+                    }
+                }
+            }
+        }
+
+        private static bool TryAdd<TKey, TValue>(IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
+        {
+            if (dictionary.ContainsKey(key)) return false;
+            dictionary.Add(key, value);
+            return true;
+        }
+
         [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs", "p1xel8ted.GraveyardKeeper.WheresMaStorage")]
         [HarmonyPatch(typeof(ChestGUI), nameof(ChestGUI.Open))]
         public static class ChestGuiOpenPatch
@@ -92,36 +250,57 @@ namespace ShippingBoxMod
             {
                 if (__instance == null || !_usingShippingBox) return;
 
-                foreach (var inventory in __instance.player_panel.multi_inventory.all.Where(i => i.data.inventory.Count > 0))
+                var maxItemCount = 50;
+
+                if (UnlockedFullPrice())
                 {
-                    foreach (var item in inventory.data.inventory.Where(item => item.definition.player_cant_throw_out))
-                    {
-                        var itemCellGuiForItem = __instance.player_panel.GetItemCellGuiForItem(item);
-                        itemCellGuiForItem.SetInactiveState();
-                    }
+                    maxItemCount = 100;
                 }
 
-                foreach (var inventory in __instance.chest_panel.multi_inventory.all.Where(i => i.data.inventory.Count > 0))
+                foreach (var item in __instance.player_panel.multi_inventory.all[0].data.inventory.Where(item => item.definition.stack_count > 1))
                 {
-                    foreach (var item in inventory.data.inventory)
-                    {
-                        var itemCellGuiForItem = __instance.chest_panel.GetItemCellGuiForItem(item);
-                        if (itemCellGuiForItem != null)
-                        {
-                            itemCellGuiForItem.SetInactiveState();
-                        }
-                    }
+                  
+                        TryAdd(StackSizeBackups, item.id, item.definition.stack_count);
+        
+                    item.definition.stack_count = maxItemCount;
                 }
+
+                foreach (var item in __instance.chest_panel.multi_inventory.all[0].data.inventory.Where(item => item.definition.stack_count > 1))
+                {
+               
+                        TryAdd(StackSizeBackups, item.id, item.definition.stack_count);
+
+                    item.definition.stack_count = maxItemCount;
+                }
+
+                UpdateItemStates(ref __instance);
             }
         }
 
         [HarmonyPatch(typeof(ChestGUI), "OnPressedBack")]
         public static class ChestGuiOnClosePressedPatch
         {
-            [HarmonyPostfix]
-            public static void Postfix(ref ChestGUI __instance)
+            [HarmonyPrefix]
+            public static void Prefix(ref ChestGUI __instance)
             {
-                if (__instance == null) return;
+                if (__instance == null || !_usingShippingBox) return;
+                if (StackSizeBackups.Count <= 0) return;
+                foreach (var item in __instance.player_panel.multi_inventory.all[0].data.inventory)
+                {
+                    var found = StackSizeBackups.TryGetValue(item.id, out var value);
+                    if (!found) continue;
+                   // Debug.LogError($"[SB]: Restore item stack size: Item: {item.id}, StackSize: {value}");
+                    item.definition.stack_count = value;
+                }
+
+                foreach (var item in __instance.chest_panel.multi_inventory.all[0].data.inventory)
+                {
+                    var found = StackSizeBackups.TryGetValue(item.id, out var value);
+                    if (!found) continue;
+                   // Debug.LogError($"[SB]: Restore item stack size: Item: {item.id}, StackSize: {value}");
+                    item.definition.stack_count = value;
+                }
+
                 _usingShippingBox = false;
             }
         }
@@ -139,14 +318,21 @@ namespace ShippingBoxMod
                     UpdateInternalConfig();
                     _usingShippingBox = true;
                     __instance.data.drop_zone_id = ShippingBoxTag;
-                    __instance.data.SetInventorySize(10);
+                    var invSize = 10;
+                    if (UnlockedShippingBoxExpansion())
+                    {
+                        invSize = 20;
+                    }
+                    __instance.data.SetInventorySize(invSize);
                     __instance.data.money = GetEarnings(__instance);
                     _shippingBox = __instance;
                 }
-                //else
-                //{
-                //    _usingShippingBox = false;
-                //}
+            }
+
+            [HarmonyFinalizer]
+            private static Exception Finalizer()
+            {
+                return null;
             }
         }
 
@@ -168,7 +354,12 @@ namespace ShippingBoxMod
                     __instance.custom_tag = ShippingBoxTag;
 
                     // _shippingBoxBuilt = true;
-                    __instance.data.SetInventorySize(10);
+                    var invSize = 10;
+                    if (UnlockedShippingBoxExpansion())
+                    {
+                        invSize = 20;
+                    }
+                    __instance.data.SetInventorySize(invSize);
                     __instance.data.drop_zone_id = ShippingBoxTag;
                     _shippingBox = __instance;
                     _internalCfg.ShippingBoxBuilt = true;
@@ -248,7 +439,7 @@ namespace ShippingBoxMod
                 }
             }
 
-            return num * 0.75f;
+            return UnlockedFullPrice() ? num : num * 0.60f;
         }
 
         [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
@@ -265,8 +456,9 @@ namespace ShippingBoxMod
                 {
                     foreach (var inventoryWidget in ____widgets)
                     {
-                        inventoryWidget.header_label.text = "Shipping Box";
+                        inventoryWidget.header_label.text = strings.Header;
                         inventoryWidget.dont_show_empty_rows = true;
+                        inventoryWidget.SetInactiveStateToEmptyCells();
                     }
 
                     __instance.money_label.text = Trading.FormatMoney(GetEarnings(_shippingBox), true);
@@ -288,8 +480,9 @@ namespace ShippingBoxMod
                 {
                     foreach (var inventoryWidget in ____widgets)
                     {
-                        inventoryWidget.header_label.text = "Shipping Box";
+                        inventoryWidget.header_label.text = strings.Header;
                         inventoryWidget.dont_show_empty_rows = true;
+                        inventoryWidget.SetInactiveStateToEmptyCells();
                     }
                 }
             }
@@ -312,7 +505,7 @@ namespace ShippingBoxMod
                     }
 
                     var num = GetEarnings(_shippingBox);
-                    Stats.PlayerAddMoney(num, "Shipping Box");
+                    Stats.PlayerAddMoney(num,  strings.Header);
                     MainGame.me.player.data.money += num;
                     var money = Trading.FormatMoney(num, true);
 
@@ -331,9 +524,26 @@ namespace ShippingBoxMod
                         time = 7f;
                     }
 
-                    Sounds.PlaySound("coins_sound", position, true, 0f);
-                    _shippingBox.data.inventory.Clear();
-                    EffectBubblesManager.ShowImmediately(position, $"Earned ${money}!", EffectBubblesManager.BubbleColor.Green, true, time);
+                    if (_cfg.DisableSoldMessageWhenNoSale) return;
+
+                    if (_cfg.EnableGerry)
+                    {
+                        _shippingBox.Say(strings.WorkWork, delegate
+                        {
+                            Sounds.PlaySound("coins_sound", position, true);
+                            _shippingBox.data.inventory.Clear();
+                            _shippingBox.Say($"{money}", null, null, SpeechBubbleGUI.SpeechBubbleType.Talk,
+                                SmartSpeechEngine.VoiceID.Skull);
+                        }, null, SpeechBubbleGUI.SpeechBubbleType.Talk, SmartSpeechEngine.VoiceID.Skull, false);
+                    }
+                    else
+                    {
+                        Sounds.PlaySound("coins_sound", position, true);
+                        _shippingBox.data.inventory.Clear();
+                        EffectBubblesManager.ShowImmediately(position, $"{money}",
+                            num > 0 ? EffectBubblesManager.BubbleColor.Green : EffectBubblesManager.BubbleColor.Red,
+                            true, time);
+                    }
                 }
             }
         }
@@ -395,7 +605,7 @@ namespace ShippingBoxMod
                 newCd.difficulty = cd.difficulty;
                 newCd.linked_perks = cd.linked_perks;
                 newCd.linked_buffs = cd.linked_buffs;
-                newCd.custom_name = "Shipping Box";
+                newCd.custom_name = strings.Header;
                 newCd.tab_id = cd.tab_id;
                 newCd.buff = cd.buff;
                 newCd.needs_quality = cd.needs_quality;
@@ -417,7 +627,7 @@ namespace ShippingBoxMod
                 if (wgo == null) return;
                 if (wgo.obj_id.Contains("zombie")) return;
                 if (!wgo.obj_id.Contains("mf_wood_builddesk")) return;
-
+                if (!UnlockedShippingBox()) return;
                 if (_internalCfg.ShippingBoxBuilt || _shippingBox != null) return;
 
                 ___crafts.Add(newCd);

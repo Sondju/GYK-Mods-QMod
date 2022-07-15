@@ -26,6 +26,7 @@ namespace WheresMaStorage
             public bool DisableInventoryDimming;
             public bool ShowUsedSpaceInTitles;
             public bool ShowWorldZoneInTitles;
+            public bool CacheEligibleInventories;
         }
 
         public static Options GetOptions()
@@ -38,6 +39,9 @@ namespace WheresMaStorage
 
             bool.TryParse(_con.Value("DontShowEmptyRowsInInventory", "true"), out var dontShowEmptyRowsInInventory);
             _options.DontShowEmptyRowsInInventory = dontShowEmptyRowsInInventory;
+
+            bool.TryParse(_con.Value("CacheEligibleInventories", "true"), out var cacheEligibleInventories);
+            _options.CacheEligibleInventories = cacheEligibleInventories;
 
             bool.TryParse(_con.Value("ShowUsedSpaceInTitles", "true"), out var showUsedSpaceInTitles);
             _options.ShowUsedSpaceInTitles = showUsedSpaceInTitles;

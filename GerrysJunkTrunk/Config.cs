@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ShippingBoxMod;
+namespace GerrysJunkTrunk;
 
 public static class Config
 {
@@ -15,6 +15,12 @@ public static class Config
         bool.TryParse(_con.Value("ShowSoldMessagesOnPlayer", "true"), out var showSoldMessagesOnPlayer);
         _options.ShowSoldMessagesOnPlayer = showSoldMessagesOnPlayer;
 
+        bool.TryParse(_con.Value("DisableSoldMessageWhenNoSale", "false"), out var disableSoldMessageWhenNoSale);
+        _options.DisableSoldMessageWhenNoSale = disableSoldMessageWhenNoSale;
+
+        bool.TryParse(_con.Value("EnableGerry", "true"), out var enableGerry);
+        _options.EnableGerry = enableGerry;
+
         _con.ConfigWrite();
 
         return _options;
@@ -24,5 +30,7 @@ public static class Config
     public class Options
     {
         public bool ShowSoldMessagesOnPlayer = true;
+        public bool DisableSoldMessageWhenNoSale;
+        public bool EnableGerry;
     }
 }

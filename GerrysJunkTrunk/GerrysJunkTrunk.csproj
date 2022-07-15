@@ -5,7 +5,7 @@
     <ProjectGuid>{59844D78-0F3A-4E2F-A66B-19B262ED3026}</ProjectGuid>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
-    <AssemblyName>ShippingBoxMod</AssemblyName>
+    <AssemblyName>GerrysJunkTrunk</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -29,13 +29,18 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <RootNamespace>ShippingBoxMod</RootNamespace>
+    <RootNamespace>GerrysJunkTrunk</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
     <Compile Include="InternalConfig.cs" />
     <Compile Include="ConfigReader.cs" />
     <Compile Include="InternalConfigReader.cs" />
+    <Compile Include="lang\strings.Designer.cs">
+      <DependentUpon>strings.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="MainPatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -56,6 +61,22 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="lang\strings.de.resx" />
+    <EmbeddedResource Include="lang\strings.es.resx" />
+    <EmbeddedResource Include="lang\strings.fr.resx" />
+    <EmbeddedResource Include="lang\strings.it.resx" />
+    <EmbeddedResource Include="lang\strings.ja.resx" />
+    <EmbeddedResource Include="lang\strings.ko.resx" />
+    <EmbeddedResource Include="lang\strings.pl.resx" />
+    <EmbeddedResource Include="lang\strings.pt-BR.resx" />
+    <EmbeddedResource Include="lang\strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="lang\strings.ru.resx" />
+    <EmbeddedResource Include="lang\strings.zh-CN.resx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>

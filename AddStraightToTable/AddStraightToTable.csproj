@@ -34,6 +34,8 @@
     <RootNamespace>AddStraightToTable</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Config.cs" />
+    <Compile Include="ConfigReader.cs" />
     <Compile Include="MainPatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -58,6 +60,7 @@
       <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="System" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
