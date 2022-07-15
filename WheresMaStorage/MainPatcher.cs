@@ -49,7 +49,7 @@ namespace WheresMaStorage
 
         private static int _invSize;
 
-        private static bool _isChest, _isBarman, _isTavernCellar, _isRefugee, _isChurchPulpit, _isGrindstone, _isCraft, _isVendor, _zombie;
+        private static bool _isChest, _isBarman, _isTavernCellar, _isRefugee, _isCraft, _isVendor, _linkedWorker;//, _isChurchPulpit, _isGrindstone
 
         //private static readonly List<Inventory> ResourceCraftInventories = new();
         //private static readonly List<Inventory> WorldInventories = new();
@@ -148,8 +148,8 @@ namespace WheresMaStorage
             _isBarman = false;
             _isTavernCellar = false;
             _isRefugee = false;
-            _isChurchPulpit = false;
-            _isGrindstone = false;
+            //_isChurchPulpit = false;
+            //_isGrindstone = false;
         }
 
         private static void wl(string message)
@@ -201,7 +201,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref BaseCraftGUI __instance, ref MultiInventory __result)
             {
-                // if (_zombie) return;
+                if (_linkedWorker) return;
                 __result = _mi;
             }
         }
@@ -543,9 +543,12 @@ namespace WheresMaStorage
                 bool include_toolbelt = false
             )
             {
-                //_zombie = __instance.has_linked_worker;
-
-                //_zombie = false;
+                if (__instance.has_linked_worker && __instance.linked_worker.obj_id.Contains("zombie"))
+                {
+                    _linkedWorker = true;
+                    return;
+                }
+                _linkedWorker = false;
                 if (!_cfg.SharedCraftInventory) return;
 
                 if (_cfg.CacheEligibleInventories && __instance == _previousWgo)
@@ -645,8 +648,8 @@ namespace WheresMaStorage
                 _isBarman = __instance.obj_id.ToLowerInvariant().Contains(Barman);
                 _isTavernCellar = __instance.obj_id.ToLowerInvariant().Contains(TavernCellar);
                 _isRefugee = __instance.obj_id.ToLowerInvariant().Contains(Refugee);
-                _isChurchPulpit = __instance.obj_id.ToLowerInvariant().Contains(Church);
-                _isGrindstone = __instance.obj_id.ToLowerInvariant().Contains(Grindstone);
+                //_isChurchPulpit = __instance.obj_id.ToLowerInvariant().Contains(Church);
+                //_isGrindstone = __instance.obj_id.ToLowerInvariant().Contains(Grindstone);
             }
         }
         
@@ -657,7 +660,7 @@ namespace WheresMaStorage
         //    [HarmonyPostfix]
         //    public static void Postfix(ref string item_id, ref int __result)
         //    {
-        //        if (!_zombie) return;
+        //        if (!_linkedWorker) return;
         //        var s = item_id;
         //        var count = _mi.all.Sum(inv => inv.data.GetTotalCount(s));
         //        __result = count;
