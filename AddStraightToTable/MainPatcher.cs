@@ -3,8 +3,6 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Helper;
-using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace AddStraightToTable;
 
