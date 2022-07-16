@@ -2,8 +2,8 @@ using System;
 using HarmonyLib;
 using System.Reflection;
 using FlowCanvas;
+using Helper;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace FogBeGone;
 
@@ -19,12 +19,16 @@ public class MainPatcher
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             _introPlaying = false;
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
-            Debug.LogError($"[FogBeGone]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
     }
 
+    private static void Log(string message, bool error = false)
+    {
+        Tools.Log("FogBeGone", $"{message}", error);
+    }
 
     [HarmonyPatch(typeof(CustomFlowScript), nameof(CustomFlowScript.Create), typeof(GameObject), typeof(FlowGraph), typeof(bool), typeof(CustomFlowScript.OnFinishedDelegate), typeof(string))]
     public static class CustomFlowScriptCreatePatch

@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Threading;
 using UnityEngine;
+using Helper;
 
 namespace BeamMeUpGerry
 {
@@ -24,11 +25,17 @@ namespace BeamMeUpGerry
 
                 _cfg = Config.GetOptions();
                 _showCooldownReadyAlert = false;
+                
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[BeamMeUpGerry]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+                Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
             }
+        }
+
+        private static void Log(string message, bool error = false)
+        {
+            Tools.Log("BeamMeUpGerry", $"{message}", error);
         }
 
         private static Item GetHearthstone()

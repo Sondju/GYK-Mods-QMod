@@ -1,5 +1,6 @@
 using AutoLootHeavies.lang;
 using HarmonyLib;
+using Helper;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -68,12 +69,16 @@ public class MainPatcher
 
             _vectorsLoaded = false;
             _needScanning = true;
-
         }
         catch (Exception ex)
         {
-            Debug.LogError($"[AutoLootHeavies]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
+    }
+
+    private static void Log(string message, bool error = false)
+    {
+        Tools.Log("AutoLootHeavies", $"{message}", error);
     }
 
     [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
@@ -108,7 +113,7 @@ public class MainPatcher
             if (!found) VectorDictionary.Add(keyToAdd, valueToAdd);
         }
 
-        Debug.LogError($"Loaded {VectorDictionary.Count} stockpiles into the dictionary.");
+        Log($"Loaded {VectorDictionary.Count} stockpiles into the dictionary.");
         return true;
     }
 
@@ -288,16 +293,21 @@ public class MainPatcher
 
     private static void ShowMessage(string msg, Vector3 pos)
     {
+        Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
         Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-        //the floaty bubbles are stuck in english apparently??
-        if (Lang.Contains("ko") || Lang.Contains("ja") || Lang.Contains("zh"))
+
+        if (GJL.IsEastern())
+        {
             MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
                 SmartSpeechEngine.VoiceID.None, true);
+        }
         else
+        {
             EffectBubblesManager.ShowImmediately(pos,
                 msg,
                 EffectBubblesManager.BubbleColor.Relation,
                 true, 3f);
+        }
     }
 
     private static void GetClosestStockPile()
@@ -305,22 +315,18 @@ public class MainPatcher
         if (!MainGame.game_started) return;
         if (VectorDictionary.Count <= 0)
         {
-           // Debug.LogError("Nothing loaded in the Vector dictionary.");
             return;
         }
-
-        //Debug.LogError($"Vector dictionary has {VectorDictionary.Count} vectors.");
 
         try
         {
             _lastKnownTimberLocation = VectorDictionary.Where(x => x.Value == Constants.FileKeys.Timber)
                 .ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key))
                 .Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
-           // Debug.Log($"Closest Timber: {_lastKnownTimberLocation}");
         }
         catch (Exception)
         {
-            Debug.LogError("No last known timber locations available.");
+            Log("No last known timber locations available.");
         }
 
         try
@@ -328,11 +334,10 @@ public class MainPatcher
             _lastKnownOreLocation = VectorDictionary.Where(x => x.Value == Constants.FileKeys.Ore)
                 .ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key))
                 .Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
-           // Debug.Log($"Closest Timber: {_lastKnownOreLocation}");
         }
         catch (Exception)
         {
-            Debug.LogError("No last known ore locations available.");
+            Log("No last known ore locations available.");
         }
 
         try
@@ -340,11 +345,10 @@ public class MainPatcher
             _lastKnownStoneLocation = VectorDictionary.Where(x => x.Value == Constants.FileKeys.Stone)
                 .ToDictionary(v => v.Key, v => Vector3.Distance(MainGame.me.player_pos, v.Key))
                 .Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
-            //Debug.Log($"Closest Stone: {_lastKnownStoneLocation}");
         }
         catch (Exception)
         {
-            Debug.LogError("No last known stone locations available.");
+            Log("No last known stone locations available.");
         }
     }
 
@@ -360,7 +364,7 @@ public class MainPatcher
                 x.obj_id.Contains(Constants.ItemObjectId.Stone))
             .ToList();
         _storedStockpiles = _objects;
-       // Debug.LogError($"StockPile Count: {_storedStockpiles.Count}, Object count: {_objects.Count}");
+
         foreach (var obj in _objects.Where(obj => obj != null))
         {
             bool found;
@@ -416,7 +420,6 @@ public class MainPatcher
         _freeTimberSlots = 9 * _timberPileCount - _usedTimberSlots;
         _freeStoneSlots = 6 * _stonePileCount - _usedStoneSlots;
         _freeOreSlots = 7 * _orePileCount - _usedOreSlots;
-        //  ShowMessage($"Free Timber: {FreeTimberSlots}, Free Stone: {FreeStoneSlots}, Free Ore: {FreeOreSlots}", false,false,false,"");
     }
 
     private struct Constants
@@ -570,7 +573,7 @@ public class MainPatcher
             UpdateStockpiles();
 
             if (Time.time - _lastScanTime < _cfg.ScanIntervalInSeconds)
-                // Debug.LogError($"Been less than {_cfg.ScanIntervalInSeconds} seconds since last scan. Skipping.");
+
                 return;
 
             ScanStockpiles();
@@ -646,7 +649,7 @@ public class MainPatcher
                 }
 
                 ItemsToInsert.Clear();
-                //ItemsDidntFit.Clear();
+
                 ItemsToInsert.Add(item);
 
                 if (__state.iron)
@@ -710,7 +713,6 @@ public class MainPatcher
                                 else
                                 {
                                     DropOjectAndNull(__instance, item);
-                                    //ShowMessage("", false, true, true, Constants.FileKeys.Ores);
                                 }
 
                                 break;
@@ -737,11 +739,6 @@ public class MainPatcher
                                     ShowLootAddedIcon(item);
                                 else
                                     DropOjectAndNull(__instance, item);
-
-                                //if (ItemsDidntFit.Count > 0)
-                                //{
-                                //    ShowMessage("", false, false, true, Constants.FileKeys.Ore);
-                                //}
 
                                 break;
                         }
@@ -834,12 +831,6 @@ public class MainPatcher
                                     ShowLootAddedIcon(item);
                                 else
                                     DropOjectAndNull(__instance, item);
-
-                                //if (ItemsDidntFit.Count > 0)
-                                //{
-                                //    ShowMessage("", false, false, true, Constants.FileKeys.Timber);
-                                //}
-
                                 break;
                         }
                     }
@@ -888,7 +879,6 @@ public class MainPatcher
                                 else
                                 {
                                     DropOjectAndNull(__instance, item);
-                                    // ShowMessage("", false, false, true, Constants.FileKeys.Stone);
                                 }
 
                                 break;
@@ -906,7 +896,6 @@ public class MainPatcher
                                 else
                                 {
                                     DropOjectAndNull(__instance, item);
-                                    // ShowMessage("", false, false, true, Constants.FileKeys.Stone);
                                 }
 
                                 break;
@@ -934,37 +923,18 @@ public class MainPatcher
                                 else
                                     DropOjectAndNull(__instance, item);
 
-                                //if (ItemsDidntFit.Count > 0)
-                                //{
-                                //    ShowMessage("", false, false, true, Constants.FileKeys.Stone);
-                                //}
-
                                 break;
                         }
                     }
                 }
                 else
                 {
-                    //shouldn't need this, but just in case
                     DropOjectAndNull(__instance, item);
                 }
             }
             catch (Exception ex)
             {
-                ShowMessage(
-                    strings.ErrorMsg,
-                    false,
-                    false, false, "");
-                try
-                {
-                    File.WriteAllText("./QMods/AutoLootHeavies/error.txt",
-                        $@"Mod: AutoLootHeavies, Message: {ex.Message}, Source: {ex.Source}, Trace: {ex.StackTrace}
-");
-                }
-                catch (Exception)
-                {
-                    //
-                }
+                Log(strings.ErrorMsg + $"{ex.Message}\n{ex.Source}\n{ex.StackTrace}", true);
             }
         }
     }

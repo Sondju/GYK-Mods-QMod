@@ -2,6 +2,7 @@ using HarmonyLib;
 using System;
 using System.Linq;
 using System.Reflection;
+using Helper;
 using UnityEngine;
 
 namespace TheSeedEqualizer;
@@ -17,8 +18,13 @@ public class MainPatcher
         }
         catch (Exception ex)
         {
-            Debug.LogError($"[TheSeedEqualizer]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
+    }
+
+    private static void Log(string message, bool error = false)
+    {
+        Tools.Log("TheSeedEqualizer", $"{message}", error);
     }
 
     [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.FillCraftsList))]
@@ -52,7 +58,7 @@ public class MainPatcher
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[TheSeedEqualizer] {ex.Message}, {ex.Source}, {ex.StackTrace}");
+                Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}",true);
             }
         }
     }

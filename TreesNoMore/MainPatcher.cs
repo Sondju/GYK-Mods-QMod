@@ -1,6 +1,7 @@
 using HarmonyLib;
 using System;
 using System.Reflection;
+using Helper;
 using UnityEngine;
 
 namespace TreesNoMore;
@@ -16,8 +17,13 @@ public class MainPatcher
         }
         catch (Exception ex)
         {
-            Debug.LogError($"[TreesNoMore]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
+    }
+
+    private static void Log(string message, bool error = false)
+    {
+        Tools.Log("TreesNoMore", $"{message}", error);
     }
 
     //makes the racks and the barman inventory larger
@@ -37,7 +43,6 @@ public class MainPatcher
         [HarmonyFinalizer]
         public static Exception Finalizer()
         {
-            //Debug.LogError($"[TreesNoMore]: Stopped a stump spawning!");
             return null;
         }
     }
@@ -57,7 +62,6 @@ public class MainPatcher
         [HarmonyFinalizer]
         public static Exception Finalizer()
         {
-           // Debug.LogError($"[TreesNoMore]: Stopped a tree spawning!");
             return null;
         }
     }

@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.7")]
 [assembly: AssemblyFileVersion("1.7")]
 [assembly: NeutralResourcesLanguage("en")]
-[assembly: AssemblyDescription("MiscBitsBobs")]
+[assembly: AssemblyDescription("MiscBitsAndBobs")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]

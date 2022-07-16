@@ -1,7 +1,8 @@
 using HarmonyLib;
 using LazyBearGames.Preloader;
+using System;
 using System.Reflection;
-using UnityEngine;
+using Helper;
 
 namespace NoIntros;
 
@@ -14,10 +15,15 @@ public class MainPatcher
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.NoIntros");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
-            Debug.LogError($"[NoIntros]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
+    }
+
+    private static void Log(string message, bool error = false)
+    {
+        Tools.Log("NoIntros", $"{message}", error);
     }
 
     [HarmonyPatch(typeof(LBPreloader), "StartAnimations")]

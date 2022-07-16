@@ -43,6 +43,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{A58B39AC-A
 		libs\0Harmony.xml = libs\0Harmony.xml
 		libs\Assembly-CSharp-firstpass.dll = libs\Assembly-CSharp-firstpass.dll
 		libs\Assembly-CSharp.dll = libs\Assembly-CSharp.dll
+		libs\Helper.dll = libs\Helper.dll
+		libs\Rewired_Core.dll = libs\Rewired_Core.dll
+		libs\Rewired_Windows_Lib.dll = libs\Rewired_Windows_Lib.dll
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AddStraightToTable", "AddStraightToTable\AddStraightToTable.csproj", "{2A226EA2-0839-4FF6-8438-697D3CC83EBF}"
@@ -57,7 +60,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeamMeUpGerry", "BeamMeUpGe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{40B250ED-4247-485F-A2A9-6459A545CDD7}"
 	ProjectSection(SolutionItems) = preProject
-		TextFile1.txt = TextFile1.txt
+		ButtonMappings.txt = ButtonMappings.txt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WheresMaStorage", "WheresMaStorage\WheresMaStorage.csproj", "{24C8C61B-50FE-4814-9146-C59875A99CCF}"

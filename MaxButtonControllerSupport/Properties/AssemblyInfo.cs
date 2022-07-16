@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.3")]
 [assembly: NeutralResourcesLanguage("en")]
 
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("MaxButtonControllerSupport")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]

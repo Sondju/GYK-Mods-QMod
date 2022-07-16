@@ -3,10 +3,12 @@ using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
+using Helper;
 using UnityEngine;
 using WheresMaStorage.lang;
 
@@ -27,6 +29,7 @@ namespace WheresMaStorage
         private const string Tavern = "tavern";
         private const string TavernCellar = "tavern_cellar";
         private const string Vendor = "vendor";
+
         private static readonly string[] AlwaysHidePartials =
         {
             "refugee_camp_well", "refugee_camp_tent", "pump", "pallet"
@@ -49,11 +52,12 @@ namespace WheresMaStorage
 
         private static int _invSize;
 
-        private static bool _isChest, _isBarman, _isTavernCellar, _isRefugee, _isCraft, _isVendor, _linkedWorker;//, _isChurchPulpit, _isGrindstone
+        private static bool _isChest, _isBarman, _isTavernCellar, _isRefugee, _isCraft, _isVendor, _zombieWorker, _playerInteraction;//, _isChurchPulpit, _isGrindstone
 
         //private static readonly List<Inventory> ResourceCraftInventories = new();
         //private static readonly List<Inventory> WorldInventories = new();
         private static MultiInventory _mi = new();
+
         private static WorldGameObject _wgo, _previousWgo;
 
         private static string Lang { get; set; }
@@ -70,11 +74,17 @@ namespace WheresMaStorage
 
                 _cfg = Config.GetOptions();
                 _invSize = 20 + _cfg.AdditionalInventorySpace;
+
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[WheresMaStorage]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+                Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
             }
+        }
+
+        private static void Log(string message, bool error = false)
+        {
+            Tools.Log("WheresMaStorage", $"{message}", error);
         }
 
         private static void SetInventorySizeText(BaseInventoryWidget inventoryWidget, InventoryPanelGUI inventoryPanelGui)
@@ -148,14 +158,69 @@ namespace WheresMaStorage
             _isBarman = false;
             _isTavernCellar = false;
             _isRefugee = false;
+            _playerInteraction = false;
             //_isChurchPulpit = false;
             //_isGrindstone = false;
         }
 
-        private static void wl(string message)
+
+
+        //this method gets inserted into the CraftReally method using the transpiler below, overwriting any inventory the game sets. It only effects zombie requests.
+        public static MultiInventory GetMi(CraftDefinition craft, MultiInventory orig, WorldGameObject otherGameObject)
         {
-            Debug.LogError($"[WMS]: {message}");
+            if (otherGameObject.has_linked_worker && otherGameObject.linked_worker.obj_id.Contains("zombie"))
+            {
+                Log($"[InvRedirect]: Redirected zombie inventory to player MultiInventory! Object: {otherGameObject.obj_id}, Craft: {craft.id}");
+                return _mi;
+            }
+
+            Log($"[InvRedirect]: Original inventory sent back to requester! Object: {otherGameObject.obj_id}, Craft: {craft.id}");
+            return orig;
         }
+
+        [HarmonyDebug]
+        [HarmonyPriority(1)]
+        [HarmonyPatch(typeof(CraftComponent), "CraftReally")]
+        public static class CraftComponentPatch
+        {
+            [HarmonyTranspiler]
+            private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                var codes = new List<CodeInstruction>(instructions);
+                if (!_cfg.SharedCraftInventory) return codes.AsEnumerable();
+                var usedMultiField = AccessTools.Field(typeof(CraftComponent), "used_multi_inventory");
+                var otherObj = AccessTools.Field(typeof(CraftComponent), "other_obj");
+                var miGetter = typeof(WheresMaStorage.MainPatcher).GetMethod("GetMi");
+                var insertIndex = -1;
+                for (var i = 0; i < codes.Count; i++)
+                {
+                    if (codes[i].opcode == OpCodes.Ldfld && codes[i].operand.ToString().Contains("item_needs") && codes[i - 1].opcode == OpCodes.Ldarg_1)
+                    {
+                        insertIndex = i;
+                        Log($"[Found Insert Index: {insertIndex}]");
+                        break;
+                    }
+                }
+                var newCodes = new List<CodeInstruction>
+                {
+                    new(OpCodes.Ldarg_0),
+                    new(OpCodes.Ldarg_1),
+                    new(OpCodes.Ldarg_0),
+                    new(OpCodes.Ldfld, usedMultiField),
+                    new(OpCodes.Ldarg_0),
+                    new(OpCodes.Ldfld, otherObj),
+                    new(OpCodes.Call, miGetter),
+                    new(OpCodes.Stfld, usedMultiField)
+                };
+                if (insertIndex != -1)
+                {
+                    codes.InsertRange(insertIndex, newCodes);
+                }
+
+                return codes.AsEnumerable();
+            }
+        }
+
 
         [HarmonyPatch(typeof(AutopsyGUI))]
         public static class AutopsyGuiPatch
@@ -195,13 +260,13 @@ namespace WheresMaStorage
             }
         }
 
+        //some crafting objects re-acquire the inventories when starting a craft, overwriting our multi. This stops that.
         [HarmonyPatch(typeof(BaseCraftGUI), "multi_inventory", MethodType.Getter)]
         public static class BaseCraftGuiMiGetterPatch
         {
             [HarmonyPostfix]
-            public static void Postfix(ref BaseCraftGUI __instance, ref MultiInventory __result)
+            public static void Postfix(ref MultiInventory __result)
             {
-                if (_linkedWorker) return;
                 __result = _mi;
             }
         }
@@ -268,11 +333,6 @@ namespace WheresMaStorage
                 {
                     id.stack_count = _cfg.StackSizeForStackables;
                 }
-
-                foreach (var id in GameBalance.me.items_data.Where(id => id.base_count is > 1 and < 999))
-                {
-                    id.base_count = _cfg.StackSizeForStackables;
-                }
             }
         }
 
@@ -287,8 +347,69 @@ namespace WheresMaStorage
             }
         }
 
+        //[HarmonyPatch(typeof(WorldZone), nameof(WorldZone.IsPlayerInZone))]
+        //public static class WorldZoneIsPlayerInZoneChangePatch
+        //{
+        //    [HarmonyPostfix]
+        //    public static void Postfix(ref bool __result)
+        //    {
+        //        if (_zombieWorker)
+        //        {
+        //            __result = true;
+        //        }
+        //    }
+        //}
+
         [HarmonyPatch(typeof(GraveGUI), "GravePartsFilter", typeof(Item), typeof(ItemDefinition.ItemType))]
         public static class GraveGuiGravePartsFilterPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref InventoryWidget.ItemFilterResult __result)
+            {
+                if (!MainGame.game_started) return;
+                if (!_cfg.HideInvalidSelections) return;
+
+                if (__result != InventoryWidget.ItemFilterResult.Active)
+                {
+                    __result = InventoryWidget.ItemFilterResult.Inactive;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(MixedCraftGUI), "AlchemyItemPickerFilter", typeof(Item), typeof(InventoryWidget))]
+        public static class MixedCraftGuiAlchemyItemPickerFilterPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref InventoryWidget.ItemFilterResult __result)
+            {
+                if (!MainGame.game_started) return;
+                if (!_cfg.HideInvalidSelections) return;
+
+                if (__result != InventoryWidget.ItemFilterResult.Active)
+                {
+                    __result = InventoryWidget.ItemFilterResult.Inactive;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(SoulContainerWidget), "SoulItemsFilter", typeof(Item))]
+        public static class SoulContainerWidgetSoulItemsFilterPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref InventoryWidget.ItemFilterResult __result)
+            {
+                if (!MainGame.game_started) return;
+                if (!_cfg.HideInvalidSelections) return;
+
+                if (__result != InventoryWidget.ItemFilterResult.Active)
+                {
+                    __result = InventoryWidget.ItemFilterResult.Inactive;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(SoulHealingWidget), "SoulItemsFilter", typeof(Item))]
+        public static class SoulHealingWidgetSoulItemsFilterPatch
         {
             [HarmonyPostfix]
             public static void Postfix(ref InventoryWidget.ItemFilterResult __result)
@@ -376,9 +497,9 @@ namespace WheresMaStorage
             [HarmonyPrefix]
             public static void Prefix(ref InventoryPanelGUI __instance, ref MultiInventory multi_inventory)
             {
-                // var isVendor = __instance.name.ToLowerInvariant().Contains(Vendor);
-                //// wl($"Barman:{_isBarman}, Cellar:{_isTavernCellar}, Refugee:{_isRefugee}, Chest:{_isChest}, Vendor:{isVendor}");
-                // if (isVendor) return;
+                var isVendorPanel = __instance.name.ToLowerInvariant().Contains(Vendor);
+                // Log($"Barman:{_isBarman}, Cellar:{_isTavernCellar}, Refugee:{_isRefugee}, Chest:{_isChest}, Vendor:{isVendor}");
+                if (isVendorPanel) return;
 
                 if (_cfg.DontShowEmptyRowsInInventory)
                 {
@@ -484,6 +605,36 @@ namespace WheresMaStorage
                 print_log = false;
             }
         }
+
+        //[HarmonyPatch(typeof(RatCellGUI))]
+        //public static class RatCellGuiPatch
+        //{
+        //    internal static IEnumerable<MethodBase> TargetMethods()
+        //    {
+        //        var inner = typeof(OrganEnhancerGUI).GetNestedType("<>c", AccessTools.all)
+        //                    ?? throw new Exception("Inner Not Found");
+
+        //        foreach (var method in inner.GetMethods(AccessTools.all))
+        //        {
+        //            if (method.Name.Contains("<OnRatInsertionButtonPressed>") && method.GetParameters().Length == 2)
+        //            {
+        //                yield return method;
+        //            }
+        //        }
+        //    }
+
+        //    [HarmonyTranspiler]
+        //    [CanBeNull]
+        //    private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator gen, MethodBase original)
+        //    {
+        //        var instructionsList = new List<CodeInstruction>(instructions);
+        //        if (!_cfg.HideInvalidSelections) return instructionsList.AsEnumerable();
+        //        instructionsList[5].opcode = OpCodes.Ldc_I4_1;
+
+        //        return instructionsList.AsEnumerable();
+        //    }
+        //}
+
         [HarmonyPatch(typeof(OrganEnhancerGUI))]
         public static class OrganEnhancerGuiPatch
         {
@@ -513,25 +664,6 @@ namespace WheresMaStorage
                 return instructionsList.AsEnumerable();
             }
         }
-        //with the stack size changes, the game doesn't remove the prayer item on pray (i cant actually find where it does this at all). now it does.
-        [HarmonyPatch(typeof(PrayCraftGUI), nameof(PrayCraftGUI.OnPrayButtonPressed))]
-        public static class PrayCraftGuiOnPrayButtonPressedPatch
-        {
-            [HarmonyPrefix]
-            public static void Prefix(ref PrayCraftGUI __instance, ref Item ____selected_item)
-            {
-                if (__instance == null) return;
-                foreach (var inv in _mi.all)
-                {
-                    foreach (var item in inv.data.inventory)
-                    {
-                        if (item != ____selected_item) continue;
-                        inv.data.RemoveItemNoCheck(item, 1);
-                        wl($"[PrayCraftGUI.OnPrayButtonPressed]: Remove 1x {____selected_item.id}.");
-                    }
-                }
-            }
-        }
 
         [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetMultiInventory))]
         public static class WorldGameObjectGetMultiInventoryPatch
@@ -543,12 +675,8 @@ namespace WheresMaStorage
                 bool include_toolbelt = false
             )
             {
-                if (__instance.has_linked_worker && __instance.linked_worker.obj_id.Contains("zombie"))
-                {
-                    _linkedWorker = true;
-                    return;
-                }
-                _linkedWorker = false;
+                _zombieWorker = false || __instance.has_linked_worker && __instance.linked_worker.obj_id.Contains("zombie");
+
                 if (!_cfg.SharedCraftInventory) return;
 
                 if (_cfg.CacheEligibleInventories && __instance == _previousWgo)
@@ -559,23 +687,23 @@ namespace WheresMaStorage
                         var newInv = _mi.all.Where(a => !a.name.Contains("Toolbelt")).ToList();
                         pMi.SetInventories(newInv);
                         __result = pMi;
-                        wl($"[WorldGameObject.GetMultiInventory] Cached player inventory sent to Player.");
+                        //Log($"[WorldGameObject.GetMultiInventory] Cached player inventory sent to Player.");
                         return;
                     }
 
-                    wl(__instance.is_player
-                        ? $"[WorldGameObject.GetMultiInventory] Cached inventory sent to Player."
-                        : $"[WorldGameObject.GetMultiInventory] Cached inventory sent to {__instance.obj_id}.");
+                    //Log(__instance.is_player
+                    //    ? $"[WorldGameObject.GetMultiInventory] Cached inventory sent to Player."
+                    //    : $"[WorldGameObject.GetMultiInventory] Cached inventory sent to {__instance.obj_id}.");
 
                     __result = _mi;
                     return;
                 }
 
-                if (__instance.is_player || __instance == _wgo || __instance.has_linked_worker)
+                if (__instance.is_player || __instance == _wgo || _zombieWorker)
                 {
-                    wl(__instance.is_player
-                        ? $"[WorldGameObject.GetMultiInventory] Fresh inventory sent to Player."
-                        : $"[WorldGameObject.GetMultiInventory] Fresh inventory sent to {__instance.obj_id}.");
+                    //Log(__instance.is_player
+                    //    ? $"[WorldGameObject.GetMultiInventory] Fresh inventory sent to Player."
+                    //    : $"[WorldGameObject.GetMultiInventory] Fresh inventory sent to {__instance.obj_id}.");
                     _previousWgo = __instance;
                     _mi = new MultiInventory();
                     var playerInv = new Inventory(MainGame.me.player.data, "Player", string.Empty);
@@ -641,7 +769,7 @@ namespace WheresMaStorage
                 _previousWgo = _wgo;
                 _wgo = __instance;
 
-                wl($"Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player}, OtherObj: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}, InstanceInteractionType: {__instance.obj_def.interaction_type}, OtherObjInteractionType: {other_obj.obj_def.interaction_type}, InstanceHasCraft: {__instance.obj_def.has_craft}, InstanceCraftPreset: {__instance.obj_def.craft_preset},, InstanceScript: {__instance.obj_def.attached_script}");
+                Log($"Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player}, OtherObj: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}, InstanceInteractionType: {__instance.obj_def.interaction_type}, OtherObjInteractionType: {other_obj.obj_def.interaction_type}, InstanceHasCraft: {__instance.obj_def.has_craft}, InstanceCraftPreset: {__instance.obj_def.craft_preset},, InstanceScript: {__instance.obj_def.attached_script}");
                 _isVendor = __instance.vendor != null;
                 _isCraft = other_obj.is_player && __instance.obj_def.interaction_type != ObjectDefinition.InteractionType.Chest && __instance.obj_def.has_craft;
                 _isChest = __instance.obj_def.interaction_type == ObjectDefinition.InteractionType.Chest;
@@ -652,20 +780,68 @@ namespace WheresMaStorage
                 //_isGrindstone = __instance.obj_id.ToLowerInvariant().Contains(Grindstone);
             }
         }
-        
-        
+
+        //[HarmonyPatch(typeof(MultiInventory), nameof(MultiInventory.RemoveItems))]
+        //public static class MultiInventoryRemoveItemsPatch
+        //{
+        //    [HarmonyPrefix]
+        //    public static void Prefix(ref List<Inventory> ____inventories)
+        //    {
+        //        if (!_zombieWorker || !_playerInteraction) return;
+        //        ____inventories = _mi.all;
+        //    }
+        //}
+
+        //[HarmonyPatch(typeof(ChestGUI), "GetMaxMoveCount")]
+        //public static class ChestGuiGetMaxMoveCountPatch
+        //{
+        //    [HarmonyPrefix]
+        //    public static void Prefix()
+        //    {
+        //        _playerInteraction = true;
+        //    }
+
+        //    [HarmonyPrefix]
+        //    public static void Postfix()
+        //    {
+        //        _playerInteraction = false;
+        //    }
+        //}
+
+        //[HarmonyPatch(typeof(VendorGUI), "GetMaxMoveCount")]
+        //public static class VendorGuiMaxMoveCountPatch
+        //{
+        //    [HarmonyPrefix]
+        //    public static void Prefix()
+        //    {
+        //        _playerInteraction = true;
+        //    }
+
+        //    [HarmonyPrefix]
+        //    public static void Postfix()
+        //    {
+        //        _playerInteraction = false;
+        //    }
+        //}
+
         //[HarmonyPatch(typeof(MultiInventory), nameof(MultiInventory.GetTotalCount))]
         //public static class MultiInventoryGetTotalCountPatch
         //{
+        //    [HarmonyPrefix]
+        //    public static void Prefix(ref List<Inventory> ____inventories)
+        //    {
+        //        if (!_zombieWorker || !_playerInteraction || _isVendor || _isBarman ||_isRefugee) return;
+        //        ____inventories = _mi.all;
+        //    }
+
         //    [HarmonyPostfix]
         //    public static void Postfix(ref string item_id, ref int __result)
         //    {
-        //        if (!_linkedWorker) return;
+        //        if (!_zombieWorker || _playerInteraction) return;
         //        var s = item_id;
         //        var count = _mi.all.Sum(inv => inv.data.GetTotalCount(s));
         //        __result = count;
         //    }
         //}
-
     }
 }

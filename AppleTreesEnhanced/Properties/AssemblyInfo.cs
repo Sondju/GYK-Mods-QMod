@@ -3,7 +3,7 @@ using System.Resources;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Makes garden apple trees and berry bushes drop their harvest when it's ready.")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("AppleTreesEnhanced")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
 [assembly: AssemblyProduct("Apple Trees Enhanced!")]
@@ -12,6 +12,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
 [assembly: Guid("b07cf3fc-0508-4041-b4f5-b8469eb20cb0")]
-[assembly: AssemblyVersion("2.5")]
-[assembly: AssemblyFileVersion("2.5")]
+[assembly: AssemblyVersion("2.6")]
+[assembly: AssemblyFileVersion("2.6")]
 [assembly: NeutralResourcesLanguage("en")]

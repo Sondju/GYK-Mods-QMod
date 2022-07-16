@@ -1,7 +1,9 @@
 using HarmonyLib;
+using System;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
+using Helper;
 using ThoughtfulReminders.lang;
 using UnityEngine;
 
@@ -23,13 +25,16 @@ public class MainPatcher
 
             _cfg = Config.GetOptions();
 
-            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
-            Debug.LogError($"[ThoughtfulReminders]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
+    }
+
+    private static void Log(string message, bool error = false)
+    {
+        Tools.Log("ThoughtfulReminders", $"{message}", error);
     }
 
     private static void SayMessage(string msg)
@@ -42,8 +47,7 @@ public class MainPatcher
         }
         else
         {
-            //game doesn't appear to support these languages fonts in the effects bubbles aka floaty text
-            if (Lang.Contains("ko") || Lang.Contains("ja") || Lang.Contains("zh"))
+            if (GJL.IsEastern())
                 MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
                     SmartSpeechEngine.VoiceID.None, true);
             else

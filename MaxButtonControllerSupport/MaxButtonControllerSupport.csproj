@@ -51,6 +51,10 @@
       <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Helper">
+      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\Helper.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="MaxButton">
       <HintPath>..\..\..\..\..\GOG Games\Graveyard Keeper\QMods\MaxButton\MaxButton.dll</HintPath>
       <Private>False</Private>

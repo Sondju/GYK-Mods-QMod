@@ -1,13 +1,10 @@
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using DarkTonic.MasterAudio;
-using Debug = UnityEngine.Debug;
-using Object = UnityEngine.Object;
+using Helper;
 
 namespace MiscBitsAndBobs;
 
@@ -15,7 +12,6 @@ public class MainPatcher
 {
     private static Config.Options _cfg;
     private static WorldGameObject _wgo;
-    private static readonly List<string> LoadedMods = new();
     private const string WheresMaStorage = "WheresMaStorage";
 
     private static readonly string[] TavernItems =
@@ -52,25 +48,34 @@ public class MainPatcher
         }
         catch (Exception ex)
         {
-            Debug.LogError($"[MiscBitsAndBobs]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
     }
 
-    [HarmonyPatch(typeof(MasterAudio), nameof(MasterAudio.PlaySound))]
-    public static class MasterAudioPlaySoundPatch
+    private static void Log(string message, bool error = false)
     {
-        [HarmonyPrefix]
-        public static void Prefix(string sType, ref float volumePercentage)
-        {
-            if (!_cfg.LessenFootstepSound) return;
-            if (sType.Contains("foot"))
-            {
-                Debug.LogError($"[MBB]: Footstep Volume: {volumePercentage}");
-                //volumePercentage = 0.25f;
-            }
-        }
+        Tools.Log("MiscBitsAndBobs", $"{message}", error);
     }
 
+    ////with the stack size changes, the game doesn't remove the prayer item on pray (i cant actually find where it does this at all). now it does.
+    //[HarmonyPatch(typeof(PrayCraftGUI), nameof(PrayCraftGUI.OnPrayButtonPressed))]
+    //public static class PrayCraftGuiOnPrayButtonPressedPatch
+    //{
+    //    [HarmonyPrefix]
+    //    public static void Prefix(ref PrayCraftGUI __instance, ref Item ____selected_item)
+    //    {
+    //        if (__instance == null) return;
+    //        foreach (var inv in _mi.all)
+    //        {
+    //            foreach (var item in inv.data.inventory)
+    //            {
+    //                if (item != ____selected_item) continue;
+    //                inv.data.RemoveItemNoCheck(item, 1);
+    //                wl($"[PrayCraftGUI.OnPrayButtonPressed]: Remove 1x {____selected_item.id}.");
+    //            }
+    //        }
+    //    }
+    //}
 
     [HarmonyPatch(typeof(LeaveTrailComponent), "LeaveTrail")]
     public static class LeaveTrailComponentLeaveTrailPatch
@@ -78,7 +83,7 @@ public class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(TrailDefinition ____trail_definition, Ground.GroudType ____trail_type, float ____dirty_amount, List<TrailObject> ____all_trails)
         {
-            //Debug.LogError($"[MBB]: Dirty Amount: {____dirty_amount}");
+            
             if (!_cfg.LessenFootprintImpact) return;
             var byType = ____trail_definition.GetByType(____trail_type);
             if (____all_trails.Count <= 0) return;
@@ -137,31 +142,10 @@ public class MainPatcher
             if (!MainGame.game_started || __instance == null) return;
             if (__instance.last_craft_id.Equals("set_grave_bot_wd_1"))
             {
-                //Debug.LogError($"Object: {_wgo.obj_id}, Craft: {__instance.last_craft_id}");
                 TechPointsDrop.Drop(_wgo.pos3, 0, 0, 1);
             }
         }
     }
-
-    //[HarmonyPatch(typeof(InventoryGUI), nameof(InventoryGUI.OnItemOver))]
-    //public static class InventoryGuiOnItemOverPatch
-    //{
-    //    [HarmonyPrefix]
-    //    public static void Prefix(ref InventoryGUI __instance)
-    //    {
-    //        //if (__instance == null) return;
-
-    //        //Debug.LogError(__instance.selected_item.definition.linked_craft != null
-    //        //    ? $"[MBB]: Item: {__instance.selected_item.id}, CantDestroy: {__instance.selected_item.definition.player_cant_throw_out}, Unique: {__instance.selected_item.is_unique}, OneTime: {__instance.selected_item.definition.linked_craft.one_time_craft}"
-    //        //    : $"[MBB]: Item: {__instance.selected_item.id}, CantDestroy: {__instance.selected_item.definition.player_cant_throw_out}, Unique: {__instance.selected_item.is_unique}");
-
-    //        if (!_cfg.AllowHandToolDestroy) return;
-    //        if (__instance == null) return;
-    //        var itemDef = __instance.selected_item?.definition;
-    //        if (itemDef == null) return;
-    //        if (ToolItems.Contains(itemDef.type)) itemDef.player_cant_throw_out = false;
-    //    }
-    //}
 
     [HarmonyPatch(typeof(DropResGameObject), nameof(DropResGameObject.CollectDrop))]
     public static class DropResGameObjectCollectDrop
@@ -170,10 +154,9 @@ public class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref DropResGameObject __instance)
         {
-            if (LoadedMods.Contains(WheresMaStorage)) return;
+            if (Tools.IsModLoaded(WheresMaStorage)) return;
                 if (!GraveItems.Contains(__instance.res.definition.type)) return;
             __instance.res.definition.stack_count = 9999;
-            // __instance.res.definition.base_count = 1000;
         }
     }
 
@@ -184,11 +167,10 @@ public class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref CraftDefinition __result)
         {
-            if (LoadedMods.Contains(WheresMaStorage)) return;
+            if (Tools.IsModLoaded(WheresMaStorage)) return;
             foreach (var item in __result.output.Where(a => GraveItems.Contains(a.definition.type)))
             {
                 item.definition.stack_count = 1;
-                //item.definition.base_count = 1;
             }
         }
     }
@@ -199,14 +181,14 @@ public class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref CraftDefinition __instance, ref bool __result)
         {
-            if (LoadedMods.Contains(WheresMaStorage)) return;
+            if (Tools.IsModLoaded(WheresMaStorage)) return;
             if (!_cfg.EnableToolAndPrayerStacking) return;
             if (__instance == null) return;
             if (__instance.needs.Exists(item => item.id.Equals("pen:ink_pen")) && __instance.dur_needs_item > 0)
             {
                 __result = false;
             }
-            //Debug.LogError($"[MiscBitsAndBobs] Def: {__instance.id}, Dur: {__instance.dur_needs_item}");
+            
         }
     }
 
@@ -226,7 +208,7 @@ public class MainPatcher
                 }
             }
 
-            if (LoadedMods.Contains(WheresMaStorage)) return;
+            if (Tools.IsModLoaded(WheresMaStorage)) return;
 
             if (_cfg.EnableToolAndPrayerStacking)
             {
@@ -248,10 +230,9 @@ public class MainPatcher
         [HarmonyPostfix]
         private static void Postfix(ref WorldGameObject __instance)
         {
-            if (LoadedMods.Contains(WheresMaStorage)) return;
+            if (Tools.IsModLoaded(WheresMaStorage)) return;
             if (TavernItems.Contains(__instance.obj_id))
             {
-               // Debug.LogError($"[MBB]: TavernStorage InitNewObject Hit");
                 __instance.data.SetInventorySize(__instance.obj_def.inventory_size + _cfg.TavernInvIncrease);
             }
         }
@@ -281,29 +262,6 @@ public class MainPatcher
             {
                 comp.SetState(UIButtonColor.State.Disabled, true);
                 comp.SetActive(false);
-            }
-        }
-
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            try
-            {
-                var mods = AppDomain.CurrentDomain.GetAssemblies()
-             .Where(a => a.Location.ToLowerInvariant().Contains("qmods"));
-                LoadedMods.Clear();
-                foreach (var mod in mods)
-                {
-                    var modInfo = FileVersionInfo.GetVersionInfo(mod.Location);
-                    if (!string.IsNullOrEmpty(modInfo.Comments))
-                    {
-                        LoadedMods.Add(modInfo.Comments);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Loaded Mod: {ex.Message}");
             }
         }
     }

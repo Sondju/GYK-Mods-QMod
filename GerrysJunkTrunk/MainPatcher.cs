@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using GerrysJunkTrunk.lang;
+using Helper;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -26,10 +27,22 @@ namespace GerrysJunkTrunk
 
         public static void Patch()
         {
-            var harmony = new Harmony("p1xel8ted.GraveyardKeeper.GerrysJunkTrunk");
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
-            _internalCfg = InternalConfig.GetOptions();
-            _cfg = Config.GetOptions();
+            try
+            {
+                var harmony = new Harmony("p1xel8ted.GraveyardKeeper.GerrysJunkTrunk");
+                harmony.PatchAll(Assembly.GetExecutingAssembly());
+                _internalCfg = InternalConfig.GetOptions();
+                _cfg = Config.GetOptions();
+            }
+            catch (Exception ex)
+            {
+                Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
+            }
+        }
+
+        private static void Log(string message, bool error = false)
+        {
+            Tools.Log("GerrysJunkTrunk", $"{message}", error);
         }
 
         [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
@@ -85,12 +98,12 @@ namespace GerrysJunkTrunk
                         .FirstOrDefault(x => string.Equals(x.custom_tag, ShippingBoxTag));
                     if (_shippingBox == null)
                     {
-                        Debug.LogError("[SB]: No Shipping Box Found!");
+                        Log("No Shipping Box Found!");
                         _internalCfg.ShippingBoxBuilt = false;
                     }
                     else
                     {
-                        Debug.LogError($"[SB]: Found Shipping Box at {_shippingBox.pos3}");
+                        Log($"Found Shipping Box at {_shippingBox.pos3}");
                         _internalCfg.ShippingBoxBuilt = true;
                         _shippingBox.data.drop_zone_id = ShippingBoxTag;
                         var invSize = 10;
@@ -114,7 +127,7 @@ namespace GerrysJunkTrunk
             {
                 if (string.Equals(__instance.custom_tag, ShippingBoxTag))
                 {
-                    Debug.LogError($"[SB]: Removed Shipping Box!");
+                    Log($"Removed Shipping Box!");
                     _shippingBox = null;
                     _internalCfg.ShippingBoxBuilt = false;
                     UpdateInternalConfig();
@@ -289,7 +302,7 @@ namespace GerrysJunkTrunk
                 {
                     var found = StackSizeBackups.TryGetValue(item.id, out var value);
                     if (!found) continue;
-                   // Debug.LogError($"[SB]: Restore item stack size: Item: {item.id}, StackSize: {value}");
+                   
                     item.definition.stack_count = value;
                 }
 
@@ -297,7 +310,7 @@ namespace GerrysJunkTrunk
                 {
                     var found = StackSizeBackups.TryGetValue(item.id, out var value);
                     if (!found) continue;
-                   // Debug.LogError($"[SB]: Restore item stack size: Item: {item.id}, StackSize: {value}");
+                  
                     item.definition.stack_count = value;
                 }
 
@@ -313,7 +326,7 @@ namespace GerrysJunkTrunk
             {
                 if (string.Equals(__instance.custom_tag, ShippingBoxTag))
                 {
-                    Debug.LogError($"[SB]: Prefix Found Shipping Box! {__instance.data.drop_zone_id}, Other: {other_obj.obj_id}");
+                    Log($"Found Shipping Box! {__instance.data.drop_zone_id}, Other: {other_obj.obj_id}");
                     _internalCfg.ShippingBoxBuilt = true;
                     UpdateInternalConfig();
                     _usingShippingBox = true;
@@ -350,7 +363,7 @@ namespace GerrysJunkTrunk
             {
                 if (string.Equals(new_obj_id, "mf_box_stuff") && _shippingBuild)
                 {
-                    Debug.LogError($"[SB]: Shipping Build: Built Shipping Box!");
+                    Log($"Built Shipping Box!");
                     __instance.custom_tag = ShippingBoxTag;
 
                     // _shippingBoxBuilt = true;
@@ -505,7 +518,11 @@ namespace GerrysJunkTrunk
                     }
 
                     var num = GetEarnings(_shippingBox);
-                    Stats.PlayerAddMoney(num,  strings.Header);
+                    if (num > 0)
+                    {
+                        Stats.PlayerAddMoney(num, strings.Header);
+                    }
+
                     MainGame.me.player.data.money += num;
                     var money = Trading.FormatMoney(num, true);
 

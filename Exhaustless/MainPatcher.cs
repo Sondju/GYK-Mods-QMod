@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Helper;
 using UnityEngine;
 
 namespace Exhaustless;
@@ -29,11 +30,17 @@ public static class MainPatcher
             _cfg = Config.GetOptions();
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.exhaust-less");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
+            Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
         }
         catch (Exception ex)
         {
-            Debug.LogError($"[Exhaust-less]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
+    }
+
+    private static void Log(string message, bool error = false)
+    {
+        Tools.Log("Exhaustless", $"{message}", error);
     }
 
     [HarmonyPatch(typeof(BuffsLogics), nameof(BuffsLogics.AddBuff))]

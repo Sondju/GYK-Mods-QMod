@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Increase (or decrease) the default pixel size.")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("LargerScale")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]
 [assembly: AssemblyProduct("Larger Scale")]
@@ -29,6 +29,6 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("3.1")]
-[assembly: AssemblyFileVersion("3.1")]
+[assembly: AssemblyVersion("3.2")]
+[assembly: AssemblyFileVersion("3.2")]
 [assembly: NeutralResourcesLanguage("en")]

@@ -1,5 +1,7 @@
 using HarmonyLib;
+using System;
 using System.Reflection;
+using Helper;
 using UnityEngine;
 
 namespace LargerScale;
@@ -17,10 +19,15 @@ public class MainPatcher
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.LargerScale");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
-            Debug.LogError($"[LargerScale]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
+    }
+
+    private static void Log(string message, bool error = false)
+    {
+        Tools.Log("LargerScale", $"{message}", error);
     }
 
     [HarmonyAfter("com.p1xel8ted.graveyardkeeper.UltraWide")]

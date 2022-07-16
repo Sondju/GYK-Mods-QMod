@@ -1,11 +1,10 @@
 using HarmonyLib;
+using Helper;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace LongerDays;
 
@@ -51,21 +50,10 @@ public class MainPatcher
         }
         catch (Exception ex)
         {
-            Debug.LogError($"[LongerDays]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
     }
-
-    [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.UpdateAllCrafts))]
-    public static class CraftComponentUpdateAllCraftsPatch
-    {
-        [HarmonyPrefix]
-        public static void Prefix(ref float delta_time)
-        {
-            delta_time = GetTime();
-        }
-    }
-
-
+    
     private static float GetTimeMulti()
     {
         var num = _seconds switch
@@ -78,7 +66,21 @@ public class MainPatcher
         };
         return num;
     }
-    
+
+    private static void Log(string message, bool error = false)
+    {
+        Tools.Log("LongerDays", $"{message}", error);
+    }
+
+    [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.UpdateAllCrafts))]
+    public static class CraftComponentUpdateAllCraftsPatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix(ref float delta_time)
+        {
+            delta_time = GetTime();
+        }
+    }
     [HarmonyPatch(typeof(EnvironmentEngine), nameof(EnvironmentEngine.Update))]
     public static class EnvironmentEngineUpdatePatch
     {

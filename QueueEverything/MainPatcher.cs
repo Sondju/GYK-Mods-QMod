@@ -1,4 +1,5 @@
 using HarmonyLib;
+using Helper;
 using QueueEverything.lang;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,7 @@ public static class MainPatcher
     private static readonly string[] UnSafeCraftObjects =
     {
         "mf_crematorium_corp", "garden_builddesk", "tree_garden_builddesk", "mf_crematorium", "grave_ground",
-        "tile_church_semicircle_2floors", "mf_grindstone_1", "zombie_garden_desk_1", "zombie_garden_desk_2", "zombie_garden_desk_3", 
+        "tile_church_semicircle_2floors", "mf_grindstone_1", "zombie_garden_desk_1", "zombie_garden_desk_2", "zombie_garden_desk_3",
         "zombie_vineyard_desk_1", "zombie_vineyard_desk_2", "zombie_vineyard_desk_3", "graveyard_builddesk", "blockage_H_low", "blockage_V_low",
         "blockage_H_high", "blockage_V_high", "wood_obstacle_v", "refugee_camp_garden_bed", "refugee_camp_garden_bed_1", "refugee_camp_garden_bed_2",
         "refugee_camp_garden_bed_3", "carrot_box", "elevator_top", "zombie_crafting_table", "mf_balsamation","mf_balsamation_1","mf_balsamation_2",
@@ -53,7 +54,6 @@ public static class MainPatcher
     {
         CraftDefinition.CraftType.PrayCraft, CraftDefinition.CraftType.Fixing
     };
-
 
     private static readonly string[] UnSafeItems =
     {
@@ -84,18 +84,20 @@ public static class MainPatcher
             _exhaustless = false;
             _alreadyRun = false;
 
-              if (Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod")) _fasterCraft = true;
-
-             if (Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.exhaust-less")) _exhaustless = true;
+            _fasterCraft = Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod");
+            _exhaustless = Tools.IsModLoaded("Exhaustless") || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.exhaust-less");
 
             if (_fasterCraft) LoadFasterCraftConfig();
-
-           
         }
         catch (Exception ex)
         {
-            Debug.LogError($"[QueueEverything]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
+    }
+
+    private static void Log(string message, bool error = false)
+    {
+        Tools.Log("QueueEverything", $"{message}", error);
     }
 
     private static bool IsUnsafeDefinition(CraftDefinition _craftDefinition)
@@ -109,16 +111,15 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref WorldGameObject __instance)
         {
-
             if (UnSafeCraftZones.Contains(__instance.GetMyWorldZoneId()) || UnSafePartials.Any(__instance.obj_id.Contains) || UnSafeCraftObjects.Contains(__instance.obj_id))
             {
                 _unsafeInteraction = true;
-            Debug.LogError($"[QueueEverything]: UNSAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
+                Log($"Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
             }
             else
             {
                 _unsafeInteraction = false;
-                Debug.LogError($"[QueueEverything]: UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
+                Log($"UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
             }
         }
     }
@@ -136,18 +137,7 @@ public static class MainPatcher
                 var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
                 foreach (var craft in GameBalance.me.craft_data)
                 {
-                    //if (craft.one_time_craft)
-                    //{
-                    //    Debug.LogError($"[QE]: OneTimeCraft: {craft.id}");
-                    //}
                     if (craft.is_auto) continue;
-                    //if (craft.id.Contains("table"))
-                    //{
-                    //    craft.craft_in.ForEach(ci =>
-                    //    {
-                    //        Debug.Log($"Craft: {craft.id}, Craft-in: {ci}");
-                    //    });
-                    //}
 
                     var zombieCraft = craft.craft_in.Any(craftIn => craftIn.Contains("zombie"));
                     var refugeeCraft = craft.craft_in.Any(craftIn => craftIn.Contains("refugee"));
@@ -164,7 +154,6 @@ public static class MainPatcher
                     if (UnSafeItems.Any(craft.id.Contains) || refugeeCraft || cookingTableCraft || zombieCraft || graveCraft || bodyCraft ||
                        UnSafeCraftTypes.Contains(craft.craft_type) || craft.craft_time_is_zero || craft.one_time_craft) continue;
 
-                    
                     var ct = craft.energy.EvaluateFloat(crafteryWgo, MainGame.me.player);
                     ct /= 2; //don't know why its getting doubled
                     if (_fasterCraft)
@@ -202,7 +191,7 @@ public static class MainPatcher
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[QueueEverything] {ex.Message}, {ex.Source}, {ex.StackTrace}");
+                Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
             }
         }
     }
@@ -240,7 +229,7 @@ public static class MainPatcher
         {
             if (_unsafeInteraction || IsUnsafeDefinition(__instance))
             {
-                Debug.Log($"[QueueEverything]: Unsafe Craft: {__instance.id}");
+                Log($"Unsafe Craft: {__instance.id}");
                 return;
             }
             __result = true;
@@ -357,7 +346,7 @@ public static class MainPatcher
 
             if (__instance.is_auto)
             {
-                float num4 = 0; 
+                float num4 = 0;
 
                 var found = Crafts.TryGetValue(__instance.id, out var value);
                 if (found)
@@ -405,7 +394,7 @@ public static class MainPatcher
                 {
                     if (_cfg.HalfFireRequirements)
                     {
-                        item.value = (int) Math.Round((double) value / 2, MidpointRounding.AwayFromZero);
+                        item.value = (int)Math.Round((double)value / 2, MidpointRounding.AwayFromZero);
                     }
                     else
                     {
@@ -491,9 +480,6 @@ public static class MainPatcher
             if (_unsafeInteraction) return;
             _alreadyRun = true;
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
-            //Debug.LogError(crafteryWgo != null
-            //    ? $"[QueueEverything]: {crafteryWgo.obj_id}"
-            //    : $"[QueueEverything]: Craftery WGO is null!");
 
             if (string.Equals(crafteryWgo.obj_id, previousObjId)) return;
             previousObjId = crafteryWgo.obj_id;
@@ -597,8 +583,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref CraftItemGUI __instance, ref int ____amount)
         {
-           // if (__instance == null) return;
-            Debug.LogError($"[QueueEverything]: Craft: {__instance.craft_definition.id}, One time: {__instance.craft_definition.one_time_craft}");
+            Log($"Craft: {__instance.craft_definition.id}, One time: {__instance.craft_definition.one_time_craft}");
             if (_unsafeInteraction || IsUnsafeDefinition(__instance.craft_definition)) return;
 
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
@@ -608,7 +593,6 @@ public static class MainPatcher
             if (found)
             {
                 originalTimeFloat = value.EvaluateFloat(crafteryWgo);
-                // originalTimeFloat = value.EvaluateFloat(crafteryWgo);
             }
             else
             {
@@ -630,7 +614,6 @@ public static class MainPatcher
                     time /= _timeAdjustment;
             }
 
-            // _craftAmount = ____amount;
             time *= ____amount;
 
             if (time >= 300 && !_cfg.DisableComeBackLaterThoughts)

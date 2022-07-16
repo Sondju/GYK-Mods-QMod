@@ -1,12 +1,12 @@
 using System.Linq;
 using HarmonyLib;
 using System.Reflection;
-
 using Rewired;
 using UnityEngine;
 using MaxButton;
+using System;
+using Helper;
 
-//build project to resolve reference errors
 namespace MaxButtonControllerSupport
 {
     public class MainPatcher
@@ -38,16 +38,6 @@ namespace MaxButtonControllerSupport
             "blockage", "obstacle", "builddesk", "fix", "broken"
         };
 
-        private static readonly CraftDefinition.CraftType[] UnSafeCraftTypes =
-        {
-            CraftDefinition.CraftType.PrayCraft, CraftDefinition.CraftType.Fixing
-        };
-
-
-        private static readonly string[] UnSafeItems =
-        {
-            "zombie","grow_desk_planting","refugee","grow_vineyard_planting", "axe", "hammer", "faith", "shovel", "sword",
-        };
 
         public static void Patch()
         {
@@ -55,19 +45,25 @@ namespace MaxButtonControllerSupport
             {
                 if (Harmony.HasAnyPatches("com.graveyardkeeper.urbanvibes.maxbutton"))
                 {
-                    Debug.LogError($"[MaxButtonControllerSupport]: MaxButton found, continuing with patch process.");
+                    Debug.LogError($"MaxButton found, continuing with patch process.");
                     var harmony = new Harmony("p1xel8ted.GraveyardKeeper.MaxButtonControllerSupport");
                     harmony.PatchAll(Assembly.GetExecutingAssembly());
                 }
                 else
                 {
-                    Debug.LogError($"[MaxButtonControllerSupport]: MaxButton not found, aborting patch process.");
+                    Log($"MaxButton not found, aborting patch process.");
                 }
+               
             }
-            catch (System.Exception ex) 
+            catch (Exception ex)
             {
-                Debug.LogError($"[MaxButtonControllerSupport]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+                Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
             }
+        }
+
+        private static void Log(string message, bool error = false)
+        {
+            Tools.Log("MaxButtonControllerSupport", $"{message}", error);
         }
 
 
@@ -141,12 +137,10 @@ namespace MaxButtonControllerSupport
                 if (UnSafeCraftZones.Contains(__instance.GetMyWorldZoneId()) || UnSafePartials.Any(__instance.obj_id.Contains) || UnSafeCraftObjects.Contains(__instance.obj_id))
                 {
                     _unsafeInteraction = true;
-                   // Debug.LogError($"[QueueEverything]: UNSAFE: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
                 }
                 else
                 {
                     _unsafeInteraction = false;
-                   // Debug.LogError($"[QueueEverything]: UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}");
                 }
             }
         }
@@ -210,6 +204,12 @@ namespace MaxButtonControllerSupport
                         });
                 }
 
+            }
+
+            [HarmonyFinalizer]
+            public static Exception Finalizer()
+            {
+                return null;
             }
         }
 

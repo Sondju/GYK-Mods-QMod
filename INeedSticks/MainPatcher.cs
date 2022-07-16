@@ -1,9 +1,10 @@
 using HarmonyLib;
+using Helper;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using UnityEngine;
 
 namespace INeedSticks;
 
@@ -130,12 +131,18 @@ public class MainPatcher
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.INeedSticks");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            if (Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.QueueEverything")) _queueEverything = true;
+            _queueEverything = Tools.IsModLoaded("QueueEverything");
+            //if (Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.QueueEverything")) _queueEverything = true;
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
-            Debug.LogError($"[INeedSticks]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
+    }
+
+    private static void Log(string message, bool error = false)
+    {
+        Tools.Log("INeedSticks", $"{message}", error);
     }
 
     //setting minimum had no effect, this method updates the counter on the craft screen
@@ -160,7 +167,7 @@ public class MainPatcher
 
         //this is required as it seems impossible to add things to GameData that actually take effect, this stops it coming back null when it doesn't find "wooden_stick" in game data
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(CraftComponent.CraftQueueItem),"craft", MethodType.Getter)]
+        [HarmonyPatch(typeof(CraftComponent.CraftQueueItem), "craft", MethodType.Getter)]
         public static void CraftComponentCraftQueueItemPrefix(ref CraftDefinition ____craft)
         {
             var wgo = GUIElements.me.craft.GetCrafteryWGO();
@@ -179,7 +186,6 @@ public class MainPatcher
             if (!__instance.wgo.obj_id.Contains("mf_saw")) return;
             if (!__instance.current_craft.id.Contains("wooden_stick")) return;
             var itemList = __instance.current_craft.output;
-            Debug.Log($"Instance Craft: {__instance.current_craft.id}");
             foreach (var unused in itemList.Where(item => item.id.Contains("stick")))
                 if (__instance.wgo.is_current_craft_gratitude)
                 {

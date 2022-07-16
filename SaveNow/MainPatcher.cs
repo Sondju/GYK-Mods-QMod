@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using Helper;
 using UnityEngine;
 
 namespace SaveNow;
@@ -41,8 +42,13 @@ public class MainPatcher
         }
         catch (Exception ex)
         {
-            Debug.LogError($"[SaveNow]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
+    }
+
+    private static void Log(string message, bool error = false)
+    {
+        Tools.Log("SaveNow", $"{message}", error);
     }
 
     private static void WriteSavesToFile()
@@ -71,7 +77,7 @@ public class MainPatcher
                 float.Parse(tempVector[1].Trim(), CultureInfo.InvariantCulture), float.Parse(tempVector[2].Trim(), CultureInfo.InvariantCulture));
 
             var found = SaveLocationsDictionary.TryGetValue(saveName, out _);
-            // Debug.LogError(Path.Combine(PlatformSpecific.GetSaveFolder(), saveName+".dat"));
+          
             if (!File.Exists(Path.Combine(PlatformSpecific.GetSaveFolder(), saveName + ".dat"))) continue;
             if (!found) SaveLocationsDictionary.Add(saveName, vectorToAdd);
         }
@@ -81,8 +87,8 @@ public class MainPatcher
         EffectBubblesManager.BubbleColor color = EffectBubblesManager.BubbleColor.Relation, float time = 3f)
     {
         Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-        //the floaty bubbles are stuck in english apparently??
-        if (Lang.Contains("ko") || Lang.Contains("ja") || Lang.Contains("zh"))
+       
+        if (GJL.IsEastern())
         {
             MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
                 SmartSpeechEngine.VoiceID.None, true);
@@ -260,7 +266,7 @@ public class MainPatcher
                     }
                     catch (Exception e)
                     {
-                        Debug.Log($"Error backing up save games. {e.Message}");
+                        Log($"Error backing up save games. {e.Message}",true);
                     }
                 }
                 else

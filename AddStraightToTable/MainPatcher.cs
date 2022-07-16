@@ -1,17 +1,15 @@
 using HarmonyLib;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Net.Configuration;
 using System.Reflection;
+using Helper;
+using UnityEngine;
 using Debug = UnityEngine.Debug;
 
 namespace AddStraightToTable;
 
 public static class MainPatcher
 {
-    private static readonly List<string> LoadedMods = new();
     private const string WheresMaStorage = "WheresMaStorage";
     private static Config.Options _cfg;
     private static bool _wms;
@@ -25,36 +23,13 @@ public static class MainPatcher
         }
         catch (Exception ex)
         {
-            Debug.LogError($"[AddStraightToTable]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
     }
 
-
-    [HarmonyPatch(typeof(MainMenuGUI), nameof(MainMenuGUI.Open))]
-    public static class MainMenuGuiOpenPatch
+    private static void Log(string message, bool error = false)
     {
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            try
-            {
-                var mods = AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(a => a.Location.ToLowerInvariant().Contains("qmods"));
-                LoadedMods.Clear();
-                foreach (var mod in mods)
-                {
-                    var modInfo = FileVersionInfo.GetVersionInfo(mod.Location);
-                    if (!string.IsNullOrEmpty(modInfo.Comments))
-                    {
-                        LoadedMods.Add(modInfo.Comments);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Loaded Mod: {ex.Message}");
-            }
-        }
+        Tools.Log("AddStraightToTable", $"{message}", error);
     }
 
     [HarmonyPatch(typeof(AutopsyGUI), "OnBodyItemPress")]
@@ -63,9 +38,9 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static bool Prefix()
         {
-            if (LoadedMods.Contains(WheresMaStorage))
+            _wms = Tools.IsModLoaded(WheresMaStorage);
+            if (_wms)
             {
-                _wms = true;
                 _cfg = Config.GetOptions();
             }
             return false;

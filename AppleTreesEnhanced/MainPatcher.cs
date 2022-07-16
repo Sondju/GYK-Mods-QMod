@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using UnityEngine;
+using Helper;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
@@ -27,12 +28,19 @@ public class MainPatcher
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             _cfg = Config.GetOptions();
             _updateDone = false;
+           
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
-            Debug.LogError($"[AppleTreesEnhanced]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
     }
+
+    private static void Log(string message, bool error = false)
+    {
+        Tools.Log("AppleTreesEnhanced", $"{message}", error);
+    }
+
 
     private static void ShowMessage(WorldGameObject obj, string message)
     {
@@ -119,7 +127,7 @@ public class MainPatcher
             {
                 dudBeesCount++;
                 ProcessBeeRespawn(dudBee);
-                Debug.Log($"[AppleTreesEnhanced] Fixed DudBee {dudBeesCount}");
+                Log($"Fixed DudBee {dudBeesCount}");
             }
 
             var dudTrees = Object.FindObjectsOfType<WorldGameObject>(true)
@@ -130,7 +138,7 @@ public class MainPatcher
                 dudTreeCount++;
                 ProcessRespawn(dudTree, Constants.HarvestGrowing.GardenAppleTree,
                     Constants.HarvestSpawner.GardenAppleTree);
-                Debug.Log($"[AppleTreesEnhanced] Fixed DudGardenTree {dudTreeCount}");
+                Log($"Fixed DudGardenTree {dudTreeCount}");
             }
 
             var dudBushes = Object.FindObjectsOfType<WorldGameObject>(true)
@@ -141,7 +149,7 @@ public class MainPatcher
                 dudBushCount++;
                 ProcessRespawn(dudBush, Constants.HarvestGrowing.GardenBerryBush,
                     Constants.HarvestSpawner.GardenBerryBush);
-                Debug.Log($"[AppleTreesEnhanced] Fixed DudGardenBush {dudBushCount}");
+                Log($"Fixed DudGardenBush {dudBushCount}");
             }
             var readyBees = Object.FindObjectsOfType<WorldGameObject>(true).Where(a => a.obj_id == Constants.HarvestReady.BeeHouse)
                 .Where(IsPlayerBeeHive);

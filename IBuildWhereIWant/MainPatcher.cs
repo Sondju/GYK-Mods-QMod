@@ -1,4 +1,5 @@
 using HarmonyLib;
+using Helper;
 using IBuildWhereIWant.lang;
 using Rewired;
 using System;
@@ -24,7 +25,6 @@ namespace IBuildWhereIWant
         private static Dictionary<string, string> _craftDictionary;
         private const string Zone = "mf_wood";
 
-        // private static List<string> _hasRemoveCraftList;
         private const string BuildDesk = "buildanywhere_desk";
 
         private static int _unlockedCraftListCount;
@@ -41,8 +41,13 @@ namespace IBuildWhereIWant
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[IBuildWhereIWant]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+                Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
             }
+        }
+
+        private static void Log(string message, bool error = false)
+        {
+            Tools.Log("IBuildWhereIWant", $"{message}", error);
         }
 
         [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
@@ -66,35 +71,21 @@ namespace IBuildWhereIWant
             }
 
             _craftsInventory ??= new CraftsInventory();
-            // _hasRemoveCraftList ??= new List<string>();
-            _craftDictionary ??= new Dictionary<string, string>();
 
-            //var buildDesks = Object.FindObjectsOfType<WorldGameObject>(true)
-            //    .Where(x => x.obj_id.Contains("build"));
-            //foreach (var desk in buildDesks)
-            //{
-            //    File.AppendAllText("./qmods/desks.txt", desk.obj_id+"\n");
-            //}
+            _craftDictionary ??= new Dictionary<string, string>();
 
             _buildDesk ??= Object.FindObjectsOfType<WorldGameObject>(true)
                 .FirstOrDefault(x => string.Equals(x.obj_id, "mf_wood_builddesk"));
 
-            Debug.LogError(
+            Log(
                 _buildDesk != null
-                    ? $"[IBuildWhereIWant]: Found Build Desk: {_buildDesk}, Zone: {_buildDesk.GetMyWorldZone()}"
-                    : "[IBuildWhereIWant]: Unable to locate a build desk.");
+                    ? $"Found Build Desk: {_buildDesk}, Zone: {_buildDesk.GetMyWorldZone()}"
+                    : "Unable to locate a build desk.");
 
             _buildDeskClone ??= Object.Instantiate(_buildDesk);
-            // _buildDeskClone.obj_def = _buildDesk.obj_def;
-            _buildDeskClone.name = BuildDesk;
-            //_buildDeskClone.obj_id = BuildDesk;
 
-            //foreach (var objectCraftDefinition in GameBalance.me.craft_obj_data.Where(a =>
-            //             a.build_type == ObjectCraftDefinition.BuildType.Remove)
-            //             .Where(b=> MainGame.me.save.IsCraftVisible(b)))
-            //{
-            //    _hasRemoveCraftList.Add(objectCraftDefinition.out_obj);
-            //}
+            _buildDeskClone.name = BuildDesk;
+
             var needsRefresh = false;
             if (MainGame.me.save.unlocked_crafts.Count > _unlockedCraftListCount)
             {
@@ -108,15 +99,11 @@ namespace IBuildWhereIWant
                                  x.build_type == ObjectCraftDefinition.BuildType.Put)
                              .Where(a => a.icon.Length > 0)
                              .Where(b => !b.id.Contains("refugee"))
-                             //.Where(c => !string.IsNullOrEmpty(c.out_obj))
-                             //.Where(c => _hasRemoveCraftList.Contains(c.out_obj))
                              .Where(d => MainGame.me.save.IsCraftVisible(d))
                              .Where(e => !_craftDictionary.TryGetValue(GJL.L(e.GetNameNonLocalized()), out _)))
 
                 {
                     var itemName = GJL.L(objectCraftDefinition.GetNameNonLocalized());
-                    //var found = _craftDictionary.TryGetValue(GJL.L(objectCraftDefinition.GetNameNonLocalized()), out _);
-                    //if (!found)
                     _craftDictionary.Add(itemName, objectCraftDefinition.id);
                 }
 
@@ -126,26 +113,14 @@ namespace IBuildWhereIWant
                 craftList.ForEach(craft => { _craftsInventory.AddCraft(craft.Value); });
             }
 
-             _craftAnywhere = true;
-
-            //BuildModeLogics.last_build_desk = _buildDesk;
-            //MainGame.me.build_mode_logics.SetCurrentBuildZone(_buildDesk.obj_def.zone_id, "");
-            //GUIElements.me.craft.OpenAsBuild(_buildDesk, _craftsInventory);
-            //MainGame.paused = false;
+            _craftAnywhere = true;
 
             BuildModeLogics.last_build_desk = _buildDeskClone;
-            // Debug.LogError($"BuildDesk Zone: {_buildDesk.obj_def.zone_id}, Clone Zone: {_buildDeskClone.obj_def.zone_id}");
+
             MainGame.me.build_mode_logics.SetCurrentBuildZone(_buildDeskClone.obj_def.zone_id, "");
             GUIElements.me.craft.OpenAsBuild(_buildDeskClone, _craftsInventory);
             MainGame.paused = false;
         }
-
-        //private static bool IsCraftAnywhere()
-        //{
-        //    return BuildModeLogics.last_build_desk.name.Equals(BuildDesk);
-        //}
-
-
 
         [HarmonyPatch(typeof(BuildGrid))]
         public static class BuildGridPatch
@@ -169,7 +144,6 @@ namespace IBuildWhereIWant
                     apply_colors = false;
                 }
             }
-
         }
 
         [HarmonyPatch(typeof(BuildModeLogics))]

@@ -1,6 +1,8 @@
 using Fishing;
 using HarmonyLib;
+using System;
 using System.Reflection;
+using Helper;
 using UnityEngine;
 
 namespace NoTimeForFishing;
@@ -14,10 +16,15 @@ public class MainPatcher
             var harmony = new Harmony("p1xel8ted.GraveyardKeeper.NoTimeForFishing");
             harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
-            Debug.LogError($"[NoTimeForFishing]: {ex.Message}, {ex.Source}, {ex.StackTrace}");
+            Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
+    }
+
+    private static void Log(string message, bool error = false)
+    {
+        Tools.Log("NoTimeForFishing", $"{message}", error);
     }
 
     [HarmonyPatch(typeof(FishLogic), "CalculateFishPos")]
