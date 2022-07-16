@@ -2,7 +2,6 @@ using System.Linq;
 using HarmonyLib;
 using System.Reflection;
 using Rewired;
-using UnityEngine;
 using MaxButton;
 using System;
 using Helper;
@@ -45,7 +44,7 @@ namespace MaxButtonControllerSupport
             {
                 if (Harmony.HasAnyPatches("com.graveyardkeeper.urbanvibes.maxbutton"))
                 {
-                    Debug.LogError($"MaxButton found, continuing with patch process.");
+                    Log($"MaxButton found, continuing with patch process.");
                     var harmony = new Harmony("p1xel8ted.GraveyardKeeper.MaxButtonControllerSupport");
                     harmony.PatchAll(Assembly.GetExecutingAssembly());
                 }

@@ -1,16 +1,15 @@
-using System.IO;
 using HarmonyLib;
-using System.Linq;
-using System.Reflection;
-using System.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
 namespace Helper
 {
-
     public static class Tools
     {
         internal static readonly List<string> LoadedMods = new();
@@ -29,7 +28,7 @@ namespace Helper
                 Debug.LogError($"[{caller}][ERROR]: {message}");
                 return;
             }
-            Debug.LogError($"[{caller}][INFO]: {message}");
+            Debug.LogError($"[{caller}]: {message}");
         }
     }
 
@@ -37,6 +36,7 @@ namespace Helper
     {
         private const string DisablePath = "./QMods/disable";
         private static bool _disableMods;
+
         public static void Patch()
         {
             try
@@ -56,13 +56,9 @@ namespace Helper
             }
         }
 
-        
- 
-
         [HarmonyPatch(typeof(MainMenuGUI), nameof(MainMenuGUI.Open))]
         public static class MainMenuGuiOpenPatch
         {
-
             [HarmonyPrefix]
             public static void Prefix()
             {
@@ -70,6 +66,10 @@ namespace Helper
                 {
                     var mods = AppDomain.CurrentDomain.GetAssemblies()
                         .Where(a => a.Location.ToLowerInvariant().Contains("qmods"));
+                    foreach (var m in mods)
+                    {
+                        File.AppendAllText("./qmods/loaded.assemblie.txt", $"Location: {m.Location}, Name: {m.FullName}\n");
+                    }
                     Tools.LoadedMods.Clear();
                     foreach (var mod in mods)
                     {
@@ -80,9 +80,9 @@ namespace Helper
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Tools.Log("QModHelper", $"[ERROR]: {ex.Message}, {ex.Source}, {ex.StackTrace}", true);
+                   //
                 }
             }
 
@@ -114,7 +114,6 @@ namespace Helper
                     comp.overflowMethod = UILabel.Overflow.ResizeFreely;
                     comp.multiLine = true;
                     comp.MakePixelPerfect();
-
                 }
             }
         }
