@@ -136,7 +136,7 @@
     <value>- Items in the trunk are sold when the day ends (moon a little past the church).</value>
   </data>
 	<data name="Message6" xml:space="preserve">
-    <value>- You get approx. 40% less than selling directly to T3 vendor.</value>
+    <value>- You get more at the vendor. Gerry takes a cut of the profits.</value>
   </data>
 	<data name="Message7" xml:space="preserve">
     <value>- The trunk has three levels of progress, initial unlock and then two enhancements, linked to certain tech/perks.</value>
@@ -157,7 +157,7 @@
     <value>Enhance: Gerry's Junk Trunk</value>
   </data>
 	<data name="Stage3Des" xml:space="preserve">
-    <value>Sales from Gerry's junk trunk now earn the full price &amp; max stack size increased to 100.</value>
+    <value>Gerry takes a smaller cut of the profits and max stack size increased to 100.</value>
   </data>
 	<data name="Stage3Header" xml:space="preserve">
     <value>Enhance: Gerry's Junk Trunk</value>

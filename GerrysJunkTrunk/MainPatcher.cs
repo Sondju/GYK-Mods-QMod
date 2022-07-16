@@ -452,7 +452,7 @@ namespace GerrysJunkTrunk
                 }
             }
 
-            return UnlockedFullPrice() ? num : num * 0.60f;
+            return UnlockedFullPrice() ? num * 0.50f : num * 0.25f;
         }
 
         [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]

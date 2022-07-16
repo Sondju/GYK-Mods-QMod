@@ -115,9 +115,6 @@
 	<data name="Message5" xml:space="preserve">
 		<value>- Предметы в сундуке продаются, когда день заканчивается (луна немного мимо церкви).</value>
 	</data>
-	<data name="Message6" xml:space="preserve">
-		<value>- Вы получаете ок. На 40% меньше, чем продажа напрямую поставщику T3.</value>
-	</data>
 	<data name="Message7" xml:space="preserve">
 		<value>- Сундук имеет три уровня прогресса, начальную разблокировку, а затем два улучшения, связанные с определенными технологиями/перками.</value>
 	</data>
@@ -136,13 +133,16 @@
 	<data name="Stage2Header" xml:space="preserve">
 		<value>Улучшение: Старомодный сундук Джерри</value>
 	</data>
-	<data name="Stage3Des" xml:space="preserve">
-		<value>Продажи из мусорного сундука Джерри теперь приносят полную цену, а максимальный размер стека увеличен до 100.</value>
-	</data>
 	<data name="Stage3Header" xml:space="preserve">
 		<value>Улучшение: Старомодный сундук Джерри</value>
 	</data>
 	<data name="WorkWork" xml:space="preserve">
 		<value>Работа. Работа.</value>
+	</data>
+	<data name="Message6" xml:space="preserve">
+		<value>- Вы получаете больше у продавца. Джерри получает часть прибыли.</value>
+	</data>
+	<data name="Stage3Des" xml:space="preserve">
+		<value>Джерри получает меньшую долю прибыли, а максимальный размер стека увеличивается до 100.</value>
 	</data>
 </root>

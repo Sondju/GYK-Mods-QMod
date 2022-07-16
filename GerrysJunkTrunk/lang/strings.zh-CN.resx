@@ -115,9 +115,6 @@
 	<data name="Message5" xml:space="preserve">
 		<value>- 后备箱中的物品在一天结束时出售（月亮略过教堂）。</value>
 	</data>
-	<data name="Message6" xml:space="preserve">
-		<value>- 你得到大约。比直接销售给 T3 供应商少 40%。</value>
-	</data>
 	<data name="Message7" xml:space="preserve">
 		<value>- 后备箱有三个级别的进度，初始解锁，然后是两个增强功能，与某些技术/特权相关联。</value>
 	</data>
@@ -136,13 +133,16 @@
 	<data name="Stage2Header" xml:space="preserve">
 		<value>增强：格里的垃圾箱</value>
 	</data>
-	<data name="Stage3Des" xml:space="preserve">
-		<value>来自 Gerry 的垃圾箱的销售现在获得全价，并且最大堆栈大小增加到 100。</value>
-	</data>
 	<data name="Stage3Header" xml:space="preserve">
 		<value>增强：格里的垃圾箱</value>
 	</data>
 	<data name="WorkWork" xml:space="preserve">
 		<value>工作。工作。</value>
+	</data>
+	<data name="Message6" xml:space="preserve">
+		<value>- 你从供应商那里得到更多。格里从利润中分一杯羹。</value>
+	</data>
+	<data name="Stage3Des" xml:space="preserve">
+		<value>Gerry 减少了利润分成，最大筹码量增加到 100。</value>
 	</data>
 </root>

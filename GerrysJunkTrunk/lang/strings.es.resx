@@ -115,9 +115,6 @@
 	<data name="Message5" xml:space="preserve">
 		<value>- Los artículos en el baúl se venden cuando termina el día (luna un poco más allá de la iglesia).</value>
 	</data>
-	<data name="Message6" xml:space="preserve">
-		<value>- Obtienes aprox. 40% menos que vender directamente al proveedor T3.</value>
-	</data>
 	<data name="Message7" xml:space="preserve">
 		<value>- El baúl tiene tres niveles de progreso, desbloqueo inicial y luego dos mejoras, vinculadas a ciertas tecnologías/ventajas.</value>
 	</data>
@@ -136,13 +133,16 @@
 	<data name="Stage2Header" xml:space="preserve">
 		<value>Mejorar: el baúl de chatarra de Gerry</value>
 	</data>
-	<data name="Stage3Des" xml:space="preserve">
-		<value>Las ventas del baúl de chatarra de Gerry ahora ganan el precio completo y el tamaño máximo de pila aumentó a 100.</value>
-	</data>
 	<data name="Stage3Header" xml:space="preserve">
 		<value>Mejorar: el baúl de chatarra de Gerry</value>
 	</data>
 	<data name="WorkWork" xml:space="preserve">
 		<value>Trabajar. Trabajar.</value>
+	</data>
+	<data name="Message6" xml:space="preserve">
+		<value>- Obtienes más en el vendedor. Gerry toma una parte de las ganancias.</value>
+	</data>
+	<data name="Stage3Des" xml:space="preserve">
+		<value>Gerry toma una parte más pequeña de las ganancias y el tamaño máximo de la pila aumenta a 100.</value>
 	</data>
 </root>

@@ -115,9 +115,6 @@
 	<data name="Message5" xml:space="preserve">
 		<value>- Os itens no baú são vendidos quando o dia termina (lua um pouco depois da igreja).</value>
 	</data>
-	<data name="Message6" xml:space="preserve">
-		<value>- Você recebe aprox. 40% menos do que vender diretamente para o fornecedor T3.</value>
-	</data>
 	<data name="Message7" xml:space="preserve">
 		<value>- O baú tem três níveis de progresso, desbloqueio inicial e depois dois aprimoramentos, vinculados a certas tecnologias/vantagens.</value>
 	</data>
@@ -136,13 +133,16 @@
 	<data name="Stage2Header" xml:space="preserve">
 		<value>Melhorar: Junk Trunk de Gerry</value>
 	</data>
-	<data name="Stage3Des" xml:space="preserve">
-		<value>As vendas do baú de lixo de Gerry agora ganham o preço total e o tamanho máximo da pilha aumentou para 100.</value>
-	</data>
 	<data name="Stage3Header" xml:space="preserve">
 		<value>Melhorar: Junk Trunk de Gerry</value>
 	</data>
 	<data name="WorkWork" xml:space="preserve">
 		<value>Trabalhar. Trabalhar.</value>
+	</data>
+	<data name="Message6" xml:space="preserve">
+		<value>- Você recebe mais no fornecedor. Gerry fica com uma parte dos lucros.</value>
+	</data>
+	<data name="Stage3Des" xml:space="preserve">
+		<value>Gerry fica com uma fatia menor dos lucros e o tamanho máximo da pilha aumenta para 100.</value>
 	</data>
 </root>

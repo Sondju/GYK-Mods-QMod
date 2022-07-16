@@ -115,9 +115,6 @@
 	<data name="Message5" xml:space="preserve">
 		<value>- Artikel im Kofferraum werden verkauft, wenn der Tag endet (Mond kurz hinter der Kirche).</value>
 	</data>
-	<data name="Message6" xml:space="preserve">
-		<value>- Sie erhalten ca. 40 % weniger als beim Direktverkauf an T3-Anbieter.</value>
-	</data>
 	<data name="Message7" xml:space="preserve">
 		<value>- Der Kofferraum hat drei Fortschrittsstufen, anfängliche Freischaltung und dann zwei Verbesserungen, die mit bestimmten Technologien/Vergünstigungen verbunden sind.</value>
 	</data>
@@ -136,13 +133,16 @@
 	<data name="Stage2Header" xml:space="preserve">
 		<value>Verbesserung: Gerrys Junk Trunk</value>
 	</data>
-	<data name="Stage3Des" xml:space="preserve">
-		<value>Verkäufe aus Gerrys Schrottkoffer verdienen jetzt den vollen Preis und die maximale Stapelgröße wurde auf 100 erhöht.</value>
-	</data>
 	<data name="Stage3Header" xml:space="preserve">
 		<value>Verbesserung: Gerrys Junk Trunk</value>
 	</data>
 	<data name="WorkWork" xml:space="preserve">
 		<value>Arbeit. Arbeit.</value>
+	</data>
+	<data name="Message6" xml:space="preserve">
+		<value>- Beim Händler bekommt man mehr. Gerry nimmt eine Kürzung der Gewinne.</value>
+	</data>
+	<data name="Stage3Des" xml:space="preserve">
+		<value>Gerry nimmt einen kleineren Teil der Gewinne und die maximale Stack-Größe wurde auf 100 erhöht.</value>
 	</data>
 </root>

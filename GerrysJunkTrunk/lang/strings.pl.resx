@@ -115,9 +115,6 @@
 	<data name="Message5" xml:space="preserve">
 		<value>- Przedmioty w bagażniku są sprzedawane pod koniec dnia (księżyc trochę za kościołem).</value>
 	</data>
-	<data name="Message6" xml:space="preserve">
-		<value>- Dostajesz około. 40% mniej niż sprzedaż bezpośrednio do dostawcy T3.</value>
-	</data>
 	<data name="Message7" xml:space="preserve">
 		<value>- Bagażnik ma trzy poziomy postępu, początkowe odblokowanie, a następnie dwa ulepszenia, powiązane z niektórymi technologiami/dodatkami.</value>
 	</data>
@@ -136,13 +133,16 @@
 	<data name="Stage2Header" xml:space="preserve">
 		<value>Ulepsz: Śmieciowy kufer Gerry'ego</value>
 	</data>
-	<data name="Stage3Des" xml:space="preserve">
-		<value>Sprzedaż ze śmieciowego kufra Gerry'ego zyskuje teraz pełną cenę i maksymalny rozmiar stosu zwiększony do 100.</value>
-	</data>
 	<data name="Stage3Header" xml:space="preserve">
 		<value>Ulepsz: Śmieciowy kufer Gerry'ego</value>
 	</data>
 	<data name="WorkWork" xml:space="preserve">
 		<value>Praca. Praca.</value>
+	</data>
+	<data name="Message6" xml:space="preserve">
+		<value>- Dostajesz więcej u sprzedawcy. Gerry bierze udział w zyskach.</value>
+	</data>
+	<data name="Stage3Des" xml:space="preserve">
+		<value>Gerry ma mniejszą część zysków, a maksymalny rozmiar stosu został zwiększony do 100.</value>
 	</data>
 </root>

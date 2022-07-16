@@ -115,9 +115,6 @@
 	<data name="Message5" xml:space="preserve">
 		<value>- 트렁크에 있는 아이템은 하루가 끝나면 판매됩니다(달이 교회를 조금 지나갈 때).</value>
 	</data>
-	<data name="Message6" xml:space="preserve">
-		<value>- 당신은 대략. T3 공급업체에 직접 판매하는 것보다 40% 저렴합니다.</value>
-	</data>
 	<data name="Message7" xml:space="preserve">
 		<value>- 트렁크에는 특정 기술/특전과 연결된 초기 잠금 해제 및 두 가지 향상의 세 가지 진행 수준이 있습니다.</value>
 	</data>
@@ -136,13 +133,16 @@
 	<data name="Stage2Header" xml:space="preserve">
 		<value>강화: 게리의 쓰레기통</value>
 	</data>
-	<data name="Stage3Des" xml:space="preserve">
-		<value>Gerry의 정크 트렁크 판매는 이제 정가를 받고 최대 스택 크기가 100으로 증가했습니다.</value>
-	</data>
 	<data name="Stage3Header" xml:space="preserve">
 		<value>강화: 게리의 쓰레기통</value>
 	</data>
 	<data name="WorkWork" xml:space="preserve">
 		<value>일하다. 일하다.</value>
+	</data>
+	<data name="Message6" xml:space="preserve">
+		<value>- 판매자에게 더 많은 것을 얻을 수 있습니다. Gerry는 이익의 일부를 가져갑니다.</value>
+	</data>
+	<data name="Stage3Des" xml:space="preserve">
+		<value>Gerry는 이익을 더 적게 줄이고 최대 스택 크기를 100으로 늘렸습니다.</value>
 	</data>
 </root>

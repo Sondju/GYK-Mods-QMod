@@ -115,9 +115,6 @@
 	<data name="Message5" xml:space="preserve">
 		<value>-トランク内のアイテムは、1日が終わると販売されます（教会を少し過ぎた月）。</value>
 	</data>
-	<data name="Message6" xml:space="preserve">
-		<value>-あなたは約を取得します。 T3ベンダーに直接販売するよりも40％少なくなります。</value>
-	</data>
 	<data name="Message7" xml:space="preserve">
 		<value>-トランクには3つのレベルの進行状況があり、最初のロック解除と2つの拡張機能があり、特定の技術/特典にリンクされています。</value>
 	</data>
@@ -136,13 +133,16 @@
 	<data name="Stage2Header" xml:space="preserve">
 		<value>強化：ジェリーのジャンクトランク</value>
 	</data>
-	<data name="Stage3Des" xml:space="preserve">
-		<value>ジェリーのジャンクトランクからの売り上げが全額を獲得し、最大スタックサイズが100に増加しました。</value>
-	</data>
 	<data name="Stage3Header" xml:space="preserve">
 		<value>強化：ジェリーのジャンクトランク</value>
 	</data>
 	<data name="WorkWork" xml:space="preserve">
 		<value>仕事。仕事。</value>
+	</data>
+	<data name="Message6" xml:space="preserve">
+		<value>-ベンダーでより多くを得ることができます。ジェリーは利益を削減します。</value>
+	</data>
+	<data name="Stage3Des" xml:space="preserve">
+		<value>Gerryは利益を少し減らし、最大スタックサイズを100に増やしました。</value>
 	</data>
 </root>

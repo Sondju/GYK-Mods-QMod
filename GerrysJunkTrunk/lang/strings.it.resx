@@ -115,9 +115,6 @@
 	<data name="Message5" xml:space="preserve">
 		<value>- Gli oggetti nel baule vengono venduti alla fine della giornata (luna poco dopo la chiesa).</value>
 	</data>
-	<data name="Message6" xml:space="preserve">
-		<value>- Ottieni ca. 40% in meno rispetto alla vendita diretta al venditore T3.</value>
-	</data>
 	<data name="Message7" xml:space="preserve">
 		<value>- Il baule ha tre livelli di avanzamento, sblocco iniziale e poi due miglioramenti, legati a determinate tecnologie/vantaggi.</value>
 	</data>
@@ -136,13 +133,16 @@
 	<data name="Stage2Header" xml:space="preserve">
 		<value>Potenziamento: il baule spazzatura di Gerry</value>
 	</data>
-	<data name="Stage3Des" xml:space="preserve">
-		<value>Le vendite del baule della spazzatura di Gerry ora guadagnano il prezzo intero e la dimensione massima dello stack aumentata a 100.</value>
-	</data>
 	<data name="Stage3Header" xml:space="preserve">
 		<value>Potenziamento: il baule spazzatura di Gerry</value>
 	</data>
 	<data name="WorkWork" xml:space="preserve">
 		<value>Opera. Opera.</value>
+	</data>
+	<data name="Message6" xml:space="preserve">
+		<value>- Ottieni di più dal venditore. Gerry prende una parte dei profitti.</value>
+	</data>
+	<data name="Stage3Des" xml:space="preserve">
+		<value>Gerry prende una riduzione minore dei profitti e la dimensione massima dello stack è aumentata a 100.</value>
 	</data>
 </root>

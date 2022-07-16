@@ -114,12 +114,12 @@ public static class MainPatcher
             if (UnSafeCraftZones.Contains(__instance.GetMyWorldZoneId()) || UnSafePartials.Any(__instance.obj_id.Contains) || UnSafeCraftObjects.Contains(__instance.obj_id))
             {
                 _unsafeInteraction = true;
-                Log($"Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
+               // Log($"Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
             }
             else
             {
                 _unsafeInteraction = false;
-                Log($"UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
+               // Log($"UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
             }
         }
     }
@@ -216,7 +216,7 @@ public static class MainPatcher
         }
         catch (Exception)
         {
-            Debug.Log("Issue reading FasterCraft Config, disabling integration.");
+            Log("Issue reading FasterCraft Config, disabling integration.");
             _fasterCraft = false;
         }
     }
@@ -229,7 +229,7 @@ public static class MainPatcher
         {
             if (_unsafeInteraction || IsUnsafeDefinition(__instance))
             {
-                Log($"Unsafe Craft: {__instance.id}");
+                //Log($"Unsafe Craft: {__instance.id}");
                 return;
             }
             __result = true;
@@ -583,7 +583,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref CraftItemGUI __instance, ref int ____amount)
         {
-            Log($"Craft: {__instance.craft_definition.id}, One time: {__instance.craft_definition.one_time_craft}");
+           // Log($"Craft: {__instance.craft_definition.id}, One time: {__instance.craft_definition.one_time_craft}");
             if (_unsafeInteraction || IsUnsafeDefinition(__instance.craft_definition)) return;
 
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
