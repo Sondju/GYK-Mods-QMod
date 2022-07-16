@@ -172,7 +172,7 @@ namespace WheresMaStorage
                 return _mi;
             }
 
-            Log($"[InvRedirect]: Original inventory sent back to requester! Object: {otherGameObject.obj_id}, Craft: {craft.id}");
+            //Log($"[InvRedirect]: Original inventory sent back to requester! Object: {otherGameObject.obj_id}, Craft: {craft.id}");
             return orig;
         }
 
@@ -195,7 +195,7 @@ namespace WheresMaStorage
                     if (codes[i].opcode == OpCodes.Ldfld && codes[i].operand.ToString().Contains("item_needs") && codes[i - 1].opcode == OpCodes.Ldarg_1)
                     {
                         insertIndex = i;
-                        Log($"[Found Insert Index: {insertIndex}]");
+                       // Log($"[Found Insert Index: {insertIndex}]");
                         break;
                     }
                 }

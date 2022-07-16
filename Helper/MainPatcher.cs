@@ -1,10 +1,12 @@
 using HarmonyLib;
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -24,7 +26,7 @@ namespace Helper
             Application.SetStackTraceLogType(LogType.Error, StackTraceLogType.None);
             if (error)
             {
-                Application.SetStackTraceLogType(LogType.Error, StackTraceLogType.Full);
+                Application.SetStackTraceLogType(LogType.Error, StackTraceLogType.ScriptOnly);
                 Debug.LogError($"[{caller}][ERROR]: {message}");
                 return;
             }

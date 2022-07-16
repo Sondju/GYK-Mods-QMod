@@ -22,7 +22,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -57,18 +57,5 @@
   <ProjectExtensions>
     <VisualStudio AllowExistingFolder="true" />
   </ProjectExtensions>
-  <Target Name="CopyMod" AfterTargets="Build">
-    <ItemGroup>
-      <MyDebugSourceFiles Include="bin\Debug\**\*.*" />
-      <MyReleaseSourceFiles Include="bin\Release\**\*.*" />
-    </ItemGroup>
-    <Message Text="Copying $(ProjectName) to QMod mod directory." Importance="High" />
-    <Copy SourceFiles="@(MyDebugSourceFiles)" DestinationFiles="H:\Games\steamapps\common\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
-    <Copy SourceFiles="@(MyReleaseSourceFiles)" DestinationFiles="H:\Games\steamapps\common\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
-    <Copy SourceFiles="@(MyDebugSourceFiles)" DestinationFiles="H:\GOG Games\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
-    <Copy SourceFiles="@(MyReleaseSourceFiles)" DestinationFiles="H:\GOG Games\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
-    <Delete Files="@(MyDebugSourceFiles)" />
-    <Delete Files="@(MyReleaseSourceFiles)" />
-    <Message Text="Finished copying $(ProjectName)" Importance="High" />
-  </Target>
+
 </Project>
