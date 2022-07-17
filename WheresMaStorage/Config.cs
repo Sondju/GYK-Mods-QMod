@@ -68,6 +68,10 @@ namespace WheresMaStorage
             _options.AdditionalInventorySpace = additionalInventorySpace;
 
             int.TryParse(_con.Value("StackSizeForStackables", "999"), NumberStyles.Integer, CultureInfo.InvariantCulture, out var stackSizeForStackables);
+            if (stackSizeForStackables > 999)
+            {
+                stackSizeForStackables = 999;
+            }
             _options.StackSizeForStackables = stackSizeForStackables;
 
             bool.TryParse(_con.Value("HideStockpileWidgets", "true"), out var hideStockpileWidgets);

@@ -271,21 +271,21 @@ namespace WheresMaStorage
             }
         }
 
-        [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
+       //[HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
         //fixes not being able to craft paper based things i.e flyers due to stack size changes
-        [HarmonyPatch(typeof(CraftDefinition), "takes_item_durability", MethodType.Getter)]
-        public static class CraftDefinitionTakesItemDurabilityPatch
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref CraftDefinition __instance, ref bool __result)
-            {
-                if (__instance == null) return;
-                if (__instance.needs.Exists(item => item.id.Equals("pen:ink_pen")) && __instance.dur_needs_item > 0)
-                {
-                    __result = false;
-                }
-            }
-        }
+        //[HarmonyPatch(typeof(CraftDefinition), "takes_item_durability", MethodType.Getter)]
+        //public static class CraftDefinitionTakesItemDurabilityPatch
+        //{
+        //    [HarmonyPostfix]
+        //    public static void Postfix(ref CraftDefinition __instance, ref bool __result)
+        //    {
+        //        if (__instance == null) return;
+        //        if (__instance.needs.Exists(item => item.id.Equals("pen:ink_pen")) && __instance.dur_needs_item > 0)
+        //        {
+        //            __result = false;
+        //        }
+        //    }
+        //}
 
         [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
         [HarmonyPatch(typeof(DropResGameObject), nameof(DropResGameObject.CollectDrop))]
@@ -331,7 +331,14 @@ namespace WheresMaStorage
 
                 foreach (var id in GameBalance.me.items_data.Where(id => id.stack_count is > 1 and < 999))
                 {
-                    id.stack_count = _cfg.StackSizeForStackables;
+                    if (id.stack_count + _cfg.StackSizeForStackables > 999)
+                    {
+                        id.stack_count = 999;
+                    }
+                    else
+                    {
+                        id.stack_count += _cfg.StackSizeForStackables;
+                    }
                 }
             }
         }
