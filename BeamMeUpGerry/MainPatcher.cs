@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Threading;
 using UnityEngine;
 using Helper;
+using System.Collections.Generic;
 
 namespace BeamMeUpGerry
 {
@@ -43,9 +44,72 @@ namespace BeamMeUpGerry
             return MainGame.me.player.data.GetItemWithID("hearthstone");
         }
 
+        [HarmonyPatch(typeof(MultiAnswerGUI), "ShowAnswers", new[] { typeof(List<AnswerVisualData>), typeof(bool) })]
+        public static class MultiAnswerGuiShowAnswersPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref MultiAnswerGUI __instance, ref List<AnswerVisualData> answers)
+            {
+                if (__instance == null) return;
+                var test = new AnswerVisualData
+                {
+                    id = GJL.L("zone_" + wzId.id)
+                };
+               
+                    answers.Insert(answers.Count-1, test);
+                foreach (var answer in answers)
+                {
+                    Log($"[MultiAnswerGUI.ShowAnswers]: {answer.id}");
+                }
+            }
+        }
+
+        //[HarmonyPatch(typeof(WorldZone), nameof(WorldZone.OnPlayerEnter))]
+        //public static class MultiAnswerGuiShowAnswersPatch
+        //{
+        //    [HarmonyPostfix]
+        //    public static void Postfix(ref WorldZone __instance, ref List<WorldZone> ____all_zones)
+        //    {
+        //        foreach (var zone in ____all_zones)
+        //        {
+        //            Log($"[WorldZone.OnPlayerEnter]: {zone.id}");
+        //        }
+        //    }
+        //}
+
+        //private static bool _alreadyRun = false;
+
+        //[HarmonyPatch(typeof(WorldMap), nameof(WorldMap.GetGroundType))]
+        //public static class WorldMapPatch
+        //{
+        //    [HarmonyPostfix]
+        //    public static void Postfix(List<GDPoint> ____gd_points)
+        //    {
+        //        if (_alreadyRun) return;
+        //        foreach (var gd in ____gd_points)
+        //        {
+        //            Log($"[WorldMap.GetGroundType]: {gd.gd_tag}");
+        //        }
+
+        //        _alreadyRun = true;
+        //    }
+        //}
+
         [HarmonyPatch(typeof(MultiAnswerGUI), nameof(MultiAnswerGUI.OnChosen))]
         public static class MultiAnswerGuiOnChosenPatch
         {
+            [HarmonyPrefix]
+            public static bool Prefix(string answer)
+            {
+                if (answer.Contains("witch"))
+                {
+                    MainGame.me.player.TeleportToGDPoint("gd_witch_27", false);
+                    return false;
+                }
+
+                return true;
+            }
+
             [HarmonyPostfix]
             public static void Postfix(string answer)
             {

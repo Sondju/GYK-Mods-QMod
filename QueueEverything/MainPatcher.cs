@@ -1,3 +1,4 @@
+using FlowCanvas.Nodes;
 using HarmonyLib;
 using Helper;
 using QueueEverything.lang;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 // ReSharper disable InconsistentNaming
 
@@ -53,7 +55,6 @@ public static class MainPatcher
     private static readonly CraftDefinition.CraftType[] UnSafeCraftTypes =
     {
        // CraftDefinition.CraftType.PrayCraft, CraftDefinition.CraftType.Fixing
-       
     };
 
     private static readonly string[] UnSafeItems =
@@ -115,14 +116,36 @@ public static class MainPatcher
             if (UnSafeCraftZones.Contains(__instance.GetMyWorldZoneId()) || UnSafePartials.Any(__instance.obj_id.Contains) || UnSafeCraftObjects.Contains(__instance.obj_id))
             {
                 _unsafeInteraction = true;
-               // Log($"Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
+                // Log($"Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
             }
             else
             {
                 _unsafeInteraction = false;
-               // Log($"UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
+                // Log($"UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
             }
         }
+
+        //[HarmonyPostfix]
+        //public static void Postfix(ref WorldGameObject __instance, WorldGameObject other_obj)
+        //{
+        //    var craftery = GUIElements.me.craft.GetCrafteryWGO();
+        //    if (craftery == null || craftery.has_linked_worker) return;
+        //    var dockPoint = __instance.RefindDockPointsAndGet();
+        //    if (other_obj.is_player)
+        //    {
+
+        //        var data = GameBalance.me.GetData<WorkerDefinition>("worker_zombie_1");
+        //        var item = MainGame.me.save.GenerateBody(1, 1, -1, -1);
+        //        var worker_wgo = WorldMap.SpawnWGO(MainGame.me.world_root, data.worker_wgo, new Vector3?(dockPoint[0].transform.position));
+        //        var worker = MainGame.me.save.workers.CreateNewWorker(worker_wgo, data.id, item);
+        //        worker.ForcingWorkerK(true, 1f);
+        //        //worker.UpdateWorkerLevel();
+        //        craftery.linked_worker = worker_wgo;
+        //        worker_wgo.enabled = false;
+
+        //    } 
+        //    Log($"Object: {__instance.obj_id}, Other: {other_obj.obj_id}, Craftery: {GUIElements.me.craft.GetCrafteryWGO().obj_id}, Worker Attached: {craftery.has_linked_worker}");
+        //}
     }
 
     [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.FillCraftsList))]
@@ -157,7 +180,7 @@ public static class MainPatcher
 
                     var ct = craft.energy.EvaluateFloat(crafteryWgo, MainGame.me.player);
 
-                    ct *= 1.5f;
+                    //ct *= 1.5f;
                     if (_fasterCraft)
                     {
                         if (_timeAdjustment < 0)
@@ -584,13 +607,13 @@ public static class MainPatcher
     public static class CraftItemGuiOnCraftPressedPatch
     {
         [HarmonyPrefix]
-        public static void Prefix(ref CraftItemGUI __instance, ref int ____amount)
+        public static void Prefix(ref CraftItemGUI __instance, ref int ____amount, ref WorldGameObject __state)
         {
-           // Log($"Craft: {__instance.craft_definition.id}, One time: {__instance.craft_definition.one_time_craft}");
+            // Log($"Craft: {__instance.craft_definition.id}, One time: {__instance.craft_definition.one_time_craft}");
             if (_unsafeInteraction || IsUnsafeDefinition(__instance.craft_definition)) return;
 
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
-
+            __state = crafteryWgo;
             var found = Crafts.TryGetValue(__instance.craft_definition.id, out var value);
             float originalTimeFloat;
             if (found)
@@ -634,6 +657,59 @@ public static class MainPatcher
                         : message, null, false,
                     SpeechBubbleGUI.SpeechBubbleType.Think,
                     SmartSpeechEngine.VoiceID.None, true);
+            }
+        }
+
+        [HarmonyPostfix]
+        public static void Postfix(WorldGameObject __state)
+        {
+            if (!_cfg.MakeEverythingAuto) return;
+            if (__state == null) return;
+            if (__state.linked_worker != null) return;
+            if (__state.has_linked_worker) return;
+            currentlyCrafting.Add(__state);
+            __state.OnWorkAction();
+
+        }
+    }
+
+    private static readonly List<WorldGameObject> currentlyCrafting = new();
+    private static bool _craftsStarted;
+
+    [HarmonyPatch(typeof(MainGame), nameof(MainGame.Update))]
+    public static class MainGameUpdatePatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix()
+        {
+            if (!MainGame.game_started) return;
+            if (!_cfg.MakeEverythingAuto) return;
+            if (_craftsStarted) return;
+
+            foreach (var wgo in MainGame.me.world.GetComponentsInChildren<WorldGameObject>(true))
+            {
+                if (wgo.components.craft.is_crafting && !wgo.has_linked_worker)
+                {
+                    currentlyCrafting.Add(wgo);
+                }
+            }
+
+            _craftsStarted = true;
+        }
+    }
+
+    [HarmonyPatch(typeof(CraftComponent), "CraftReally")]
+    public static class CraftComponentCraftReally
+    {
+        [HarmonyPrefix]
+        public static void Prefix()
+        {
+            if (!MainGame.game_started) return;
+            if (!_cfg.MakeEverythingAuto) return;
+
+            foreach (var wgo in currentlyCrafting.Where(wgo => wgo.components.craft.is_crafting && !wgo.has_linked_worker))
+            {
+                wgo.OnWorkAction();
             }
         }
     }

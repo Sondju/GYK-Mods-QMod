@@ -134,6 +134,13 @@ public class MainPatcher
             {
                 _wgo = __instance;
             }
+
+            if (__instance.obj_id.Contains("mf_crematorium"))
+            {
+                __instance.obj_def.can_insert_items.ForEach(a=> Log($"Can Insert: {a}\n"));
+            }
+
+
         }
     }
 
@@ -209,6 +216,7 @@ public class MainPatcher
         [HarmonyPostfix]
         private static void Postfix()
         {
+
             if (_cfg.AllowHandToolDestroy)
             {
                 foreach (var itemDef in GameBalance.me.items_data.Where(a => ToolItems.Contains(a.type)))

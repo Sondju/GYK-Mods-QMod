@@ -291,31 +291,46 @@ namespace GerrysJunkTrunk
             }
         }
 
+        private static void ClearGerryFlag(ref ChestGUI chestGui)
+        {
+            if (chestGui == null || !_usingShippingBox) return;
+            if (StackSizeBackups.Count <= 0) return;
+            foreach (var item in chestGui.player_panel.multi_inventory.all[0].data.inventory)
+            {
+                var found = StackSizeBackups.TryGetValue(item.id, out var value);
+                if (!found) continue;
+
+                item.definition.stack_count = value;
+            }
+
+            foreach (var item in chestGui.chest_panel.multi_inventory.all[0].data.inventory)
+            {
+                var found = StackSizeBackups.TryGetValue(item.id, out var value);
+                if (!found) continue;
+
+                item.definition.stack_count = value;
+            }
+
+            _usingShippingBox = false;
+        }
+
         [HarmonyPatch(typeof(ChestGUI), "OnPressedBack")]
         public static class ChestGuiOnClosePressedPatch
         {
             [HarmonyPrefix]
             public static void Prefix(ref ChestGUI __instance)
             {
-                if (__instance == null || !_usingShippingBox) return;
-                if (StackSizeBackups.Count <= 0) return;
-                foreach (var item in __instance.player_panel.multi_inventory.all[0].data.inventory)
-                {
-                    var found = StackSizeBackups.TryGetValue(item.id, out var value);
-                    if (!found) continue;
+                ClearGerryFlag(ref __instance);
+            }
+        }
 
-                    item.definition.stack_count = value;
-                }
-
-                foreach (var item in __instance.chest_panel.multi_inventory.all[0].data.inventory)
-                {
-                    var found = StackSizeBackups.TryGetValue(item.id, out var value);
-                    if (!found) continue;
-
-                    item.definition.stack_count = value;
-                }
-
-                _usingShippingBox = false;
+        [HarmonyPatch(typeof(ChestGUI), "Hide")]
+        public static class ChestGuiHide
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref ChestGUI __instance)
+            {
+                ClearGerryFlag(ref __instance);
             }
         }
 
