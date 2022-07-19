@@ -61,11 +61,38 @@ namespace GerrysJunkTrunk.lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bye..
+        /// </summary>
+        public static string Bye {
+            get {
+                return ResourceManager.GetString("Bye", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to for.
+        /// </summary>
+        public static string For {
+            get {
+                return ResourceManager.GetString("For", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Gerry&apos;s Junk Trunk.
         /// </summary>
         public static string Header {
             get {
                 return ResourceManager.GetString("Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Gerry&apos;s Junk Trunk Sales.
+        /// </summary>
+        public static string HeaderSales {
+            get {
+                return ResourceManager.GetString("HeaderSales", resourceCulture);
             }
         }
         
@@ -115,7 +142,7 @@ namespace GerrysJunkTrunk.lang {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to - You get approx. 40% less than selling directly to T3 vendor..
+        ///   Looks up a localized string similar to - You get more at the vendor. Gerry takes a cut of the profits..
         /// </summary>
         public static string Message6 {
             get {
@@ -138,6 +165,15 @@ namespace GerrysJunkTrunk.lang {
         public static string Message8 {
             get {
                 return ResourceManager.GetString("Message8", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to What?! Nothing!.
+        /// </summary>
+        public static string Nothing {
+            get {
+                return ResourceManager.GetString("Nothing", resourceCulture);
             }
         }
         
@@ -178,7 +214,7 @@ namespace GerrysJunkTrunk.lang {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sales from Gerry&apos;s junk trunk now earn the full price &amp; max stack size increased to 100..
+        ///   Looks up a localized string similar to Gerry takes a smaller cut of the profits and max stack size increased to 100..
         /// </summary>
         public static string Stage3Des {
             get {
@@ -192,6 +228,24 @@ namespace GerrysJunkTrunk.lang {
         public static string Stage3Header {
             get {
                 return ResourceManager.GetString("Stage3Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vendor.
+        /// </summary>
+        public static string Vendor {
+            get {
+                return ResourceManager.GetString("Vendor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vendors.
+        /// </summary>
+        public static string Vendors {
+            get {
+                return ResourceManager.GetString("Vendors", resourceCulture);
             }
         }
         

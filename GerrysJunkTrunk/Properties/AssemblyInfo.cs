@@ -2,7 +2,7 @@
 using System.Resources;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Items placed in Gerry's trunk, will be sold overnight. Not sure who he's selling to, but they have deep pockets.")]
+[assembly: AssemblyTitle("Items placed in Gerry's trunk, will be sold overnight (Gerry takes a cut for his work). Not sure who he's selling to, but they have deep pockets.")]
 [assembly: AssemblyDescription("GerrysJunkTrunk")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]

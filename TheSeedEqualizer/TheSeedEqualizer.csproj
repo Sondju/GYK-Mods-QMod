@@ -58,6 +58,7 @@
     </Reference>
     <Reference Include="Helper">
       <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\Helper.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>

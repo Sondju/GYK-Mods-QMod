@@ -43,6 +43,7 @@
     </Compile>
     <Compile Include="MainPatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VendorSale.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="UnityEngine.Modules" Version="2020.3.17" IncludeAssets="compile" />
@@ -68,7 +69,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="lang\strings.de.resx" />
-    <EmbeddedResource Include="lang\strings.es.resx" />
+    <EmbeddedResource Include="lang\strings.es.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="lang\strings.fr.resx" />
     <EmbeddedResource Include="lang\strings.it.resx" />
     <EmbeddedResource Include="lang\strings.ja.resx" />

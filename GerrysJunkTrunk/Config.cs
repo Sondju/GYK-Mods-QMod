@@ -21,6 +21,9 @@ public static class Config
         bool.TryParse(_con.Value("EnableGerry", "true"), out var enableGerry);
         _options.EnableGerry = enableGerry;
 
+        bool.TryParse(_con.Value("ShowSummary", "true"), out var showSummary);
+        _options.ShowSummary = showSummary;
+
         _con.ConfigWrite();
 
         return _options;
@@ -32,5 +35,6 @@ public static class Config
         public bool ShowSoldMessagesOnPlayer = true;
         public bool DisableSoldMessageWhenNoSale;
         public bool EnableGerry;
+        public bool ShowSummary;
     }
 }

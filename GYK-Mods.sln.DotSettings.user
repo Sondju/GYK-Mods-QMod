@@ -3,6 +3,7 @@
   &lt;Assembly Path="H:\OneDrive\Development\GraveyardKeeper\GYK-Mods\libs\Assembly-CSharp.dll" /&gt;&#xD;
   &lt;Assembly Path="H:\OneDrive\Development\Graveyard Keeper\GYK-Mods-QMod\libs\Assembly-CSharp.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
+	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=GerrysJunkTrunk_002Flang_002Fstrings/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=IBuildWhereIWant_002Flang_002Fstrings/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=SaveNow_002Flang_002Fstrings/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=ThoughtfulReminders_002Flang_002Fstrings/@EntryIndexedValue">False</s:Boolean>

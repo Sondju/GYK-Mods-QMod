@@ -117,8 +117,17 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
+	<data name="Bye" xml:space="preserve">
+    <value>Bye.</value>
+  </data>
+	<data name="For" xml:space="preserve">
+    <value>for</value>
+  </data>
 	<data name="Header" xml:space="preserve">
     <value>Gerry's Junk Trunk</value>
+  </data>
+	<data name="HeaderSales" xml:space="preserve">
+    <value>Gerry's Junk Trunk Sales</value>
   </data>
 	<data name="Message1" xml:space="preserve">
     <value>Thanks for installing Gerry's Junk Trunk!</value>
@@ -144,6 +153,9 @@
 	<data name="Message8" xml:space="preserve">
     <value>Enjoy! - p1xel8ted</value>
   </data>
+	<data name="Nothing" xml:space="preserve">
+    <value>What?! Nothing!</value>
+  </data>
 	<data name="Stage1Des" xml:space="preserve">
     <value>Crafted at: Yard build desk. Has 10 slots with a max stack size of 50.</value>
   </data>
@@ -161,6 +173,12 @@
   </data>
 	<data name="Stage3Header" xml:space="preserve">
     <value>Enhance: Gerry's Junk Trunk</value>
+  </data>
+	<data name="Vendor" xml:space="preserve">
+    <value>Vendor</value>
+  </data>
+	<data name="Vendors" xml:space="preserve">
+    <value>Vendors</value>
   </data>
 	<data name="WorkWork" xml:space="preserve">
     <value>Work. Work.</value>

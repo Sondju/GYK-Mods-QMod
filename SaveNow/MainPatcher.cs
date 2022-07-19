@@ -10,10 +10,11 @@ using System.Text;
 using System.Threading;
 using Helper;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 
 namespace SaveNow;
 
-public class MainPatcher
+public class MainPatcher : MonoBehaviour
 {
     private static Vector3 _pos;
     private static string _dataPath;
@@ -398,6 +399,7 @@ public class MainPatcher
             _canSave = !__instance.player_controlled_by_script;
         }
     }
+
 
     //hooks into the time of day update and saves if the K key was pressed
     [HarmonyPatch(typeof(TimeOfDay))]

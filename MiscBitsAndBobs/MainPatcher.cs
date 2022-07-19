@@ -22,7 +22,7 @@ public class MainPatcher
 
     private static readonly string[] MakeStackable =
     {
-        "book","chapter","pen"
+        "book","chapter"
     };
 
     private static readonly ItemDefinition.ItemType[] GraveItems =
@@ -57,25 +57,30 @@ public class MainPatcher
         Tools.Log("MiscBitsAndBobs", $"{message}", error);
     }
 
-    ////with the stack size changes, the game doesn't remove the prayer item on pray (i cant actually find where it does this at all). now it does.
-    //[HarmonyPatch(typeof(PrayCraftGUI), nameof(PrayCraftGUI.OnPrayButtonPressed))]
-    //public static class PrayCraftGuiOnPrayButtonPressedPatch
-    //{
-    //    [HarmonyPrefix]
-    //    public static void Prefix(ref PrayCraftGUI __instance, ref Item ____selected_item)
-    //    {
-    //        if (__instance == null) return;
-    //        foreach (var inv in _mi.all)
-    //        {
-    //            foreach (var item in inv.data.inventory)
-    //            {
-    //                if (item != ____selected_item) continue;
-    //                inv.data.RemoveItemNoCheck(item, 1);
-    //                wl($"[PrayCraftGUI.OnPrayButtonPressed]: Remove 1x {____selected_item.id}.");
-    //            }
-    //        }
-    //    }
-    //}
+    
+    [HarmonyPatch(typeof(PrayCraftGUI), nameof(PrayCraftGUI.OnPrayButtonPressed))]
+    public static class PrayCraftGuiOnPrayButtonPressedPatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(ref PrayCraftGUI __instance, ref Item ____selected_item)
+        {
+            if (!_cfg.RemovePrayerOnUse) return;
+            if (__instance == null) return;
+            var playerInv = MainGame.me.player.GetMultiInventory(exceptions: null, force_world_zone: "",
+                player_mi: MultiInventory.PlayerMultiInventory.IncludePlayer, include_toolbelt: true,
+                include_bags: true, sortWGOS: true);
+            foreach (var inv in playerInv.all)
+            {
+                foreach (var item in inv.data.inventory)
+                {
+                    if (item != ____selected_item) continue;
+                    inv.data.RemoveItemNoCheck(item, 1);
+                    Log($"Removed 1x {____selected_item.id} from {inv._obj_id}.");
+                    return;
+                }
+            }
+        }
+    }
 
     [HarmonyPatch(typeof(LeaveTrailComponent), "LeaveTrail")]
     public static class LeaveTrailComponentLeaveTrailPatch
@@ -88,7 +93,7 @@ public class MainPatcher
             var byType = ____trail_definition.GetByType(____trail_type);
             if (____all_trails.Count <= 0) return;
             var trailObject = ____all_trails[____all_trails.Count - 1];
-            trailObject.SetColor(byType.color, ____dirty_amount / 2.0f);
+            trailObject.SetColor(byType.color, ____dirty_amount * 0.5f);
         }
     }
 
@@ -156,7 +161,7 @@ public class MainPatcher
         {
             if (Tools.IsModLoaded(WheresMaStorage)) return;
                 if (!GraveItems.Contains(__instance.res.definition.type)) return;
-            __instance.res.definition.stack_count = 9999;
+            __instance.res.definition.stack_count = 999;
         }
     }
 
@@ -181,19 +186,23 @@ public class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref CraftDefinition __instance, ref bool __result)
         {
-            if (Tools.IsModLoaded(WheresMaStorage)) return;
-            if (!_cfg.EnableToolAndPrayerStacking) return;
+           // if (Tools.IsModLoaded(WheresMaStorage)) return;
+            if (!_cfg.EnableChiselInkStacking) return;
             if (__instance == null) return;
             if (__instance.needs.Exists(item => item.id.Equals("pen:ink_pen")) && __instance.dur_needs_item > 0)
             {
                 __result = false;
             }
-            
+            if (__instance.needs.Exists(item => item.id.Contains("chisel")) && __instance.dur_needs_item > 0)
+            {
+                __result = false;
+            }
+
         }
     }
 
 
-    //patch tools to be stack-able
+    [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
     [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
     public static class GameBalanceLoadGameBalancePatch
     {
@@ -208,16 +217,27 @@ public class MainPatcher
                 }
             }
 
-            if (Tools.IsModLoaded(WheresMaStorage)) return;
-
-            if (_cfg.EnableToolAndPrayerStacking)
+         
+            if (_cfg.EnableToolAndPrayerStacking || _cfg.EnableChiselInkStacking)
             {
-                foreach (var item in GameBalance.me.items_data.Where(item =>
-                             ToolItems.Contains(item.type) || GraveItems.Contains(item.type) ||
-                             MakeStackable.Any(item.id.Contains)))
+                foreach (var item in GameBalance.me.items_data.Where(item => item.stack_count == 1))
                 {
-                    if (item.stack_count >= 1000) continue;
-                    item.stack_count += 1000;
+                    if (_cfg.EnableToolAndPrayerStacking)
+                    {
+                        if (ToolItems.Contains(item.type) || GraveItems.Contains(item.type) ||
+                            MakeStackable.Any(item.id.Contains))
+                        {
+                            item.stack_count = 999;
+                        }
+                    }
+
+                    if (_cfg.EnableChiselInkStacking)
+                    {
+                        if (item.id.Contains("ink") || item.id.Contains("pen") || item.id.Contains("chisel"))
+                        {
+                            item.stack_count = 999;
+                        }
+                    }
                 }
             }
         }

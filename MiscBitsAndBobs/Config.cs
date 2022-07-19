@@ -1,4 +1,5 @@
 ﻿using System;
+using Steamworks;
 
 namespace MiscBitsAndBobs;
 
@@ -45,8 +46,11 @@ public static class Config
         bool.TryParse(_con.Value("LessenFootprintImpact", "false"), out var lessenFootprintImpact);
         _options.LessenFootprintImpact = lessenFootprintImpact;
 
-        bool.TryParse(_con.Value("LessenFootstepSound", "false"), out var lessenFootstepSound);
-        _options.LessenFootstepSound = lessenFootstepSound;
+        bool.TryParse(_con.Value("RemovePrayerOnUse", "false"), out var removePrayerOnUse);
+        _options.RemovePrayerOnUse = removePrayerOnUse;
+
+        bool.TryParse(_con.Value("EnableChiselInkStacking", "false"), out var enableChiselInkStacking);
+        _options.EnableChiselInkStacking = enableChiselInkStacking;
 
         _con.ConfigWrite();
 
@@ -67,6 +71,7 @@ public static class Config
         public bool DisableCinematicLetterboxing;
         public bool KitsuneKitoMode;
         public bool LessenFootprintImpact;
-        public bool LessenFootstepSound;
+        public bool RemovePrayerOnUse;
+        public bool EnableChiselInkStacking;
     }
 }

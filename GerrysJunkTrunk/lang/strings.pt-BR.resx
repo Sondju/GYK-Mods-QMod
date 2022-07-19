@@ -145,4 +145,22 @@
 	<data name="Stage3Des" xml:space="preserve">
 		<value>Gerry fica com uma fatia menor dos lucros e o tamanho máximo da pilha aumenta para 100.</value>
 	</data>
+	<data name="Vendor" xml:space="preserve">
+		<value>Fornecedor</value>
+	</data>
+	<data name="Vendors" xml:space="preserve">
+		<value>Fornecedores</value>
+	</data>
+	<data name="HeaderSales" xml:space="preserve">
+		<value>Gerry's Junk Trunk Sales</value>
+	</data>
+	<data name="For" xml:space="preserve">
+		<value>por</value>
+	</data>
+	<data name="Bye" xml:space="preserve">
+		<value>Tchau.</value>
+	</data>
+	<data name="Nothing" xml:space="preserve">
+		<value>O que?! Nada!</value>
+	</data>
 </root>

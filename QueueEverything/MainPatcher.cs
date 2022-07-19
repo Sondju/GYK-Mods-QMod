@@ -52,12 +52,13 @@ public static class MainPatcher
 
     private static readonly CraftDefinition.CraftType[] UnSafeCraftTypes =
     {
-        CraftDefinition.CraftType.PrayCraft, CraftDefinition.CraftType.Fixing
+       // CraftDefinition.CraftType.PrayCraft, CraftDefinition.CraftType.Fixing
+       
     };
 
     private static readonly string[] UnSafeItems =
     {
-        "zombie","grow_desk_planting","refugee","grow_vineyard_planting", "axe", "hammer", "faith", "shovel", "sword", "mf_balsamation"
+        "zombie","grow_desk_planting","refugee","grow_vineyard_planting", "axe", "hammer", "shovel", "sword", "mf_balsamation"
     };
 
     private static bool _alreadyRun;
@@ -155,7 +156,8 @@ public static class MainPatcher
                        UnSafeCraftTypes.Contains(craft.craft_type) || craft.craft_time_is_zero || craft.one_time_craft) continue;
 
                     var ct = craft.energy.EvaluateFloat(crafteryWgo, MainGame.me.player);
-                    ct /= 2; //don't know why its getting doubled
+
+                    ct *= 1.5f;
                     if (_fasterCraft)
                     {
                         if (_timeAdjustment < 0)
@@ -174,10 +176,11 @@ public static class MainPatcher
                     }
                     craft.energy = SmartExpression.ParseExpression("0");
                     craft.is_auto = true;
-                    craft.needs.ForEach(need =>
-                    {
-                        need.value *= 2;
-                    });
+                    //craft.needs.ForEach(need =>
+                    //{
+                    //    //int value = need.value * 10 / 100;
+                    //    need.value += (int) Math.Ceiling((decimal) need.value * 25 / 100);
+                    //});
                     craft.output.ForEach(output =>
                     {
                         if (output.id is not ("r" or "g" or "b")) return;

@@ -1,12 +1,12 @@
+using GerrysJunkTrunk.lang;
 using HarmonyLib;
+using Helper;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using GerrysJunkTrunk.lang;
-using Helper;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -23,6 +23,9 @@ namespace GerrysJunkTrunk
         private const string ShippingItem = "shipping";
         private const string ShippingBoxTag = "shipping_box";
         private static readonly Dictionary<string, int> StackSizeBackups = new();
+        private static readonly List<WorldGameObject> KnownVendors = new();
+        private static readonly List<WorldGameObject> VendorWgos = new();
+        private static List<VendorSale> _vendorSales = new();
         private static string Lang { get; set; }
 
         public static void Patch()
@@ -63,7 +66,7 @@ namespace GerrysJunkTrunk
 
         private static bool UnlockedFullPrice()
         {
-            return MainGame.me.save.unlocked_techs.Exists(a => a.ToLowerInvariant().Equals("Best friend".ToLowerInvariant()));
+            return UnlockedShippingBoxExpansion() && MainGame.me.save.unlocked_techs.Exists(a => a.ToLowerInvariant().Equals("Best friend".ToLowerInvariant()));
         }
 
         private static bool UnlockedShippingBox()
@@ -73,7 +76,7 @@ namespace GerrysJunkTrunk
 
         private static bool UnlockedShippingBoxExpansion()
         {
-            return MainGame.me.save.unlocked_techs.Exists(a => a.ToLowerInvariant().Equals("Engineer".ToLowerInvariant()));
+            return UnlockedShippingBox() && MainGame.me.save.unlocked_techs.Exists(a => a.ToLowerInvariant().Equals("Engineer".ToLowerInvariant()));
         }
 
         [HarmonyPatch(typeof(MainGame), nameof(MainGame.Update))]
@@ -235,7 +238,7 @@ namespace GerrysJunkTrunk
 
             foreach (var inventory in __instance.chest_panel.multi_inventory.all.Where(i => i.data.inventory.Count > 0))
             {
-                inventory.is_locked = true;
+                //inventory.is_locked = true;
                 foreach (var item in inventory.data.inventory)
                 {
                     var itemCellGuiForItem = __instance.chest_panel.GetItemCellGuiForItem(item);
@@ -272,16 +275,14 @@ namespace GerrysJunkTrunk
 
                 foreach (var item in __instance.player_panel.multi_inventory.all[0].data.inventory.Where(item => item.definition.stack_count > 1))
                 {
-                  
-                        TryAdd(StackSizeBackups, item.id, item.definition.stack_count);
-        
+                    TryAdd(StackSizeBackups, item.id, item.definition.stack_count);
+
                     item.definition.stack_count = maxItemCount;
                 }
 
                 foreach (var item in __instance.chest_panel.multi_inventory.all[0].data.inventory.Where(item => item.definition.stack_count > 1))
                 {
-               
-                        TryAdd(StackSizeBackups, item.id, item.definition.stack_count);
+                    TryAdd(StackSizeBackups, item.id, item.definition.stack_count);
 
                     item.definition.stack_count = maxItemCount;
                 }
@@ -302,7 +303,7 @@ namespace GerrysJunkTrunk
                 {
                     var found = StackSizeBackups.TryGetValue(item.id, out var value);
                     if (!found) continue;
-                   
+
                     item.definition.stack_count = value;
                 }
 
@@ -310,7 +311,7 @@ namespace GerrysJunkTrunk
                 {
                     var found = StackSizeBackups.TryGetValue(item.id, out var value);
                     if (!found) continue;
-                  
+
                     item.definition.stack_count = value;
                 }
 
@@ -427,32 +428,91 @@ namespace GerrysJunkTrunk
             }
         }
 
+        [HarmonyPatch(typeof(WorldMap), nameof(WorldMap.RescanWGOsList))]
+        public static class WorldMapAddVendorPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref List<WorldGameObject> ____npcs)
+            {
+                foreach (var npc in ____npcs.Where(npc => npc.vendor != null))
+                {
+                    var known =
+                        MainGame.me.save.known_npcs.npcs.Exists(a => string.Equals(a.npc_id, npc.vendor.id));
+                    if (known)
+                    {
+                        KnownVendors.Add(npc);
+                    }
+                }
+            }
+        }
+
         private static float GetEarnings(WorldGameObject shippingBox)
         {
-            var vendor = WorldMap.GetNPCByObjID("npc_tavern owner");
-            if (vendor == null)
+            if (KnownVendors.Count != VendorWgos.Count)
             {
-                return 0;
-            }
-            _myVendor = Object.Instantiate(vendor);
-            _myVendor.data.money = 1000000f;
-            _myVendor.vendor.cur_money = 1000000f;
-            _myVendor.vendor.cur_tier = 3;
-            _myVendor.vendor.definition.not_buying.Clear();
-
-            var myTrader = new Trading(_myVendor);
-            var num = 0f;
-
-            foreach (var item in shippingBox.data.inventory)
-            {
-                var totalCount = shippingBox.data.GetTotalCount(item.id);
-                for (var i = 0; i < totalCount; i++)
+                foreach (var vendor in KnownVendors.Where(vendor => !VendorWgos.Exists(a => string.Equals(vendor.obj_id, a.obj_id))))
                 {
-                    num += Mathf.Round(myTrader.GetSingleItemCostInPlayerInventory(item, -i) * 100f) / 100f;
+                    _myVendor = Object.Instantiate(vendor);
+                    _myVendor.data.money = 1000000f;
+                    _myVendor.vendor.cur_money = 1000000f;
+                    _myVendor.vendor.cur_tier = 3;
+                    _myVendor.vendor.definition.not_buying.Clear();
+
+                    if (!VendorWgos.Exists(a => string.Equals(a.obj_id, _myVendor.obj_id)))
+                    {
+                        VendorWgos.Add(_myVendor);
+                    }
                 }
             }
 
-            return UnlockedFullPrice() ? num * 0.50f : num * 0.25f;
+            var totalSalePrice = 0f;
+            _vendorSales.Clear();
+
+            var prevItem = string.Empty;
+            foreach (var item in shippingBox.data.inventory)
+            {
+                if (string.Equals(item.id, prevItem)) continue;
+                var totalCount = shippingBox.data.GetTotalCount(item.id);
+
+                prevItem = item.id;
+                var num = 0f;
+                List<Vendor> vendorList = new();
+                List<float> priceList = new();
+
+                foreach (var vendor in VendorWgos)
+                {
+                    var v = new VendorSale(vendor.vendor);
+                    var myTrader = new Trading(vendor);
+                    if (item.definition.base_price <= 0)
+                    {
+                        num += 0.25f * totalCount;
+                    }
+                    else
+                    {
+                        for (var i = 0; i < totalCount; i++)
+                        {
+                            var itemCost = Mathf.Round(myTrader.GetSingleItemCostInPlayerInventory(item, -i) * 100f) / 100f;
+                            num += itemCost;
+                        }
+                    }
+
+                    vendorList.Add(vendor.vendor);
+                    priceList.Add(UnlockedFullPrice() ? num * 0.90f : num * 0.60f);
+                }
+
+                var maxSaleIndex = priceList.IndexOf(priceList.Max());
+                var newSale = new VendorSale(vendorList[maxSaleIndex]);
+                newSale.AddSale(item, totalCount, priceList[maxSaleIndex]);
+                _vendorSales.Add(newSale);
+                _vendorSales = _vendorSales.OrderBy(a => a.GetVendor().id).ToList();
+                totalSalePrice += priceList[maxSaleIndex];
+            }
+
+            if (totalSalePrice == 0)
+            {
+                return 0;
+            }
+            return UnlockedFullPrice() ? totalSalePrice * 0.90f : totalSalePrice * 0.60f;
         }
 
         [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
@@ -469,8 +529,14 @@ namespace GerrysJunkTrunk
                 {
                     foreach (var inventoryWidget in ____widgets)
                     {
-                        inventoryWidget.header_label.text = strings.Header;
-                        inventoryWidget.dont_show_empty_rows = true;
+                        var vendorCount = KnownVendors.Count;
+                        var header = vendorCount switch
+                        {
+                            > 1 => $"{strings.Header} - {vendorCount} {strings.Vendors}",
+                            1 => $"{strings.Header} - {vendorCount} {strings.Vendor}",
+                            _ => $"{strings.Header}"
+                        };
+                        inventoryWidget.header_label.text = header;
                         inventoryWidget.SetInactiveStateToEmptyCells();
                     }
 
@@ -493,12 +559,83 @@ namespace GerrysJunkTrunk
                 {
                     foreach (var inventoryWidget in ____widgets)
                     {
-                        inventoryWidget.header_label.text = strings.Header;
+                        var vendorCount = KnownVendors.Count;
+                        var header = vendorCount switch
+                        {
+                            > 1 => $"{strings.Header} - {vendorCount} {strings.Vendors}",
+                            1 => $"{strings.Header} - {vendorCount} {strings.Vendor}",
+                            _ => $"{strings.Header}"
+                        };
+                        inventoryWidget.header_label.text = header;
                         inventoryWidget.dont_show_empty_rows = true;
                         inventoryWidget.SetInactiveStateToEmptyCells();
                     }
                 }
             }
+        }
+
+        private static void StartGerryRoutine(float num)
+        {
+            var noSales = num <= 0;
+            var money = Trading.FormatMoney(num, true);
+            //var gerry = WorldMap.GetNPCByObjID("talking_skull");
+            var gerry = WorldMap.SpawnWGO(_shippingBox.transform, "talking_skull", new Vector3(_shippingBox.pos3.x, _shippingBox.pos3.y + 43f, _shippingBox.pos3.z));
+            gerry.ReplaceWithObject("talking_skull", true);
+
+            GJTimer.AddTimer(2f, delegate
+            {
+                gerry.Say(noSales ? strings.Nothing : strings.WorkWork, delegate
+                {
+                    GJTimer.AddTimer(1f, delegate
+                    {
+                        gerry.ReplaceWithObject("talking_skull", true);
+                        gerry.DestroyMe();
+                    });
+                }, null, SpeechBubbleGUI.SpeechBubbleType.Talk, SmartSpeechEngine.VoiceID.Skull, false);
+            });
+
+            if (noSales) return;
+            GJTimer.AddTimer(8f, delegate
+            {
+                var gerry2 = WorldMap.SpawnWGO(_shippingBox.transform, "talking_skull", new Vector3(_shippingBox.pos3.x, _shippingBox.pos3.y + 43f, _shippingBox.pos3.z));
+                gerry2.ReplaceWithObject("talking_skull", true);
+
+                GJTimer.AddTimer(2f, delegate
+                {
+                    gerry2.Say($"{money}", delegate
+                        {
+                            _shippingBox.data.inventory.Clear();
+                            if (_cfg.ShowSoldMessagesOnPlayer)
+                            {
+                                Sounds.PlaySound("coins_sound", MainGame.me.player_pos, true);
+                                var pos = MainGame.me.player_pos;
+                                pos.y += 125f;
+                                EffectBubblesManager.ShowImmediately(pos, $"{money}",
+                                    num > 0 ? EffectBubblesManager.BubbleColor.Green : EffectBubblesManager.BubbleColor.Red,
+                                    true, 4f);
+                            }
+                            else
+                            {
+                                Sounds.PlaySound("coins_sound", gerry2.pos3, true);
+                            }
+
+                            GJTimer.AddTimer(2f, delegate
+                            {
+                                gerry2.Say(strings.Bye, delegate
+                                {
+                                    GJTimer.AddTimer(1f, delegate
+                                    {
+                                        gerry2.ReplaceWithObject("talking_skull", true);
+                                        gerry2.DestroyMe();
+
+                                        GJTimer.AddTimer(1f, delegate { ShowSummary(money); });
+                                    });
+                                }, null, SpeechBubbleGUI.SpeechBubbleType.Talk, SmartSpeechEngine.VoiceID.Skull, false);
+                            });
+                        }, null, SpeechBubbleGUI.SpeechBubbleType.Talk,
+                        SmartSpeechEngine.VoiceID.Skull);
+                });
+            });
         }
 
         [HarmonyPatch(typeof(EnvironmentEngine), "OnEndOfDay")]
@@ -517,14 +654,14 @@ namespace GerrysJunkTrunk
                         }
                     }
 
-                    var num = GetEarnings(_shippingBox);
-                    if (num > 0)
+                    var earnings = GetEarnings(_shippingBox);
+                    if (earnings > 0)
                     {
-                        Stats.PlayerAddMoney(num, strings.Header);
+                        Stats.PlayerAddMoney(earnings, strings.Header);
                     }
 
-                    MainGame.me.player.data.money += num;
-                    var money = Trading.FormatMoney(num, true);
+                    MainGame.me.player.data.money += earnings;
+                    var money = Trading.FormatMoney(earnings, true);
 
                     Vector3 position;
                     float time;
@@ -541,28 +678,43 @@ namespace GerrysJunkTrunk
                         time = 7f;
                     }
 
-                    if (_cfg.DisableSoldMessageWhenNoSale) return;
-
                     if (_cfg.EnableGerry)
                     {
-                        _shippingBox.Say(strings.WorkWork, delegate
-                        {
-                            Sounds.PlaySound("coins_sound", position, true);
-                            _shippingBox.data.inventory.Clear();
-                            _shippingBox.Say($"{money}", null, null, SpeechBubbleGUI.SpeechBubbleType.Talk,
-                                SmartSpeechEngine.VoiceID.Skull);
-                        }, null, SpeechBubbleGUI.SpeechBubbleType.Talk, SmartSpeechEngine.VoiceID.Skull, false);
+                        StartGerryRoutine(earnings);
                     }
                     else
                     {
+                        if (_cfg.DisableSoldMessageWhenNoSale) return;
+
                         Sounds.PlaySound("coins_sound", position, true);
                         _shippingBox.data.inventory.Clear();
                         EffectBubblesManager.ShowImmediately(position, $"{money}",
-                            num > 0 ? EffectBubblesManager.BubbleColor.Green : EffectBubblesManager.BubbleColor.Red,
+                            earnings > 0 ? EffectBubblesManager.BubbleColor.Green : EffectBubblesManager.BubbleColor.Red,
                             true, time);
+                    }
+
+                    if (_cfg.ShowSummary && !_cfg.EnableGerry && earnings > 0)
+                    {
+                        ShowSummary(money);
                     }
                 }
             }
+        }
+
+        private static void ShowSummary(string money)
+        {
+            var result = string.Empty;
+            foreach (var vendor in _vendorSales)
+            {
+                var sales = vendor.GetSales().OrderBy(a => a.GetItem().id).ToList();
+
+                foreach (var sale in sales)
+                {
+                    result += $"{sale.GetItem().GetItemName()} {strings.For} {Trading.FormatMoney(sale.GetPrice())}\n";
+                }
+            }
+
+            GUIElements.me.dialog.OpenOK($"[37ff00]{strings.Header}[-]", null, $"{result}", true, $"{money}");
         }
 
         [HarmonyPatch(typeof(BaseCraftGUI), "CommonOpen")]

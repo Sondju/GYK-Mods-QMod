@@ -145,4 +145,22 @@
 	<data name="Stage3Des" xml:space="preserve">
 		<value>Gerry prende una riduzione minore dei profitti e la dimensione massima dello stack è aumentata a 100.</value>
 	</data>
+	<data name="Vendor" xml:space="preserve">
+		<value>Venditore</value>
+	</data>
+	<data name="Vendors" xml:space="preserve">
+		<value>Fornitori</value>
+	</data>
+	<data name="HeaderSales" xml:space="preserve">
+		<value>Vendite di baule spazzatura di Gerry</value>
+	</data>
+	<data name="For" xml:space="preserve">
+		<value>per</value>
+	</data>
+	<data name="Bye" xml:space="preserve">
+		<value>Addio.</value>
+	</data>
+	<data name="Nothing" xml:space="preserve">
+		<value>Che cosa?! Niente!</value>
+	</data>
 </root>
