@@ -36,6 +36,7 @@
     <Compile Include="InternalConfig.cs" />
     <Compile Include="ConfigReader.cs" />
     <Compile Include="InternalConfigReader.cs" />
+    <Compile Include="ItemPrice.cs" />
     <Compile Include="lang\strings.Designer.cs">
       <DependentUpon>strings.resx</DependentUpon>
       <AutoGen>True</AutoGen>

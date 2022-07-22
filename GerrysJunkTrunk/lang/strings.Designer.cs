@@ -79,6 +79,15 @@ namespace GerrysJunkTrunk.lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Gerry&apos;s price:.
+        /// </summary>
+        public static string GerrysPrice {
+            get {
+                return ResourceManager.GetString("GerrysPrice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Gerry&apos;s Junk Trunk.
         /// </summary>
         public static string Header {

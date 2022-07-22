@@ -14,18 +14,28 @@ namespace GerrysJunkTrunk
 {
     public class MainPatcher
     {
-        private static bool _shippingBuild;
-        private static WorldGameObject _shippingBox;
-        private static InternalConfig.Options _internalCfg;
-        private static Config.Options _cfg;
-        private static bool _usingShippingBox;
-        private static WorldGameObject _myVendor;
-        private const string ShippingItem = "shipping";
+        private const float FullPriceModifier = 0.90f;
+        private const float PityPrice = 0.10f;
+        private const int LargeInvSize = 20;
+        private const int LargeMaxItemCount = 100;
+        private const float PriceModifier = 0.60f;
         private const string ShippingBoxTag = "shipping_box";
-        private static readonly Dictionary<string, int> StackSizeBackups = new();
+        private const string ShippingItem = "shipping";
+        private const int SmallInvSize = 10;
+        private const int SmallMaxItemCount = 50;
         private static readonly List<WorldGameObject> KnownVendors = new();
+        private static readonly Dictionary<string, int> StackSizeBackups = new();
         private static readonly List<WorldGameObject> VendorWgos = new();
+        private static Config.Options _cfg;
+        private static InternalConfig.Options _internalCfg;
+        private static WorldGameObject _myVendor;
+        private static WorldGameObject _shippingBox;
+        private static bool _shippingBuild;
+        private static bool _usingShippingBox;
         private static List<VendorSale> _vendorSales = new();
+        private static readonly List<ItemPrice> PriceCache = new();
+        private static readonly List<BaseItemCellGUI> AlreadyDone = new();
+
         private static string Lang { get; set; }
 
         public static void Patch()
@@ -43,252 +53,20 @@ namespace GerrysJunkTrunk
             }
         }
 
-        private static void Log(string message, bool error = false)
+        private static void ShowSummary(string money)
         {
-            Tools.Log("GerrysJunkTrunk", $"{message}", error);
-        }
-
-        [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
-        public static class GameSettingsApplyLanguageChange
-        {
-            [HarmonyPostfix]
-            public static void Postfix()
+            var result = string.Empty;
+            foreach (var vendor in _vendorSales)
             {
-                Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-            }
-        }
+                var sales = vendor.GetSales().OrderBy(a => a.GetItem().id).ToList();
 
-        private static void ShowIntroMessage()
-        {
-            GUIElements.me.dialog.OpenOK(strings.Message1, null, $"{strings.Message2}\n{strings.Message3}\n{strings.Message4}\n{strings.Message5}\n{strings.Message6}\n{strings.Message7}", true, strings.Message8);
-        }
-
-        private static bool UnlockedFullPrice()
-        {
-            return UnlockedShippingBoxExpansion() && MainGame.me.save.unlocked_techs.Exists(a => a.ToLowerInvariant().Equals("Best friend".ToLowerInvariant()));
-        }
-
-        private static bool UnlockedShippingBox()
-        {
-            return MainGame.me.save.unlocked_techs.Exists(a => a.ToLowerInvariant().Equals("Wood processing".ToLowerInvariant()));
-        }
-
-        private static bool UnlockedShippingBoxExpansion()
-        {
-            return UnlockedShippingBox() && MainGame.me.save.unlocked_techs.Exists(a => a.ToLowerInvariant().Equals("Engineer".ToLowerInvariant()));
-        }
-
-        [HarmonyPatch(typeof(MainGame), nameof(MainGame.Update))]
-        public static class MainGameUpdatePatch
-        {
-            [HarmonyPostfix]
-            public static void Postfix()
-            {
-                if (!MainGame.game_started) return;
-
-                if (_internalCfg.ShowIntroMessage)
+                foreach (var sale in sales)
                 {
-                    ShowIntroMessage();
-                    _internalCfg.ShowIntroMessage = false;
-                    UpdateInternalConfig();
-                }
-
-                if (!UnlockedShippingBox()) return;
-                if (_internalCfg.ShippingBoxBuilt && _shippingBox == null)
-                {
-                    _shippingBox = Object.FindObjectsOfType<WorldGameObject>(true)
-                        .FirstOrDefault(x => string.Equals(x.custom_tag, ShippingBoxTag));
-                    if (_shippingBox == null)
-                    {
-                        Log("No Shipping Box Found!");
-                        _internalCfg.ShippingBoxBuilt = false;
-                    }
-                    else
-                    {
-                        Log($"Found Shipping Box at {_shippingBox.pos3}");
-                        _internalCfg.ShippingBoxBuilt = true;
-                        _shippingBox.data.drop_zone_id = ShippingBoxTag;
-                        var invSize = 10;
-                        if (UnlockedShippingBoxExpansion())
-                        {
-                            invSize = 20;
-                        }
-                        _shippingBox.data.SetInventorySize(invSize);
-                    }
-
-                    UpdateInternalConfig();
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.DestroyMe))]
-        public static class WorldGameObjectDestroyMePatch
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref WorldGameObject __instance)
-            {
-                if (string.Equals(__instance.custom_tag, ShippingBoxTag))
-                {
-                    Log($"Removed Shipping Box!");
-                    _shippingBox = null;
-                    _internalCfg.ShippingBoxBuilt = false;
-                    UpdateInternalConfig();
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(TechTreeGUIItem), "InitGamepadTooltip")]
-        public static class TechTreeGuiItemInitGamepadTooltip
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref TechTreeGUIItem __instance)
-            {
-                if (__instance == null) return;
-                {
-                    var component = __instance.GetComponent<Tooltip>();
-                    if (__instance.tech_id.ToLowerInvariant().Contains("Wood processing".ToLowerInvariant()))
-                    {
-                        component.AddData(new BubbleWidgetSeparatorData());
-                        component.AddData(new BubbleWidgetTextData(strings.Stage1Header, UITextStyles.TextStyle.HintTitle));
-                        component.AddData(new BubbleWidgetTextData(strings.Stage1Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
-                    }
-
-                    if (__instance.tech_id.ToLowerInvariant().Contains("Engineer".ToLowerInvariant()))
-                    {
-                        component.AddData(new BubbleWidgetSeparatorData());
-                        component.AddData(new BubbleWidgetTextData(strings.Stage2Header, UITextStyles.TextStyle.HintTitle));
-                        component.AddData(new BubbleWidgetTextData(strings.Stage2Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
-                    }
-
-                    if (__instance.tech_id.ToLowerInvariant().Contains("Best friend".ToLowerInvariant()))
-                    {
-                        component.AddData(new BubbleWidgetSeparatorData());
-                        component.AddData(new BubbleWidgetTextData(strings.Stage3Header, UITextStyles.TextStyle.HintTitle));
-                        component.AddData(new BubbleWidgetTextData(strings.Stage3Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
-                    }
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(TechUnlock), nameof(TechUnlock.GetTooltip), typeof(Tooltip))]
-        public static class TechUnlockGetTooltipPatch
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref TechUnlock __instance, ref Tooltip tooltip)
-            {
-                if (__instance != null)
-                {
-                    if (LazyInput.gamepad_active) return;
-                    var name = __instance.GetData().name;
-
-                    if (name.ToLowerInvariant().Contains("Wooden plank".ToLowerInvariant()))
-                    {
-                        tooltip.AddData(new BubbleWidgetBlankSeparatorData());
-                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage1Header, UITextStyles.TextStyle.HintTitle, NGUIText.Alignment.Left));
-                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage1Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
-                    }
-
-                    if (name.ToLowerInvariant().Contains("Engineer".ToLowerInvariant()))
-                    {
-                        tooltip.AddData(new BubbleWidgetBlankSeparatorData());
-                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage2Header, UITextStyles.TextStyle.HintTitle, NGUIText.Alignment.Left));
-                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage2Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
-                    }
-
-                    if (name.ToLowerInvariant().Contains("Jeweler".ToLowerInvariant()))
-                    {
-                        tooltip.AddData(new BubbleWidgetBlankSeparatorData());
-                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage3Header, UITextStyles.TextStyle.HintTitle, NGUIText.Alignment.Left));
-                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage3Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
-                    }
-                }
-            }
-        }
-
-        [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs", "p1xel8ted.GraveyardKeeper.WheresMaStorage")]
-        [HarmonyPatch(typeof(ChestGUI), "MoveItem", typeof(Item), typeof(int), typeof(bool), typeof(Item), typeof(bool))]
-        public static class ChestGuiMoveItemPatch
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref ChestGUI __instance)
-            {
-                if (__instance == null || !_usingShippingBox) return;
-
-                UpdateItemStates(ref __instance);
-            }
-        }
-
-        private static void UpdateItemStates(ref ChestGUI __instance)
-        {
-            foreach (var inventory in __instance.player_panel.multi_inventory.all.Where(i => i.data.inventory.Count > 0))
-            {
-                foreach (var item in inventory.data.inventory)
-                {
-                    var itemCellGuiForItem = __instance.player_panel.GetItemCellGuiForItem(item);
-                    itemCellGuiForItem.SetInactiveState(false);
-                }
-
-                foreach (var item in inventory.data.inventory.Where(item => item.definition.player_cant_throw_out))
-                {
-                    var itemCellGuiForItem = __instance.player_panel.GetItemCellGuiForItem(item);
-                    itemCellGuiForItem.SetInactiveState();
+                    result += $"{sale.GetItem().GetItemName()} {strings.For} {Trading.FormatMoney(sale.GetPrice())}\n";
                 }
             }
 
-            foreach (var inventory in __instance.chest_panel.multi_inventory.all.Where(i => i.data.inventory.Count > 0))
-            {
-                //inventory.is_locked = true;
-                foreach (var item in inventory.data.inventory)
-                {
-                    var itemCellGuiForItem = __instance.chest_panel.GetItemCellGuiForItem(item);
-                    if (itemCellGuiForItem != null)
-                    {
-                        itemCellGuiForItem.SetInactiveState();
-                    }
-                }
-            }
-        }
-
-        private static bool TryAdd<TKey, TValue>(IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
-        {
-            if (dictionary.ContainsKey(key)) return false;
-            dictionary.Add(key, value);
-            return true;
-        }
-
-        [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs", "p1xel8ted.GraveyardKeeper.WheresMaStorage")]
-        [HarmonyPatch(typeof(ChestGUI), nameof(ChestGUI.Open))]
-        public static class ChestGuiOpenPatch
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref ChestGUI __instance)
-            {
-                if (__instance == null || !_usingShippingBox) return;
-
-                var maxItemCount = 50;
-
-                if (UnlockedFullPrice())
-                {
-                    maxItemCount = 100;
-                }
-
-                foreach (var item in __instance.player_panel.multi_inventory.all[0].data.inventory.Where(item => item.definition.stack_count > 1))
-                {
-                    TryAdd(StackSizeBackups, item.id, item.definition.stack_count);
-
-                    item.definition.stack_count = maxItemCount;
-                }
-
-                foreach (var item in __instance.chest_panel.multi_inventory.all[0].data.inventory.Where(item => item.definition.stack_count > 1))
-                {
-                    TryAdd(StackSizeBackups, item.id, item.definition.stack_count);
-
-                    item.definition.stack_count = maxItemCount;
-                }
-
-                UpdateItemStates(ref __instance);
-            }
+            GUIElements.me.dialog.OpenOK($"[37ff00]{strings.Header}[-]", null, $"{result}", true, $"{money}");
         }
 
         private static void ClearGerryFlag(ref ChestGUI chestGui)
@@ -314,193 +92,45 @@ namespace GerrysJunkTrunk
             _usingShippingBox = false;
         }
 
-        [HarmonyPatch(typeof(ChestGUI), "OnPressedBack")]
-        public static class ChestGuiOnClosePressedPatch
+        private static float GetBoxEarnings(WorldGameObject shippingBox)
         {
-            [HarmonyPrefix]
-            public static void Prefix(ref ChestGUI __instance)
-            {
-                ClearGerryFlag(ref __instance);
-            }
-        }
-
-        [HarmonyPatch(typeof(ChestGUI), "Hide")]
-        public static class ChestGuiHide
-        {
-            [HarmonyPrefix]
-            public static void Prefix(ref ChestGUI __instance)
-            {
-                ClearGerryFlag(ref __instance);
-            }
-        }
-
-        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
-        public static class WorldGameObjectInteractPatch
-        {
-            [HarmonyPrefix]
-            public static void Prefix(ref WorldGameObject __instance, ref WorldGameObject other_obj)
-            {
-                if (string.Equals(__instance.custom_tag, ShippingBoxTag))
-                {
-                    Log($"Found Shipping Box! {__instance.data.drop_zone_id}, Other: {other_obj.obj_id}");
-                    _internalCfg.ShippingBoxBuilt = true;
-                    UpdateInternalConfig();
-                    _usingShippingBox = true;
-                    __instance.data.drop_zone_id = ShippingBoxTag;
-                    var invSize = 10;
-                    if (UnlockedShippingBoxExpansion())
-                    {
-                        invSize = 20;
-                    }
-                    __instance.data.SetInventorySize(invSize);
-                    __instance.data.money = GetEarnings(__instance);
-                    _shippingBox = __instance;
-                }
-            }
-
-            [HarmonyFinalizer]
-            private static Exception Finalizer()
-            {
-                return null;
-            }
-        }
-
-        private static void UpdateInternalConfig()
-        {
-            InternalConfig.WriteOptions();
-            _internalCfg = InternalConfig.GetOptions();
-        }
-
-        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.ReplaceWithObject))]
-        public static class WorldGameObjectReplaceWithObjectPatch
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref WorldGameObject __instance, ref string new_obj_id)
-            {
-                if (string.Equals(new_obj_id, "mf_box_stuff") && _shippingBuild)
-                {
-                    Log($"Built Shipping Box!");
-                    __instance.custom_tag = ShippingBoxTag;
-
-                    // _shippingBoxBuilt = true;
-                    var invSize = 10;
-                    if (UnlockedShippingBoxExpansion())
-                    {
-                        invSize = 20;
-                    }
-                    __instance.data.SetInventorySize(invSize);
-                    __instance.data.drop_zone_id = ShippingBoxTag;
-                    _shippingBox = __instance;
-                    _internalCfg.ShippingBoxBuilt = true;
-                    UpdateInternalConfig();
-                }
-            }
-        }
-
-        //should never need these, but will stop a 2nd being built
-        [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.CanBuild))]
-        public static class BuildItemGuiSelectPatch
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref bool __result, ref CraftDefinition cd)
-            {
-                if (_internalCfg.ShippingBoxBuilt && _shippingBox != null)
-                {
-                    if (cd.id.Contains(ShippingItem))
-                    {
-                        __result = false;
-                    }
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(Vendor), nameof(Vendor.CanTradeItem))]
-        public static class VendorCanTradeItemPatch
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref Vendor __instance, ref bool __result)
-            {
-                if (__instance == null || _myVendor == null || _myVendor.vendor == null) return;
-                if (__instance.Equals(_myVendor.vendor))
-                {
-                    __result = true;
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.OnBuildCraftSelected))]
-        public static class BuildModeLogicsOnBuildCraftSelectedPatch
-        {
-            [HarmonyPrefix]
-            public static void Prefix(ref ObjectCraftDefinition cd)
-            {
-                if (cd.id.Contains(ShippingItem))
-                {
-                    _shippingBuild = true;
-                    var ocd = GameBalance.me.GetData<ObjectCraftDefinition>("mf_wood_builddesk:p:mf_box_stuff_place");
-                    cd = ocd;
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(WorldMap), nameof(WorldMap.RescanWGOsList))]
-        public static class WorldMapAddVendorPatch
-        {
-            [HarmonyPostfix]
-            public static void Postfix(ref List<WorldGameObject> ____npcs)
-            {
-                foreach (var npc in ____npcs.Where(npc => npc.vendor != null))
-                {
-                    var known =
-                        MainGame.me.save.known_npcs.npcs.Exists(a => string.Equals(a.npc_id, npc.vendor.id));
-                    if (known)
-                    {
-                        KnownVendors.Add(npc);
-                    }
-                }
-            }
-        }
-
-        private static float GetEarnings(WorldGameObject shippingBox)
-        {
-            if (KnownVendors.Count != VendorWgos.Count)
-            {
-                foreach (var vendor in KnownVendors.Where(vendor => !VendorWgos.Exists(a => string.Equals(vendor.obj_id, a.obj_id))))
-                {
-                    _myVendor = Object.Instantiate(vendor);
-                    _myVendor.data.money = 1000000f;
-                    _myVendor.vendor.cur_money = 1000000f;
-                    _myVendor.vendor.cur_tier = 3;
-                    _myVendor.vendor.definition.not_buying.Clear();
-
-                    if (!VendorWgos.Exists(a => string.Equals(a.obj_id, _myVendor.obj_id)))
-                    {
-                        VendorWgos.Add(_myVendor);
-                    }
-                }
-            }
+            RefreshVendors();
 
             var totalSalePrice = 0f;
+            var totalCount = 0;
             _vendorSales.Clear();
 
             var prevItem = string.Empty;
-            foreach (var item in shippingBox.data.inventory)
+            foreach (var item in shippingBox.data.inventory.Where(item => !string.Equals(item.id, prevItem)))
             {
-                if (string.Equals(item.id, prevItem)) continue;
-                var totalCount = shippingBox.data.GetTotalCount(item.id);
+                totalCount = shippingBox.data.GetTotalCount(item.id);
 
                 prevItem = item.id;
-                var num = 0f;
                 List<Vendor> vendorList = new();
                 List<float> priceList = new();
 
                 foreach (var vendor in VendorWgos)
                 {
-                    var v = new VendorSale(vendor.vendor);
+                    var num = 0f;
                     var myTrader = new Trading(vendor);
                     if (item.definition.base_price <= 0)
                     {
-                        num += 0.25f * totalCount;
+                        if (item.id.EndsWith(":3"))
+                        {
+                            num += 0.75f * totalCount;
+                        }
+                        else if (item.id.EndsWith(":2"))
+                        {
+                            num += 0.60f * totalCount;
+                        }
+                        else if (item.id.EndsWith(":1"))
+                        {
+                            num += 0.45f * totalCount;
+                        }
+                        else
+                        {
+                            num += 0.25f * totalCount;
+                        }
                     }
                     else
                     {
@@ -512,7 +142,7 @@ namespace GerrysJunkTrunk
                     }
 
                     vendorList.Add(vendor.vendor);
-                    priceList.Add(UnlockedFullPrice() ? num * 0.90f : num * 0.60f);
+                    priceList.Add(UnlockedFullPrice() ? num * FullPriceModifier : num * PriceModifier);
                 }
 
                 var maxSaleIndex = priceList.IndexOf(priceList.Max());
@@ -523,70 +153,117 @@ namespace GerrysJunkTrunk
                 totalSalePrice += priceList[maxSaleIndex];
             }
 
-            if (totalSalePrice == 0)
+            if (totalSalePrice <= 0)
             {
-                return 0;
+                var price = PityPrice * totalCount;
+                return UnlockedFullPrice() ? price * FullPriceModifier : price * PriceModifier;
             }
-            return UnlockedFullPrice() ? totalSalePrice * 0.90f : totalSalePrice * 0.60f;
+            return UnlockedFullPrice() ? totalSalePrice * FullPriceModifier : totalSalePrice * PriceModifier;
         }
 
-        [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
-        [HarmonyPatch(typeof(InventoryPanelGUI), nameof(InventoryPanelGUI.Redraw))]
-        public static class InventoryWidgetRedrawPatch
+        private static float GetItemEarnings(Item selectedItem)
         {
-            [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
-            [HarmonyPostfix]
-            public static void Postfix(ref InventoryPanelGUI __instance, ref List<InventoryWidget> ____widgets)
-            {
-                var isChest = __instance.name.ToLowerInvariant().Contains("chest");
-                var isPlayer = __instance.name.ToLowerInvariant().Contains("player");
-                if (_usingShippingBox && isChest && !isPlayer)
-                {
-                    foreach (var inventoryWidget in ____widgets)
-                    {
-                        var vendorCount = KnownVendors.Count;
-                        var header = vendorCount switch
-                        {
-                            > 1 => $"{strings.Header} - {vendorCount} {strings.Vendors}",
-                            1 => $"{strings.Header} - {vendorCount} {strings.Vendor}",
-                            _ => $"{strings.Header}"
-                        };
-                        inventoryWidget.header_label.text = header;
-                        inventoryWidget.SetInactiveStateToEmptyCells();
-                    }
+            var itemCache = PriceCache.Find(a =>
+                string.Equals(a.GetItem().id, selectedItem.id) && a.GetQty() == selectedItem.value);
 
-                    __instance.money_label.text = Trading.FormatMoney(GetEarnings(_shippingBox), true);
+            if (itemCache != null)
+            {
+                if (itemCache.GetPrice() == 0)
+                {
+                    var price = PityPrice * itemCache.GetQty();
+                    return UnlockedFullPrice() ? price * FullPriceModifier : price * PriceModifier;
+                }
+                return UnlockedFullPrice() ? itemCache.GetPrice() * FullPriceModifier : itemCache.GetPrice() * PriceModifier;
+            }
+
+            RefreshVendors();
+
+            var totalSalePrice = 0f;
+            _vendorSales.Clear();
+            var totalCount = selectedItem.value;
+
+            List<Vendor> vendorList = new();
+            List<float> priceList = new();
+
+            foreach (var vendor in VendorWgos)
+            {
+                float num = 0;
+                var myTrader = new Trading(vendor);
+                if (selectedItem.definition.base_price <= 0)
+                {
+                    if (selectedItem.id.EndsWith(":3"))
+                    {
+                        num += 0.75f * totalCount;
+                    }
+                    else if (selectedItem.id.EndsWith(":2"))
+                    {
+                        num += 0.60f * totalCount;
+                    }
+                    else if (selectedItem.id.EndsWith(":1"))
+                    {
+                        num += 0.45f * totalCount;
+                    }
+                    else
+                    {
+                        num += 0.25f * totalCount;
+                    }
+                }
+                else
+                {
+                    for (var i = 0; i < totalCount; i++)
+                    {
+                        var itemCost = Mathf.Round(myTrader.GetSingleItemCostInPlayerInventory(selectedItem, -i) * 100f) / 100f;
+                        num += itemCost;
+                    }
+                }
+
+                vendorList.Add(vendor.vendor);
+                priceList.Add(num);
+            }
+
+            var maxSaleIndex = priceList.IndexOf(priceList.Max());
+            var newSale = new VendorSale(vendorList[maxSaleIndex]);
+            newSale.AddSale(selectedItem, totalCount, priceList[maxSaleIndex]);
+            _vendorSales.Add(newSale);
+            _vendorSales = _vendorSales.OrderBy(a => a.GetVendor().id).ToList();
+            totalSalePrice += priceList[maxSaleIndex];
+
+            PriceCache.Add(new ItemPrice(selectedItem, totalCount, priceList[maxSaleIndex]));
+
+            if (totalSalePrice <= 0)
+            {
+                var price = PityPrice * totalCount;
+                return UnlockedFullPrice() ? price * FullPriceModifier : price * PriceModifier;
+            }
+            return UnlockedFullPrice() ? totalSalePrice * FullPriceModifier : totalSalePrice * PriceModifier;
+        }
+
+        private static void Log(string message, bool error = false)
+        {
+            Tools.Log("GerrysJunkTrunk", $"{message}", error);
+        }
+
+        private static void RefreshVendors()
+        {
+            if (KnownVendors.Count == VendorWgos.Count) return;
+            foreach (var vendor in KnownVendors.Where(vendor => !VendorWgos.Exists(a => string.Equals(vendor.obj_id, a.obj_id))))
+            {
+                _myVendor = Object.Instantiate(vendor);
+                _myVendor.data.money = 1000000f;
+                _myVendor.vendor.cur_money = 1000000f;
+                _myVendor.vendor.cur_tier = 3;
+                _myVendor.vendor.definition.not_buying.Clear();
+
+                if (!VendorWgos.Exists(a => string.Equals(a.obj_id, _myVendor.obj_id)))
+                {
+                    VendorWgos.Add(_myVendor);
                 }
             }
         }
 
-        [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
-        [HarmonyPatch(typeof(InventoryPanelGUI), "DoOpening")]
-        public static class InventoryWidgetDoOpeningPatch
+        private static void ShowIntroMessage()
         {
-            [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
-            [HarmonyPostfix]
-            public static void Postfix(ref InventoryPanelGUI __instance, ref List<InventoryWidget> ____widgets)
-            {
-                var isChest = __instance.name.ToLowerInvariant().Contains("chest");
-                var isPlayer = __instance.name.ToLowerInvariant().Contains("player");
-                if (_usingShippingBox && isChest && !isPlayer)
-                {
-                    foreach (var inventoryWidget in ____widgets)
-                    {
-                        var vendorCount = KnownVendors.Count;
-                        var header = vendorCount switch
-                        {
-                            > 1 => $"{strings.Header} - {vendorCount} {strings.Vendors}",
-                            1 => $"{strings.Header} - {vendorCount} {strings.Vendor}",
-                            _ => $"{strings.Header}"
-                        };
-                        inventoryWidget.header_label.text = header;
-                        inventoryWidget.dont_show_empty_rows = true;
-                        inventoryWidget.SetInactiveStateToEmptyCells();
-                    }
-                }
-            }
+            GUIElements.me.dialog.OpenOK(strings.Message1, null, $"{strings.Message2}\n{strings.Message3}\n{strings.Message4}\n{strings.Message5}\n{strings.Message6}\n{strings.Message7}", true, strings.Message8);
         }
 
         private static void StartGerryRoutine(float num)
@@ -606,7 +283,7 @@ namespace GerrysJunkTrunk
                         gerry.ReplaceWithObject("talking_skull", true);
                         gerry.DestroyMe();
                     });
-                }, null, SpeechBubbleGUI.SpeechBubbleType.Talk, SmartSpeechEngine.VoiceID.Skull, false);
+                }, null, SpeechBubbleGUI.SpeechBubbleType.Talk, SmartSpeechEngine.VoiceID.Skull);
             });
 
             if (noSales) return;
@@ -645,13 +322,247 @@ namespace GerrysJunkTrunk
 
                                         GJTimer.AddTimer(1f, delegate { ShowSummary(money); });
                                     });
-                                }, null, SpeechBubbleGUI.SpeechBubbleType.Talk, SmartSpeechEngine.VoiceID.Skull, false);
+                                }, null, SpeechBubbleGUI.SpeechBubbleType.Talk, SmartSpeechEngine.VoiceID.Skull);
                             });
                         }, null, SpeechBubbleGUI.SpeechBubbleType.Talk,
                         SmartSpeechEngine.VoiceID.Skull);
                 });
             });
         }
+
+        private static void TryAdd<TKey, TValue>(IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
+        {
+            if (dictionary.ContainsKey(key)) return;
+            dictionary.Add(key, value);
+        }
+
+        private static bool UnlockedFullPrice()
+        {
+            return UnlockedShippingBoxExpansion() && MainGame.me.save.unlocked_techs.Exists(a => a.ToLowerInvariant().Equals("Best friend".ToLowerInvariant()));
+        }
+
+        private static bool UnlockedShippingBox()
+        {
+            return MainGame.me.save.unlocked_techs.Exists(a => a.ToLowerInvariant().Equals("Wood processing".ToLowerInvariant()));
+        }
+
+        private static bool UnlockedShippingBoxExpansion()
+        {
+            return UnlockedShippingBox() && MainGame.me.save.unlocked_techs.Exists(a => a.ToLowerInvariant().Equals("Engineer".ToLowerInvariant()));
+        }
+
+        private static void UpdateInternalConfig()
+        {
+            InternalConfig.WriteOptions();
+            _internalCfg = InternalConfig.GetOptions();
+        }
+
+        private static void UpdateItemStates(ref ChestGUI __instance)
+        {
+            foreach (var inventory in __instance.player_panel.multi_inventory.all.Where(i => i.data.inventory.Count > 0))
+            {
+                foreach (var item in inventory.data.inventory)
+                {
+                    var itemCellGuiForItem = __instance.player_panel.GetItemCellGuiForItem(item);
+                    itemCellGuiForItem.SetInactiveState(false);
+                }
+
+                foreach (var item in inventory.data.inventory.Where(item => item.definition.player_cant_throw_out))
+                {
+                    var itemCellGuiForItem = __instance.player_panel.GetItemCellGuiForItem(item);
+                    itemCellGuiForItem.SetInactiveState();
+                }
+            }
+
+            foreach (var inventory in __instance.chest_panel.multi_inventory.all.Where(i => i.data.inventory.Count > 0))
+            {
+                inventory.is_locked = true;
+                foreach (var item in inventory.data.inventory)
+                {
+                    var itemCellGuiForItem = __instance.chest_panel.GetItemCellGuiForItem(item);
+                    if (itemCellGuiForItem != null)
+                    {
+                        itemCellGuiForItem.SetInactiveState();
+                    }
+                }
+            }
+        }
+
+        //should never need these, but will stop a 2nd being built
+        [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.CanBuild))]
+        public static class BuildItemGuiSelectPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref bool __result, ref CraftDefinition cd)
+            {
+                if (_internalCfg.ShippingBoxBuilt && _shippingBox != null)
+                {
+                    if (cd.id.Contains(ShippingItem))
+                    {
+                        __result = false;
+                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(InventoryPanelGUI), nameof(InventoryPanelGUI.Open))]
+        public static class InventoryPanelGuiOpenPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref InventoryPanelGUI __instance)
+            {
+                AlreadyDone.Clear();
+                //AlreadyDone.Add(__instance.selected_item_gui);
+            }
+        }
+
+        [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.OnBuildCraftSelected))]
+        public static class BuildModeLogicsOnBuildCraftSelectedPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref ObjectCraftDefinition cd)
+            {
+                if (cd.id.Contains(ShippingItem))
+                {
+                    _shippingBuild = true;
+                    var ocd = GameBalance.me.GetData<ObjectCraftDefinition>("mf_wood_builddesk:p:mf_box_stuff_place");
+                    cd = ocd;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(ChestGUI), "Hide")]
+        public static class ChestGuiHide
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref ChestGUI __instance)
+            {
+                ClearGerryFlag(ref __instance);
+            }
+        }
+
+        [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs", "p1xel8ted.GraveyardKeeper.WheresMaStorage")]
+        [HarmonyPatch(typeof(ChestGUI), "MoveItem", typeof(Item), typeof(int), typeof(bool), typeof(Item), typeof(bool))]
+        public static class ChestGuiMoveItemPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref ChestGUI __instance)
+            {
+                if (__instance == null || !_usingShippingBox) return;
+
+                UpdateItemStates(__instance: ref __instance);
+            }
+        }
+
+        [HarmonyPatch(typeof(ChestGUI), "OnPressedBack")]
+        public static class ChestGuiOnClosePressedPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref ChestGUI __instance)
+            {
+                ClearGerryFlag(ref __instance);
+            }
+        }
+
+        [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs", "p1xel8ted.GraveyardKeeper.WheresMaStorage")]
+        [HarmonyPatch(typeof(ChestGUI), nameof(ChestGUI.Open))]
+        public static class ChestGuiOpenPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref ChestGUI __instance)
+            {
+                //AlreadyDone.Clear();
+
+                if (__instance == null || !_usingShippingBox) return;
+
+                var maxItemCount = SmallMaxItemCount;
+
+                if (UnlockedFullPrice())
+                {
+                    maxItemCount = LargeMaxItemCount;
+                }
+
+                foreach (var item in __instance.player_panel.multi_inventory.all[0].data.inventory.Where(item => item.definition.stack_count > 1))
+                {
+                    TryAdd(StackSizeBackups, item.id, item.definition.stack_count);
+
+                    item.definition.stack_count = maxItemCount;
+                }
+
+                foreach (var item in __instance.chest_panel.multi_inventory.all[0].data.inventory.Where(item => item.definition.stack_count > 1))
+                {
+                    TryAdd(StackSizeBackups, item.id, item.definition.stack_count);
+
+                    item.definition.stack_count = maxItemCount;
+                }
+
+                UpdateItemStates(__instance: ref __instance);
+            }
+        }
+
+        [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs", "p1xel8ted.GraveyardKeeper.WheresMaStorage")]
+        [HarmonyPatch(typeof(InventoryPanelGUI), "OnItemOver", typeof(InventoryWidget), typeof(BaseItemCellGUI))]
+        public static class BaseItemCellGuiInitTooltipsPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref InventoryPanelGUI __instance, ref BaseItemCellGUI item_gui)
+            {
+                //if (!_usingShippingBox) return;
+                if (!_cfg.ShowItemPriceTooltips) return;
+                if (__instance == null) return;
+                if (AlreadyDone.Contains(item_gui)) return;
+                if (item_gui.id_empty) return;
+
+                if (item_gui.x1.tooltip.has_info)
+                {
+                    item_gui.x1.tooltip.AddData(new BubbleWidgetSeparatorData());
+                    item_gui.x1.tooltip.AddData(new BubbleWidgetTextData(
+                        $"{strings.GerrysPrice} {Trading.FormatMoney(GetItemEarnings(item_gui.item), true)}",
+                        UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                    AlreadyDone.Add(item_gui);
+                }
+
+                if (item_gui.x2.tooltip.has_info)
+                {
+                    item_gui.x2.tooltip.AddData(new BubbleWidgetSeparatorData());
+                    item_gui.x2.tooltip.AddData(new BubbleWidgetTextData(
+                        $"{strings.GerrysPrice} {Trading.FormatMoney(GetItemEarnings(item_gui.item), true)}",
+                        UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                    AlreadyDone.Add(item_gui);
+                }
+
+               
+            }
+
+            [HarmonyFinalizer]
+            private static Exception Finalizer()
+            {
+                return null;
+            }
+        }
+
+        //[HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs", "p1xel8ted.GraveyardKeeper.WheresMaStorage")]
+        //[HarmonyPatch(typeof(ChestGUI), nameof(ChestGUI.Update))]
+        //public static class ChestGuiUpdatePatch
+        //{
+        //    [HarmonyPostfix]
+        //    public static void Postfix(ref ChestGUI __instance)
+        //    {
+        //        if (!_cfg.ShowItemPriceOnMoneyLabel) return;
+        //        if (!_usingShippingBox) return;
+        //        if (__instance == null) return;
+        //        if (__instance.player_panel.selected_item != null)
+        //        {
+        //            __instance.player_panel.money_label.text = Trading.FormatMoney(GetItemEarnings(__instance.player_panel.selected_item), true);
+        //        }
+        //    }
+
+        //    [HarmonyFinalizer]
+        //    private static Exception Finalizer()
+        //    {
+        //        return null;
+        //    }
+        //}
 
         [HarmonyPatch(typeof(EnvironmentEngine), "OnEndOfDay")]
         public static class EnvironmentEngineOnEndOfDayPatch
@@ -669,7 +580,7 @@ namespace GerrysJunkTrunk
                         }
                     }
 
-                    var earnings = GetEarnings(_shippingBox);
+                    var earnings = GetBoxEarnings(_shippingBox);
                     if (earnings > 0)
                     {
                         Stats.PlayerAddMoney(earnings, strings.Header);
@@ -716,27 +627,11 @@ namespace GerrysJunkTrunk
             }
         }
 
-        private static void ShowSummary(string money)
-        {
-            var result = string.Empty;
-            foreach (var vendor in _vendorSales)
-            {
-                var sales = vendor.GetSales().OrderBy(a => a.GetItem().id).ToList();
-
-                foreach (var sale in sales)
-                {
-                    result += $"{sale.GetItem().GetItemName()} {strings.For} {Trading.FormatMoney(sale.GetPrice())}\n";
-                }
-            }
-
-            GUIElements.me.dialog.OpenOK($"[37ff00]{strings.Header}[-]", null, $"{result}", true, $"{money}");
-        }
-
         [HarmonyPatch(typeof(BaseCraftGUI), "CommonOpen")]
         public static class GameBalanceLoadGameBalancePatch
         {
             [HarmonyPostfix]
-            public static void BaseCraftGUICommonOpenPostfix(ref BaseCraftGUI __instance, ref CraftComponent ___craft_component,
+            public static void BaseCraftGuiCommonOpenPostfix(ref BaseCraftGUI __instance, ref CraftComponent ___craft_component,
                 ref CraftsInventory ___crafts_inventory, ref List<CraftDefinition> ___crafts)
             {
                 var newCd = new ObjectCraftDefinition();
@@ -816,6 +711,308 @@ namespace GerrysJunkTrunk
 
                 ___crafts.Add(newCd);
                 ___crafts_inventory?.AddCraft(newCd.id);
+            }
+        }
+
+        [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
+        public static class GameSettingsApplyLanguageChange
+        {
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+            }
+        }
+
+        [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
+        [HarmonyPatch(typeof(InventoryPanelGUI), "DoOpening")]
+        public static class InventoryWidgetDoOpeningPatch
+        {
+            [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
+            [HarmonyPostfix]
+            public static void Postfix(ref InventoryPanelGUI __instance, ref List<InventoryWidget> ____widgets)
+            {
+                var isChest = __instance.name.ToLowerInvariant().Contains("chest");
+                var isPlayer = __instance.name.ToLowerInvariant().Contains("player");
+                if (_usingShippingBox && isChest && !isPlayer)
+                {
+                    foreach (var inventoryWidget in ____widgets)
+                    {
+                        var vendorCount = KnownVendors.Count;
+                        var header = vendorCount switch
+                        {
+                            > 1 => $"{strings.Header} - {vendorCount} {strings.Vendors}",
+                            1 => $"{strings.Header} - {vendorCount} {strings.Vendor}",
+                            _ => $"{strings.Header}"
+                        };
+                        inventoryWidget.header_label.text = _cfg.ShowKnownVendorCount ? header : strings.Header;
+                        inventoryWidget.dont_show_empty_rows = true;
+                        inventoryWidget.SetInactiveStateToEmptyCells();
+                    }
+                }
+            }
+        }
+
+        [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
+        [HarmonyPatch(typeof(InventoryPanelGUI), nameof(InventoryPanelGUI.Redraw))]
+        public static class InventoryWidgetRedrawPatch
+        {
+            [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
+            [HarmonyPostfix]
+            public static void Postfix(ref InventoryPanelGUI __instance, ref List<InventoryWidget> ____widgets)
+            {
+                var isChest = __instance.name.ToLowerInvariant().Contains("chest");
+                var isPlayer = __instance.name.ToLowerInvariant().Contains("player");
+                if (_usingShippingBox && isChest && !isPlayer)
+                {
+                    foreach (var inventoryWidget in ____widgets)
+                    {
+                        var vendorCount = KnownVendors.Count;
+                        var header = vendorCount switch
+                        {
+                            > 1 => $"{strings.Header} - {vendorCount} {strings.Vendors}",
+                            1 => $"{strings.Header} - {vendorCount} {strings.Vendor}",
+                            _ => $"{strings.Header}"
+                        };
+                        inventoryWidget.header_label.text = _cfg.ShowKnownVendorCount ? header : strings.Header;
+                        inventoryWidget.SetInactiveStateToEmptyCells();
+                    }
+
+                    __instance.money_label.text = Trading.FormatMoney(GetBoxEarnings(_shippingBox), true);
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(MainGame), nameof(MainGame.Update))]
+        public static class MainGameUpdatePatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                if (!MainGame.game_started) return;
+
+                if (_internalCfg.ShowIntroMessage)
+                {
+                    ShowIntroMessage();
+                    _internalCfg.ShowIntroMessage = false;
+                    UpdateInternalConfig();
+                }
+
+                if (!UnlockedShippingBox()) return;
+                if (_internalCfg.ShippingBoxBuilt && _shippingBox == null)
+                {
+                    _shippingBox = Object.FindObjectsOfType<WorldGameObject>(true)
+                        .FirstOrDefault(x => string.Equals(x.custom_tag, ShippingBoxTag));
+                    if (_shippingBox == null)
+                    {
+                        Log("No Shipping Box Found!");
+                        _internalCfg.ShippingBoxBuilt = false;
+                    }
+                    else
+                    {
+                        Log($"Found Shipping Box at {_shippingBox.pos3}");
+                        _internalCfg.ShippingBoxBuilt = true;
+                        _shippingBox.data.drop_zone_id = ShippingBoxTag;
+                        var invSize = SmallInvSize;
+                        if (UnlockedShippingBoxExpansion())
+                        {
+                            invSize = LargeInvSize;
+                        }
+                        _shippingBox.data.SetInventorySize(invSize);
+                    }
+
+                    UpdateInternalConfig();
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(TechTreeGUIItem), "InitGamepadTooltip")]
+        public static class TechTreeGuiItemInitGamepadTooltip
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref TechTreeGUIItem __instance)
+            {
+                if (__instance == null) return;
+                {
+                    var component = __instance.GetComponent<Tooltip>();
+                    if (__instance.tech_id.ToLowerInvariant().Contains("Wood processing".ToLowerInvariant()))
+                    {
+                        component.AddData(new BubbleWidgetSeparatorData());
+                        component.AddData(new BubbleWidgetTextData(strings.Stage1Header, UITextStyles.TextStyle.HintTitle));
+                        component.AddData(new BubbleWidgetTextData(strings.Stage1Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                    }
+
+                    if (__instance.tech_id.ToLowerInvariant().Contains("Engineer".ToLowerInvariant()))
+                    {
+                        component.AddData(new BubbleWidgetSeparatorData());
+                        component.AddData(new BubbleWidgetTextData(strings.Stage2Header, UITextStyles.TextStyle.HintTitle));
+                        component.AddData(new BubbleWidgetTextData(strings.Stage2Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                    }
+
+                    if (__instance.tech_id.ToLowerInvariant().Contains("Best friend".ToLowerInvariant()))
+                    {
+                        component.AddData(new BubbleWidgetSeparatorData());
+                        component.AddData(new BubbleWidgetTextData(strings.Stage3Header, UITextStyles.TextStyle.HintTitle));
+                        component.AddData(new BubbleWidgetTextData(strings.Stage3Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(TechUnlock), nameof(TechUnlock.GetTooltip), typeof(Tooltip))]
+        public static class TechUnlockGetTooltipPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref TechUnlock __instance, ref Tooltip tooltip)
+            {
+                if (__instance != null)
+                {
+                    if (LazyInput.gamepad_active) return;
+                    var name = __instance.GetData().name;
+
+                    if (name.ToLowerInvariant().Contains("Wooden plank".ToLowerInvariant()))
+                    {
+                        tooltip.AddData(new BubbleWidgetBlankSeparatorData());
+                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage1Header, UITextStyles.TextStyle.HintTitle, NGUIText.Alignment.Left));
+                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage1Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                    }
+
+                    if (name.ToLowerInvariant().Contains("Engineer".ToLowerInvariant()))
+                    {
+                        tooltip.AddData(new BubbleWidgetBlankSeparatorData());
+                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage2Header, UITextStyles.TextStyle.HintTitle, NGUIText.Alignment.Left));
+                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage2Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                    }
+
+                    if (name.ToLowerInvariant().Contains("Jeweler".ToLowerInvariant()))
+                    {
+                        tooltip.AddData(new BubbleWidgetBlankSeparatorData());
+                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage3Header, UITextStyles.TextStyle.HintTitle, NGUIText.Alignment.Left));
+                        tooltip.AddData(new BubbleWidgetTextData(strings.Stage3Des, UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
+                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Vendor), nameof(Vendor.CanTradeItem))]
+        public static class VendorCanTradeItemPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref Vendor __instance, ref bool __result)
+            {
+                if (__instance == null || _myVendor == null || _myVendor.vendor == null) return;
+                if (__instance.Equals(_myVendor.vendor))
+                {
+                    __result = true;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.DestroyMe))]
+        public static class WorldGameObjectDestroyMePatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref WorldGameObject __instance)
+            {
+                if (string.Equals(__instance.custom_tag, ShippingBoxTag))
+                {
+                    Log($"Removed Shipping Box!");
+                    _shippingBox = null;
+                    _internalCfg.ShippingBoxBuilt = false;
+                    UpdateInternalConfig();
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
+        public static class WorldGameObjectInteractPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref WorldGameObject __instance, ref WorldGameObject other_obj)
+            {
+                if (string.Equals(__instance.custom_tag, ShippingBoxTag))
+                {
+                    Log($"Found Shipping Box! {__instance.data.drop_zone_id}, Other: {other_obj.obj_id}");
+                    _internalCfg.ShippingBoxBuilt = true;
+                    UpdateInternalConfig();
+                    _usingShippingBox = true;
+                    __instance.data.drop_zone_id = ShippingBoxTag;
+                    __instance.custom_tag = ShippingBoxTag;
+                    var invSize = SmallInvSize;
+                    if (UnlockedShippingBoxExpansion())
+                    {
+                        invSize = LargeInvSize;
+                    }
+                    __instance.data.SetInventorySize(invSize);
+                    __instance.data.money = GetBoxEarnings(__instance);
+                    _shippingBox = __instance;
+                }
+            }
+
+            [HarmonyFinalizer]
+            private static Exception Finalizer()
+            {
+                return null;
+            }
+        }
+
+        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.ReplaceWithObject))]
+        public static class WorldGameObjectReplaceWithObjectPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref WorldGameObject __instance, ref string new_obj_id)
+            {
+                if (_internalCfg.ShippingBoxBuilt && _shippingBox != null) return;
+                if (string.Equals(new_obj_id, "mf_box_stuff") && _shippingBuild)
+                {
+                    Log($"Built Shipping Box!");
+                    __instance.custom_tag = ShippingBoxTag;
+
+                    _shippingBuild = false;
+                    var invSize = SmallInvSize;
+                    if (UnlockedShippingBoxExpansion())
+                    {
+                        invSize = LargeInvSize;
+                    }
+                    __instance.data.SetInventorySize(invSize);
+                    __instance.data.drop_zone_id = ShippingBoxTag;
+                    _shippingBox = __instance;
+                    _internalCfg.ShippingBoxBuilt = true;
+                    UpdateInternalConfig();
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(WorldMap), nameof(WorldMap.RescanWGOsList))]
+        public static class WorldMapAddVendorPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref List<WorldGameObject> ____npcs)
+            {
+                foreach (var npc in ____npcs.Where(npc => npc.vendor != null))
+                {
+                    var known =
+                        MainGame.me.save.known_npcs.npcs.Exists(a => string.Equals(a.npc_id, npc.vendor.id));
+                    if (known)
+                    {
+                        KnownVendors.Add(npc);
+                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(WorldZone), nameof(WorldZone.GetZoneWGOs))]
+        public static class WorldZoneGetZoneWgOsPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref List<WorldGameObject> __result)
+            {
+                foreach (var wgo in __result.Where(a => string.Equals(a.custom_tag, ShippingBoxTag) || string.Equals(a.data.drop_zone_id, ShippingBoxTag)))
+                {
+                    __result.Remove(wgo);
+                    Log($"[WorldZone.GetZoneWGOs] Removed Shipping Box From WorldMap Objects");
+                }
             }
         }
     }

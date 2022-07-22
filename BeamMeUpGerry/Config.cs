@@ -14,6 +14,7 @@ namespace BeamMeUpGerry
             public bool HalfCooldown;
             public bool DisableGerryVoice;
             public bool DisableAlerts;
+            public bool FadeForCustomLocations;
         }
 
         public static Options GetOptions()
@@ -32,6 +33,9 @@ namespace BeamMeUpGerry
 
             bool.TryParse(_con.Value("DisableAlerts", "false"), out var disableAlerts);
             _options.DisableAlerts = disableAlerts;
+
+            bool.TryParse(_con.Value("FadeForCustomLocations", "true"), out var fadeForCustomLocations);
+            _options.FadeForCustomLocations = fadeForCustomLocations;
 
             _con.ConfigWrite();
 

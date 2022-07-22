@@ -24,6 +24,12 @@ public static class Config
         bool.TryParse(_con.Value("ShowSummary", "true"), out var showSummary);
         _options.ShowSummary = showSummary;
 
+        bool.TryParse(_con.Value("ShowItemPriceTooltips", "true"), out var showItemPriceTooltips);
+        _options.ShowItemPriceTooltips = showItemPriceTooltips;
+
+        bool.TryParse(_con.Value("ShowKnownVendorCount", "true"), out var showKnownVendorCount);
+        _options.ShowKnownVendorCount = showKnownVendorCount;
+
         _con.ConfigWrite();
 
         return _options;
@@ -36,5 +42,7 @@ public static class Config
         public bool DisableSoldMessageWhenNoSale;
         public bool EnableGerry;
         public bool ShowSummary;
+        public bool ShowItemPriceTooltips;
+        public bool ShowKnownVendorCount;
     }
 }

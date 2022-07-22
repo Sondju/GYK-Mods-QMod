@@ -123,6 +123,9 @@
 	<data name="For" xml:space="preserve">
     <value>for</value>
   </data>
+	<data name="GerrysPrice" xml:space="preserve">
+    <value>Gerry's price:</value>
+  </data>
 	<data name="Header" xml:space="preserve">
     <value>Gerry's Junk Trunk</value>
   </data>

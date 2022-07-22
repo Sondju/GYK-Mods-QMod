@@ -175,12 +175,15 @@
     <value>Gerry’s Trödelkisteneinnahmen</value>
   </data>
 	<data name="For" xml:space="preserve">
-		<value>zum</value>
-	</data>
+    <value>zum</value>
+  </data>
 	<data name="Bye" xml:space="preserve">
-		<value>Wiedersehen.</value>
-	</data>
+    <value>Wiedersehen.</value>
+  </data>
 	<data name="Nothing" xml:space="preserve">
-		<value>Was?! Nichts!</value>
+    <value>Was?! Nichts!</value>
+  </data>
+	<data name="GerrysPrice" xml:space="preserve">
+		<value>Gerrys Preis:</value>
 	</data>
 </root>

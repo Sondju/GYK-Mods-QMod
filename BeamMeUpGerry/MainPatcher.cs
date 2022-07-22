@@ -1,13 +1,15 @@
 using BeamMeUpGerry.lang;
 using HarmonyLib;
+using Helper;
 using Rewired;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
+using NodeCanvas.Tasks.Actions;
 using UnityEngine;
-using Helper;
-using System.Collections.Generic;
 
 namespace BeamMeUpGerry
 {
@@ -16,6 +18,25 @@ namespace BeamMeUpGerry
         private static Config.Options _cfg;
         private static bool _showCooldownReadyAlert;
         private static string Lang { get; set; }
+        private static bool _menuShown;
+        private static bool _usingStone;
+
+        private static readonly Dictionary<string, Vector3> LocationByVector = new()
+        {
+            { "zone_witch_hut", new Vector3(-4964.0f, -1772.0f, -370.2f) },
+            { "zone_cellar", new Vector3(10841.9f, -9241.7f, -1923.1f) },
+            { "zone_alchemy", new Vector3(8249.0f, -10180.7f, -2119.3f) },
+            { "zone_morgue", new Vector3(9744.0f, -11327.5f, -2357.9f) },
+            { "zone_beegarden", new Vector3(3234.0f, 1815.0f, 378.81f) },
+            { "zone_hill", new Vector3(8292.7f, 1396.6f, 292.71f) },
+            { "zone_sacrifice", new Vector3(9529.1f, -8427.1f, -1753.71f) },
+            { "zone_souls", new Vector3(11050.1f, -10807.1f, -2249.21f) },
+            { "zone_graveyard", new Vector3(1635.7f, -1506.9f, -313.61f) },
+            { "zone_euric_room", new Vector3(20108.0f, -11599.6f, -2412.41f) },
+            { "zone_church", new Vector3(190.6f, -8715.7f, -1815.7f) },
+            { "zone_zombie_sawmill", new Vector3(2204.3f, 3409.7f, 710.8f) },
+            { "cancel", Vector3.zero }
+        };
 
         public static void Patch()
         {
@@ -26,7 +47,6 @@ namespace BeamMeUpGerry
 
                 _cfg = Config.GetOptions();
                 _showCooldownReadyAlert = false;
-                
             }
             catch (Exception ex)
             {
@@ -51,68 +71,71 @@ namespace BeamMeUpGerry
             public static void Prefix(ref MultiAnswerGUI __instance, ref List<AnswerVisualData> answers)
             {
                 if (__instance == null) return;
-                var test = new AnswerVisualData
+                if (_menuShown || !_usingStone) return;
+                answers.Insert(answers.Count - 1, new AnswerVisualData()
                 {
-                    id = GJL.L("zone_" + wzId.id)
-                };
-               
-                    answers.Insert(answers.Count-1, test);
-                foreach (var answer in answers)
-                {
-                    Log($"[MultiAnswerGUI.ShowAnswers]: {answer.id}");
-                }
+                    id = "..."
+                });
             }
         }
-
-        //[HarmonyPatch(typeof(WorldZone), nameof(WorldZone.OnPlayerEnter))]
-        //public static class MultiAnswerGuiShowAnswersPatch
-        //{
-        //    [HarmonyPostfix]
-        //    public static void Postfix(ref WorldZone __instance, ref List<WorldZone> ____all_zones)
-        //    {
-        //        foreach (var zone in ____all_zones)
-        //        {
-        //            Log($"[WorldZone.OnPlayerEnter]: {zone.id}");
-        //        }
-        //    }
-        //}
-
-        //private static bool _alreadyRun = false;
-
-        //[HarmonyPatch(typeof(WorldMap), nameof(WorldMap.GetGroundType))]
-        //public static class WorldMapPatch
-        //{
-        //    [HarmonyPostfix]
-        //    public static void Postfix(List<GDPoint> ____gd_points)
-        //    {
-        //        if (_alreadyRun) return;
-        //        foreach (var gd in ____gd_points)
-        //        {
-        //            Log($"[WorldMap.GetGroundType]: {gd.gd_tag}");
-        //        }
-
-        //        _alreadyRun = true;
-        //    }
-        //}
 
         [HarmonyPatch(typeof(MultiAnswerGUI), nameof(MultiAnswerGUI.OnChosen))]
         public static class MultiAnswerGuiOnChosenPatch
         {
-            [HarmonyPrefix]
-            public static bool Prefix(string answer)
-            {
-                if (answer.Contains("witch"))
-                {
-                    MainGame.me.player.TeleportToGDPoint("gd_witch_27", false);
-                    return false;
-                }
+            private static MultiAnswerGUI instance;
 
-                return true;
+            [HarmonyPrefix]
+            public static void Prefix(ref MultiAnswerGUI __instance, ref string answer)
+            {
+                instance = __instance;
+                if (answer != "...") return;
+                var answers = LocationByVector.Select(location => new AnswerVisualData() { id = location.Key }).ToList();
+                answer = "cancel";
+                _menuShown = true;
+                MainGame.me.player.ShowMultianswer(answers, BeamGerryOnChosen);
+            }
+
+            private static void BeamGerryOnChosen(string chosen)
+            {
+                if (string.Equals("cancel", chosen))
+                {
+                    _showCooldownReadyAlert = false;
+                    _menuShown = false;
+                    _usingStone = false;
+                    MainGame.me.player.components.character.control_enabled = true;
+                    return;
+                }
+                
+                var vectorFound = LocationByVector.TryGetValue(chosen, out var vector);
+                if (vectorFound)
+                {
+                    if (_cfg.FadeForCustomLocations)
+                    {
+                        CameraFader.current.FadeOut(0.15f);
+                        GJTimer.AddTimer(0.15f, delegate
+                        {
+                            MainGame.me.player.PlaceAtPos(vector);
+                            MainGame.me.player.components.character.control_enabled = true;
+                            GJTimer.AddTimer(1.5f, delegate { CameraFader.current.FadeIn(0.15f); });
+                        });
+                    }
+                    else
+                    {
+                        MainGame.me.player.PlaceAtPos(vector);
+                        MainGame.me.player.components.character.control_enabled = true;
+                    }
+                }
+                else
+                {
+                    MainGame.me.player.Say("I don't know where that is!");
+                }
+                _menuShown = false;
             }
 
             [HarmonyPostfix]
             public static void Postfix(string answer)
             {
+                MainGame.me.player.components.character.control_enabled = !_menuShown;
                 // _showCooldownReadyAlert = !
                 if (string.Equals("cancel", answer))
                 {
@@ -122,6 +145,7 @@ namespace BeamMeUpGerry
                 {
                     _showCooldownReadyAlert = true;
                 }
+                _usingStone = false;
             }
         }
 
@@ -147,6 +171,7 @@ namespace BeamMeUpGerry
                 }
                 else
                 {
+                    _usingStone = true;
                     MainGame.me.player.UseItemFromInventory(item);
                 }
             }
@@ -184,6 +209,7 @@ namespace BeamMeUpGerry
 
                 if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(7))
                 {
+                    Log($"[ZONE]: {GJL.L("zone_" + MainGame.me.player.GetMyWorldZoneId())}, ID: {"zone_" + MainGame.me.player.GetMyWorldZoneId()}, Vector: {MainGame.me.player_pos}");
                     Beam();
                 }
 
