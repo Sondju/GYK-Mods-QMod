@@ -190,7 +190,7 @@ namespace WheresMaStorage
                 if (!_cfg.SharedCraftInventory) return codes.AsEnumerable();
                 var usedMultiField = AccessTools.Field(typeof(CraftComponent), "used_multi_inventory");
                 var otherObj = AccessTools.Field(typeof(CraftComponent), "other_obj");
-                var miGetter = typeof(WheresMaStorage.MainPatcher).GetMethod("GetMi");
+                var miGetter = typeof(MainPatcher).GetMethod("GetMi");
                 var insertIndex = -1;
                 for (var i = 0; i < codes.Count; i++)
                 {

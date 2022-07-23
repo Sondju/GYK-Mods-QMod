@@ -126,4 +126,10 @@
 	<data name="WhereIsIt" xml:space="preserve">
 		<value>その石をどこに置いたのか...</value>
 	</data>
+	<data name="Clay" xml:space="preserve">
+		<value>クレイピット</value>
+	</data>
+	<data name="Sand" xml:space="preserve">
+		<value>砂塚</value>
+	</data>
 </root>

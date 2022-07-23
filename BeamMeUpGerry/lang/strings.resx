@@ -117,11 +117,17 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
+	<data name="Clay" xml:space="preserve">
+    <value>Clay pit</value>
+  </data>
 	<data name="NotReady" xml:space="preserve">
     <value>Can't use that yet!</value>
   </data>
 	<data name="Ready" xml:space="preserve">
     <value>Teleportstone Ready!</value>
+  </data>
+	<data name="Sand" xml:space="preserve">
+    <value>Sand mound</value>
   </data>
 	<data name="WhereIsIt" xml:space="preserve">
     <value>Where did I leave that stone...</value>

@@ -126,4 +126,10 @@
 	<data name="WhereIsIt" xml:space="preserve">
 		<value>Onde deixei aquela pedra...</value>
 	</data>
+	<data name="Clay" xml:space="preserve">
+		<value>Poço de barro</value>
+	</data>
+	<data name="Sand" xml:space="preserve">
+		<value>monte de areia</value>
+	</data>
 </root>

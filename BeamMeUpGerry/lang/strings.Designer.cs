@@ -61,6 +61,15 @@ namespace BeamMeUpGerry.lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Clay pit.
+        /// </summary>
+        public static string Clay {
+            get {
+                return ResourceManager.GetString("Clay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Can&apos;t use that yet!.
         /// </summary>
         public static string NotReady {
@@ -75,6 +84,15 @@ namespace BeamMeUpGerry.lang {
         public static string Ready {
             get {
                 return ResourceManager.GetString("Ready", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sand mound.
+        /// </summary>
+        public static string Sand {
+            get {
+                return ResourceManager.GetString("Sand", resourceCulture);
             }
         }
         

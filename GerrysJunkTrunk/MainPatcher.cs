@@ -388,6 +388,12 @@ namespace GerrysJunkTrunk
             }
         }
 
+        private static int GetTrunkTier()
+        {
+            if (UnlockedFullPrice()) return 3;
+            return UnlockedShippingBoxExpansion() ? 2 : 1;
+        }
+
         //should never need these, but will stop a 2nd being built
         [HarmonyPatch(typeof(BuildModeLogics), nameof(BuildModeLogics.CanBuild))]
         public static class BuildItemGuiSelectPatch
@@ -740,13 +746,14 @@ namespace GerrysJunkTrunk
                     foreach (var inventoryWidget in ____widgets)
                     {
                         var vendorCount = KnownVendors.Count;
+                        var tier = GetTrunkTier();
                         var header = vendorCount switch
                         {
-                            > 1 => $"{strings.Header} - {vendorCount} {strings.Vendors}",
-                            1 => $"{strings.Header} - {vendorCount} {strings.Vendor}",
-                            _ => $"{strings.Header}"
+                            > 1 => $"{strings.Header}(T{tier}) - {vendorCount} {strings.Vendors}",
+                            1 => $"{strings.Header}(T{tier}) - {vendorCount} {strings.Vendor}",
+                            _ => $"{strings.Header}(T{tier})"
                         };
-                        inventoryWidget.header_label.text = _cfg.ShowKnownVendorCount ? header : strings.Header;
+                        inventoryWidget.header_label.text = _cfg.ShowKnownVendorCount ? header : $"{strings.Header}(T{tier})";
                         inventoryWidget.dont_show_empty_rows = true;
                         inventoryWidget.SetInactiveStateToEmptyCells();
                     }
@@ -769,13 +776,15 @@ namespace GerrysJunkTrunk
                     foreach (var inventoryWidget in ____widgets)
                     {
                         var vendorCount = KnownVendors.Count;
+                        var tier = GetTrunkTier();
                         var header = vendorCount switch
                         {
-                            > 1 => $"{strings.Header} - {vendorCount} {strings.Vendors}",
-                            1 => $"{strings.Header} - {vendorCount} {strings.Vendor}",
-                            _ => $"{strings.Header}"
+                            > 1 => $"{strings.Header}(T{tier}) - {vendorCount} {strings.Vendors}",
+                            1 => $"{strings.Header}(T{tier}) - {vendorCount} {strings.Vendor}",
+                            _ => $"{strings.Header}(T{tier})"
                         };
-                        inventoryWidget.header_label.text = _cfg.ShowKnownVendorCount ? header : strings.Header;
+                        inventoryWidget.header_label.text = _cfg.ShowKnownVendorCount ? header : $"{strings.Header}(T{tier})";
+                        inventoryWidget.dont_show_empty_rows = true;
                         inventoryWidget.SetInactiveStateToEmptyCells();
                     }
 

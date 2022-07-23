@@ -126,4 +126,10 @@
 	<data name="WhereIsIt" xml:space="preserve">
 		<value>저 돌 어디다 뒀더라...</value>
 	</data>
+	<data name="Clay" xml:space="preserve">
+		<value>점토 구덩이</value>
+	</data>
+	<data name="Sand" xml:space="preserve">
+		<value>모래 언덕</value>
+	</data>
 </root>

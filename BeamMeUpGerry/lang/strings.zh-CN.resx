@@ -126,4 +126,10 @@
 	<data name="WhereIsIt" xml:space="preserve">
 		<value>我把那块石头丢在哪里了……</value>
 	</data>
+	<data name="Clay" xml:space="preserve">
+		<value>粘土坑</value>
+	</data>
+	<data name="Sand" xml:space="preserve">
+		<value>沙丘</value>
+	</data>
 </root>
