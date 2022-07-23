@@ -10,9 +10,17 @@ using Debug = UnityEngine.Debug;
 
 namespace Helper
 {
+    
+
     public static class Tools
     {
         internal static readonly List<string> LoadedMods = new();
+        internal static bool IsNpcInteraction;
+
+        public static bool IsNpc()
+        {
+            return IsNpcInteraction;
+        }
 
         public static bool IsModLoaded(string mod)
         {
@@ -55,6 +63,27 @@ namespace Helper
                 Tools.Log("QModHelper", $"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
             }
         }
+
+        [HarmonyPatch(typeof(SmartAudioEngine))]
+        private static class SmartAudioEnginePatch
+        {
+            [HarmonyPatch(nameof(SmartAudioEngine.OnStartNPCInteraction))]
+            [HarmonyPrefix]
+            public static void OnStartNPCInteractionPrefix()
+            {
+                Tools.IsNpcInteraction = true;
+            }
+
+            [HarmonyPatch(nameof(SmartAudioEngine.OnEndNPCInteraction))]
+            [HarmonyPrefix]
+            public static void OnEndNPCInteractionPrefix()
+            {
+                Tools.IsNpcInteraction = false;
+            }
+        }
+
+
+
 
         [HarmonyPatch(typeof(MainMenuGUI), nameof(MainMenuGUI.Open))]
         public static class MainMenuGuiOpenPatch

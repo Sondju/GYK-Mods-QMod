@@ -160,6 +160,15 @@ namespace SaveNow.lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Progress and current location will not be saved.
+        /// </summary>
+        public static string SaveProgressNotSaved {
+            get {
+                return ResourceManager.GetString("SaveProgressNotSaved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Progress and current location will be saved.
         /// </summary>
         public static string SaveProgressSaved {

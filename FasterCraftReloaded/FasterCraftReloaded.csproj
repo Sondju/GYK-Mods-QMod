@@ -2,10 +2,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2084C92A-5D15-44CE-AC53-4C1AC6859E37}</ProjectGuid>
+    <ProjectGuid>{23E99E91-DC6C-4FAC-920B-F5DB145B81E6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
-    <AssemblyName>NewGameAtBottom</AssemblyName>
+    <AssemblyName>FasterCraftReloaded</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -29,18 +29,15 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <RootNamespace>NewGameAtBottom</RootNamespace>
+    <RootNamespace>FasterCraftReloaded</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Config.cs" />
+    <Compile Include="ConfigReader.cs" />
     <Compile Include="MainPatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
-      <Version>[3.3.3]</Version>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="UnityEngine.Modules" Version="2020.3.17" IncludeAssets="compile" />
   </ItemGroup>
   <ItemGroup>

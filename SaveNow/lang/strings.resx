@@ -151,6 +151,9 @@
     <value>Progress and current location will be saved</value>
   </data>
 	<data name="ExitButtonText" xml:space="preserve">
-		<value>Exit to desktop</value>
-	</data>
+    <value>Exit to desktop</value>
+  </data>
+	<data name="SaveProgressNotSaved" xml:space="preserve">
+    <value>Progress and current location will not be saved</value>
+  </data>
 </root>

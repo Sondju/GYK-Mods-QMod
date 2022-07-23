@@ -62,10 +62,6 @@
       <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Helper">
-      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\Helper.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
@@ -85,6 +81,13 @@
     </EmbeddedResource>
     <EmbeddedResource Include="lang\strings.ru.resx" />
     <EmbeddedResource Include="lang\strings.zh-CN.resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Helper\QModHelper.csproj">
+      <Project>{17e3eeaa-86d5-4737-bc62-bb6dd43f0fee}</Project>
+      <Name>QModHelper</Name>
+      <Private>False</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>

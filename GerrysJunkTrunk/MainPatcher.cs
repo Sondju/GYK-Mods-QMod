@@ -546,30 +546,7 @@ namespace GerrysJunkTrunk
                 return null;
             }
         }
-
-        //[HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs", "p1xel8ted.GraveyardKeeper.WheresMaStorage")]
-        //[HarmonyPatch(typeof(ChestGUI), nameof(ChestGUI.Update))]
-        //public static class ChestGuiUpdatePatch
-        //{
-        //    [HarmonyPostfix]
-        //    public static void Postfix(ref ChestGUI __instance)
-        //    {
-        //        if (!_cfg.ShowItemPriceOnMoneyLabel) return;
-        //        if (!_usingShippingBox) return;
-        //        if (__instance == null) return;
-        //        if (__instance.player_panel.selected_item != null)
-        //        {
-        //            __instance.player_panel.money_label.text = Trading.FormatMoney(GetItemEarnings(__instance.player_panel.selected_item), true);
-        //        }
-        //    }
-
-        //    [HarmonyFinalizer]
-        //    private static Exception Finalizer()
-        //    {
-        //        return null;
-        //    }
-        //}
-
+        
         [HarmonyPatch(typeof(EnvironmentEngine), "OnEndOfDay")]
         public static class EnvironmentEngineOnEndOfDayPatch
         {
@@ -749,11 +726,11 @@ namespace GerrysJunkTrunk
                         var tier = GetTrunkTier();
                         var header = vendorCount switch
                         {
-                            > 1 => $"{strings.Header}(T{tier}) - {vendorCount} {strings.Vendors}",
-                            1 => $"{strings.Header}(T{tier}) - {vendorCount} {strings.Vendor}",
-                            _ => $"{strings.Header}(T{tier})"
+                            > 1 => $"{strings.Header} (T{tier}) - {vendorCount} {strings.Vendors}",
+                            1 => $"{strings.Header} (T{tier}) - {vendorCount} {strings.Vendor}",
+                            _ => $"{strings.Header} (T{tier})"
                         };
-                        inventoryWidget.header_label.text = _cfg.ShowKnownVendorCount ? header : $"{strings.Header}(T{tier})";
+                        inventoryWidget.header_label.text = _cfg.ShowKnownVendorCount ? header : $"{strings.Header} (T{tier})";
                         inventoryWidget.dont_show_empty_rows = true;
                         inventoryWidget.SetInactiveStateToEmptyCells();
                     }
@@ -779,11 +756,11 @@ namespace GerrysJunkTrunk
                         var tier = GetTrunkTier();
                         var header = vendorCount switch
                         {
-                            > 1 => $"{strings.Header}(T{tier}) - {vendorCount} {strings.Vendors}",
-                            1 => $"{strings.Header}(T{tier}) - {vendorCount} {strings.Vendor}",
-                            _ => $"{strings.Header}(T{tier})"
+                            > 1 => $"{strings.Header} (T{tier}) - {vendorCount} {strings.Vendors}",
+                            1 => $"{strings.Header} (T{tier}) - {vendorCount} {strings.Vendor}",
+                            _ => $"{strings.Header} (T{tier})"
                         };
-                        inventoryWidget.header_label.text = _cfg.ShowKnownVendorCount ? header : $"{strings.Header}(T{tier})";
+                        inventoryWidget.header_label.text = _cfg.ShowKnownVendorCount ? header : $"{strings.Header} (T{tier})";
                         inventoryWidget.dont_show_empty_rows = true;
                         inventoryWidget.SetInactiveStateToEmptyCells();
                     }

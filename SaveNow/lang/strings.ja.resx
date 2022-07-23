@@ -133,4 +133,7 @@
 	<data name="ExitButtonText" xml:space="preserve">
 		<value>デスクトップに戻る</value>
 	</data>
+	<data name="SaveProgressNotSaved" xml:space="preserve">
+		<value>進行状況と現在地は保存されません</value>
+	</data>
 </root>

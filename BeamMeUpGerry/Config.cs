@@ -10,29 +10,17 @@ namespace BeamMeUpGerry
         [Serializable]
         public class Options
         {
-            public bool DisableCooldown;
-            public bool HalfCooldown;
-            public bool DisableGerryVoice;
-            public bool DisableAlerts;
             public bool FadeForCustomLocations;
+            public bool IncreaseMenuAnimationSpeed;
         }
 
         public static Options GetOptions()
         {
             _options = new Options();
             _con = new ConfigReader();
-
-            bool.TryParse(_con.Value("DisableCooldown", "false"), out var disableCooldown);
-            _options.DisableCooldown = disableCooldown;
-
-            bool.TryParse(_con.Value("HalfCooldown", "true"), out var halfCooldown);
-            _options.HalfCooldown = halfCooldown;
-
-            bool.TryParse(_con.Value("DisableGerryVoice", "false"), out var disableGerryVoice);
-            _options.DisableGerryVoice = disableGerryVoice;
-
-            bool.TryParse(_con.Value("DisableAlerts", "false"), out var disableAlerts);
-            _options.DisableAlerts = disableAlerts;
+            
+            bool.TryParse(_con.Value("IncreaseMenuAnimationSpeed", "true"), out var increaseMenuAnimationSpeed);
+            _options.IncreaseMenuAnimationSpeed = increaseMenuAnimationSpeed;
 
             bool.TryParse(_con.Value("FadeForCustomLocations", "true"), out var fadeForCustomLocations);
             _options.FadeForCustomLocations = fadeForCustomLocations;

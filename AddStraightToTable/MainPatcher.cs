@@ -36,7 +36,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static bool Prefix()
         {
-            _wms = Tools.IsModLoaded(WheresMaStorage);
+            _wms = Tools.IsModLoaded(WheresMaStorage) || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.WheresMaStorage");
             if (_wms)
             {
                 _cfg = Config.GetOptions();

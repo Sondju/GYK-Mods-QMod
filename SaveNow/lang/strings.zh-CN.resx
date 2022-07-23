@@ -133,4 +133,7 @@
 	<data name="ExitButtonText" xml:space="preserve">
 		<value>退出到桌面</value>
 	</data>
+	<data name="SaveProgressNotSaved" xml:space="preserve">
+		<value>不会保存进度和当前位置</value>
+	</data>
 </root>

@@ -133,4 +133,7 @@
 	<data name="ExitButtonText" xml:space="preserve">
 		<value>Wyjdź na pulpit</value>
 	</data>
+	<data name="SaveProgressNotSaved" xml:space="preserve">
+		<value>Postęp i aktualna lokalizacja nie zostaną zapisane</value>
+	</data>
 </root>

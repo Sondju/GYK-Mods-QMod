@@ -58,17 +58,19 @@
       <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Helper">
-      <HintPath>..\..\..\..\..\Games\steamapps\common\Graveyard Keeper\Graveyard Keeper_Data\Managed\Helper.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Rewired_Core">
       <HintPath>..\libs\Rewired_Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Helper\QModHelper.csproj">
+      <Project>{17e3eeaa-86d5-4737-bc62-bb6dd43f0fee}</Project>
+      <Name>QModHelper</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="lang\strings.de.resx">
       <SubType>Designer</SubType>

@@ -1,4 +1,5 @@
 using HarmonyLib;
+using Helper;
 using SaveNow.lang;
 using System;
 using System.Collections.Generic;
@@ -8,9 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using Helper;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 
 namespace SaveNow;
 
@@ -78,7 +77,7 @@ public class MainPatcher : MonoBehaviour
                 float.Parse(tempVector[1].Trim(), CultureInfo.InvariantCulture), float.Parse(tempVector[2].Trim(), CultureInfo.InvariantCulture));
 
             var found = SaveLocationsDictionary.TryGetValue(saveName, out _);
-          
+
             if (!File.Exists(Path.Combine(PlatformSpecific.GetSaveFolder(), saveName + ".dat"))) continue;
             if (!found) SaveLocationsDictionary.Add(saveName, vectorToAdd);
         }
@@ -88,7 +87,7 @@ public class MainPatcher : MonoBehaviour
         EffectBubblesManager.BubbleColor color = EffectBubblesManager.BubbleColor.Relation, float time = 3f)
     {
         Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-       
+
         if (GJL.IsEastern())
         {
             MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
@@ -176,7 +175,6 @@ public class MainPatcher : MonoBehaviour
             GJTimer.AddTimer(_cfg.SaveInterval, AutoSave);
         }
     }
-
 
     private static void AutoSave()
     {
@@ -267,7 +265,7 @@ public class MainPatcher : MonoBehaviour
                     }
                     catch (Exception e)
                     {
-                        Log($"Error backing up save games. {e.Message}",true);
+                        Log($"Error backing up save games. {e.Message}", true);
                     }
                 }
                 else
@@ -323,30 +321,50 @@ public class MainPatcher : MonoBehaviour
 
             __instance.SetControllsActive(false);
             __instance.OnClosePressed();
+
             var messageText = strings.SaveAreYouSureMenu + "?\n\n" +
-                              strings.SaveProgressSaved + ".";
+                              (_cfg.DisableSaveOnExit ? strings.SaveProgressNotSaved : strings.SaveProgressSaved) + ".";
+
             if (_cfg.ExitToDesktop)
+            {
                 messageText = strings.SaveAreYouSureDesktop + "?\n\n" +
-                              strings.SaveProgressSaved + ".";
+                              (_cfg.DisableSaveOnExit ? strings.SaveProgressNotSaved : strings.SaveProgressSaved) + ".";
+            }
 
             GUIElements.me.dialog.OpenYesNo(messageText
                 ,
                 delegate
                 {
-                    if (SaveLocation(true, string.Empty))
-                        PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save, delegate
+                    if (_cfg.DisableSaveOnExit)
+                    {
+                        if (_cfg.ExitToDesktop)
                         {
-                            if (_cfg.ExitToDesktop)
+                            GC.Collect();
+                            Resources.UnloadUnusedAssets();
+                            Application.Quit();
+                        }
+                        else
+                        {
+                            LoadingGUI.Show(__instance.ReturnToMainMenu);
+                        }
+                    }
+                    else
+                    {
+                        if (SaveLocation(true, string.Empty))
+                            PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save, delegate
                             {
-                                GC.Collect();
-                                Resources.UnloadUnusedAssets();
-                                Application.Quit();
-                            }
-                            else
-                            {
-                                LoadingGUI.Show(__instance.ReturnToMainMenu);
-                            }
-                        });
+                                if (_cfg.ExitToDesktop)
+                                {
+                                    GC.Collect();
+                                    Resources.UnloadUnusedAssets();
+                                    Application.Quit();
+                                }
+                                else
+                                {
+                                    LoadingGUI.Show(__instance.ReturnToMainMenu);
+                                }
+                            });
+                    }
                 }, null, delegate { __instance.SetControllsActive(true); });
         }
     }
@@ -399,7 +417,6 @@ public class MainPatcher : MonoBehaviour
             _canSave = !__instance.player_controlled_by_script;
         }
     }
-
 
     //hooks into the time of day update and saves if the K key was pressed
     [HarmonyPatch(typeof(TimeOfDay))]

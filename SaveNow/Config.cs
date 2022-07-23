@@ -41,6 +41,9 @@ public static class Config
         bool.TryParse(_con.Value("ExitToDesktop", "false"), out var exitToDesktop);
         _options.ExitToDesktop = exitToDesktop;
 
+        bool.TryParse(_con.Value("DisableSaveOnExit", "false"), out var disableSaveOnExit);
+        _options.DisableSaveOnExit = disableSaveOnExit;
+
         _con.ConfigWrite();
 
         return _options;
@@ -58,5 +61,6 @@ public static class Config
         public bool TurnOffTravelMessages;
         public bool TurnOffSaveGameNotificationText;
         public bool ExitToDesktop;
+        public bool DisableSaveOnExit;
     }
 }

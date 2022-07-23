@@ -15,11 +15,8 @@ namespace BeamMeUpGerry
 {
     public class MainPatcher
     {
-        private static Config.Options _cfg;
-        private static bool _showCooldownReadyAlert;
-        private static string Lang { get; set; }
-        private static bool _dotSelection;
-        private static bool _usingStone;
+        private const float Fee = 5f;
+       // private const float Fee = 100000f;
 
         private static readonly Dictionary<string, Vector3> LocationByVectorPartOne = new()
         {
@@ -30,6 +27,9 @@ namespace BeamMeUpGerry
             { "zone_beegarden", new Vector3(3234.0f, 1815.0f, 378.81f) },
             { "zone_hill", new Vector3(8292.7f, 1396.6f, 292.71f) },
             { "zone_sacrifice", new Vector3(9529.1f, -8427.1f, -1753.71f) },
+            { "zone_beatch", new Vector3(22507.9f, 314.9f, 70.3f) },
+            { "zone_vineyard", new Vector3(6712.3f, 42.1f, 10.2f) },
+            { "zone_camp", new Vector3(20690.7f, 2818.7f, 591.5f) },
             { "....", Vector3.zero },
             { "cancel", Vector3.zero }
         };
@@ -46,6 +46,13 @@ namespace BeamMeUpGerry
             { "cancel", Vector3.zero }
         };
 
+        private static Config.Options _cfg;
+        private static bool _dotSelection;
+        private static bool _isNpc;
+        private static MultiAnswerGUI _maGui;
+        private static bool _usingStone;
+        private static string Lang { get; set; }
+
         public static void Patch()
         {
             try
@@ -54,7 +61,6 @@ namespace BeamMeUpGerry
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
 
                 _cfg = Config.GetOptions();
-                _showCooldownReadyAlert = false;
             }
             catch (Exception ex)
             {
@@ -62,9 +68,21 @@ namespace BeamMeUpGerry
             }
         }
 
-        private static void Log(string message, bool error = false)
+        private static void Beam()
         {
-            Tools.Log("BeamMeUpGerry", $"{message}", error);
+            if (_usingStone || _dotSelection || _isNpc) return;
+
+            var item = GetHearthstone();
+            if (item != null)
+            {
+                _usingStone = true;
+                _isNpc = false;
+                MainGame.me.player.UseItemFromInventory(item);
+            }
+            else
+            {
+                SpawnGerry(strings.WhereIsIt);
+            }
         }
 
         private static Item GetHearthstone()
@@ -72,11 +90,16 @@ namespace BeamMeUpGerry
             return MainGame.me.player.data.GetItemWithID("hearthstone");
         }
 
+        private static void Log(string message, bool error = false)
+        {
+            Tools.Log("BeamMeUpGerry", $"{message}", error);
+        }
+
         private static bool RemoveZone(AnswerVisualData answer)
         {
             if (answer.id.Contains("Clay") || answer.id.Contains("Sand") || answer.id.Contains("...") || answer.id.Contains("....") || answer.id.Contains("cancel")) return false;
             var zone = answer.id.Replace("zone_", "");
-            if(MainGame.me.save.known_world_zones.Exists(a => string.Equals(a, zone)))
+            if (MainGame.me.save.known_world_zones.Exists(a => string.Equals(a, zone)))
             {
                 Log($"[RemoveZone]: Player knows {zone}. NOT removing.");
                 return false;
@@ -84,38 +107,103 @@ namespace BeamMeUpGerry
             Log($"[RemoveZone]: Player does not know {zone}. Removing.");
             return true;
         }
-        
+
+        private static void SpawnGerry(string message)
+        {
+            var location = MainGame.me.player_pos;
+            location.x += 125f;
+            location.y += 125f;
+
+            var gerry = WorldMap.SpawnWGO(MainGame.me.world_root.transform, "talking_skull", location);
+            gerry.ReplaceWithObject("talking_skull", true);
+
+            GJTimer.AddTimer(0.5f, delegate
+            {
+                gerry.Say(message, delegate
+                {
+                    GJTimer.AddTimer(0.25f, delegate
+                    {
+                        gerry.ReplaceWithObject("talking_skull", true);
+                        gerry.DestroyMe();
+                    });
+                }, null, SpeechBubbleGUI.SpeechBubbleType.Talk, SmartSpeechEngine.VoiceID.Skull);
+            });
+        }
+
         private static List<AnswerVisualData> ValidateAnswerList(IEnumerable<AnswerVisualData> answers)
         {
             return answers.Where(answer => !RemoveZone(answer)).ToList();
         }
 
-        private static MultiAnswerGUI _maGui;
-
-        [HarmonyPatch(typeof(MultiAnswerGUI), "ShowAnswers", typeof(List<AnswerVisualData>), typeof(bool))]
-        public static class MultiAnswerGuiShowAnswersPatch
+        [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
+        public static class GameSettingsApplyLanguageChange
         {
-            [HarmonyPrefix]
-            public static void Prefix(ref MultiAnswerGUI __instance, ref List<AnswerVisualData> answers)
+            [HarmonyPostfix]
+            public static void Postfix()
             {
-               
-                if (__instance == null) return;
+                Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
+                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+            }
+        }
 
-                _maGui = __instance;
+        [HarmonyPatch(typeof(Item))]
+        [HarmonyPatch(nameof(Item.GetGrayedCooldownPercent))]
+        public static class ItemGetGrayedCooldownPercentPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref Item __instance, ref int __result)
+            {
+                if (__instance is not { id: "hearthstone" }) return;
 
-                if (_dotSelection) return;
-                if (!_usingStone) return;
-
-                answers.Insert(answers.Count - 1, new AnswerVisualData()
-                {
-                    id = "..."
-                });
+                __result = 0;
             }
         }
 
         [HarmonyPatch(typeof(MultiAnswerGUI), nameof(MultiAnswerGUI.OnChosen))]
         public static class MultiAnswerGuiOnChosenPatch
         {
+            [HarmonyPostfix]
+            public static void Postfix(string answer)
+            {
+                Log($"[Answer]: {answer}");
+
+                if (string.Equals("cancel", answer) && !_dotSelection)
+                {
+                    //real cancel
+                    _usingStone = false;
+                    _dotSelection = false;
+                    _isNpc = false;
+
+                    MainGame.me.player.components.character.control_enabled = true;
+                    return;
+                }
+                if (string.Equals("cancel", answer) && _dotSelection)
+                {
+                    //fake cancel to close the old menu and open a new one
+                    _usingStone = true;
+                    _dotSelection = true;
+                    MainGame.me.player.components.character.control_enabled = false;
+                    return;
+                }
+
+                if (string.Equals("leave", answer.ToLowerInvariant()))
+                {
+                    //leave option for npcs
+                    _usingStone = false;
+                    _dotSelection = false;
+                    _isNpc = false;
+                    MainGame.me.player.components.character.control_enabled = true;
+
+                    return;
+                }
+
+                if (_isNpc) return;
+                _usingStone = false;
+                _dotSelection = false;
+
+                MainGame.me.player.components.character.control_enabled = true;
+            }
+
             [HarmonyPrefix]
             public static void Prefix(ref string answer)
             {
@@ -156,6 +244,15 @@ namespace BeamMeUpGerry
                     return;
                 }
 
+                if (MainGame.me.player.data.money < Fee)
+                {
+                    var location = MainGame.me.player_pos;
+                    location.x += 125f;
+                    location.y += 125f;
+                    SpawnGerry("You need more coin!");
+                    return;
+                }
+
                 var partOne = LocationByVectorPartOne.TryGetValue(chosen, out var vectorOne);
                 var partTwo = LocationByVectorPartTwo.TryGetValue(chosen, out var vectorTwo);
 
@@ -182,14 +279,30 @@ namespace BeamMeUpGerry
                         GJTimer.AddTimer(0.15f, delegate
                         {
                             MainGame.me.player.PlaceAtPos(vector);
+                            MainGame.me.save.ApplyCurrentEnvironmentPreset();
                             MainGame.me.player.components.character.control_enabled = true;
-                            GJTimer.AddTimer(1.25f, delegate { CameraFader.current.FadeIn(0.15f); });
+                            GJTimer.AddTimer(1.25f, delegate
+                            {
+                                CameraFader.current.FadeIn(0.15f);
+                                GJTimer.AddTimer(0.20f, delegate
+                                {
+                                    vector.y += 125f;
+                                    MainGame.me.player.data.money -= Fee;
+                                    Sounds.PlaySound("coins_sound", vector, true);
+                                    EffectBubblesManager.ShowImmediately(vector, $"-{Trading.FormatMoney(Fee, true)}", EffectBubblesManager.BubbleColor.Red, true, 3f);
+                                });
+                            });
                         });
                     }
                     else
                     {
+                        vector.y += 125f;
                         MainGame.me.player.PlaceAtPos(vector);
+                        MainGame.me.save.ApplyCurrentEnvironmentPreset();
                         MainGame.me.player.components.character.control_enabled = true;
+                        MainGame.me.player.data.money -= Fee;
+                        Sounds.PlaySound("coins_sound", vector, true);
+                        EffectBubblesManager.ShowImmediately(vector, $"-{Trading.FormatMoney(Fee, true)}", EffectBubblesManager.BubbleColor.Red, true, 3f);
                     }
                 }
                 else
@@ -199,95 +312,31 @@ namespace BeamMeUpGerry
                     _maGui.DestroyBubble();
                 }
             }
-
-            [HarmonyPostfix]
-            public static void Postfix(string answer)
-            {
-               
-                if (string.Equals("cancel", answer) && !_dotSelection)
-                {
-                    //real cancel
-                    _usingStone = false;
-                    _dotSelection = false;
-                    MainGame.me.player.components.character.control_enabled = true;
-                    return;
-                }
-                if (string.Equals("cancel", answer) && _dotSelection)
-                {
-                    //fake cancel to close the old menu and open a new one
-                    _usingStone = true;
-                    _dotSelection = true;
-                    MainGame.me.player.components.character.control_enabled = false;
-                    return;
-                }
-                if (_isNpc) return;
-                _usingStone = false;
-                _dotSelection = false;
-                MainGame.me.player.components.character.control_enabled = true;
-            }
         }
 
-        private static bool _isNpc;
-    
-        [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
-        public static class GameSettingsApplyLanguageChange
-        {
-            [HarmonyPostfix]
-            public static void Postfix()
-            {
-                Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-            }
-        }
-
-        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
-        public static class WorldGameObjectInteractPatch
+        [HarmonyPatch(typeof(MultiAnswerGUI), "ShowAnswers", typeof(List<AnswerVisualData>), typeof(bool))]
+        public static class MultiAnswerGuiShowAnswersPatch
         {
             [HarmonyPrefix]
-            public static void Prefix(ref WorldGameObject __instance, ref WorldGameObject other_obj)
+            public static void Prefix(ref MultiAnswerGUI __instance, ref List<AnswerVisualData> answers)
             {
-                _isNpc = __instance.obj_def.IsNPC();
-                //Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
-            }
+                if (__instance == null) return;
 
-        }
+                _maGui = __instance;
 
-        private static void Beam()
-        {
-            var item = GetHearthstone();
-            if (item != null)
-            {
-                if (item.GetGrayedCooldownPercent() > 0)
+                if (!_usingStone) return;
+                if (_cfg.IncreaseMenuAnimationSpeed)
                 {
-                    ShowMessage(strings.NotReady);
+                    __instance.anim_delay /= 3f;
+                    __instance.anim_time /= 3f;
                 }
-                else
-                {
-                    _usingStone = true;
-                    _isNpc = false;
-                    MainGame.me.player.UseItemFromInventory(item);
-                }
-            }
-            else
-            {
-                ShowMessage(strings.WhereIsIt);
-            }
-        }
 
-        private static void ShowMessage(string msg)
-        {
-            if (_cfg.DisableAlerts) return;
-            if (_cfg.DisableGerryVoice)
-            {
-                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-                MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
-                    SmartSpeechEngine.VoiceID.None, true);
-            }
-            else
-            {
-                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-                MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.InfoBox,
-                    SmartSpeechEngine.VoiceID.Skull);
+                if (_dotSelection) return;
+
+                answers.Insert(answers.Count - 1, new AnswerVisualData()
+                {
+                    id = "..."
+                });
             }
         }
 
@@ -311,40 +360,75 @@ namespace BeamMeUpGerry
                     Log($"[ZONE]: {GJL.L("zone_" + MainGame.me.player.GetMyWorldZoneId())}, ID: {"zone_" + MainGame.me.player.GetMyWorldZoneId()}, Vector: {MainGame.me.player_pos}");
                     Beam();
                 }
-            }
 
-            [HarmonyPostfix]
-            public static void Postfix()
-            {
-                if (!MainGame.game_started || MainGame.me.player.is_dead || MainGame.me.player.IsDisabled() ||
-                    MainGame.paused || !BaseGUI.all_guis_closed) return;
-                var item = GetHearthstone();
-                if (item == null) return;
-                if (item.GetGrayedCooldownPercent() <= 0 && _showCooldownReadyAlert && !_cfg.DisableCooldown)
+                if (Input.GetKeyUp(KeyCode.Escape) ||
+                    (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(3)))
                 {
-                    _showCooldownReadyAlert = false;
-                    ShowMessage(strings.Ready);
+                    if (_maGui != null)
+                    {
+                        Sounds.OnClosePressed();
+                        _maGui.DestroyBubble();
+                        _usingStone = false;
+                        _dotSelection = false;
+                        _isNpc = false;
+                        MainGame.me.player.components.character.control_enabled = true;
+                        _maGui = null;
+                    }
                 }
             }
         }
 
-        [HarmonyPatch(typeof(Item))]
-        [HarmonyPatch(nameof(Item.GetGrayedCooldownPercent))]
-        public static class ItemGetGrayedCooldownPercentPatch
+        [HarmonyPatch(typeof(SmartAudioEngine))]
+        private static class SmartAudioEnginePatch
+        {
+            [HarmonyPatch(nameof(SmartAudioEngine.OnStartNPCInteraction))]
+            [HarmonyPostfix]
+            public static void OnStartNPCInteractionPostfix()
+            {
+                _isNpc = true;
+            }
+
+            [HarmonyPatch(nameof(SmartAudioEngine.OnEndNPCInteraction))]
+            [HarmonyPostfix]
+            public static void OnEndNPCInteractionPostfix()
+            {
+                _isNpc = false;
+            }
+        }
+
+        [HarmonyPatch(typeof(VendorGUI))]
+        public static class VendorGuiPatches
         {
             [HarmonyPostfix]
-            public static void Postfix(ref Item __instance, ref int __result)
+            [HarmonyPatch(nameof(VendorGUI.Hide), typeof(bool))]
+            public static void VendorGuiHidePostfix()
             {
-                if (__instance is not { id: "hearthstone" }) return;
-                if (_cfg.DisableCooldown)
-                {
-                    __result = 0;
-                    return;
-                }
-                if (_cfg.HalfCooldown)
-                {
-                    __result /= 2;
-                }
+                _isNpc = false;
+            }
+
+            [HarmonyPostfix]
+            [HarmonyPatch(nameof(VendorGUI.OnClosePressed))]
+            public static void VendorGUIOnClosePressedPostfix()
+            {
+                _isNpc = false;
+            }
+
+            [HarmonyPostfix]
+            [HarmonyPatch(nameof(VendorGUI.Open), typeof(WorldGameObject), typeof(GJCommons.VoidDelegate))]
+            public static void VendorGuiOpenPostfix()
+            {
+                _isNpc = true;
+            }
+        }
+
+        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
+        public static class WorldGameObjectInteractPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref WorldGameObject __instance, ref WorldGameObject other_obj)
+            {
+                _isNpc = __instance.obj_def.IsNPC();
+                //Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
             }
         }
     }

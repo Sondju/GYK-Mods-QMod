@@ -64,10 +64,13 @@ public static class MainPatcher
 
     private static bool _alreadyRun;
     private static Config.Options _cfg;
+    private static FcConfig.Options _fCcfg;
     private static int _craftAmount = 1;
     private static bool _exhaustless;
 
     private static bool _fasterCraft;
+    private static bool _fasterCraftReloaded;
+    private static bool _oGfasterCraft;
 
     private static WorldGameObject _previousWorldGameObject;
     private static float _timeAdjustment;
@@ -83,13 +86,28 @@ public static class MainPatcher
             _cfg = Config.GetOptions();
 
             _fasterCraft = false;
+            _fasterCraftReloaded = false;
+            _oGfasterCraft = false;
             _exhaustless = false;
             _alreadyRun = false;
 
-            _fasterCraft = Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod");
+            _fasterCraftReloaded = Tools.IsModLoaded("FasterCraftReloaded") || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.FasterCraftReloaded");
+            _oGfasterCraft = Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod");
             _exhaustless = Tools.IsModLoaded("Exhaustless") || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.exhaust-less");
 
-            if (_fasterCraft) LoadFasterCraftConfig();
+            if (_fasterCraftReloaded)
+            {
+                _fCcfg = FcConfig.GetOptions();
+                _timeAdjustment = _fCcfg.CraftSpeedMultiplier;
+                _fasterCraft = true;
+                Log($"FasterCraft Reloaded! detected, using its config.");
+            }
+            else if (_oGfasterCraft)
+            {
+                _fasterCraft = true;
+                Log($"OG FasterCraft detected, using its config.");
+                LoadFasterCraftConfig();
+            }
         }
         catch (Exception ex)
         {
