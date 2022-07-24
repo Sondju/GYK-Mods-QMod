@@ -134,16 +134,9 @@ public class MainPatcher
             {
                 _wgo = __instance;
             }
-
-            if (__instance.obj_id.Contains("mf_crematorium"))
-            {
-                __instance.obj_def.can_insert_items.ForEach(a=> Log($"Can Insert: {a}\n"));
-            }
-
-
         }
     }
-
+    
     [HarmonyPatch(typeof(CraftComponent), "End")]
     public static class GraveGuiOnCraftPatch
     {

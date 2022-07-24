@@ -516,6 +516,9 @@ namespace GerrysJunkTrunk
                 //if (!_usingShippingBox) return;
                 if (!_cfg.ShowItemPriceTooltips) return;
                 if (__instance == null) return;
+
+                //Log($"[ItemGUI]: {item_gui.item.id}");
+
                 if (AlreadyDone.Contains(item_gui)) return;
                 if (item_gui.id_empty) return;
 

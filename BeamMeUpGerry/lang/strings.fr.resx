@@ -132,4 +132,10 @@
 	<data name="Sand" xml:space="preserve">
 		<value>Monticule de sable</value>
 	</data>
+	<data name="Farmer" xml:space="preserve">
+		<value>Agriculteur</value>
+	</data>
+	<data name="Mill" xml:space="preserve">
+		<value>Moulin</value>
+	</data>
 </root>

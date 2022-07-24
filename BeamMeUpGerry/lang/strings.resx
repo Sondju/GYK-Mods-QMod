@@ -120,6 +120,12 @@
 	<data name="Clay" xml:space="preserve">
     <value>Clay pit</value>
   </data>
+	<data name="Farmer" xml:space="preserve">
+    <value>Farmer</value>
+  </data>
+	<data name="Mill" xml:space="preserve">
+    <value>Mill</value>
+  </data>
 	<data name="NotReady" xml:space="preserve">
     <value>Can't use that yet!</value>
   </data>

@@ -132,4 +132,10 @@
 	<data name="Sand" xml:space="preserve">
 		<value>Песчаная насыпь</value>
 	</data>
+	<data name="Farmer" xml:space="preserve">
+		<value>Фермер</value>
+	</data>
+	<data name="Mill" xml:space="preserve">
+		<value>Мельница</value>
+	</data>
 </root>

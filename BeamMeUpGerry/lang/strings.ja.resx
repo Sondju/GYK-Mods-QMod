@@ -132,4 +132,10 @@
 	<data name="Sand" xml:space="preserve">
 		<value>砂塚</value>
 	</data>
+	<data name="Farmer" xml:space="preserve">
+		<value>農家</value>
+	</data>
+	<data name="Mill" xml:space="preserve">
+		<value>工場</value>
+	</data>
 </root>

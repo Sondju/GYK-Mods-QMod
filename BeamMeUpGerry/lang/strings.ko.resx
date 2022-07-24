@@ -132,4 +132,10 @@
 	<data name="Sand" xml:space="preserve">
 		<value>모래 언덕</value>
 	</data>
+	<data name="Farmer" xml:space="preserve">
+		<value>농장주</value>
+	</data>
+	<data name="Mill" xml:space="preserve">
+		<value>밀</value>
+	</data>
 </root>

@@ -70,6 +70,24 @@ namespace BeamMeUpGerry.lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Farmer.
+        /// </summary>
+        public static string Farmer {
+            get {
+                return ResourceManager.GetString("Farmer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mill.
+        /// </summary>
+        public static string Mill {
+            get {
+                return ResourceManager.GetString("Mill", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Can&apos;t use that yet!.
         /// </summary>
         public static string NotReady {

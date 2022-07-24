@@ -1,4 +1,5 @@
 using BeamMeUpGerry.lang;
+using FlowCanvas.Nodes;
 using HarmonyLib;
 using Helper;
 using NodeCanvas.Tasks.Actions;
@@ -16,11 +17,11 @@ namespace BeamMeUpGerry
     public class MainPatcher
     {
         private const float Fee = 5f;
-       // private const float Fee = 100000f;
+        // private const float Fee = 100000f; //testing
 
         private static readonly Dictionary<string, Vector3> LocationByVectorPartOne = new()
         {
-            { "zone_witch_hut", new Vector3(-4964.0f, -1772.0f, -370.2f) },
+            { "zone_witch_hut", new Vector3(-4964.0f, -1772.0f, -370.2f) }, //gd_witch_27
             { "zone_cellar", new Vector3(10841.9f, -9241.7f, -1923.1f) },
             { "zone_alchemy", new Vector3(8249.0f, -10180.7f, -2119.3f) },
             { "zone_morgue", new Vector3(9744.0f, -11327.5f, -2357.9f) },
@@ -43,6 +44,8 @@ namespace BeamMeUpGerry
             { "zone_zombie_sawmill", new Vector3(2204.3f, 3409.7f, 710.8f) },
             { strings.Clay, new Vector3(595.4f, -3185.8f, -663.6f) },
             { strings.Sand, new Vector3(334.3f, 875.9f, 182.5f) },
+            { strings.Mill, new Vector3(11805.2f, -768.9f, -157.7f) }, //mill_to_crossroads
+            { strings.Farmer, new Vector3(11800.7f, -3251.7f, -675.0f) }, //none suitable
             { "cancel", Vector3.zero }
         };
 
@@ -81,7 +84,7 @@ namespace BeamMeUpGerry
             }
             else
             {
-                SpawnGerry(strings.WhereIsIt);
+                SpawnGerry(strings.WhereIsIt, Vector3.zero);
             }
         }
 
@@ -97,7 +100,18 @@ namespace BeamMeUpGerry
 
         private static bool RemoveZone(AnswerVisualData answer)
         {
-            if (answer.id.Contains("Clay") || answer.id.Contains("Sand") || answer.id.Contains("...") || answer.id.Contains("....") || answer.id.Contains("cancel")) return false;
+            var wheatExists = MainGame.me.save.known_world_zones.Exists(a => string.Equals(a, "zone_wheat_land"));
+            if (answer.id.Contains(strings.Farmer))
+            {
+                return wheatExists && MainGame.me.save.known_npcs.npcs.Exists(a => a.npc_id.Contains("farmer"));
+            }
+
+            if (answer.id.Contains(strings.Mill))
+            {
+                return wheatExists && MainGame.me.save.known_npcs.npcs.Exists(a => a.npc_id.Contains("miller"));
+            }
+
+            if (answer.id.Contains(strings.Clay) || answer.id.Contains(strings.Sand) || answer.id.Contains("...") || answer.id.Contains("....") || answer.id.Contains("cancel")) return false;
             var zone = answer.id.Replace("zone_", "");
             if (MainGame.me.save.known_world_zones.Exists(a => string.Equals(a, zone)))
             {
@@ -108,12 +122,15 @@ namespace BeamMeUpGerry
             return true;
         }
 
-        private static void SpawnGerry(string message)
+        private static void SpawnGerry(string message, Vector3 customPosition)
         {
             var location = MainGame.me.player_pos;
             location.x += 125f;
             location.y += 125f;
-
+            if (customPosition != Vector3.zero)
+            {
+                location = customPosition;
+            }
             var gerry = WorldMap.SpawnWGO(MainGame.me.world_root.transform, "talking_skull", location);
             gerry.ReplaceWithObject("talking_skull", true);
 
@@ -165,6 +182,7 @@ namespace BeamMeUpGerry
             [HarmonyPostfix]
             public static void Postfix(string answer)
             {
+                if (!_cfg.EnableListExpansion) return;
                 Log($"[Answer]: {answer}");
 
                 if (string.Equals("cancel", answer) && !_dotSelection)
@@ -207,6 +225,7 @@ namespace BeamMeUpGerry
             [HarmonyPrefix]
             public static void Prefix(ref string answer)
             {
+                if (!_cfg.EnableListExpansion) return;
                 if (_isNpc) return;
                 List<AnswerVisualData> answers;
 
@@ -238,6 +257,7 @@ namespace BeamMeUpGerry
 
             private static void BeamGerryOnChosen(string chosen)
             {
+                if (!_cfg.EnableListExpansion) return;
                 if (_isNpc) return;
                 if (string.Equals("cancel", chosen))
                 {
@@ -249,7 +269,7 @@ namespace BeamMeUpGerry
                     var location = MainGame.me.player_pos;
                     location.x += 125f;
                     location.y += 125f;
-                    SpawnGerry("You need more coin!");
+                    SpawnGerry("You need more coin!", Vector3.zero);
                     return;
                 }
 
@@ -314,11 +334,27 @@ namespace BeamMeUpGerry
             }
         }
 
+        [HarmonyPatch(typeof(Flow_MultiAnswer), "RegisterPorts")]
+        public static class FlowMultiAnswerRegisterPortsPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ref Flow_MultiAnswer __instance)
+            {
+                if (__instance == null) return;
+                if (!_usingStone) return;
+
+                if (!_cfg.EnableListExpansion) return;
+                if (_dotSelection) return;
+
+                __instance.answers.Insert(__instance.answers.Count - 1, @"...");
+            }
+        }
+
         [HarmonyPatch(typeof(MultiAnswerGUI), "ShowAnswers", typeof(List<AnswerVisualData>), typeof(bool))]
         public static class MultiAnswerGuiShowAnswersPatch
         {
             [HarmonyPrefix]
-            public static void Prefix(ref MultiAnswerGUI __instance, ref List<AnswerVisualData> answers)
+            public static void Prefix(ref MultiAnswerGUI __instance)
             {
                 if (__instance == null) return;
 
@@ -330,13 +366,6 @@ namespace BeamMeUpGerry
                     __instance.anim_delay /= 3f;
                     __instance.anim_time /= 3f;
                 }
-
-                if (_dotSelection) return;
-
-                answers.Insert(answers.Count - 1, new AnswerVisualData()
-                {
-                    id = "..."
-                });
             }
         }
 
@@ -351,14 +380,12 @@ namespace BeamMeUpGerry
 
                 if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(7))
                 {
-                    Log($"[ZONE]: {GJL.L("zone_" + MainGame.me.player.GetMyWorldZoneId())}, ID: {"zone_" + MainGame.me.player.GetMyWorldZoneId()}, Vector: {MainGame.me.player_pos}");
-                    Beam();
+                    DoLoggingAndBeam();
                 }
 
                 if (Input.GetKeyUp(KeyCode.Z))
                 {
-                    Log($"[ZONE]: {GJL.L("zone_" + MainGame.me.player.GetMyWorldZoneId())}, ID: {"zone_" + MainGame.me.player.GetMyWorldZoneId()}, Vector: {MainGame.me.player_pos}");
-                    Beam();
+                    DoLoggingAndBeam();
                 }
 
                 if (Input.GetKeyUp(KeyCode.Escape) ||
@@ -374,6 +401,19 @@ namespace BeamMeUpGerry
                         MainGame.me.player.components.character.control_enabled = true;
                         _maGui = null;
                     }
+                }
+
+                static void DoLoggingAndBeam()
+                {
+                    Log($"[ZONE]: {GJL.L("zone_" + MainGame.me.player.GetMyWorldZoneId())}, ID: {"zone_" + MainGame.me.player.GetMyWorldZoneId()}, Vector: {MainGame.me.player_pos}");
+                    var gdPoint = Util.FindNearestGdPoint();
+                    if (gdPoint != null)
+                    {
+                        //SpawnGerry("Here!", gdPoint.pos);
+                        var distance = Vector3.Distance(MainGame.me.player_pos, gdPoint.pos);
+                        Log($"[GDPoint:] Nearest: {gdPoint.name}, Distance to player: {distance}, Vector: {gdPoint.pos}");
+                    }
+                    Beam();
                 }
             }
         }
@@ -428,7 +468,7 @@ namespace BeamMeUpGerry
             public static void Prefix(ref WorldGameObject __instance, ref WorldGameObject other_obj)
             {
                 _isNpc = __instance.obj_def.IsNPC();
-                //Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
+                Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
             }
         }
     }

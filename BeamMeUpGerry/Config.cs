@@ -12,6 +12,7 @@ namespace BeamMeUpGerry
         {
             public bool FadeForCustomLocations;
             public bool IncreaseMenuAnimationSpeed;
+            public bool EnableListExpansion;
         }
 
         public static Options GetOptions()
@@ -24,6 +25,9 @@ namespace BeamMeUpGerry
 
             bool.TryParse(_con.Value("FadeForCustomLocations", "true"), out var fadeForCustomLocations);
             _options.FadeForCustomLocations = fadeForCustomLocations;
+
+            bool.TryParse(_con.Value("EnableListExpansion", "true"), out var enableListExpansion);
+            _options.EnableListExpansion = enableListExpansion;
 
             _con.ConfigWrite();
 
