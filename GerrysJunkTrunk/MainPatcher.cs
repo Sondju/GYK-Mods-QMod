@@ -357,23 +357,35 @@ namespace GerrysJunkTrunk
             _internalCfg = InternalConfig.GetOptions();
         }
 
+        private static readonly ItemDefinition.ItemType[] ExcludeItems =
+        {
+            ItemDefinition.ItemType.Axe, ItemDefinition.ItemType.Shovel, ItemDefinition.ItemType.Hammer,
+            ItemDefinition.ItemType.Pickaxe, ItemDefinition.ItemType.FishingRod, ItemDefinition.ItemType.BodyArmor,
+            ItemDefinition.ItemType.HeadArmor, ItemDefinition.ItemType.Sword, ItemDefinition.ItemType.Preach,
+            ItemDefinition.ItemType.GraveStone, ItemDefinition.ItemType.GraveFence, ItemDefinition.ItemType.GraveCover,
+            ItemDefinition.ItemType.GraveStoneReq, ItemDefinition.ItemType.GraveFenceReq, ItemDefinition.ItemType.GraveCoverReq,
+        };
+
         private static void UpdateItemStates(ref ChestGUI __instance)
         {
             foreach (var inventory in __instance.player_panel.multi_inventory.all.Where(i => i.data.inventory.Count > 0))
             {
+                //reset status
                 foreach (var item in inventory.data.inventory)
                 {
                     var itemCellGuiForItem = __instance.player_panel.GetItemCellGuiForItem(item);
                     itemCellGuiForItem.SetInactiveState(false);
                 }
 
-                foreach (var item in inventory.data.inventory.Where(item => item.definition.player_cant_throw_out))
+                //disable quest item selling
+                foreach (var item in inventory.data.inventory.Where(item => item.definition.player_cant_throw_out && !ExcludeItems.Contains(item.definition.type)))
                 {
                     var itemCellGuiForItem = __instance.player_panel.GetItemCellGuiForItem(item);
                     itemCellGuiForItem.SetInactiveState();
                 }
             }
 
+            //disable items in the chest inventory
             foreach (var inventory in __instance.chest_panel.multi_inventory.all.Where(i => i.data.inventory.Count > 0))
             {
                 inventory.is_locked = true;

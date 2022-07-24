@@ -1,4 +1,5 @@
 using HarmonyLib;
+using Helper;
 using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,6 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
-using Helper;
 using WheresMaStorage.lang;
 
 namespace WheresMaStorage
@@ -17,9 +17,11 @@ namespace WheresMaStorage
     {
         private const string Barman = "barman";
         private const string Chest = "chest";
+
         //private const string Church = "church_pulpit";
         //private const string Grindstone = "grindstone";
         private const string Multi = "multi";
+
         private const string NpcBarman = "npc_tavern_barman";
         private const string Player = "player";
         private const string Refugee = "refugee";
@@ -72,7 +74,6 @@ namespace WheresMaStorage
 
                 _cfg = Config.GetOptions();
                 _invSize = 20 + _cfg.AdditionalInventorySpace;
-
             }
             catch (Exception ex)
             {
@@ -85,7 +86,7 @@ namespace WheresMaStorage
             Tools.Log("WheresMaStorage", $"{message}", error);
         }
 
-        private static void SetInventorySizeText(BaseInventoryWidget inventoryWidget, InventoryPanelGUI inventoryPanelGui)
+        private static void SetInventorySizeText(BaseInventoryWidget inventoryWidget)
         {
             if (!_cfg.ShowWorldZoneInTitles && !_cfg.ShowUsedSpaceInTitles) return;
 
@@ -161,24 +162,21 @@ namespace WheresMaStorage
             //_isGrindstone = false;
         }
 
-
-
         //this method gets inserted into the CraftReally method using the transpiler below, overwriting any inventory the game sets. It only effects zombie requests.
         public static MultiInventory GetMi(CraftDefinition craft, MultiInventory orig, WorldGameObject otherGameObject)
         {
             if ((otherGameObject.has_linked_worker && otherGameObject.linked_worker.obj_id.Contains("zombie")) || otherGameObject.obj_id.Contains("zombie"))
             {
-                Log($"[InvRedirect]: Redirected craft inventory to player MultiInventory! Object: {otherGameObject.obj_id}, Craft: {craft.id}");
+                //Log($"[InvRedirect]: Redirected craft inventory to player MultiInventory! Object: {otherGameObject.obj_id}, Craft: {craft.id}");
                 _zombieWorker = true;
                 return _mi;
             }
 
-           // Log($"[InvRedirect]: Original inventory sent back to requester! Object: {otherGameObject.obj_id}, Craft: {craft.id}");
+            // Log($"[InvRedirect]: Original inventory sent back to requester! Object: {otherGameObject.obj_id}, Craft: {craft.id}");
             _zombieWorker = false;
             return orig;
         }
 
-        [HarmonyDebug]
         [HarmonyPriority(1)]
         [HarmonyPatch(typeof(CraftComponent), "CraftReally")]
         public static class CraftComponentPatch
@@ -197,7 +195,6 @@ namespace WheresMaStorage
                     if (codes[i].opcode == OpCodes.Ldfld && codes[i].operand.ToString().Contains("item_needs") && codes[i - 1].opcode == OpCodes.Ldarg_1)
                     {
                         insertIndex = i;
-                        Log($"Found Insert Index: {insertIndex}");
                         break;
                     }
                 }
@@ -220,7 +217,6 @@ namespace WheresMaStorage
                 return codes.AsEnumerable();
             }
         }
-
 
         [HarmonyPatch(typeof(AutopsyGUI))]
         public static class AutopsyGuiPatch
@@ -270,22 +266,6 @@ namespace WheresMaStorage
                 __result = _mi;
             }
         }
-
-       //[HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
-        //fixes not being able to craft paper based things i.e flyers due to stack size changes
-        //[HarmonyPatch(typeof(CraftDefinition), "takes_item_durability", MethodType.Getter)]
-        //public static class CraftDefinitionTakesItemDurabilityPatch
-        //{
-        //    [HarmonyPostfix]
-        //    public static void Postfix(ref CraftDefinition __instance, ref bool __result)
-        //    {
-        //        if (__instance == null) return;
-        //        if (__instance.needs.Exists(item => item.id.Equals("pen:ink_pen")) && __instance.dur_needs_item > 0)
-        //        {
-        //            __result = false;
-        //        }
-        //    }
-        //}
 
         [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
         [HarmonyPatch(typeof(DropResGameObject), nameof(DropResGameObject.CollectDrop))]
@@ -353,19 +333,6 @@ namespace WheresMaStorage
                 Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
             }
         }
-
-        //[HarmonyPatch(typeof(WorldZone), nameof(WorldZone.IsPlayerInZone))]
-        //public static class WorldZoneIsPlayerInZoneChangePatch
-        //{
-        //    [HarmonyPostfix]
-        //    public static void Postfix(ref bool __result)
-        //    {
-        //        if (_zombieWorker)
-        //        {
-        //            __result = true;
-        //        }
-        //    }
-        //}
 
         [HarmonyPatch(typeof(GraveGUI), "GravePartsFilter", typeof(Item), typeof(ItemDefinition.ItemType))]
         public static class GraveGuiGravePartsFilterPatch
@@ -450,6 +417,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryPanelGUI __instance, ref MultiInventory multi_inventory, ref List<UIWidget> ____separators, ref List<InventoryWidget> ____widgets, ref List<CustomInventoryWidget> ____custom_widgets)
             {
+               
                 var isChestPanel = __instance.name.ToLowerInvariant().Contains(Chest);
                 var isVendorPanel = __instance.name.ToLowerInvariant().Contains(Vendor);
                 var isPlayerPanel = __instance.name.ToLowerInvariant().Contains(Player) || (__instance.name.ToLowerInvariant().Contains(Multi) && _wgo == null);
@@ -467,7 +435,7 @@ namespace WheresMaStorage
                 {
                     foreach (var inventoryWidget in ____widgets)
                     {
-                        SetInventorySizeText(inventoryWidget, __instance);
+                        SetInventorySizeText(inventoryWidget);
                     }
                 }
 
@@ -537,7 +505,7 @@ namespace WheresMaStorage
                 {
                     foreach (var inventoryWidget in ____widgets.Where(a => !a.header_label.text.ToLowerInvariant().Contains("gerry")))
                     {
-                        SetInventorySizeText(inventoryWidget, __instance);
+                        SetInventorySizeText(inventoryWidget);
                     }
                 }
             }
@@ -560,6 +528,7 @@ namespace WheresMaStorage
             public static void Postfix(ref InventoryWidget __instance,
                 ref InventoryWidget.ItemFilterDelegate filter_delegate, ref List<BaseItemCellGUI> ___items)
             {
+        
                 if (__instance.gameObject.transform.parent.transform.parent.transform.parent.name.ToLowerInvariant()
                     .Contains(Vendor))
                     return;
@@ -602,17 +571,6 @@ namespace WheresMaStorage
             }
         }
 
-        //stops unnecessary log spam
-        [HarmonyPatch(typeof(MultiInventory), "IsEmpty")]
-        public static class MultiInventoryIsEmptyPatch
-        {
-            [HarmonyPrefix]
-            public static void Prefix(ref bool print_log)
-            {
-                print_log = false;
-            }
-        }
-
         [HarmonyPatch(typeof(RatCellGUI))]
         public static class RatCellGuiPatch
         {
@@ -628,7 +586,6 @@ namespace WheresMaStorage
                         yield return method;
                     }
                 }
-
             }
 
             [HarmonyTranspiler]
@@ -695,13 +652,9 @@ namespace WheresMaStorage
                         var newInv = _mi.all.Where(a => !a.name.Contains("Toolbelt")).ToList();
                         pMi.SetInventories(newInv);
                         __result = pMi;
-                        //Log($"[WorldGameObject.GetMultiInventory] Cached player inventory sent to Player.");
+
                         return;
                     }
-
-                    //Log(__instance.is_player
-                    //    ? $"[WorldGameObject.GetMultiInventory] Cached inventory sent to Player."
-                    //    : $"[WorldGameObject.GetMultiInventory] Cached inventory sent to {__instance.obj_id}.");
 
                     __result = _mi;
                     return;
@@ -709,9 +662,6 @@ namespace WheresMaStorage
 
                 if (__instance.is_player || __instance == _wgo || _zombieWorker)
                 {
-                    //Log(__instance.is_player
-                    //    ? $"[WorldGameObject.GetMultiInventory] Fresh inventory sent to Player."
-                    //    : $"[WorldGameObject.GetMultiInventory] Fresh inventory sent to {__instance.obj_id}.");
                     _previousWgo = __instance;
                     _mi = new MultiInventory();
                     var playerInv = new Inventory(MainGame.me.player.data, "Player", string.Empty);
@@ -784,8 +734,6 @@ namespace WheresMaStorage
                 _isBarman = __instance.obj_id.ToLowerInvariant().Contains(Barman);
                 _isTavernCellar = __instance.obj_id.ToLowerInvariant().Contains(TavernCellar);
                 _isRefugee = __instance.obj_id.ToLowerInvariant().Contains(Refugee);
-                //_isChurchPulpit = __instance.obj_id.ToLowerInvariant().Contains(Church);
-                //_isGrindstone = __instance.obj_id.ToLowerInvariant().Contains(Grindstone);
             }
         }
 
@@ -802,38 +750,6 @@ namespace WheresMaStorage
             }
         }
 
-        //[HarmonyPatch(typeof(ChestGUI), "GetMaxMoveCount")]
-        //public static class ChestGuiGetMaxMoveCountPatch
-        //{
-        //    [HarmonyPrefix]
-        //    public static void Prefix()
-        //    {
-        //        _playerInteraction = true;
-        //    }
-
-        //    [HarmonyPrefix]
-        //    public static void Postfix()
-        //    {
-        //        _playerInteraction = false;
-        //    }
-        //}
-
-        //[HarmonyPatch(typeof(VendorGUI), "GetMaxMoveCount")]
-        //public static class VendorGuiMaxMoveCountPatch
-        //{
-        //    [HarmonyPrefix]
-        //    public static void Prefix()
-        //    {
-        //        _playerInteraction = true;
-        //    }
-
-        //    [HarmonyPrefix]
-        //    public static void Postfix()
-        //    {
-        //        _playerInteraction = false;
-        //    }
-        //}
-
         [HarmonyPatch(typeof(MultiInventory), nameof(MultiInventory.GetTotalCount))]
         public static class MultiInventoryGetTotalCountPatch
         {
@@ -845,17 +761,6 @@ namespace WheresMaStorage
                     ____inventories = _mi.all;
                 }
             }
-
-            //[HarmonyPostfix]
-            //public static void Postfix(ref string item_id, ref int __result)
-            //{
-            //    if (_zombieWorker)
-            //    {
-            //        var s = item_id;
-            //        var count = _mi.all.Sum(inv => inv.data.GetTotalCount(s));
-            //        __result = count;
-            //    }
-            //}
         }
     }
 }

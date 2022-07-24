@@ -100,12 +100,12 @@ public static class MainPatcher
                 _fCcfg = FcConfig.GetOptions();
                 _timeAdjustment = _fCcfg.CraftSpeedMultiplier;
                 _fasterCraft = true;
-                Log($"FasterCraft Reloaded! detected, using its config.");
+               // Log($"FasterCraft Reloaded! detected, using its config.");
             }
             else if (_oGfasterCraft)
             {
                 _fasterCraft = true;
-                Log($"OG FasterCraft detected, using its config.");
+               // Log($"OG FasterCraft detected, using its config.");
                 LoadFasterCraftConfig();
             }
         }

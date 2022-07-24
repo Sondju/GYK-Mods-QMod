@@ -151,7 +151,7 @@ namespace SaveNow.lang {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Game Saved!.
+        ///   Looks up a localized string similar to Game saved!.
         /// </summary>
         public static string SaveMessage {
             get {

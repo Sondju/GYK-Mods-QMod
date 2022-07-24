@@ -468,7 +468,7 @@ namespace BeamMeUpGerry
             public static void Prefix(ref WorldGameObject __instance, ref WorldGameObject other_obj)
             {
                 _isNpc = __instance.obj_def.IsNPC();
-                Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
+              //  Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
             }
         }
     }

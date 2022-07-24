@@ -44,7 +44,7 @@ namespace MaxButtonControllerSupport
             {
                 if (Harmony.HasAnyPatches("com.graveyardkeeper.urbanvibes.maxbutton"))
                 {
-                    Log($"MaxButton found, continuing with patch process.");
+                    //Log($"MaxButton found, continuing with patch process.");
                     var harmony = new Harmony("p1xel8ted.GraveyardKeeper.MaxButtonControllerSupport");
                     harmony.PatchAll(Assembly.GetExecutingAssembly());
                 }
