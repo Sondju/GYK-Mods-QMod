@@ -11,6 +11,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.UIElements;
+using Random = System.Random;
 
 namespace BeamMeUpGerry
 {
@@ -122,26 +124,41 @@ namespace BeamMeUpGerry
             return true;
         }
 
-        private static void SpawnGerry(string message, Vector3 customPosition)
+        private static string GetMoneyMessage()
+        {
+            var rng = new Random();
+            var messageList = new List<string>
+            {
+                strings.M1,strings.M2,strings.M3,strings.M4,strings.M5,strings.M6,strings.M7,
+                strings.M8,strings.M9,strings.M10
+            };
+            var shuffledList = messageList.OrderBy(_ => rng.Next()).ToList();
+            return shuffledList[0];
+        }
+
+        private static void SpawnGerry(string message, Vector3 customPosition, bool money = false)
         {
             var location = MainGame.me.player_pos;
-            location.x += 125f;
-            location.y += 125f;
+            location.x -= 75f;
+            //location.y += 50f;
             if (customPosition != Vector3.zero)
             {
                 location = customPosition;
             }
             var gerry = WorldMap.SpawnWGO(MainGame.me.world_root.transform, "talking_skull", location);
             gerry.ReplaceWithObject("talking_skull", true);
-
+            
             GJTimer.AddTimer(0.5f, delegate
             {
-                gerry.Say(message, delegate
+                gerry.Say(!money ? message : $"{GetMoneyMessage()}", delegate
                 {
                     GJTimer.AddTimer(0.25f, delegate
                     {
                         gerry.ReplaceWithObject("talking_skull", true);
                         gerry.DestroyMe();
+                        if (!money) return;
+
+                        TakeMoney(MainGame.me.player_pos);
                     });
                 }, null, SpeechBubbleGUI.SpeechBubbleType.Talk, SmartSpeechEngine.VoiceID.Skull);
             });
@@ -174,6 +191,14 @@ namespace BeamMeUpGerry
 
                 __result = 0;
             }
+        }
+
+        private static void TakeMoney(Vector3 vector)
+        {
+            vector.y += 125f;
+            MainGame.me.player.data.money -= Fee;
+            Sounds.PlaySound("coins_sound", vector, true);
+            EffectBubblesManager.ShowImmediately(vector, $"-{Trading.FormatMoney(Fee, true)}", EffectBubblesManager.BubbleColor.Red, true, 3f);
         }
 
         [HarmonyPatch(typeof(MultiAnswerGUI), nameof(MultiAnswerGUI.OnChosen))]
@@ -269,7 +294,7 @@ namespace BeamMeUpGerry
                     var location = MainGame.me.player_pos;
                     location.x += 125f;
                     location.y += 125f;
-                    SpawnGerry("You need more coin!", Vector3.zero);
+                    SpawnGerry(strings.MoreCoin, Vector3.zero);
                     return;
                 }
 
@@ -299,35 +324,42 @@ namespace BeamMeUpGerry
                         GJTimer.AddTimer(0.15f, delegate
                         {
                             MainGame.me.player.PlaceAtPos(vector);
-                            MainGame.me.save.ApplyCurrentEnvironmentPreset();
                             MainGame.me.player.components.character.control_enabled = true;
                             GJTimer.AddTimer(1.25f, delegate
                             {
                                 CameraFader.current.FadeIn(0.15f);
                                 GJTimer.AddTimer(0.20f, delegate
                                 {
-                                    vector.y += 125f;
-                                    MainGame.me.player.data.money -= Fee;
-                                    Sounds.PlaySound("coins_sound", vector, true);
-                                    EffectBubblesManager.ShowImmediately(vector, $"-{Trading.FormatMoney(Fee, true)}", EffectBubblesManager.BubbleColor.Red, true, 3f);
+                                    if (_cfg.DisableGerry)
+                                    {
+                                        TakeMoney(vector);
+                                    }
+                                    else
+                                    {
+                                        SpawnGerry("", Vector3.zero, true);
+                                    }
                                 });
                             });
                         });
                     }
                     else
                     {
-                        vector.y += 125f;
                         MainGame.me.player.PlaceAtPos(vector);
-                        MainGame.me.save.ApplyCurrentEnvironmentPreset();
                         MainGame.me.player.components.character.control_enabled = true;
-                        MainGame.me.player.data.money -= Fee;
-                        Sounds.PlaySound("coins_sound", vector, true);
-                        EffectBubblesManager.ShowImmediately(vector, $"-{Trading.FormatMoney(Fee, true)}", EffectBubblesManager.BubbleColor.Red, true, 3f);
+                        if (_cfg.DisableGerry)
+                        {
+                            TakeMoney(vector);
+                        }
+                        else
+                        {
+                            SpawnGerry("", Vector3.zero, true);
+                        }
                     }
+                    EnvironmentEngine.me.SetEngineGlobalState(EnvironmentEngine.State.Inside);
                 }
                 else
                 {
-                    MainGame.me.player.Say("I don't know where that is!");
+                    MainGame.me.player.Say(strings.DontKnow);
                     MainGame.me.player.components.character.control_enabled = true;
                     _maGui.DestroyBubble();
                 }

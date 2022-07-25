@@ -27,8 +27,10 @@ namespace WheresMaStorage
         private const string Refugee = "refugee";
         private const string Storage = "storage";
         private const string Tavern = "tavern";
+        private const string Writer = "writer";
         private const string TavernCellar = "tavern_cellar";
         private const string Vendor = "vendor";
+        private const string Gerry = "gerry";
 
         private static readonly string[] AlwaysHidePartials =
         {
@@ -52,7 +54,7 @@ namespace WheresMaStorage
 
         private static int _invSize;
 
-        private static bool _isChest, _isBarman, _isTavernCellar, _isRefugee, _isCraft, _isVendor, _zombieWorker;//, _playerInteraction;//, _isChurchPulpit, _isGrindstone
+        private static bool _isChest, _isBarman, _isTavernCellar, _isRefugee, _isCraft, _isWritersTable, _isVendor, _zombieWorker;//, _playerInteraction;//, _isChurchPulpit, _isGrindstone
 
         //private static readonly List<Inventory> ResourceCraftInventories = new();
         //private static readonly List<Inventory> WorldInventories = new();
@@ -88,6 +90,8 @@ namespace WheresMaStorage
 
         private static void SetInventorySizeText(BaseInventoryWidget inventoryWidget)
         {
+            if (inventoryWidget.inventory_data.id.Contains(Writer)) return;
+            if (inventoryWidget.header_label.text.Contains(Gerry)) return;
             if (!_cfg.ShowWorldZoneInTitles && !_cfg.ShowUsedSpaceInTitles) return;
 
             string wzLabel;
@@ -157,6 +161,7 @@ namespace WheresMaStorage
             _isBarman = false;
             _isTavernCellar = false;
             _isRefugee = false;
+            _isWritersTable = false;
             //_playerInteraction = false;
             //_isChurchPulpit = false;
             //_isGrindstone = false;
@@ -167,12 +172,12 @@ namespace WheresMaStorage
         {
             if ((otherGameObject.has_linked_worker && otherGameObject.linked_worker.obj_id.Contains("zombie")) || otherGameObject.obj_id.Contains("zombie"))
             {
-                //Log($"[InvRedirect]: Redirected craft inventory to player MultiInventory! Object: {otherGameObject.obj_id}, Craft: {craft.id}");
+                Log($"[InvRedirect]: Redirected craft inventory to player MultiInventory! Object: {otherGameObject.obj_id}, Craft: {craft.id}");
                 _zombieWorker = true;
                 return _mi;
             }
 
-            // Log($"[InvRedirect]: Original inventory sent back to requester! Object: {otherGameObject.obj_id}, Craft: {craft.id}");
+            Log($"[InvRedirect]: Original inventory sent back to requester! Object: {otherGameObject.obj_id}, Craft: {craft.id}");
             _zombieWorker = false;
             return orig;
         }
@@ -261,8 +266,12 @@ namespace WheresMaStorage
         public static class BaseCraftGuiMiGetterPatch
         {
             [HarmonyPostfix]
-            public static void Postfix(ref MultiInventory __result)
+            public static void Postfix(ref BaseCraftGUI __instance, ref MultiInventory __result)
             {
+                if (!_zombieWorker)
+                {
+                    Log($"[BaseCraftGUI.multi_inventory (Getter)]: {__instance.name}, Craftery: {__instance.GetCrafteryWGO().obj_id}");
+                }
                 __result = _mi;
             }
         }
@@ -417,11 +426,16 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryPanelGUI __instance, ref MultiInventory multi_inventory, ref List<UIWidget> ____separators, ref List<InventoryWidget> ____widgets, ref List<CustomInventoryWidget> ____custom_widgets)
             {
-               
                 var isChestPanel = __instance.name.ToLowerInvariant().Contains(Chest);
                 var isVendorPanel = __instance.name.ToLowerInvariant().Contains(Vendor);
                 var isPlayerPanel = __instance.name.ToLowerInvariant().Contains(Player) || (__instance.name.ToLowerInvariant().Contains(Multi) && _wgo == null);
                 var isResourcePanelProbably = !isChestPanel && !isVendorPanel && !isPlayerPanel;
+
+                foreach (var inventoryWidget in ____widgets)
+                {
+                    Log($"[InventoryWidget DoOpening Postfix]: InvID: {inventoryWidget.inventory_data.id}, HeaderText: {inventoryWidget.header_label.text}, HeaderPrintedText: {inventoryWidget.header_label.printedText}");
+                }
+
 
                 if ((_cfg.RemoveGapsBetweenSections && isPlayerPanel) || (_cfg.RemoveGapsBetweenSectionsVendor && isVendorPanel) || isResourcePanelProbably)
                 {
@@ -435,6 +449,7 @@ namespace WheresMaStorage
                 {
                     foreach (var inventoryWidget in ____widgets)
                     {
+                        //Log($"[InventoryWidget]: InvID: {inventoryWidget.inventory_data.id}, HeaderText: {inventoryWidget.header_label.text}, HeaderPrintedText: {inventoryWidget.header_label.printedText}");
                         SetInventorySizeText(inventoryWidget);
                     }
                 }
@@ -465,7 +480,10 @@ namespace WheresMaStorage
 
                 foreach (var inventoryWidget in from inventoryWidget in ____widgets let id = inventoryWidget.inventory_data.id where (_cfg.HideRefugeeWidgets && id.Contains(Refugee)) || (_cfg.HideStockpileWidgets && StockpileWidgetsPartials.Any(id.Contains)) || (_cfg.HideTavernWidgets && id.Contains(Tavern)) || (_cfg.HideWarehouseShopWidgets && id.Contains(Storage)) select inventoryWidget)
                 {
-                    inventoryWidget.Deactivate();
+                    if (!inventoryWidget.inventory_data.id.Contains(Writer))
+                    {
+                        inventoryWidget.Deactivate();
+                    }
                 }
             }
 
@@ -481,10 +499,11 @@ namespace WheresMaStorage
                     __instance.dont_show_empty_rows = true;
                 }
 
-                if (_isCraft) return;
-                // if (_isChurchPulpit || _isGrindstone) return;
-                if (_cfg.ShowOnlyPersonalInventory || _isBarman || _isTavernCellar || _isRefugee || _isChest || _isVendor)
+                if (_isCraft || _isVendor) return;
+
+                if (_cfg.ShowOnlyPersonalInventory || _isBarman || _isTavernCellar || _isRefugee || _isChest || _isWritersTable)
                 {
+                    Log($"[InventoryPanelGUI.DoOpening-Prefix]: Panel: {__instance.name}, _isBarman: {_isBarman}, _isTavernCellar: {_isTavernCellar}, _isRefugee: {_isRefugee}, _isChest: {_isChest}, _isVendor: {_isVendor}");
                     var onlyMineInventory = new MultiInventory();
                     onlyMineInventory.AddInventory(multi_inventory.all[0]);
                     multi_inventory = onlyMineInventory;
@@ -501,10 +520,16 @@ namespace WheresMaStorage
                 var isChest = __instance.name.ToLowerInvariant().Contains(Chest);
                 var isPlayer = __instance.name.ToLowerInvariant().Contains(Player) || (__instance.name.ToLowerInvariant().Contains(Multi) && _wgo == null);
 
+                foreach (var inventoryWidget in ____widgets)
+                {
+                    Log($"[InventoryWidget Redraw Postfix]: InvID: {inventoryWidget.inventory_data.id}, HeaderText: {inventoryWidget.header_label.text}, HeaderPrintedText: {inventoryWidget.header_label.printedText}");
+                }
+                
                 if ((isPlayer || isChest) && _cfg.ShowUsedSpaceInTitles)
                 {
-                    foreach (var inventoryWidget in ____widgets.Where(a => !a.header_label.text.ToLowerInvariant().Contains("gerry")))
+                    foreach (var inventoryWidget in ____widgets)
                     {
+                        Log($"[InventoryWidget Redraw]: InvID: {inventoryWidget.inventory_data.id}, HeaderText: {inventoryWidget.header_label.text}, HeaderPrintedText: {inventoryWidget.header_label.printedText}");
                         SetInventorySizeText(inventoryWidget);
                     }
                 }
@@ -528,7 +553,6 @@ namespace WheresMaStorage
             public static void Postfix(ref InventoryWidget __instance,
                 ref InventoryWidget.ItemFilterDelegate filter_delegate, ref List<BaseItemCellGUI> ___items)
             {
-        
                 if (__instance.gameObject.transform.parent.transform.parent.transform.parent.name.ToLowerInvariant()
                     .Contains(Vendor))
                     return;
@@ -640,14 +664,47 @@ namespace WheresMaStorage
                 bool include_toolbelt = false
             )
             {
-                _zombieWorker = __instance.has_linked_worker && __instance.linked_worker.obj_id.Contains("zombie");
+                _zombieWorker = (__instance.has_linked_worker && __instance.linked_worker.obj_id.Contains("zombie")) || __instance.obj_def.id.Contains("zombie");
 
                 if (!_cfg.SharedCraftInventory) return;
 
+                if (__instance.vendor != null)
+                {
+                    if (!_zombieWorker)
+                    {
+                        Log(
+                            $"[WorldGameObject.GetMultiInventory-Postfix]: REJECTED: __instance.vendor = {__instance.vendor.id} ");
+                    }
+
+                    return;
+                }
+
+                if (!_zombieWorker)
+                {
+                    if (__instance.obj_def.IsNPC())
+                    {
+                        Log(
+                            $"[WorldGameObject.GetMultiInventory-Postfix]: REJECTED: __instance.obj_def.IsNPC {__instance.obj_def.id} ");
+                        return;
+                    }
+                }
+
                 if (_cfg.CacheEligibleInventories && __instance == _previousWgo)
                 {
+                    if (!_zombieWorker)
+                    {
+                        Log(
+                            $"[WorldGameObject.GetMultiInventory-Postfix]: Cached __instance: {__instance.obj_id}, _previousWgo: {_previousWgo.obj_id}");
+                    }
+
                     if (__instance.is_player)
                     {
+                        if (!_zombieWorker)
+                        {
+                            Log(
+                                $"[WorldGameObject.GetMultiInventory-Postfix]: Sending cached inventory to Player: {__instance.obj_id}");
+                        }
+
                         var pMi = new MultiInventory();
                         var newInv = _mi.all.Where(a => !a.name.Contains("Toolbelt")).ToList();
                         pMi.SetInventories(newInv);
@@ -683,6 +740,7 @@ namespace WheresMaStorage
                     {
                         var worldZone = WorldZone.GetZoneByID(worldZoneDef.id, false);
                         if (worldZone == null) continue;
+                        // if (worldZone.id.Contains("vilage")) continue;
                         var worldZoneMulti =
                             worldZone.GetMultiInventory(player_mi: MultiInventory.PlayerMultiInventory.ExcludePlayer,
                                 sortWGOS: true);
@@ -692,6 +750,12 @@ namespace WheresMaStorage
                             inv.data.sub_name = inv._obj_id + "#" + worldZoneDef.id;
                             _mi.AddInventory(inv);
                         }
+                    }
+
+                    if (!_zombieWorker)
+                    {
+                        Log(
+                            $"[WorldGameObject.GetMultiInventory-Postfix]: Sending non-cached to __instance: {__instance.obj_id}, isPlayer: {__instance.is_player}, _previousWgo: {_previousWgo.obj_id}, Zombie: {_zombieWorker}");
                     }
 
                     __result = _mi;
@@ -734,6 +798,7 @@ namespace WheresMaStorage
                 _isBarman = __instance.obj_id.ToLowerInvariant().Contains(Barman);
                 _isTavernCellar = __instance.obj_id.ToLowerInvariant().Contains(TavernCellar);
                 _isRefugee = __instance.obj_id.ToLowerInvariant().Contains(Refugee);
+                _isWritersTable = __instance.obj_id.ToLowerInvariant().Contains(Writer);
             }
         }
 
@@ -743,6 +808,7 @@ namespace WheresMaStorage
             [HarmonyPrefix]
             public static void Prefix(ref List<Inventory> ____inventories)
             {
+                if (_isVendor) return;
                 if (_zombieWorker)
                 {
                     ____inventories = _mi.all;
@@ -756,6 +822,7 @@ namespace WheresMaStorage
             [HarmonyPrefix]
             public static void Prefix(ref List<Inventory> ____inventories)
             {
+                if (_isVendor) return;
                 if (_zombieWorker)
                 {
                     ____inventories = _mi.all;

@@ -2,7 +2,7 @@
 using System.Resources;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Press Z or RB to open teleport menu provided it's off cooldown. Cooldown can be toggled on/off or halved.")]
+[assembly: AssemblyTitle("Press Z or RB to open the teleport menu with an extra two pages of destinations. Not cheap though...")]
 [assembly: AssemblyDescription("BeamMeUpGerry")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("p1xel8ted")]

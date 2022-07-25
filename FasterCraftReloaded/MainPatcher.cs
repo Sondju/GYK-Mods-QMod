@@ -1,6 +1,7 @@
 using HarmonyLib;
 using Helper;
 using System;
+using System.Linq;
 using System.Reflection;
 
 namespace FasterCraftReloaded
@@ -8,6 +9,11 @@ namespace FasterCraftReloaded
     public class MainPatcher
     {
         private static Config.Options _cfg;
+
+        private static readonly string[] Exclude = {
+            "zombie","refugee","bee","tree","berry","bush","pump"
+        };
+
         public static void Patch()
         {
             try
@@ -29,14 +35,15 @@ namespace FasterCraftReloaded
         }
 
         [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.DoAction))]
-        public static class Patch1
+        public static class CraftComponentDoActionPatch
         {
             [HarmonyPrefix]
-            public static void Prefix(ref float delta_time)
+            public static void Prefix(CraftComponent __instance, ref float delta_time)
             {
+                if (Exclude.Any(__instance.wgo.obj_id.ToLowerInvariant().Contains)) return;
+                Log($"[CraftComponent.DoAction]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
                 delta_time *= _cfg.CraftSpeedMultiplier;
             }
-
         }
     }
 }

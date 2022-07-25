@@ -70,6 +70,15 @@ namespace BeamMeUpGerry.lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to I don&apos;t know where that is!.
+        /// </summary>
+        public static string DontKnow {
+            get {
+                return ResourceManager.GetString("DontKnow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Farmer.
         /// </summary>
         public static string Farmer {
@@ -79,11 +88,110 @@ namespace BeamMeUpGerry.lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Where&apos;s my coin?.
+        /// </summary>
+        public static string M1 {
+            get {
+                return ResourceManager.GetString("M1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Money buddy..
+        /// </summary>
+        public static string M10 {
+            get {
+                return ResourceManager.GetString("M10", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hand it over..
+        /// </summary>
+        public static string M2 {
+            get {
+                return ResourceManager.GetString("M2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Coin. Now..
+        /// </summary>
+        public static string M3 {
+            get {
+                return ResourceManager.GetString("M3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You&apos;ll make it back in no time..
+        /// </summary>
+        public static string M4 {
+            get {
+                return ResourceManager.GetString("M4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This isn&apos;t a charity....
+        /// </summary>
+        public static string M5 {
+            get {
+                return ResourceManager.GetString("M5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cough it up buddy..
+        /// </summary>
+        public static string M6 {
+            get {
+                return ResourceManager.GetString("M6", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pleasant trip?.
+        /// </summary>
+        public static string M7 {
+            get {
+                return ResourceManager.GetString("M7", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Here again?!.
+        /// </summary>
+        public static string M8 {
+            get {
+                return ResourceManager.GetString("M8", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Are we there yet?.
+        /// </summary>
+        public static string M9 {
+            get {
+                return ResourceManager.GetString("M9", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Mill.
         /// </summary>
         public static string Mill {
             get {
                 return ResourceManager.GetString("Mill", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You need more coin!.
+        /// </summary>
+        public static string MoreCoin {
+            get {
+                return ResourceManager.GetString("MoreCoin", resourceCulture);
             }
         }
         
