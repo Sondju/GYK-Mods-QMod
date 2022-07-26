@@ -199,7 +199,9 @@ public static class MainPatcher
         {
             if (!param_name.Contains("tiredness")) return;
             var tiredness = ____data.GetParam("tiredness");
-            __result = tiredness < 1200 ? 250 : 350;
+
+            var newTirednessLimit = (float)_cfg.EnergySpendBeforeSleepDebuff;
+            __result = tiredness < newTirednessLimit ? 250 : 350;
         }
     }
 }

@@ -61,6 +61,7 @@ public static class Config
     public class Options
     {
         public int TavernInvIncrease;
+        public int EnergySpendBeforeSleepDebuff;
         public bool EnableToolAndPrayerStacking;
         public bool QuietMusicInGui;
         public bool AllowHandToolDestroy;

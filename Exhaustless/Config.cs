@@ -39,6 +39,9 @@ public static class Config
         bool.TryParse(_con.Value("SpendHalfEnergy", "true"), out var spendHalfEnergy);
         _options.SpendHalfEnergy = spendHalfEnergy;
 
+        int.TryParse(_con.Value("EnergySpendBeforeSleepDebuff", "1200"), out var energySpendBeforeSleepDebuff);
+        _options.EnergySpendBeforeSleepDebuff = energySpendBeforeSleepDebuff;
+
         _con.ConfigWrite();
 
         return _options;
@@ -47,6 +50,7 @@ public static class Config
     [Serializable]
     public class Options
     {
+        public int EnergySpendBeforeSleepDebuff;
         public bool SpeedUpSleep;
         public bool SpeedUpMeditation;
         public bool YawnMessage;

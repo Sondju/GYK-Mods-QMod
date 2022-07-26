@@ -426,7 +426,7 @@ namespace BeamMeUpGerry
                     if (_maGui != null)
                     {
                         Sounds.OnClosePressed();
-                        _maGui.DestroyBubble();
+                        _maGui.OnChosen("cancel");
                         _usingStone = false;
                         _dotSelection = false;
                         _isNpc = false;

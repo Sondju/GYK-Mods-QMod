@@ -11,7 +11,7 @@ namespace FasterCraftReloaded
         private static Config.Options _cfg;
 
         private static readonly string[] Exclude = {
-            "zombie","refugee","bee","tree","berry","bush","pump"
+            "zombie","refugee","bee","tree","berry","bush","pump", "compost", "peat", "slime", "candelabrum", "incense"
         };
 
         public static void Patch()
@@ -31,7 +31,10 @@ namespace FasterCraftReloaded
 
         private static void Log(string message, bool error = false)
         {
-            Tools.Log("FasterCraftReloaded", $"{message}", error);
+            if (_cfg.Debug || error)
+            {
+                Tools.Log("FasterCraftReloaded", $"{message}", error);
+            }
         }
 
         [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.DoAction))]

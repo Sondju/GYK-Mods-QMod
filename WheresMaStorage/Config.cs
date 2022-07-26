@@ -27,7 +27,8 @@ namespace WheresMaStorage
             public bool ShowUsedSpaceInTitles;
             public bool ShowWorldZoneInTitles;
             public bool CacheEligibleInventories;
-            public bool AutoDepositExistingStacks;
+            public bool IncludeRefugeeDepot;
+            public bool Debug;
         }
 
         public static Options GetOptions()
@@ -35,8 +36,11 @@ namespace WheresMaStorage
             _options = new Options();
             _con = new ConfigReader();
 
-            bool.TryParse(_con.Value("AutoDepositExistingStacks", "true"), out var autoDepositExistingStacks);
-            _options.AutoDepositExistingStacks = autoDepositExistingStacks;
+            bool.TryParse(_con.Value("IncludeRefugeeDepot", "false"), out var includeRefugeeDepot);
+            _options.IncludeRefugeeDepot = includeRefugeeDepot;
+
+            bool.TryParse(_con.Value("Debug", "false"), out var debug);
+            _options.Debug = debug;
 
             bool.TryParse(_con.Value("SharedCraftInventory", "true"), out var sharedCraftInventory);
             _options.SharedCraftInventory = sharedCraftInventory;

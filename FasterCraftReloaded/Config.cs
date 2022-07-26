@@ -12,12 +12,17 @@ namespace FasterCraftReloaded
         public class Options
         {
             public float CraftSpeedMultiplier;
+            public bool Debug;
         }
 
         public static Options GetOptions()
         {
             _options = new Options();
             _con = new ConfigReader();
+
+            bool.TryParse(_con.Value("Debug", "false"), out var debug);
+            _options.Debug = debug;
+
             float.TryParse(_con.Value("CraftSpeedMultiplier", "2"), NumberStyles.Float, CultureInfo.InvariantCulture, out var craftSpeedMultiplier);
             _options.CraftSpeedMultiplier = craftSpeedMultiplier;
 
