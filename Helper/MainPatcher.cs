@@ -22,10 +22,8 @@ namespace Helper
     //    }
     //}
 
-
     public static class Tools
     {
-
         private static readonly string[] Quests =
         {
             "start",
@@ -111,7 +109,7 @@ namespace Helper
             }
             catch (Exception ex)
             {
-               Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
+                Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
             }
         }
 
@@ -147,9 +145,6 @@ namespace Helper
             }
         }
 
-
-
-
         [HarmonyPatch(typeof(MainMenuGUI), nameof(MainMenuGUI.Open))]
         public static class MainMenuGuiOpenPatch
         {
@@ -176,7 +171,7 @@ namespace Helper
                 }
                 catch (Exception)
                 {
-                   //
+                    //
                 }
             }
 

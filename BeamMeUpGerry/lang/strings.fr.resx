@@ -174,4 +174,7 @@
   <data name="M10" xml:space="preserve">
     <value>Ami de l'argent.</value>
   </data>
+  <data name="Coal" xml:space="preserve">
+    <value>Veine de charbon</value>
+  </data>
 </root>

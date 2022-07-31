@@ -53,7 +53,7 @@ public class MainPatcher
             Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
     }
-    
+
     private static float GetTimeMulti()
     {
         var num = _seconds switch
@@ -81,6 +81,7 @@ public class MainPatcher
             delta_time = GetTime();
         }
     }
+
     [HarmonyPatch(typeof(EnvironmentEngine), nameof(EnvironmentEngine.Update))]
     public static class EnvironmentEngineUpdatePatch
     {

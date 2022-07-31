@@ -1,9 +1,9 @@
 using HarmonyLib;
+using Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Helper;
 
 namespace NewGameAtBottom;
 
@@ -45,7 +45,7 @@ public class MainPatcher
             }
             catch (Exception ex)
             {
-                Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}",true);
+                Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
             }
 
             return codes.AsEnumerable();

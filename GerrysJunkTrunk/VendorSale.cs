@@ -21,10 +21,12 @@ namespace GerrysJunkTrunk
             {
                 return _item;
             }
+
             public float GetQty()
             {
                 return _qty;
             }
+
             public float GetPrice()
             {
                 return _price;

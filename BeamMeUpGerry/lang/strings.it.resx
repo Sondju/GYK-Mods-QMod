@@ -174,4 +174,7 @@
   <data name="M10" xml:space="preserve">
     <value>Amico di soldi.</value>
   </data>
+  <data name="Coal" xml:space="preserve">
+    <value>Vena di carbone</value>
+  </data>
 </root>

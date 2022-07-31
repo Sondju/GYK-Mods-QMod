@@ -11,7 +11,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using UnityEngine;
-using UnityEngine.UIElements;
 using Random = System.Random;
 
 namespace BeamMeUpGerry
@@ -38,12 +37,13 @@ namespace BeamMeUpGerry
         };
 
         private static readonly Dictionary<string, Vector3> LocationByVectorPartTwo = new()
-        {
+        {//-505.5, 6098.0, 1270.3
             { "zone_souls", new Vector3(11050.1f, -10807.1f, -2249.21f) },
             { "zone_graveyard", new Vector3(1635.7f, -1506.9f, -313.61f) },
             { "zone_euric_room", new Vector3(20108.0f, -11599.6f, -2412.41f) },
             { "zone_church", new Vector3(190.6f, -8715.7f, -1815.7f) },
             { "zone_zombie_sawmill", new Vector3(2204.3f, 3409.7f, 710.8f) },
+            { strings.Coal, new Vector3(-505.5f, 6098.0f, 1270.3f) },
             { strings.Clay, new Vector3(595.4f, -3185.8f, -663.6f) },
             { strings.Sand, new Vector3(334.3f, 875.9f, 182.5f) },
             { strings.Mill, new Vector3(11805.2f, -768.9f, -157.7f) }, //mill_to_crossroads
@@ -97,12 +97,16 @@ namespace BeamMeUpGerry
 
         private static void Log(string message, bool error = false)
         {
-            Tools.Log("BeamMeUpGerry", $"{message}", error);
+            if (_cfg.Debug || error)
+            {
+                Tools.Log("BeamMeUpGerry", $"{message}", error);
+            }
         }
 
         private static bool RemoveZone(AnswerVisualData answer)
         {
             var wheatExists = MainGame.me.save.known_world_zones.Exists(a => string.Equals(a, "zone_wheat_land"));
+            var coalExists = MainGame.me.save.known_world_zones.Exists(a => string.Equals(a, "zone_flat_under_waterflow"));
             if (answer.id.Contains(strings.Farmer))
             {
                 return wheatExists && MainGame.me.save.known_npcs.npcs.Exists(a => a.npc_id.Contains("farmer"));
@@ -111,6 +115,11 @@ namespace BeamMeUpGerry
             if (answer.id.Contains(strings.Mill))
             {
                 return wheatExists && MainGame.me.save.known_npcs.npcs.Exists(a => a.npc_id.Contains("miller"));
+            }
+
+            if (answer.id.Contains(strings.Coal))
+            {
+                return coalExists;
             }
 
             if (answer.id.Contains(strings.Clay) || answer.id.Contains(strings.Sand) || answer.id.Contains("...") || answer.id.Contains("....") || answer.id.Contains("cancel")) return false;
@@ -147,7 +156,7 @@ namespace BeamMeUpGerry
             }
             var gerry = WorldMap.SpawnWGO(MainGame.me.world_root.transform, "talking_skull", location);
             gerry.ReplaceWithObject("talking_skull", true);
-            
+
             GJTimer.AddTimer(0.5f, delegate
             {
                 gerry.Say(!money ? message : $"{GetMoneyMessage()}", delegate
@@ -255,7 +264,7 @@ namespace BeamMeUpGerry
                 }
 
                 if (_isNpc) return;
-               
+
                 _usingStone = false;
                 _dotSelection = false;
 
@@ -267,7 +276,7 @@ namespace BeamMeUpGerry
             {
                 if (!Tools.TutorialDone()) return;
                 if (!_cfg.EnableListExpansion) return;
-               // if (_isNpc) return;
+                // if (_isNpc) return;
                 List<AnswerVisualData> answers;
 
                 _dotSelection = false;
@@ -306,7 +315,7 @@ namespace BeamMeUpGerry
                 if (_isNpc) return;
                 if (string.Equals("cancel", chosen))
                 {
-                   // ShowHud();
+                    // ShowHud();
                     return;
                 }
 
@@ -352,7 +361,6 @@ namespace BeamMeUpGerry
                                 CameraFader.current.FadeIn(0.15f);
                                 GJTimer.AddTimer(0.20f, delegate
                                 {
-                                    
                                     if (_cfg.DisableGerry)
                                     {
                                         TakeMoney(vector);
@@ -536,7 +544,7 @@ namespace BeamMeUpGerry
                 if (!Tools.TutorialDone()) return;
                 //MainGame.me.player.data.money += 1000f;
                 _isNpc = __instance.obj_def.IsNPC();
-              //  Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
+                //  Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
             }
         }
     }

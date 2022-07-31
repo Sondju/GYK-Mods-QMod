@@ -1,11 +1,11 @@
 using AppleTreesEnhanced.lang;
 using HarmonyLib;
+using Helper;
 using System;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using Helper;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
@@ -27,7 +27,6 @@ public class MainPatcher
             harmony.PatchAll(Assembly.GetExecutingAssembly());
             _cfg = Config.GetOptions();
             _updateDone = false;
-           
         }
         catch (Exception ex)
         {
@@ -39,7 +38,6 @@ public class MainPatcher
     {
         Tools.Log("AppleTreesEnhanced", $"{message}", error);
     }
-
 
     private static void ShowMessage(WorldGameObject obj, string message)
     {
@@ -229,7 +227,6 @@ public class MainPatcher
             }
         }
     }
-
 
     [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
     public static class GameSettingsApplyLanguageChange

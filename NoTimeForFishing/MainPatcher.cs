@@ -1,8 +1,8 @@
 using Fishing;
 using HarmonyLib;
+using Helper;
 using System;
 using System.Reflection;
-using Helper;
 using UnityEngine;
 
 namespace NoTimeForFishing;

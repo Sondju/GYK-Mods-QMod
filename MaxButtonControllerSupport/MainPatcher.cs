@@ -1,10 +1,10 @@
-using System.Linq;
 using HarmonyLib;
-using System.Reflection;
-using Rewired;
-using MaxButton;
-using System;
 using Helper;
+using MaxButton;
+using Rewired;
+using System;
+using System.Linq;
+using System.Reflection;
 
 namespace MaxButtonControllerSupport
 {
@@ -37,7 +37,6 @@ namespace MaxButtonControllerSupport
             "blockage", "obstacle", "builddesk", "fix", "broken"
         };
 
-
         public static void Patch()
         {
             try
@@ -52,7 +51,6 @@ namespace MaxButtonControllerSupport
                 {
                     Log($"MaxButton not found, aborting patch process.");
                 }
-               
             }
             catch (Exception ex)
             {
@@ -64,7 +62,6 @@ namespace MaxButtonControllerSupport
         {
             Tools.Log("MaxButtonControllerSupport", $"{message}", error);
         }
-
 
         [HarmonyPatch(typeof(CraftGUI))]
         public static class CraftGuiPatchMbcs
@@ -84,7 +81,6 @@ namespace MaxButtonControllerSupport
             }
         }
 
-
         [HarmonyPatch(typeof(CraftItemGUI), nameof(CraftItemGUI.OnOver))]
         public static class CraftItemGuiOnOverPatchMbcs
         {
@@ -93,7 +89,6 @@ namespace MaxButtonControllerSupport
             {
                 _craftItemGui = CraftItemGUI.current_overed;
                 _crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
-
             }
         }
 
@@ -116,16 +111,13 @@ namespace MaxButtonControllerSupport
                 _itemCountGuiOpen = false;
             }
 
-
             [HarmonyPostfix]
             [HarmonyPatch("OnConfirm")]
             public static void OnClosePressedPostfix()
             {
                 _itemCountGuiOpen = false;
             }
-
         }
-
 
         [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
         public static class WorldGameObjectInteractPatch
@@ -160,7 +152,6 @@ namespace MaxButtonControllerSupport
                         ?.Invoke(typeof(MaxButtonVendor), new object[]
                         {
                             _slider
-
                         });
                 }
 
@@ -172,10 +163,8 @@ namespace MaxButtonControllerSupport
                         {
                             _slider,
                             1
-
                         });
                 }
-
 
                 //RT = 19
                 if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(19) && _craftGuiOpen && !_unsafeInteraction)
@@ -187,7 +176,6 @@ namespace MaxButtonControllerSupport
                         {
                             _craftItemGui,
                             _crafteryWgo
-
                         });
                 }
 
@@ -202,7 +190,6 @@ namespace MaxButtonControllerSupport
                             _craftItemGui
                         });
                 }
-
             }
 
             [HarmonyFinalizer]
@@ -211,6 +198,5 @@ namespace MaxButtonControllerSupport
                 return null;
             }
         }
-
     }
 }

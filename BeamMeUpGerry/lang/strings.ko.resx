@@ -174,4 +174,7 @@
   <data name="M10" xml:space="preserve">
     <value>돈 친구.</value>
   </data>
+  <data name="Coal" xml:space="preserve">
+    <value>탄광</value>
+  </data>
 </root>

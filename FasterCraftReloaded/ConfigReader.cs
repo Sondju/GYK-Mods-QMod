@@ -8,6 +8,7 @@ namespace FasterCraftReloaded
         private const string ConfigPath = "./QMods/FasterCraftReloaded/config.ini";
 
         private readonly Dictionary<string, string> _values = new();
+
         public ConfigReader()
         {
             if (!File.Exists(ConfigPath))
@@ -37,7 +38,6 @@ namespace FasterCraftReloaded
             using var file = new StreamWriter(ConfigPath, false);
             foreach (var entry in _values)
                 file.WriteLine("{0}={1}", entry.Key.Trim(), entry.Value.Trim());
-
         }
     }
 }

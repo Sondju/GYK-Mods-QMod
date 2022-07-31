@@ -1,8 +1,8 @@
 using HarmonyLib;
+using Helper;
 using LazyBearGames.Preloader;
 using System;
 using System.Reflection;
-using Helper;
 
 namespace NoIntros;
 

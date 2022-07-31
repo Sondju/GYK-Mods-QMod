@@ -4,7 +4,6 @@ namespace BeamMeUpGerry
 {
     internal static class Util
     {
-
         public static GDPoint FindNearestGdPoint()
         {
             var pos = MainGame.me.player_pos;

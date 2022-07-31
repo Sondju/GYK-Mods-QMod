@@ -30,7 +30,7 @@ namespace IBuildWhereIWant
         private static int _unlockedCraftListCount;
         private static string Lang { get; set; }
         //private static bool _gerrysJunkTrunk;
-        
+
         public static void Patch()
         {
             try
@@ -40,8 +40,6 @@ namespace IBuildWhereIWant
 
                 var harmony = new Harmony("p1xel8ted.GraveyardKeeper.IBuildWhereIWant");
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
-
-                
             }
             catch (Exception ex)
             {
@@ -53,7 +51,6 @@ namespace IBuildWhereIWant
         {
             Tools.Log("IBuildWhereIWant", $"{message}", error);
         }
-
 
         [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
         public static class GameSettingsApplyLanguageChange
@@ -302,7 +299,7 @@ namespace IBuildWhereIWant
                 if (!Tools.TutorialDone()) return;
                 if (_buildDeskClone == null) return;
                 if (__instance != _buildDeskClone) return;
-               // if (!string.Equals(__instance.obj_id, _buildDeskClone.obj_id)) return;
+                // if (!string.Equals(__instance.obj_id, _buildDeskClone.obj_id)) return;
                 __result.header = strings.Header;
                 __result.descr = strings.Description;
             }

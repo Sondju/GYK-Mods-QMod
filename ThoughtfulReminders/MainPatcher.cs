@@ -1,9 +1,9 @@
 using HarmonyLib;
+using Helper;
 using System;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
-using Helper;
 using ThoughtfulReminders.lang;
 using UnityEngine;
 
@@ -24,7 +24,6 @@ public class MainPatcher
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             _cfg = Config.GetOptions();
-
         }
         catch (Exception ex)
         {

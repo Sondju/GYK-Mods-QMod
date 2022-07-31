@@ -348,7 +348,6 @@ namespace GerrysJunkTrunk
         {
             return MainGame.me.save.unlocked_techs.Exists(a =>
                 a.ToLowerInvariant().Equals("Wood processing".ToLowerInvariant()));
-
         }
 
         private static bool UnlockedShippingBoxExpansion()
@@ -563,8 +562,6 @@ namespace GerrysJunkTrunk
                         UITextStyles.TextStyle.TinyDescription, NGUIText.Alignment.Left));
                     AlreadyDone.Add(item_gui);
                 }
-
-               
             }
 
             [HarmonyFinalizer]
@@ -573,7 +570,7 @@ namespace GerrysJunkTrunk
                 return null;
             }
         }
-        
+
         [HarmonyPatch(typeof(EnvironmentEngine), "OnEndOfDay")]
         public static class EnvironmentEngineOnEndOfDayPatch
         {
@@ -828,14 +825,13 @@ namespace GerrysJunkTrunk
                     {
                         Log("No Shipping Box Found!");
                         _internalCfg.ShippingBoxBuilt = false;
-                      
                     }
                     else
                     {
                         Log($"Found Shipping Box at {_shippingBox.pos3}");
                         _internalCfg.ShippingBoxBuilt = true;
                         _shippingBox.data.drop_zone_id = ShippingBoxTag;
-             
+
                         var invSize = SmallInvSize;
                         if (UnlockedShippingBoxExpansion())
                         {
@@ -946,13 +942,11 @@ namespace GerrysJunkTrunk
                     Log($"Removed Shipping Box!");
                     _shippingBox = null;
                     _internalCfg.ShippingBoxBuilt = false;
-            
+
                     UpdateInternalConfig();
                 }
             }
         }
-
-
 
         [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
         public static class WorldGameObjectInteractPatch
@@ -978,7 +972,6 @@ namespace GerrysJunkTrunk
                     __instance.data.SetInventorySize(invSize);
                     __instance.data.money = GetBoxEarnings(__instance);
                     _shippingBox = __instance;
-                    
                 }
             }
 
@@ -1011,7 +1004,7 @@ namespace GerrysJunkTrunk
                     __instance.data.SetInventorySize(invSize);
                     __instance.data.drop_zone_id = ShippingBoxTag;
                     _shippingBox = __instance;
-                  
+
                     _internalCfg.ShippingBoxBuilt = true;
                     UpdateInternalConfig();
                 }

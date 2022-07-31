@@ -1,7 +1,7 @@
 using HarmonyLib;
+using Helper;
 using System;
 using System.Reflection;
-using Helper;
 
 namespace UltraWide;
 

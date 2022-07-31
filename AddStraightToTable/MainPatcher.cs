@@ -1,8 +1,8 @@
 using HarmonyLib;
+using Helper;
 using System;
 using System.Linq;
 using System.Reflection;
-using Helper;
 
 namespace AddStraightToTable;
 
@@ -65,7 +65,6 @@ public static class MainPatcher
                             }
 
                             return InventoryWidget.ItemFilterResult.Hide;
-
                         }
 
                         if (item.definition.type != ItemDefinition.ItemType.BodyUniversalPart)

@@ -1,11 +1,11 @@
 using Exhaustless.lang;
 using HarmonyLib;
+using Helper;
 using System;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using Helper;
 using UnityEngine;
 
 namespace Exhaustless;

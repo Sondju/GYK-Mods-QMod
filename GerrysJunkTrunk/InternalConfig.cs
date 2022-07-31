@@ -7,7 +7,6 @@ public static class InternalConfig
     private static Options _options;
     private static InternalConfigReader _con;
 
-
     public static void WriteOptions()
     {
         _con.UpdateValue("ShippingBoxBuilt", _options.ShippingBoxBuilt.ToString());

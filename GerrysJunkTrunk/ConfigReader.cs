@@ -28,6 +28,7 @@ public class ConfigReader
         _values?.Add(name.Trim(), value?.Trim());
         return value;
     }
+
     public void UpdateValue(string name, string value)
     {
         _values[name] = value;

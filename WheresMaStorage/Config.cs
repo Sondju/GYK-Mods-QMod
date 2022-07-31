@@ -16,6 +16,8 @@ namespace WheresMaStorage
             public bool HideInvalidSelections;
             public bool ShowOnlyPersonalInventory;
             public int AdditionalInventorySpace = 20;
+            public bool ModifyInventorySize;
+            public bool ModifyStackSize;
             public int StackSizeForStackables = 999;
             public bool RemoveGapsBetweenSections;
             public bool RemoveGapsBetweenSectionsVendor;
@@ -35,6 +37,14 @@ namespace WheresMaStorage
         {
             _options = new Options();
             _con = new ConfigReader();
+
+            bool.TryParse(_con.Value("ModifyInventorySize", "true"), out var modifyInventorySize);
+            _options.ModifyInventorySize = modifyInventorySize;
+
+
+            bool.TryParse(_con.Value("ModifyStackSize", "true"), out var modifyStackSize);
+            _options.ModifyStackSize = modifyStackSize;
+
 
             bool.TryParse(_con.Value("IncludeRefugeeDepot", "false"), out var includeRefugeeDepot);
             _options.IncludeRefugeeDepot = includeRefugeeDepot;
@@ -93,7 +103,7 @@ namespace WheresMaStorage
 
             bool.TryParse(_con.Value("HideWarehouseShopWidgets", "true"), out var hideWarehouseShopWidgets);
             _options.HideWarehouseShopWidgets = hideWarehouseShopWidgets;
-            
+
             _con.ConfigWrite();
 
             return _options;

@@ -13,7 +13,7 @@ public static class Config
         _options = new Options();
         _con = new ConfigReader();
 
-        int.TryParse(_con.Value("SaveInterval", "600"),NumberStyles.Integer, CultureInfo.InvariantCulture, out var saveInterval);
+        int.TryParse(_con.Value("SaveInterval", "600"), NumberStyles.Integer, CultureInfo.InvariantCulture, out var saveInterval);
         _options.SaveInterval = saveInterval;
 
         bool.TryParse(_con.Value("AutoSave", "true"), out var autoSave);

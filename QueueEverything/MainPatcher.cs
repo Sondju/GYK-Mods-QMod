@@ -1,4 +1,3 @@
-using FlowCanvas.Nodes;
 using HarmonyLib;
 using Helper;
 using QueueEverything.lang;
@@ -10,7 +9,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 // ReSharper disable InconsistentNaming
 
@@ -44,7 +42,7 @@ public static class MainPatcher
     //individual craft definitions
     private static readonly string[] UnSafeCraftDefPartials =
     {
-        "soul_workbench_craft", "remove", "zombie", "refugee"
+        "soul_workbench_craft", "remove", "zombie", "refugee", "_to_", "upgrade", "fountain"
     };
 
     private static readonly string[] UnSafePartials =
@@ -138,12 +136,12 @@ public static class MainPatcher
             if (UnSafeCraftZones.Contains(__instance.GetMyWorldZoneId()) || UnSafePartials.Any(__instance.obj_id.Contains) || UnSafeCraftObjects.Contains(__instance.obj_id))
             {
                 _unsafeInteraction = true;
-                 Log($"Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
+                Log($"Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
             }
             else
             {
                 _unsafeInteraction = false;
-                 Log($"UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
+                Log($"UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
             }
         }
 
@@ -155,7 +153,6 @@ public static class MainPatcher
         //    var dockPoint = __instance.RefindDockPointsAndGet();
         //    if (other_obj.is_player)
         //    {
-
         //        var data = GameBalance.me.GetData<WorkerDefinition>("worker_zombie_1");
         //        var item = MainGame.me.save.GenerateBody(1, 1, -1, -1);
         //        var worker_wgo = WorldMap.SpawnWGO(MainGame.me.world_root, data.worker_wgo, new Vector3?(dockPoint[0].transform.position));
@@ -165,7 +162,7 @@ public static class MainPatcher
         //        craftery.linked_worker = worker_wgo;
         //        worker_wgo.enabled = false;
 
-        //    } 
+        //    }
         //    Log($"Object: {__instance.obj_id}, Other: {other_obj.obj_id}, Craftery: {GUIElements.me.craft.GetCrafteryWGO().obj_id}, Worker Attached: {craftery.has_linked_worker}");
         //}
     }
@@ -282,6 +279,8 @@ public static class MainPatcher
                 Log($"Unsafe Craft: {__instance.id}");
                 return;
             }
+
+            Log($"UNKNOWN/Safe? Craft: {__instance.id}");
             __result = true;
         }
     }
@@ -639,8 +638,8 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref CraftItemGUI __instance, ref int ____amount, ref WorldGameObject __state)
         {
-            if (!Tools.TutorialDone()) return;
-            // Log($"Craft: {__instance.craft_definition.id}, One time: {__instance.craft_definition.one_time_craft}");
+            if (!Tools.TutorialDone()) return; 
+            Log($"Craft: {__instance.craft_definition.id}, One time: {__instance.craft_definition.one_time_craft}");
             if (_unsafeInteraction || IsUnsafeDefinition(__instance.craft_definition)) return;
 
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
@@ -701,7 +700,6 @@ public static class MainPatcher
             if (__state.has_linked_worker) return;
             currentlyCrafting.Add(__state);
             __state.OnWorkAction();
-
         }
     }
 
@@ -778,8 +776,16 @@ public static class MainPatcher
             var multiInventory = !GlobalCraftControlGUI.is_global_control_active
                 ? MainGame.me.player.GetMultiInventoryForInteraction()
                 : GUIElements.me.craft.multi_inventory;
-            //const string path = "./qmods/multis.txt";
-            //var message = crafteryWgo.obj_id+"\n---------------------\n" + "Item: " + __instance.current_craft.id + ", Craft Def: " + __instance.craft_definition.id + "\n";
+            const string path = "./qmods/multis.txt";
+            
+            var message = GUIElements.me.craft.GetCrafteryWGO().obj_id + "\n---------------------\n" + "Item: " + __instance.current_craft.id + ", Craft Def: " + __instance.craft_definition.id + "\n";
+
+
+
+
+
+
+
             for (var i = 0; i < ____multiquality_ids.Count; i++)
                 if (string.IsNullOrWhiteSpace(____multiquality_ids[i]))
                 {
@@ -790,9 +796,9 @@ public static class MainPatcher
                         craftable.Add(itemCraftable);
                     else
                         notCraftable.Add(itemCraftable);
-                    //message += "Item: " + __instance.current_craft.needs[i].id + ", Icon: "+ __instance.current_craft.needs[i].GetIcon() + ", Stock: " + itemCount +
-                    //           ", Craftable: " + itemCraftable + "\n";
-                    //message += " - Required for craft: " + itemNeed + "\n";
+                    message += "Item: " + __instance.current_craft.needs[i].id + ", Icon: " + __instance.current_craft.needs[i].GetIcon() + ", Stock: " + itemCount +
+                               ", Craftable: " + itemCraftable + "\n";
+                    message += " - Required for craft: " + itemNeed + "\n";
                 }
                 else
                 {
@@ -808,12 +814,12 @@ public static class MainPatcher
                     if (sCraftable != 0) craftable.Add(sCraftable);
                     if (gCraftable != 0) craftable.Add(gCraftable);
 
-                    //message += "MQ Item " + i + ": " + ____multiquality_ids[i] + "\n - Gold Stock: " + gStarItem +
-                    //           ", Craftable: " + gStarItem / itemValueNeeded + "\n";
-                    //message += " - Silver Stock: " + sStarItem + ", Craftable: " + sStarItem / itemValueNeeded +
-                    //           "\n";
-                    //message += " - Bronze Stock: " + bStarItem + ", Craftable: " + bCraftable + "\n";
-                    //message += " - Required for craft: " + __instance.current_craft.needs[i].value + "\n";
+                    message += "MQ Item " + i + ": " + ____multiquality_ids[i] + "\n - Gold Stock: " + gStarItem +
+                               ", Craftable: " + gStarItem / itemValueNeeded + "\n";
+                    message += " - Silver Stock: " + sStarItem + ", Craftable: " + sStarItem / itemValueNeeded +
+                               "\n";
+                    message += " - Bronze Stock: " + bStarItem + ", Craftable: " + bCraftable + "\n";
+                    message += " - Required for craft: " + __instance.current_craft.needs[i].value + "\n";
                     if (bCraftable + sCraftable + gCraftable > 0)
                         if (_cfg.AutoSelectHighestQualRecipe)
                         {
@@ -848,10 +854,10 @@ public static class MainPatcher
                 _craftAmount = min;
                 ____amount = min;
             }
-            //message += "Max Craftable: " + min + "\n";
-            //message += "Ingredient list count: " + craftable.Count + "\n";
-            //message += "---------------------\n";
-            //File.AppendAllText(path, message);
+            message += "Max Craftable: " + min + "\n";
+            message += "Ingredient list count: " + craftable.Count + "\n";
+            message += "---------------------\n";
+            File.AppendAllText(path, message);
         }
     }
 

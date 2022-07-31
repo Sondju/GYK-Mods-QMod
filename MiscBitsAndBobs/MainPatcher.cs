@@ -1,10 +1,11 @@
 using HarmonyLib;
+using Helper;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using Helper;
+using UnityEngine;
 
 namespace MiscBitsAndBobs;
 
@@ -57,7 +58,6 @@ public class MainPatcher
         Tools.Log("MiscBitsAndBobs", $"{message}", error);
     }
 
-    
     [HarmonyPatch(typeof(PrayCraftGUI), nameof(PrayCraftGUI.OnPrayButtonPressed))]
     public static class PrayCraftGuiOnPrayButtonPressedPatch
     {
@@ -82,13 +82,78 @@ public class MainPatcher
         }
     }
 
+
+    //[HarmonyPatch(typeof(DropResGameObject), nameof(DropResGameObject.ProcessDropCollectorRangeCheck), typeof(WorldGameObject), typeof(Vector3) )]
+    //public static class DropResGameObjectPatch
+    //{
+
+    //    [HarmonyPrefix]
+    //    public static bool Prefix()
+    //    {
+    //        return false;
+    //    }
+
+    //    [HarmonyPostfix]
+    //    public static void Postfix(ref DropResGameObject __instance, ref WorldGameObject collector_wgo, Vector3 char_global_pos, 
+    //        ref bool ____performing_drop_and_fly,
+    //        ref Transform ____tf,
+    //        ref WorldGameObject ____target_obj,
+    //        ref Transform ____target_char_tf,
+    //        ref float ____last_dist_to_target,
+    //        ref bool ____just_spawned)
+    //    {
+    //        Log($"[ProcessDropRange]: Postfix Hit");
+    //        if (____performing_drop_and_fly)
+    //        {
+    //            return;
+    //        }
+    //        var num = char_global_pos.DistSqrTo(____tf.position, 384f);
+    //        if (collector_wgo.is_player)
+    //        {
+    //            __instance.dist_sqr_to_player = num;
+    //        }
+    //        //if (num > 3.2399998f)
+    //        //{
+    //        //   // return;
+    //        //}
+    //        //if (collector_wgo.CanCollectDrop(__instance) <= 0)
+    //        //{
+    //        //    return;
+    //        //}
+    //        if (__instance.has_target || __instance.collect_delay > 0f)
+    //        {
+    //            return;
+    //        }
+    //        //__instance.ChangeKickableState(false);
+
+    //        typeof(DropResGameObject).GetMethod("ChangeKickableState", AccessTools.all)
+    //            ?.Invoke(__instance, new object[]
+    //            {
+    //              false
+    //            });
+
+    //        ____target_obj = collector_wgo;
+    //        ____target_char_tf = collector_wgo.transform;
+    //        ____last_dist_to_target = num;
+    //        ____just_spawned = false;
+    //        //__instance.SetDropCollectingState(true);
+
+    //        typeof(DropResGameObject).GetMethod("SetDropCollectingState", AccessTools.all)
+    //            ?.Invoke(__instance, new object[]
+    //            {
+    //                true
+    //            });
+    //    }
+    //}
+
+
+
     [HarmonyPatch(typeof(LeaveTrailComponent), "LeaveTrail")]
     public static class LeaveTrailComponentLeaveTrailPatch
     {
         [HarmonyPostfix]
         public static void Postfix(TrailDefinition ____trail_definition, Ground.GroudType ____trail_type, float ____dirty_amount, List<TrailObject> ____all_trails)
         {
-            
             if (!_cfg.LessenFootprintImpact) return;
             var byType = ____trail_definition.GetByType(____trail_type);
             if (____all_trails.Count <= 0) return;
@@ -136,7 +201,7 @@ public class MainPatcher
             }
         }
     }
-    
+
     [HarmonyPatch(typeof(CraftComponent), "End")]
     public static class GraveGuiOnCraftPatch
     {
@@ -160,7 +225,7 @@ public class MainPatcher
         public static void Prefix(ref DropResGameObject __instance)
         {
             if (Tools.IsModLoaded(WheresMaStorage)) return;
-                if (!GraveItems.Contains(__instance.res.definition.type)) return;
+            if (!GraveItems.Contains(__instance.res.definition.type)) return;
             __instance.res.definition.stack_count = 999;
         }
     }
@@ -186,7 +251,7 @@ public class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref CraftDefinition __instance, ref bool __result)
         {
-           // if (Tools.IsModLoaded(WheresMaStorage)) return;
+            // if (Tools.IsModLoaded(WheresMaStorage)) return;
             if (!_cfg.EnableChiselInkStacking) return;
             if (__instance == null) return;
             if (__instance.needs.Exists(item => item.id.Equals("pen:ink_pen")) && __instance.dur_needs_item > 0)
@@ -197,10 +262,8 @@ public class MainPatcher
             {
                 __result = false;
             }
-
         }
     }
-
 
     [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
     [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
@@ -209,7 +272,6 @@ public class MainPatcher
         [HarmonyPostfix]
         private static void Postfix()
         {
-
             if (_cfg.AllowHandToolDestroy)
             {
                 foreach (var itemDef in GameBalance.me.items_data.Where(a => ToolItems.Contains(a.type)))
@@ -218,7 +280,6 @@ public class MainPatcher
                 }
             }
 
-         
             if (_cfg.EnableToolAndPrayerStacking || _cfg.EnableChiselInkStacking)
             {
                 foreach (var item in GameBalance.me.items_data.Where(item => item.stack_count == 1))

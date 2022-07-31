@@ -8,6 +8,7 @@ namespace AddStraightToTable
         private const string ConfigPath = "./QMods/WheresMaStorage/config.ini";
 
         private readonly Dictionary<string, string> _values = new();
+
         public ConfigReader()
         {
             if (!File.Exists(ConfigPath))

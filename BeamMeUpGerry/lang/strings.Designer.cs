@@ -70,6 +70,15 @@ namespace BeamMeUpGerry.lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Coal vein.
+        /// </summary>
+        public static string Coal {
+            get {
+                return ResourceManager.GetString("Coal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to I don&apos;t know where that is!.
         /// </summary>
         public static string DontKnow {

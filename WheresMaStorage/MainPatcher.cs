@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
+using Steamworks;
 using WheresMaStorage.lang;
 
 namespace WheresMaStorage
@@ -32,35 +33,35 @@ namespace WheresMaStorage
         private const string Vendor = "vendor";
         private const string Gerry = "gerry";
 
-        //private static readonly string[] ZoneExclusions =
-        //{
-        //    "slava_test",
-        //    "morgue_outside",
-        //    "cabinet",
-        //    "farm",
-        //    "hill",
-        //    "tavern",
-        //    "vilage",
-        //    "flat_under_waterflow",
-        //    "flat_under_waterflow_2",
-        //    "flat_under_waterflow_3",
-        //    "swamp",
-        //    "witch_hut",
-        //    "wheat_land",
-        //    "beatch",
-        //    "forest_under_village",
-        //    "east_border",
-        //    "sealight",
-        //    "camp",
-        //    "marble_deposit",
-        //    "burned_house",
-        //    "nountain_fort",
-        //    "cliff",
-        //    "cellar_storage",
-        //    "refugees_camp",
-        //    "euric_room",
-        //    "alarich_tent_inside"
-        //};
+        private static readonly string[] ZoneExclusions =
+        {
+            "slava_test",
+            "morgue_outside",
+            "cabinet",
+            "farm",
+            "hill",
+            "tavern",
+            "vilage",
+            "flat_under_waterflow",
+            "flat_under_waterflow_2",
+            "flat_under_waterflow_3",
+            "swamp",
+            "witch_hut",
+            "wheat_land",
+            "beatch",
+            "forest_under_village",
+            "east_border",
+            "sealight",
+            "camp",
+            "marble_deposit",
+            "burned_house",
+            "nountain_fort",
+            "cliff",
+            "cellar_storage",
+            //"refugees_camp",
+            "euric_room",
+            "alarich_tent_inside"
+        };
 
         private static readonly string[] AlwaysHidePartials =
         {
@@ -204,7 +205,7 @@ namespace WheresMaStorage
         public static MultiInventory GetMi(CraftDefinition craft, MultiInventory orig, WorldGameObject otherGameObject)
         {
             if (!Tools.TutorialDone()) return orig;
-            if ((otherGameObject.has_linked_worker && otherGameObject.linked_worker.obj_id.Contains("zombie")) || otherGameObject.obj_id.Contains("zombie"))
+            if ((otherGameObject.has_linked_worker && otherGameObject.linked_worker.obj_id.Contains("zombie")) || otherGameObject.obj_id.Contains("zombie") || otherGameObject.obj_id.StartsWith("mf_"))
             {
                 Log($"[InvRedirect]: Redirected craft inventory to player MultiInventory! Object: {otherGameObject.obj_id}, Craft: {craft.id}");
                 _zombieWorker = true;
@@ -353,28 +354,21 @@ namespace WheresMaStorage
                 if (_gameBalanceAlreadyRun) return;
                 _gameBalanceAlreadyRun = true;
 
-                Log($"[WorldZone]: |---START---|");
-                foreach (var zone in GameBalance.me.world_zones_data)
+                if (_cfg.ModifyInventorySize)
                 {
-                    Log($"[WorldZone]: {zone.id}");
-                }
-                Log($"[WorldZone]: |---END---|");
 
-                foreach (var od in GameBalance.me.objs_data.Where(od => od.interaction_type == ObjectDefinition.InteractionType.Chest))
-                {
-                    od.inventory_size += _cfg.AdditionalInventorySpace;
+                    foreach (var od in GameBalance.me.objs_data.Where(od =>
+                                 od.interaction_type == ObjectDefinition.InteractionType.Chest))
+                    {
+                        od.inventory_size += _cfg.AdditionalInventorySpace;
+                    }
                 }
+
+                if (!_cfg.ModifyStackSize) return;
 
                 foreach (var id in GameBalance.me.items_data.Where(id => id.stack_count is > 1 and < 999))
                 {
-                    if (id.stack_count + _cfg.StackSizeForStackables > 999)
-                    {
-                        id.stack_count = 999;
-                    }
-                    else
-                    {
-                        id.stack_count += _cfg.StackSizeForStackables;
-                    }
+                    id.stack_count = id.stack_count + _cfg.StackSizeForStackables > 999 ? 999 : _cfg.StackSizeForStackables;
                 }
             }
         }
@@ -557,7 +551,7 @@ namespace WheresMaStorage
                 if (_cfg.ShowOnlyPersonalInventory || _isBarman || _isTavernCellar || _isRefugee || _isChest || _isWritersTable)
                 {
                     // Log($"[InventoryPanelGUI.DoOpening-Prefix]: Panel: {__instance.name}, _isBarman: {_isBarman}, _isTavernCellar: {_isTavernCellar}, _isRefugee: {_isRefugee}, _isChest: {_isChest}, _isVendor: {_isVendor}");
-                   
+
                     var onlyMineInventory = new MultiInventory();
                     onlyMineInventory.AddInventory(multi_inventory.all[0]);
                     multi_inventory = onlyMineInventory;
@@ -610,8 +604,8 @@ namespace WheresMaStorage
             public static void Postfix(ref InventoryWidget __instance,
                 ref InventoryWidget.ItemFilterDelegate filter_delegate, ref List<BaseItemCellGUI> ___items)
             {
-                if (!Tools.TutorialDone()) return; 
-                
+                if (!Tools.TutorialDone()) return;
+
                 if (__instance.gameObject.transform.parent.transform.parent.transform.parent.name.ToLowerInvariant()
                     .Contains(Vendor))
                     return;
@@ -752,7 +746,7 @@ namespace WheresMaStorage
                     }
                 }
 
-                if (_cfg.CacheEligibleInventories)
+                if (_cfg.CacheEligibleInventories && _mi.all.Count>0)
                 {
                     //if (!_zombieWorker)
                     //{
@@ -777,7 +771,7 @@ namespace WheresMaStorage
                         return;
                     }
 
-                    if (__instance == _previousWgo)
+                    if (__instance == _previousWgo || __instance.obj_id.StartsWith("mf_"))
                     {
                         Log(
                             $"[WorldGameObject.GetMultiInventory-Postfix]: _previousWgo == __instance. Sending cache: {__instance.obj_id}");
@@ -787,7 +781,7 @@ namespace WheresMaStorage
                     }
                 }
 
-                if (__instance.is_player || __instance == _wgo || _zombieWorker)
+                if (__instance.is_player || __instance == _wgo || _zombieWorker || __instance.obj_id.StartsWith("mf_"))
                 {
                     _previousWgo = __instance;
                     _mi = new MultiInventory();
@@ -811,7 +805,7 @@ namespace WheresMaStorage
                         var worldZone = WorldZone.GetZoneByID(worldZoneDef.id, false);
                         if (worldZone == null) continue;
 
-                        //if (ZoneExclusions.Contains(worldZone.id)) continue;
+                        if (ZoneExclusions.Contains(worldZone.id)) continue;
                         var worldZoneMulti =
                             worldZone.GetMultiInventory(player_mi: MultiInventory.PlayerMultiInventory.ExcludePlayer,
                                 sortWGOS: true);
@@ -853,13 +847,17 @@ namespace WheresMaStorage
             public static void Postfix(WorldGameObject __instance)
             {
                 if (!Tools.TutorialDone()) return;
+                if (!_cfg.ModifyInventorySize) return;
+
                 if (__instance.is_player)
                 {
                     __instance.data.SetInventorySize(_invSize);
                 }
+
                 if (string.Equals(__instance.obj_id, NpcBarman))
                 {
-                    __instance.data.SetInventorySize(__instance.obj_def.inventory_size + _cfg.AdditionalInventorySpace);
+                    __instance.data.SetInventorySize(__instance.obj_def.inventory_size +
+                                                     _cfg.AdditionalInventorySpace);
                 }
             }
         }

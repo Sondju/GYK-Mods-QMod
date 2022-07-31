@@ -174,4 +174,7 @@
   <data name="M10" xml:space="preserve">
     <value>钱哥。</value>
   </data>
+  <data name="Coal" xml:space="preserve">
+    <value>煤脉</value>
+  </data>
 </root>

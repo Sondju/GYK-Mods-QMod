@@ -54,7 +54,6 @@ namespace Helper
         //    [CanBeNull]
         //    private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         //    {
-               
         //        var otherObj = AccessTools.Field(typeof(fsResult), "Success");
 
         //        var instructionsList = new List<CodeInstruction>(instructions);

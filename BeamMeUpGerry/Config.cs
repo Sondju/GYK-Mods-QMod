@@ -14,13 +14,14 @@ namespace BeamMeUpGerry
             public bool IncreaseMenuAnimationSpeed;
             public bool EnableListExpansion;
             public bool DisableGerry;
+            public bool Debug;
         }
 
         public static Options GetOptions()
         {
             _options = new Options();
             _con = new ConfigReader();
-            
+
             bool.TryParse(_con.Value("IncreaseMenuAnimationSpeed", "true"), out var increaseMenuAnimationSpeed);
             _options.IncreaseMenuAnimationSpeed = increaseMenuAnimationSpeed;
 
@@ -32,6 +33,9 @@ namespace BeamMeUpGerry
 
             bool.TryParse(_con.Value("DisableGerry", "false"), out var disableGerry);
             _options.DisableGerry = disableGerry;
+
+            bool.TryParse(_con.Value("Debug", "false"), out var debug);
+            _options.Debug = debug;
 
             _con.ConfigWrite();
 

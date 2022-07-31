@@ -6,6 +6,7 @@ public static class Config
 {
     private static ConfigReader _con;
     private static Options _options;
+
     public static Options GetOptions()
     {
         _options = new Options();

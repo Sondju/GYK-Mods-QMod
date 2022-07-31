@@ -2,7 +2,6 @@
 using System.Resources;
 using System.Runtime.InteropServices;
 
-
 [assembly: AssemblyTitle("Implements an auto-save, and save anywhere at any time system.")]
 [assembly: AssemblyDescription("SaveNow")]
 [assembly: AssemblyConfiguration("")]

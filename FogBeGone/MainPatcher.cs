@@ -1,16 +1,16 @@
-using System;
-using HarmonyLib;
-using System.Reflection;
 using FlowCanvas;
+using HarmonyLib;
 using Helper;
+using System;
+using System.Reflection;
 using UnityEngine;
 
 namespace FogBeGone;
 
 public class MainPatcher
 {
-
     private static bool _introPlaying;
+
     public static void Patch()
     {
         try

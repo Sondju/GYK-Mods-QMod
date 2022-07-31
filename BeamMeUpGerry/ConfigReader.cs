@@ -8,6 +8,7 @@ namespace BeamMeUpGerry
         private const string ConfigPath = "./QMods/BeamMeUpGerry/config.ini";
 
         private readonly Dictionary<string, string> _values = new();
+
         public ConfigReader()
         {
             if (!File.Exists(ConfigPath))
@@ -37,7 +38,6 @@ namespace BeamMeUpGerry
             using var file = new StreamWriter(ConfigPath, false);
             foreach (var entry in _values)
                 file.WriteLine("{0}={1}", entry.Key.Trim(), entry.Value.Trim());
-
         }
     }
 }
