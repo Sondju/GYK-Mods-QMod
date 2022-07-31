@@ -10,16 +10,62 @@ using Debug = UnityEngine.Debug;
 
 namespace Helper
 {
-    
+    //public static class CrossModFields
+    //{
+    //    public static class GerrysJunkTrunk
+    //    {
+    //        public static bool UnlockedShippingBox { get; set; }
+    //        public static bool ShippingBoxBuilt { get; set; }
+    //        public static WorldGameObject ShippingBox { get; set; }
+
+    //        public static ObjectCraftDefinition ShippingBoxOcd { get; set; }
+    //    }
+    //}
+
 
     public static class Tools
     {
+
+        private static readonly string[] Quests =
+        {
+            "start",
+            "get_out_from_house_tech",
+            "get_out_from_house",
+            "dig_graved_skull",
+            "go_to_talk_with_donkey_first_time",
+            "go_to_mortuary_after_skull_tech",
+            "go_to_mortuary_after_skull",
+            "on_skull_talk_autopsi",
+            "go_to_graveyard_and_talk_with_skull",
+            "ghost_come_after_1st_burial",
+            "skull_talk_after_burial",
+            "tools_from_grave_chest_taken_tech",
+            "take_tools_from_grave_chest",
+            "goto_tavern",
+            "goto_tavern_tech",
+            "goto_tavern_2",
+            "player_repairs_sword_before",
+            "player_repairs_sword",
+    };
+
         internal static readonly List<string> LoadedMods = new();
         internal static bool IsNpcInteraction;
 
         public static bool IsNpc()
         {
             return IsNpcInteraction;
+        }
+
+        public static bool TutorialDone()
+        {
+            if (!MainGame.game_started) return false;
+            var completed = false;
+            foreach (var q in Quests)
+            {
+                completed = MainGame.me.save.quests.IsQuestSucced(q);
+                if (!completed) break;
+            }
+            return !MainGame.me.save.IsInTutorial() && completed;
         }
 
         public static bool IsModLoaded(string mod)
@@ -45,6 +91,11 @@ namespace Helper
         private const string DisablePath = "./QMods/disable";
         private static bool _disableMods;
 
+        private static void Log(string message, bool error = false)
+        {
+            Tools.Log("QModHelper", $"{message}", error);
+        }
+
         public static void Patch()
         {
             try
@@ -60,7 +111,21 @@ namespace Helper
             }
             catch (Exception ex)
             {
-                Tools.Log("QModHelper", $"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
+               Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
+            }
+        }
+
+        [HarmonyPatch(typeof(QuestSystem), "OnQuestSucceed", typeof(QuestState))]
+        public static class QuestSystemOnQuestSucceedPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref List<string> ____succed_quests)
+            {
+                //if (!Tools.TutorialDone()) return;
+                foreach (var q in ____succed_quests)
+                {
+                    Log($"[QuestSucceed]: {q}");
+                }
             }
         }
 
@@ -95,10 +160,10 @@ namespace Helper
                 {
                     var mods = AppDomain.CurrentDomain.GetAssemblies()
                         .Where(a => a.Location.ToLowerInvariant().Contains("qmods"));
-                    foreach (var m in mods)
-                    {
-                        File.AppendAllText("./qmods/loaded.assemblie.txt", $"Location: {m.Location}, Name: {m.FullName}\n");
-                    }
+                    //foreach (var m in mods)
+                    //{
+                    //    File.AppendAllText("./qmods/loaded.assemblie.txt", $"Location: {m.Location}, Name: {m.FullName}\n");
+                    //}
                     Tools.LoadedMods.Clear();
                     foreach (var mod in mods)
                     {
@@ -132,14 +197,7 @@ namespace Helper
                 foreach (var comp in __instance.GetComponentsInChildren<UILabel>()
                              .Where(x => x.name.Contains("ver txt")))
                 {
-                    if (_disableMods)
-                    {
-                        comp.text += ", [F7B000] QMod Reloaded[-] [F70000]Disabled[-]";
-                    }
-                    else
-                    {
-                        comp.text += ", [F7B000] QMod Reloaded[-] [2BFF00]Enabled[-]";
-                    }
+                    comp.text = _disableMods ? $"[F7B000] QMod Reloaded[-] [F70000]Disabled[-] [F7B000](Helper v{Assembly.GetExecutingAssembly().GetName().Version.Major}.{Assembly.GetExecutingAssembly().GetName().Version.Minor})[-]" : $"[F7B000] QMod Reloaded[-] [2BFF00]Enabled[-] [F7B000](Helper v{Assembly.GetExecutingAssembly().GetName().Version.Major}.{Assembly.GetExecutingAssembly().GetName().Version.Minor})[-]";
                     comp.overflowMethod = UILabel.Overflow.ResizeFreely;
                     comp.multiLine = true;
                     comp.MakePixelPerfect();

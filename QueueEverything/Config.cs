@@ -39,6 +39,9 @@ public static class Config
             out var disableComeBackLaterThoughts);
         _options.DisableComeBackLaterThoughts = disableComeBackLaterThoughts;
 
+        bool.TryParse(_con.Value("Debug", "false"), out var debug);
+        _options.Debug = debug;
+
         _con.ConfigWrite();
 
         return _options;
@@ -55,5 +58,6 @@ public static class Config
         public bool MakeEverythingAuto;
         public bool MakeHandTasksAuto;
         public bool DisableComeBackLaterThoughts;
+        public bool Debug;
     }
 }

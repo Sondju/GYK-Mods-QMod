@@ -38,9 +38,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="UnityEngine.Modules" Version="2020.3.17" IncludeAssets="compile" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="0Harmony" IncludeAssets="compile">
       <HintPath>..\libs\0Harmony.dll</HintPath>
       <Private>False</Private>

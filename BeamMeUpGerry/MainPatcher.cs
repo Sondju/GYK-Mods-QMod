@@ -187,10 +187,21 @@ namespace BeamMeUpGerry
             [HarmonyPostfix]
             public static void Postfix(ref Item __instance, ref int __result)
             {
+                if (!Tools.TutorialDone()) return;
                 if (__instance is not { id: "hearthstone" }) return;
 
                 __result = 0;
             }
+        }
+
+        private static void ShowHud(bool animate = false)
+        {
+            GUIElements.me.EnableHUD(true);
+            GUIElements.ChangeHUDAlpha(true, animate);
+            GUIElements.ChangeBubblesVisibility(true);
+            GUIElements.me.overhead_panel.gameObject.SetActive(true);
+            GUIElements.me.relation.ChangeHUDAlpha(true, animate);
+            GUIElements.me.relation.Update();
         }
 
         private static void TakeMoney(Vector3 vector)
@@ -207,12 +218,15 @@ namespace BeamMeUpGerry
             [HarmonyPostfix]
             public static void Postfix(string answer)
             {
+                if (!Tools.TutorialDone()) return;
                 if (!_cfg.EnableListExpansion) return;
+
                 Log($"[Answer]: {answer}");
 
                 if (string.Equals("cancel", answer) && !_dotSelection)
                 {
                     //real cancel
+                    ShowHud(true);
                     _usingStone = false;
                     _dotSelection = false;
                     _isNpc = false;
@@ -241,6 +255,7 @@ namespace BeamMeUpGerry
                 }
 
                 if (_isNpc) return;
+               
                 _usingStone = false;
                 _dotSelection = false;
 
@@ -250,8 +265,9 @@ namespace BeamMeUpGerry
             [HarmonyPrefix]
             public static void Prefix(ref string answer)
             {
+                if (!Tools.TutorialDone()) return;
                 if (!_cfg.EnableListExpansion) return;
-                if (_isNpc) return;
+               // if (_isNpc) return;
                 List<AnswerVisualData> answers;
 
                 _dotSelection = false;
@@ -260,12 +276,14 @@ namespace BeamMeUpGerry
                 {
                     answers = LocationByVectorPartOne.Select(location => new AnswerVisualData() { id = location.Key }).ToList();
                     Show(out answer);
+                    return;
                 }
 
                 if (answer == "....")
                 {
                     answers = LocationByVectorPartTwo.Select(location => new AnswerVisualData() { id = location.Key }).ToList();
                     Show(out answer);
+                    return;
                 }
 
                 void Show(out string answer)
@@ -282,10 +300,13 @@ namespace BeamMeUpGerry
 
             private static void BeamGerryOnChosen(string chosen)
             {
+                if (!Tools.TutorialDone()) return;
+                //  ShowHud();
                 if (!_cfg.EnableListExpansion) return;
                 if (_isNpc) return;
                 if (string.Equals("cancel", chosen))
                 {
+                   // ShowHud();
                     return;
                 }
 
@@ -327,9 +348,11 @@ namespace BeamMeUpGerry
                             MainGame.me.player.components.character.control_enabled = true;
                             GJTimer.AddTimer(1.25f, delegate
                             {
+                                ShowHud(true);
                                 CameraFader.current.FadeIn(0.15f);
                                 GJTimer.AddTimer(0.20f, delegate
                                 {
+                                    
                                     if (_cfg.DisableGerry)
                                     {
                                         TakeMoney(vector);
@@ -344,6 +367,7 @@ namespace BeamMeUpGerry
                     }
                     else
                     {
+                        ShowHud(false);
                         MainGame.me.player.PlaceAtPos(vector);
                         MainGame.me.player.components.character.control_enabled = true;
                         if (_cfg.DisableGerry)
@@ -372,6 +396,7 @@ namespace BeamMeUpGerry
             [HarmonyPrefix]
             public static void Prefix(ref Flow_MultiAnswer __instance)
             {
+                if (!Tools.TutorialDone()) return;
                 if (__instance == null) return;
                 if (!_usingStone) return;
 
@@ -388,6 +413,7 @@ namespace BeamMeUpGerry
             [HarmonyPrefix]
             public static void Prefix(ref MultiAnswerGUI __instance)
             {
+                if (!Tools.TutorialDone()) return;
                 if (__instance == null) return;
 
                 _maGui = __instance;
@@ -408,7 +434,7 @@ namespace BeamMeUpGerry
             public static void Prefix()
             {
                 if (!MainGame.game_started || MainGame.me.player.is_dead || MainGame.me.player.IsDisabled() ||
-                    MainGame.paused || !BaseGUI.all_guis_closed) return;
+                    MainGame.paused || !BaseGUI.all_guis_closed || !Tools.TutorialDone()) return;
 
                 if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(7))
                 {
@@ -425,8 +451,11 @@ namespace BeamMeUpGerry
                 {
                     if (_maGui != null)
                     {
+                        ShowHud();
                         Sounds.OnClosePressed();
-                        _maGui.OnChosen("cancel");
+                        //_maGui.OnChosen("cancel");
+                        //_maGui.OnChosen("leave");
+                        _maGui.DestroyBubble();
                         _usingStone = false;
                         _dotSelection = false;
                         _isNpc = false;
@@ -457,6 +486,7 @@ namespace BeamMeUpGerry
             [HarmonyPostfix]
             public static void OnStartNPCInteractionPostfix()
             {
+                if (!Tools.TutorialDone()) return;
                 _isNpc = true;
             }
 
@@ -464,6 +494,7 @@ namespace BeamMeUpGerry
             [HarmonyPostfix]
             public static void OnEndNPCInteractionPostfix()
             {
+                if (!Tools.TutorialDone()) return;
                 _isNpc = false;
             }
         }
@@ -475,6 +506,7 @@ namespace BeamMeUpGerry
             [HarmonyPatch(nameof(VendorGUI.Hide), typeof(bool))]
             public static void VendorGuiHidePostfix()
             {
+                if (!Tools.TutorialDone()) return;
                 _isNpc = false;
             }
 
@@ -482,6 +514,7 @@ namespace BeamMeUpGerry
             [HarmonyPatch(nameof(VendorGUI.OnClosePressed))]
             public static void VendorGUIOnClosePressedPostfix()
             {
+                if (!Tools.TutorialDone()) return;
                 _isNpc = false;
             }
 
@@ -489,6 +522,7 @@ namespace BeamMeUpGerry
             [HarmonyPatch(nameof(VendorGUI.Open), typeof(WorldGameObject), typeof(GJCommons.VoidDelegate))]
             public static void VendorGuiOpenPostfix()
             {
+                if (!Tools.TutorialDone()) return;
                 _isNpc = true;
             }
         }
@@ -499,6 +533,8 @@ namespace BeamMeUpGerry
             [HarmonyPrefix]
             public static void Prefix(ref WorldGameObject __instance, ref WorldGameObject other_obj)
             {
+                if (!Tools.TutorialDone()) return;
+                //MainGame.me.player.data.money += 1000f;
                 _isNpc = __instance.obj_def.IsNPC();
               //  Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
             }

@@ -38,11 +38,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
-      <Version>[3.3.3]</Version>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="UnityEngine.Modules" Version="2020.3.17" IncludeAssets="compile" />
   </ItemGroup>
   <ItemGroup>
@@ -81,8 +76,6 @@
     <Copy SourceFiles="@(MyReleaseSourceFiles)" DestinationFiles="H:\Games\steamapps\common\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
     <Copy SourceFiles="@(MyDebugSourceFiles)" DestinationFiles="H:\GOG Games\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
     <Copy SourceFiles="@(MyReleaseSourceFiles)" DestinationFiles="H:\GOG Games\Graveyard Keeper\QMods\$(ProjectName)\%(RecursiveDir)%(Filename)%(Extension)" />
-    <Delete Files="@(MyDebugSourceFiles)" />
-    <Delete Files="@(MyReleaseSourceFiles)" />
     <Message Text="Finished copying $(ProjectName)" Importance="High" />
   </Target>
 </Project>
