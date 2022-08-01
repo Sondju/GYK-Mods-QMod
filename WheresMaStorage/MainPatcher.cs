@@ -305,7 +305,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref BaseCraftGUI __instance, ref MultiInventory __result)
             {
-                if (!Tools.TutorialDone()) return;
+               // //if (!Tools.TutorialDone()) return;
                 if (!_zombieWorker)
                 {
                     Log($"[BaseCraftGUI.multi_inventory (Getter)]: {__instance.name}, Craftery: {__instance.GetCrafteryWGO().obj_id}");
@@ -322,7 +322,7 @@ namespace WheresMaStorage
             [HarmonyPrefix]
             public static void Prefix(ref DropResGameObject __instance)
             {
-                if (!Tools.TutorialDone()) return;
+                ////if (!Tools.TutorialDone()) return;
                 if (!GraveItems.Contains(__instance.res.definition.type)) return;
                 __instance.res.definition.stack_count = _cfg.StackSizeForStackables;
             }
@@ -336,7 +336,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref CraftDefinition __result)
             {
-                if (!Tools.TutorialDone()) return;
+                ////if (!Tools.TutorialDone()) return;
                 foreach (var item in __result.output.Where(a => GraveItems.Contains(a.definition.type)))
                 {
                     item.definition.stack_count = 1;
@@ -390,7 +390,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryWidget.ItemFilterResult __result)
             {
-                if (!Tools.TutorialDone()) return;
+                ////if (!Tools.TutorialDone()) return;
                 if (!MainGame.game_started) return;
                 if (!_cfg.HideInvalidSelections) return;
 
@@ -407,7 +407,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryWidget.ItemFilterResult __result)
             {
-                if (!Tools.TutorialDone()) return;
+               // //if (!Tools.TutorialDone()) return;
                 if (!MainGame.game_started) return;
                 if (!_cfg.HideInvalidSelections) return;
 
@@ -424,7 +424,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryWidget.ItemFilterResult __result)
             {
-                if (!Tools.TutorialDone()) return;
+                ////if (!Tools.TutorialDone()) return;
                 if (!MainGame.game_started) return;
                 if (!_cfg.HideInvalidSelections) return;
 
@@ -441,7 +441,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryWidget.ItemFilterResult __result)
             {
-                if (!Tools.TutorialDone()) return;
+               // //if (!Tools.TutorialDone()) return;
                 if (!MainGame.game_started) return;
                 if (!_cfg.HideInvalidSelections) return;
 
@@ -458,7 +458,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix()
             {
-                if (!Tools.TutorialDone()) return;
+                ////if (!Tools.TutorialDone()) return;
                 if (BaseGUI.all_guis_closed)
                 {
                     SetOthersFalse();
@@ -472,7 +472,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryPanelGUI __instance, ref MultiInventory multi_inventory, ref List<UIWidget> ____separators, ref List<InventoryWidget> ____widgets, ref List<CustomInventoryWidget> ____custom_widgets)
             {
-                if (!Tools.TutorialDone()) return;
+               // //if (!Tools.TutorialDone()) return;
                 var isChestPanel = __instance.name.ToLowerInvariant().Contains(Chest);
                 var isVendorPanel = __instance.name.ToLowerInvariant().Contains(Vendor);
                 var isPlayerPanel = __instance.name.ToLowerInvariant().Contains(Player) || (__instance.name.ToLowerInvariant().Contains(Multi) && _wgo == null);
@@ -536,7 +536,7 @@ namespace WheresMaStorage
             [HarmonyPrefix]
             public static void Prefix(ref InventoryPanelGUI __instance, ref MultiInventory multi_inventory)
             {
-                if (!Tools.TutorialDone()) return;
+               // //if (!Tools.TutorialDone()) return;
                 var isVendorPanel = __instance.name.ToLowerInvariant().Contains(Vendor);
                 // Log($"Barman:{_isBarman}, Cellar:{_isTavernCellar}, Refugee:{_isRefugee}, Chest:{_isChest}, Vendor:{isVendor}");
                 if (isVendorPanel) return;
@@ -565,7 +565,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryPanelGUI __instance, ref List<InventoryWidget> ____widgets)
             {
-                if (!Tools.TutorialDone()) return;
+                ////if (!Tools.TutorialDone()) return;
                 if (MainGame.me.save.IsInTutorial()) return;
                 var isChest = __instance.name.ToLowerInvariant().Contains(Chest);
                 var isPlayer = __instance.name.ToLowerInvariant().Contains(Player) || (__instance.name.ToLowerInvariant().Contains(Multi) && _wgo == null);
@@ -604,7 +604,7 @@ namespace WheresMaStorage
             public static void Postfix(ref InventoryWidget __instance,
                 ref InventoryWidget.ItemFilterDelegate filter_delegate, ref List<BaseItemCellGUI> ___items)
             {
-                if (!Tools.TutorialDone()) return;
+                ////if (!Tools.TutorialDone()) return;
 
                 if (__instance.gameObject.transform.parent.transform.parent.transform.parent.name.ToLowerInvariant()
                     .Contains(Vendor))
@@ -720,7 +720,7 @@ namespace WheresMaStorage
             )
 
             {
-                if (!Tools.TutorialDone()) return;
+                ////if (!Tools.TutorialDone()) return;
                 _zombieWorker = (__instance.has_linked_worker && __instance.linked_worker.obj_id.Contains("zombie")) || __instance.obj_def.id.Contains("zombie");
 
                 if (!_cfg.SharedCraftInventory) return;
@@ -810,7 +810,7 @@ namespace WheresMaStorage
                             worldZone.GetMultiInventory(player_mi: MultiInventory.PlayerMultiInventory.ExcludePlayer,
                                 sortWGOS: true);
                         if (worldZoneMulti == null) continue;
-                        foreach (var inv in worldZoneMulti.Where(inv => inv != null && inv.data.inventory.Count != 0))
+                        foreach (var inv in worldZoneMulti.Where(inv => inv != null))// && inv.data.inventory.Count != 0))
                         {
                             if (!_cfg.IncludeRefugeeDepot)
                             {
@@ -846,7 +846,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(WorldGameObject __instance)
             {
-                if (!Tools.TutorialDone()) return;
+               // //if (!Tools.TutorialDone()) return;
                 if (!_cfg.ModifyInventorySize) return;
 
                 if (__instance.is_player)
@@ -868,7 +868,7 @@ namespace WheresMaStorage
             [HarmonyPrefix]
             public static void Prefix(WorldGameObject __instance, WorldGameObject other_obj)
             {
-                if (!Tools.TutorialDone()) return;
+                ////if (!Tools.TutorialDone()) return;
                 if (!MainGame.game_started || __instance == null) return;
 
                 _previousWgo = _wgo;

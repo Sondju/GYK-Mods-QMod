@@ -58,7 +58,7 @@ namespace WheresMaStorage
             bool.TryParse(_con.Value("DontShowEmptyRowsInInventory", "true"), out var dontShowEmptyRowsInInventory);
             _options.DontShowEmptyRowsInInventory = dontShowEmptyRowsInInventory;
 
-            bool.TryParse(_con.Value("CacheEligibleInventories", "true"), out var cacheEligibleInventories);
+            bool.TryParse(_con.Value("CacheEligibleInventories", "false"), out var cacheEligibleInventories);
             _options.CacheEligibleInventories = cacheEligibleInventories;
 
             bool.TryParse(_con.Value("ShowUsedSpaceInTitles", "true"), out var showUsedSpaceInTitles);

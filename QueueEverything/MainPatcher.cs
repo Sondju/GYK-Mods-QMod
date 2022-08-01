@@ -47,7 +47,7 @@ public static class MainPatcher
 
     private static readonly string[] UnSafePartials =
     {
-        "blockage", "obstacle", "builddesk", "fix", "broken", "elevator", "zombie", "refugee", "mf_barrel"
+        "blockage", "obstacle", "builddesk", "fix", "broken", "elevator", "zombie", "refugee"//, "mf_barrel"
     };
 
     private static readonly CraftDefinition.CraftType[] UnSafeCraftTypes =
@@ -132,7 +132,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref WorldGameObject __instance)
         {
-            if (!Tools.TutorialDone()) return;
+            //if (!Tools.TutorialDone()) return;
             if (UnSafeCraftZones.Contains(__instance.GetMyWorldZoneId()) || UnSafePartials.Any(__instance.obj_id.Contains) || UnSafeCraftObjects.Contains(__instance.obj_id))
             {
                 _unsafeInteraction = true;
@@ -173,7 +173,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix()
         {
-            if (!Tools.TutorialDone()) return;
+            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction) return;
             if (!_cfg.MakeEverythingAuto) return;
             try
@@ -273,7 +273,7 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref CraftDefinition __instance, ref bool __result)
         {
-            if (!Tools.TutorialDone()) return;
+            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction || IsUnsafeDefinition(__instance))
             {
                 Log($"Unsafe Craft: {__instance.id}");
@@ -507,7 +507,7 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref CraftGUI __instance, ref CraftItemGUI craft_item_gui)
         {
-            if (!Tools.TutorialDone()) return;
+            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction) return;
             if (_cfg.AutoSelectCraftButtonWithController && LazyInput.gamepad_active)
                 foreach (var uiButton in craft_item_gui.GetComponentsInChildren<UIButton>())
@@ -527,7 +527,7 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix()
         {
-            if (!Tools.TutorialDone()) return;
+            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction) return;
             _alreadyRun = true;
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
@@ -540,7 +540,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix()
         {
-            if (!Tools.TutorialDone()) return;
+            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction) return;
             _craftAmount = 1;
             _alreadyRun = false;
@@ -553,7 +553,7 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix()
         {
-            if (!Tools.TutorialDone()) return;
+            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction) return;
             _alreadyRun = true;
         }
@@ -561,7 +561,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix()
         {
-            if (!Tools.TutorialDone()) return;
+            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction) return;
             _craftAmount = 1;
             _alreadyRun = false;
@@ -574,7 +574,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref CraftDefinition craft_definition, ref int ____amount)
         {
-            if (!Tools.TutorialDone()) return;
+            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction || IsUnsafeDefinition(craft_definition)) return;
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
 
@@ -638,7 +638,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref CraftItemGUI __instance, ref int ____amount, ref WorldGameObject __state)
         {
-            if (!Tools.TutorialDone()) return; 
+            //if (!Tools.TutorialDone()) return; 
             Log($"Craft: {__instance.craft_definition.id}, One time: {__instance.craft_definition.one_time_craft}");
             if (_unsafeInteraction || IsUnsafeDefinition(__instance.craft_definition)) return;
 
@@ -693,7 +693,7 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(WorldGameObject __state)
         {
-            if (!Tools.TutorialDone()) return;
+            //if (!Tools.TutorialDone()) return;
             if (!_cfg.MakeEverythingAuto) return;
             if (__state == null) return;
             if (__state.linked_worker != null) return;
@@ -712,7 +712,7 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix()
         {
-            if (!Tools.TutorialDone()) return;
+            //if (!Tools.TutorialDone()) return;
             if (!MainGame.game_started) return;
             if (!_cfg.MakeEverythingAuto) return;
             if (_craftsStarted) return;
@@ -735,7 +735,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix()
         {
-            if (!Tools.TutorialDone()) return;
+            //if (!Tools.TutorialDone()) return;
             if (!MainGame.game_started) return;
             if (!_cfg.MakeEverythingAuto) return;
 
@@ -753,7 +753,7 @@ public static class MainPatcher
         public static void Prefix(ref CraftItemGUI __instance, ref List<string> ____multiquality_ids,
             ref int ____amount)
         {
-            if (!Tools.TutorialDone()) return;
+            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction) return;
             if (IsUnsafeDefinition(__instance.craft_definition))
             {
@@ -779,11 +779,6 @@ public static class MainPatcher
             const string path = "./qmods/multis.txt";
             
             var message = GUIElements.me.craft.GetCrafteryWGO().obj_id + "\n---------------------\n" + "Item: " + __instance.current_craft.id + ", Craft Def: " + __instance.craft_definition.id + "\n";
-
-
-
-
-
 
 
             for (var i = 0; i < ____multiquality_ids.Count; i++)
@@ -847,6 +842,11 @@ public static class MainPatcher
                 }
             }
 
+            message += "Max Craftable: " + min + "\n";
+            message += "Ingredient list count: " + craftable.Count + "\n";
+            message += "---------------------\n";
+            File.AppendAllText(path, message);
+
             if (_cfg.AutoMaxNormalCrafts)
             {
                 if (isMultiQualCraft) return;
@@ -854,10 +854,7 @@ public static class MainPatcher
                 _craftAmount = min;
                 ____amount = min;
             }
-            message += "Max Craftable: " + min + "\n";
-            message += "Ingredient list count: " + craftable.Count + "\n";
-            message += "---------------------\n";
-            File.AppendAllText(path, message);
+
         }
     }
 

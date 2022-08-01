@@ -119,7 +119,7 @@ namespace Helper
             [HarmonyPostfix]
             public static void Postfix(ref List<string> ____succed_quests)
             {
-                //if (!Tools.TutorialDone()) return;
+                ////if (!Tools.TutorialDone()) return;
                 foreach (var q in ____succed_quests)
                 {
                     Log($"[QuestSucceed]: {q}");

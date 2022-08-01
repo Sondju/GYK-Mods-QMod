@@ -196,7 +196,7 @@ namespace BeamMeUpGerry
             [HarmonyPostfix]
             public static void Postfix(ref Item __instance, ref int __result)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 if (__instance is not { id: "hearthstone" }) return;
 
                 __result = 0;
@@ -227,7 +227,7 @@ namespace BeamMeUpGerry
             [HarmonyPostfix]
             public static void Postfix(string answer)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 if (!_cfg.EnableListExpansion) return;
 
                 Log($"[Answer]: {answer}");
@@ -274,7 +274,7 @@ namespace BeamMeUpGerry
             [HarmonyPrefix]
             public static void Prefix(ref string answer)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 if (!_cfg.EnableListExpansion) return;
                 // if (_isNpc) return;
                 List<AnswerVisualData> answers;
@@ -309,7 +309,7 @@ namespace BeamMeUpGerry
 
             private static void BeamGerryOnChosen(string chosen)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 //  ShowHud();
                 if (!_cfg.EnableListExpansion) return;
                 if (_isNpc) return;
@@ -404,7 +404,7 @@ namespace BeamMeUpGerry
             [HarmonyPrefix]
             public static void Prefix(ref Flow_MultiAnswer __instance)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 if (__instance == null) return;
                 if (!_usingStone) return;
 
@@ -421,7 +421,7 @@ namespace BeamMeUpGerry
             [HarmonyPrefix]
             public static void Prefix(ref MultiAnswerGUI __instance)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 if (__instance == null) return;
 
                 _maGui = __instance;
@@ -442,7 +442,7 @@ namespace BeamMeUpGerry
             public static void Prefix()
             {
                 if (!MainGame.game_started || MainGame.me.player.is_dead || MainGame.me.player.IsDisabled() ||
-                    MainGame.paused || !BaseGUI.all_guis_closed || !Tools.TutorialDone()) return;
+                    MainGame.paused || !BaseGUI.all_guis_closed) return;
 
                 if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(7))
                 {
@@ -494,7 +494,7 @@ namespace BeamMeUpGerry
             [HarmonyPostfix]
             public static void OnStartNPCInteractionPostfix()
             {
-                if (!Tools.TutorialDone()) return;
+//
                 _isNpc = true;
             }
 
@@ -502,38 +502,50 @@ namespace BeamMeUpGerry
             [HarmonyPostfix]
             public static void OnEndNPCInteractionPostfix()
             {
-                if (!Tools.TutorialDone()) return;
+//
                 _isNpc = false;
             }
         }
 
-        [HarmonyPatch(typeof(VendorGUI))]
-        public static class VendorGuiPatches
+        [HarmonyPatch(typeof(VendorGUI), nameof(VendorGUI.Open), typeof(WorldGameObject), typeof(GJCommons.VoidDelegate))]
+        public static class VendorGuiPatches1
         {
-            [HarmonyPostfix]
-            [HarmonyPatch(nameof(VendorGUI.Hide), typeof(bool))]
-            public static void VendorGuiHidePostfix()
-            {
-                if (!Tools.TutorialDone()) return;
-                _isNpc = false;
-            }
 
-            [HarmonyPostfix]
-            [HarmonyPatch(nameof(VendorGUI.OnClosePressed))]
-            public static void VendorGUIOnClosePressedPostfix()
+            [HarmonyPrefix]
+            public static void Prefix()
             {
-                if (!Tools.TutorialDone()) return;
-                _isNpc = false;
-            }
-
-            [HarmonyPostfix]
-            [HarmonyPatch(nameof(VendorGUI.Open), typeof(WorldGameObject), typeof(GJCommons.VoidDelegate))]
-            public static void VendorGuiOpenPostfix()
-            {
-                if (!Tools.TutorialDone()) return;
+                if (!MainGame.game_started) return;
                 _isNpc = true;
             }
+
         }
+
+        [HarmonyPatch(typeof(VendorGUI), nameof(VendorGUI.Hide), typeof(bool))]
+        public static class VendorGuiPatches2
+        {
+            [HarmonyPrefix]
+            public static void Prefix()
+            {
+                if (!MainGame.game_started) return;
+                _isNpc = false;
+            }
+
+        }
+
+
+        [HarmonyPatch(typeof(VendorGUI), nameof(VendorGUI.OnClosePressed))]
+        public static class VendorGuiPatches
+        {
+
+            [HarmonyPrefix]
+            public static void Prefix()
+            {
+                if (!MainGame.game_started) return;
+                _isNpc = false;
+            }
+
+        }
+
 
         [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
         public static class WorldGameObjectInteractPatch
@@ -541,10 +553,10 @@ namespace BeamMeUpGerry
             [HarmonyPrefix]
             public static void Prefix(ref WorldGameObject __instance, ref WorldGameObject other_obj)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 //MainGame.me.player.data.money += 1000f;
                 _isNpc = __instance.obj_def.IsNPC();
-                //  Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
+                  Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
             }
         }
     }

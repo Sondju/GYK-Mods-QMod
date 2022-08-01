@@ -138,7 +138,7 @@ namespace IBuildWhereIWant
             [HarmonyPatch(nameof(BuildGrid.ShowBuildGrid))]
             public static void ShowBuildGridPrefix(ref bool show)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 if (_cfg.DisableGrid)
                 {
                     show = false;
@@ -149,7 +149,7 @@ namespace IBuildWhereIWant
             [HarmonyPatch(nameof(BuildGrid.ClearPreviousTotemRadius))]
             public static void ClearPreviousTotemRadiusPrefix(ref bool apply_colors)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 if (_cfg.DisableGrid)
                 {
                     apply_colors = false;
@@ -164,7 +164,7 @@ namespace IBuildWhereIWant
             [HarmonyPatch(nameof(BuildModeLogics.EnterRemoveMode))]
             public static void BuildModeLogicsEnterRemoveMode(ref GameObject ____remove_grey_spr)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 if (_cfg.DisableGreyRemoveOverlay)
                 {
                     ____remove_grey_spr.SetActive(false);
@@ -175,7 +175,7 @@ namespace IBuildWhereIWant
             [HarmonyPatch("CancelCurrentMode")]
             public static void CancelCurrentModePrefix()
             {
-                if (!Tools.TutorialDone()) return;
+//
                 if (_craftAnywhere)
                 {
                     OpenCraftAnywhere();
@@ -186,7 +186,7 @@ namespace IBuildWhereIWant
             [HarmonyPrefix]
             private static void CanBuildPrefix(ref MultiInventory ____multi_inventory)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 ____multi_inventory = MainGame.me.player.GetMultiInventoryForInteraction();
             }
 
@@ -194,7 +194,7 @@ namespace IBuildWhereIWant
             [HarmonyPrefix]
             private static void DoPlacePrefix(ref MultiInventory ____multi_inventory)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 ____multi_inventory = MainGame.me.player.GetMultiInventoryForInteraction();
                 if (_craftAnywhere && MainGame.me.player.cur_zone.Length <= 0)
                 {
@@ -206,7 +206,7 @@ namespace IBuildWhereIWant
             [HarmonyPatch("FocusCameraOnBuildZone")]
             private static void FocusCameraOnBuildZonePrefix(ref string zone_id)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 if (_craftAnywhere)
                 {
                     zone_id = string.Empty;
@@ -217,7 +217,7 @@ namespace IBuildWhereIWant
             [HarmonyPostfix]
             private static void GetObjectRemoveCraftDefinitionPostfix(string obj_id, ref ObjectCraftDefinition __result)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 if (_craftAnywhere)
                 {
                     Debug.LogError($"[Remove]{obj_id}");
@@ -237,7 +237,7 @@ namespace IBuildWhereIWant
             private static void OnBuildCraftSelectedPrefix(ref string ____cur_build_zone_id, ref WorldZone ____cur_build_zone,
                 ref Bounds ____cur_build_zone_bounds)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 if (_craftAnywhere)
                 {
                     BuildModeLogics.last_build_desk = _buildDeskClone;
@@ -255,7 +255,7 @@ namespace IBuildWhereIWant
             [HarmonyPatch(nameof(FlowGridCell.IsInsideWorldZone))]
             public static void IsInsideWorldZonePostfix(ref bool __result)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 __result = true;
             }
 
@@ -263,7 +263,7 @@ namespace IBuildWhereIWant
             [HarmonyPatch(nameof(FlowGridCell.IsPlaceAvailable))]
             public static void IsPlaceAvailablePostfix(ref bool __result)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 __result = true;
             }
         }
@@ -274,7 +274,7 @@ namespace IBuildWhereIWant
             [HarmonyPrefix]
             public static void Prefix()
             {
-                if (!Tools.TutorialDone()) return;
+//
                 if (!MainGame.game_started || MainGame.me.player.is_dead || MainGame.me.player.IsDisabled() ||
                     MainGame.paused || !BaseGUI.all_guis_closed) return;
 
@@ -296,7 +296,7 @@ namespace IBuildWhereIWant
             [HarmonyPostfix]
             public static void Postfix(ref WorldGameObject __instance, ref UniversalObjectInfo __result)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 if (_buildDeskClone == null) return;
                 if (__instance != _buildDeskClone) return;
                 // if (!string.Equals(__instance.obj_id, _buildDeskClone.obj_id)) return;
@@ -311,7 +311,7 @@ namespace IBuildWhereIWant
             [HarmonyPrefix]
             public static void Prefix(ref WorldGameObject __instance)
             {
-                if (!Tools.TutorialDone()) return;
+//
                 if (__instance.obj_def.interaction_type is not ObjectDefinition.InteractionType.None)
                 {
                     _craftAnywhere = false;
