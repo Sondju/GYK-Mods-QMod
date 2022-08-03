@@ -15,8 +15,14 @@ public static class Config
         int.TryParse(_con.Value("TavernInvIncrease", "30"), out var tavernInvIncrease);
         _options.TavernInvIncrease = tavernInvIncrease;
 
+        bool.TryParse(_con.Value("EnableChiselInkStacking", "false"), out var enableChiselInkStacking);
+        _options.EnableChiselInkStacking = enableChiselInkStacking;
+
         bool.TryParse(_con.Value("EnableToolAndPrayerStacking", "true"), out var enableToolAndPrayerStacking);
         _options.EnableToolAndPrayerStacking = enableToolAndPrayerStacking;
+
+        bool.TryParse(_con.Value("AllowHandToolDestroy", "true"), out var allowHandToolDestroy);
+        _options.AllowHandToolDestroy = allowHandToolDestroy;
 
         bool.TryParse(_con.Value("QuietMusicInGUI", "true"), out var quietMusicInGUI);
         _options.QuietMusicInGui = quietMusicInGUI;
@@ -24,8 +30,7 @@ public static class Config
         bool.TryParse(_con.Value("CondenseXpBar", "true"), out var condenseXpBar);
         _options.CondenseXpBar = condenseXpBar;
 
-        bool.TryParse(_con.Value("AllowHandToolDestroy", "true"), out var allowHandToolDestroy);
-        _options.AllowHandToolDestroy = allowHandToolDestroy;
+
 
         bool.TryParse(_con.Value("HalloweenNow", "false"), out var halloweenNow);
         _options.HalloweenNow = halloweenNow;
@@ -48,8 +53,7 @@ public static class Config
         bool.TryParse(_con.Value("RemovePrayerOnUse", "false"), out var removePrayerOnUse);
         _options.RemovePrayerOnUse = removePrayerOnUse;
 
-        bool.TryParse(_con.Value("EnableChiselInkStacking", "false"), out var enableChiselInkStacking);
-        _options.EnableChiselInkStacking = enableChiselInkStacking;
+  
 
         _con.ConfigWrite();
 

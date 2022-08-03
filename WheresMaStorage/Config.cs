@@ -31,6 +31,9 @@ namespace WheresMaStorage
             public bool CacheEligibleInventories;
             public bool IncludeRefugeeDepot;
             public bool Debug;
+            public bool EnableChiselInkStacking;
+            public bool EnableToolAndPrayerStacking;
+            public bool AllowHandToolDestroy;
         }
 
         public static Options GetOptions()
@@ -42,9 +45,17 @@ namespace WheresMaStorage
             _options.ModifyInventorySize = modifyInventorySize;
 
 
+            bool.TryParse(_con.Value("EnableChiselInkStacking", "false"), out var enableChiselInkStacking);
+            _options.EnableChiselInkStacking = enableChiselInkStacking;
+
+            bool.TryParse(_con.Value("EnableToolAndPrayerStacking", "true"), out var enableToolAndPrayerStacking);
+            _options.EnableToolAndPrayerStacking = enableToolAndPrayerStacking;
+
+            bool.TryParse(_con.Value("AllowHandToolDestroy", "true"), out var allowHandToolDestroy);
+            _options.AllowHandToolDestroy = allowHandToolDestroy;
+
             bool.TryParse(_con.Value("ModifyStackSize", "true"), out var modifyStackSize);
             _options.ModifyStackSize = modifyStackSize;
-
 
             bool.TryParse(_con.Value("IncludeRefugeeDepot", "false"), out var includeRefugeeDepot);
             _options.IncludeRefugeeDepot = includeRefugeeDepot;

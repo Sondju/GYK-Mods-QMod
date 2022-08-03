@@ -8,7 +8,6 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
-using Steamworks;
 using WheresMaStorage.lang;
 
 namespace WheresMaStorage
@@ -68,10 +67,22 @@ namespace WheresMaStorage
             "refugee_camp_well", "refugee_camp_tent", "pump", "pallet"
         };
 
+        private static readonly string[] MakeStackable =
+        {
+            "book","chapter"
+        };
+
         private static readonly ItemDefinition.ItemType[] GraveItems =
         {
             ItemDefinition.ItemType.GraveStone, ItemDefinition.ItemType.GraveFence, ItemDefinition.ItemType.GraveCover,
             ItemDefinition.ItemType.GraveStoneReq, ItemDefinition.ItemType.GraveFenceReq, ItemDefinition.ItemType.GraveCoverReq,
+        };
+
+        private static readonly ItemDefinition.ItemType[] ToolItems =
+        {
+            ItemDefinition.ItemType.Axe, ItemDefinition.ItemType.Shovel, ItemDefinition.ItemType.Hammer,
+            ItemDefinition.ItemType.Pickaxe, ItemDefinition.ItemType.FishingRod, ItemDefinition.ItemType.BodyArmor,
+            ItemDefinition.ItemType.HeadArmor, ItemDefinition.ItemType.Sword, ItemDefinition.ItemType.Preach,
         };
 
         private static readonly string[] StockpileWidgetsPartials =
@@ -305,7 +316,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref BaseCraftGUI __instance, ref MultiInventory __result)
             {
-               // //if (!Tools.TutorialDone()) return;
+                // //if (!Tools.TutorialDone()) return;
                 if (!_zombieWorker)
                 {
                     Log($"[BaseCraftGUI.multi_inventory (Getter)]: {__instance.name}, Craftery: {__instance.GetCrafteryWGO().obj_id}");
@@ -314,7 +325,7 @@ namespace WheresMaStorage
             }
         }
 
-        [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
+        [HarmonyBefore("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
         [HarmonyPatch(typeof(DropResGameObject), nameof(DropResGameObject.CollectDrop))]
         public static class DropResGameObjectCollectDrop
         {
@@ -328,7 +339,7 @@ namespace WheresMaStorage
             }
         }
 
-        [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
+        [HarmonyBefore("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
         [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.GetRemoveCraftForItem))]
         public static class GameBalanceGetRemoveCraftForItemPatch
         {
@@ -344,19 +355,69 @@ namespace WheresMaStorage
             }
         }
 
-        [HarmonyAfter("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
+        [HarmonyBefore("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
+        [HarmonyPatch(typeof(CraftDefinition), "takes_item_durability", MethodType.Getter)]
+        public static class CraftDefinitionTakesItemDurabilityPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref CraftDefinition __instance, ref bool __result)
+            {
+                if (!_cfg.EnableChiselInkStacking) return;
+                if (__instance == null) return;
+                if (__instance.needs.Exists(item => item.id.Equals("pen:ink_pen")) && __instance.dur_needs_item > 0)
+                {
+                    __result = false;
+                }
+                if (__instance.needs.Exists(item => item.id.Contains("chisel")) && __instance.dur_needs_item > 0)
+                {
+                    __result = false;
+                }
+            }
+        }
+
+        [HarmonyBefore("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
         [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
         public static class GameBalanceLoadGameBalancePatch
         {
+            [HarmonyBefore("p1xel8ted.GraveyardKeeper.MiscBitsAndBobs")]
             [HarmonyPostfix]
             public static void Postfix()
             {
                 if (_gameBalanceAlreadyRun) return;
                 _gameBalanceAlreadyRun = true;
 
+                if (_cfg.AllowHandToolDestroy)
+                {
+                    foreach (var itemDef in GameBalance.me.items_data.Where(a => ToolItems.Contains(a.type)))
+                    {
+                        itemDef.player_cant_throw_out = false;
+                    }
+                }
+
+                if (_cfg.EnableToolAndPrayerStacking || _cfg.EnableChiselInkStacking)
+                {
+                    foreach (var item in GameBalance.me.items_data.Where(item => item.stack_count == 1))
+                    {
+                        if (_cfg.EnableToolAndPrayerStacking)
+                        {
+                            if (ToolItems.Contains(item.type) || GraveItems.Contains(item.type) ||
+                                MakeStackable.Any(item.id.Contains))
+                            {
+                                item.stack_count = item.stack_count + _cfg.StackSizeForStackables > 999 ? 999 : _cfg.StackSizeForStackables;
+                            }
+                        }
+
+                        if (!_cfg.EnableChiselInkStacking) continue;
+
+                        if (item.id.Contains("ink") || item.id.Contains("pen") || item.id.Contains("chisel"))
+                        {
+                            item.stack_count = item.stack_count + _cfg.StackSizeForStackables > 999 ? 999 : _cfg.StackSizeForStackables;
+                        }
+                    }
+                }
+
                 if (_cfg.ModifyInventorySize)
                 {
-
                     foreach (var od in GameBalance.me.objs_data.Where(od =>
                                  od.interaction_type == ObjectDefinition.InteractionType.Chest))
                     {
@@ -366,7 +427,7 @@ namespace WheresMaStorage
 
                 if (!_cfg.ModifyStackSize) return;
 
-                foreach (var id in GameBalance.me.items_data.Where(id => id.stack_count is > 1 and < 999))
+                foreach (var id in GameBalance.me.items_data.Where(id => id.stack_count is > 1 and <= 999))
                 {
                     id.stack_count = id.stack_count + _cfg.StackSizeForStackables > 999 ? 999 : _cfg.StackSizeForStackables;
                 }
@@ -407,7 +468,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryWidget.ItemFilterResult __result)
             {
-               // //if (!Tools.TutorialDone()) return;
+                // //if (!Tools.TutorialDone()) return;
                 if (!MainGame.game_started) return;
                 if (!_cfg.HideInvalidSelections) return;
 
@@ -441,7 +502,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryWidget.ItemFilterResult __result)
             {
-               // //if (!Tools.TutorialDone()) return;
+                // //if (!Tools.TutorialDone()) return;
                 if (!MainGame.game_started) return;
                 if (!_cfg.HideInvalidSelections) return;
 
@@ -472,7 +533,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryPanelGUI __instance, ref MultiInventory multi_inventory, ref List<UIWidget> ____separators, ref List<InventoryWidget> ____widgets, ref List<CustomInventoryWidget> ____custom_widgets)
             {
-               // //if (!Tools.TutorialDone()) return;
+                // //if (!Tools.TutorialDone()) return;
                 var isChestPanel = __instance.name.ToLowerInvariant().Contains(Chest);
                 var isVendorPanel = __instance.name.ToLowerInvariant().Contains(Vendor);
                 var isPlayerPanel = __instance.name.ToLowerInvariant().Contains(Player) || (__instance.name.ToLowerInvariant().Contains(Multi) && _wgo == null);
@@ -536,7 +597,7 @@ namespace WheresMaStorage
             [HarmonyPrefix]
             public static void Prefix(ref InventoryPanelGUI __instance, ref MultiInventory multi_inventory)
             {
-               // //if (!Tools.TutorialDone()) return;
+                // //if (!Tools.TutorialDone()) return;
                 var isVendorPanel = __instance.name.ToLowerInvariant().Contains(Vendor);
                 // Log($"Barman:{_isBarman}, Cellar:{_isTavernCellar}, Refugee:{_isRefugee}, Chest:{_isChest}, Vendor:{isVendor}");
                 if (isVendorPanel) return;
@@ -709,6 +770,135 @@ namespace WheresMaStorage
             }
         }
 
+        //[HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetMultiInventory))]
+        //public static class WorldGameObjectGetMultiInventoryPatch
+        //{
+        //    [HarmonyPostfix]
+        //    public static void Postfix(
+        //        WorldGameObject __instance,
+        //        ref MultiInventory __result,
+        //        bool include_toolbelt = false
+        //    )
+
+        //    {
+        //        ////if (!Tools.TutorialDone()) return;
+        //        _zombieWorker = (__instance.has_linked_worker && __instance.linked_worker.obj_id.Contains("zombie")) || __instance.obj_def.id.Contains("zombie");
+
+        //        if (!_cfg.SharedCraftInventory) return;
+
+        //        if (__instance.vendor != null)
+        //        {
+        //            if (!_zombieWorker)
+        //            {
+        //                Log(
+        //                    $"[WorldGameObject.GetMultiInventory-Postfix]: REJECTED: __instance.vendor = {__instance.vendor.id} ");
+        //            }
+
+        //            return;
+        //        }
+
+        //        if (!_zombieWorker)
+        //        {
+        //            if (__instance.obj_def.IsNPC())
+        //            {
+        //                Log(
+        //                    $"[WorldGameObject.GetMultiInventory-Postfix]: REJECTED: __instance.obj_def.IsNPC {__instance.obj_def.id} ");
+        //                return;
+        //            }
+        //        }
+
+        //        if (_cfg.CacheEligibleInventories && _mi.all.Count > 0)
+        //        {
+        //            //if (!_zombieWorker)
+        //            //{
+        //            //    Log(
+        //            //        $"[WorldGameObject.GetMultiInventory-Postfix]: Cached __instance: {__instance.obj_id}, _previousWgo: {_previousWgo.obj_id}");
+        //            //}
+
+        //            if (__instance.is_player)
+        //            {
+        //                if (!_zombieWorker)
+        //                {
+        //                    Log(
+        //                        $"[WorldGameObject.GetMultiInventory-Postfix]: Sending cached inventory to Player: {__instance.obj_id}");
+        //                }
+
+        //                var pMi = new MultiInventory();
+        //                var newInv = _mi.all.Where(a => !a.name.Contains("Toolbelt")).ToList();
+        //                pMi.SetInventories(newInv);
+        //                //instance = pMi;
+        //                __result = pMi;
+
+        //                return;
+        //            }
+
+        //            if (__instance == _previousWgo || __instance.obj_id.StartsWith("mf_"))
+        //            {
+        //                Log(
+        //                    $"[WorldGameObject.GetMultiInventory-Postfix]: _previousWgo == __instance. Sending cache: {__instance.obj_id}");
+
+        //                __result = _mi;
+        //                return;
+        //            }
+        //        }
+
+        //        if (__instance.is_player || __instance == _wgo || _zombieWorker || __instance.obj_id.StartsWith("mf_"))
+        //        {
+        //            _previousWgo = __instance;
+        //            _mi = new MultiInventory();
+        //            var playerInv = new Inventory(MainGame.me.player.data, "Player", string.Empty);
+        //            playerInv.data.SetInventorySize(_invSize);
+
+        //            _mi.AddInventory(playerInv);
+
+        //            if (include_toolbelt)
+        //            {
+        //                var data = new Item
+        //                {
+        //                    inventory = MainGame.me.player.data.secondary_inventory,
+        //                    inventory_size = 7
+        //                };
+        //                _mi.AddInventory(new Inventory(data, "Toolbelt", ""), -1);
+        //            }
+
+        //            foreach (var worldZoneDef in GameBalance.me.world_zones_data)
+        //            {
+        //                var worldZone = WorldZone.GetZoneByID(worldZoneDef.id, false);
+        //                if (worldZone == null) continue;
+
+        //                if (ZoneExclusions.Contains(worldZone.id)) continue;
+        //                var worldZoneMulti =
+        //                    worldZone.GetMultiInventory(player_mi: MultiInventory.PlayerMultiInventory.ExcludePlayer,
+        //                        sortWGOS: true);
+        //                if (worldZoneMulti == null) continue;
+        //                foreach (var inv in worldZoneMulti.Where(inv => inv != null))// && inv.data.inventory.Count != 0))
+        //                {
+        //                    if (!_cfg.IncludeRefugeeDepot)
+        //                    {
+        //                        if (worldZone.id.ToLowerInvariant().Contains("refugee"))
+        //                        {
+        //                            if (inv.data.id.ToLowerInvariant().Contains("depot")) continue;
+        //                            //Log($"[RefugeeInv]: Zone: {worldZone.id}, Inv: {inv.data.id}");
+        //                        }
+        //                    }
+
+        //                    inv.data.sub_name = inv._obj_id + "#" + worldZoneDef.id;
+        //                    _mi.AddInventory(inv);
+        //                }
+        //            }
+
+        //            if (!_zombieWorker)
+        //            {
+        //                Log(
+        //                    $"[WorldGameObject.GetMultiInventory-Postfix]: Sending non-cached to __instance: {__instance.obj_id}, isPlayer: {__instance.is_player}, _previousWgo: {_previousWgo.obj_id}, Zombie: {_zombieWorker}");
+        //            }
+
+        //            //instance = _mi;
+        //            __result = _mi;
+        //        }
+        //    }
+        //}
+
         [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetMultiInventory))]
         public static class WorldGameObjectGetMultiInventoryPatch
         {
@@ -746,42 +936,21 @@ namespace WheresMaStorage
                     }
                 }
 
-                if (_cfg.CacheEligibleInventories && _mi.all.Count>0)
+                var craftery = GUIElements.me.craft.GetCrafteryWGO();
+                if (_cfg.CacheEligibleInventories && _mi.all.Count > 0)
                 {
-                    //if (!_zombieWorker)
-                    //{
-                    //    Log(
-                    //        $"[WorldGameObject.GetMultiInventory-Postfix]: Cached __instance: {__instance.obj_id}, _previousWgo: {_previousWgo.obj_id}");
-                    //}
-
-                    if (__instance.is_player)
-                    {
-                        if (!_zombieWorker)
-                        {
-                            Log(
-                                $"[WorldGameObject.GetMultiInventory-Postfix]: Sending cached inventory to Player: {__instance.obj_id}");
-                        }
-
-                        var pMi = new MultiInventory();
-                        var newInv = _mi.all.Where(a => !a.name.Contains("Toolbelt")).ToList();
-                        pMi.SetInventories(newInv);
-                        //instance = pMi;
-                        __result = pMi;
-
-                        return;
-                    }
-
-                    if (__instance == _previousWgo || __instance.obj_id.StartsWith("mf_"))
+     
+                    if (craftery != null || __instance.obj_id.StartsWith("mf_"))
                     {
                         Log(
-                            $"[WorldGameObject.GetMultiInventory-Postfix]: _previousWgo == __instance. Sending cache: {__instance.obj_id}");
+                            $"[WorldGameObject.GetMultiInventory-Postfix]: Sending cache: {__instance.obj_id}");
 
                         __result = _mi;
                         return;
                     }
                 }
 
-                if (__instance.is_player || __instance == _wgo || _zombieWorker || __instance.obj_id.StartsWith("mf_"))
+                if (__instance.is_player || craftery != null || _zombieWorker || __instance.obj_id.StartsWith("mf_"))
                 {
                     _previousWgo = __instance;
                     _mi = new MultiInventory();
@@ -846,7 +1015,7 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(WorldGameObject __instance)
             {
-               // //if (!Tools.TutorialDone()) return;
+                // //if (!Tools.TutorialDone()) return;
                 if (!_cfg.ModifyInventorySize) return;
 
                 if (__instance.is_player)

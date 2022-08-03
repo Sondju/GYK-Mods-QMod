@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using UnityEngine;
 
 namespace MiscBitsAndBobs;
 
@@ -82,11 +81,9 @@ public class MainPatcher
         }
     }
 
-
     //[HarmonyPatch(typeof(DropResGameObject), nameof(DropResGameObject.ProcessDropCollectorRangeCheck), typeof(WorldGameObject), typeof(Vector3) )]
     //public static class DropResGameObjectPatch
     //{
-
     //    [HarmonyPrefix]
     //    public static bool Prefix()
     //    {
@@ -94,7 +91,7 @@ public class MainPatcher
     //    }
 
     //    [HarmonyPostfix]
-    //    public static void Postfix(ref DropResGameObject __instance, ref WorldGameObject collector_wgo, Vector3 char_global_pos, 
+    //    public static void Postfix(ref DropResGameObject __instance, ref WorldGameObject collector_wgo, Vector3 char_global_pos,
     //        ref bool ____performing_drop_and_fly,
     //        ref Transform ____tf,
     //        ref WorldGameObject ____target_obj,
@@ -145,8 +142,6 @@ public class MainPatcher
     //            });
     //    }
     //}
-
-
 
     [HarmonyPatch(typeof(LeaveTrailComponent), "LeaveTrail")]
     public static class LeaveTrailComponentLeaveTrailPatch
@@ -217,10 +212,12 @@ public class MainPatcher
         }
     }
 
+    [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
     [HarmonyPatch(typeof(DropResGameObject), nameof(DropResGameObject.CollectDrop))]
     public static class DropResGameObjectCollectDrop
     {
         //set stack size back up before collecting
+        [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
         [HarmonyPrefix]
         public static void Prefix(ref DropResGameObject __instance)
         {
@@ -230,10 +227,12 @@ public class MainPatcher
         }
     }
 
+    [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
     [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.GetRemoveCraftForItem))]
     public static class GameBalanceGetRemoveCraftForItemPatch
     {
         //needed for grave removals to work
+        [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
         [HarmonyPostfix]
         public static void Postfix(ref CraftDefinition __result)
         {
@@ -245,13 +244,15 @@ public class MainPatcher
         }
     }
 
+    [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
     [HarmonyPatch(typeof(CraftDefinition), "takes_item_durability", MethodType.Getter)]
     public static class CraftDefinitionTakesItemDurabilityPatch
     {
+        [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
         [HarmonyPostfix]
         public static void Postfix(ref CraftDefinition __instance, ref bool __result)
         {
-            // if (Tools.IsModLoaded(WheresMaStorage)) return;
+            if (Tools.IsModLoaded(WheresMaStorage)) return;
             if (!_cfg.EnableChiselInkStacking) return;
             if (__instance == null) return;
             if (__instance.needs.Exists(item => item.id.Equals("pen:ink_pen")) && __instance.dur_needs_item > 0)
@@ -269,9 +270,11 @@ public class MainPatcher
     [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
     public static class GameBalanceLoadGameBalancePatch
     {
+        [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
         [HarmonyPostfix]
         private static void Postfix()
         {
+            if (Tools.IsModLoaded(WheresMaStorage)) return;
             if (_cfg.AllowHandToolDestroy)
             {
                 foreach (var itemDef in GameBalance.me.items_data.Where(a => ToolItems.Contains(a.type)))
