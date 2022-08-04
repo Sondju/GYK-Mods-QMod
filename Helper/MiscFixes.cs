@@ -14,23 +14,6 @@ namespace Helper
     internal class MiscFixes
     {
 
-        //fixes npc windows bugging out when using a controller and there is no cell selected
-        [HarmonyPatch(typeof(VendorGUI), "ResetOrder")]
-        public static class VendorGuiPatches
-        {
-
-            [HarmonyPrefix]
-            public static void Prefix(ref BaseItemCellGUI ____selected_item_gui)
-            {
-                if (!BaseGUI.for_gamepad) return;
-                if (____selected_item_gui == null)
-                {
-                    ____selected_item_gui = new BaseItemCellGUI();
-                }
-            }
-
-        }
-
         //stops unnecessary log spam due to spawning clone objects that don't have matching sprites
         [HarmonyPatch(typeof(EasySpritesCollection), nameof(EasySpritesCollection.GetSprite))]
         public static class EasySpritesCollectionGetSpritePatch

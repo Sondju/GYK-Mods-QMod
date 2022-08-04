@@ -99,6 +99,9 @@ namespace GerrysJunkTrunk
         {
             RefreshVendors();
 
+            if (VendorWgos.Count <= 0) return 0f;
+
+
             var totalSalePrice = 0f;
             var totalCount = 0;
             _vendorSales.Clear();
@@ -180,6 +183,8 @@ namespace GerrysJunkTrunk
             }
 
             RefreshVendors();
+
+            if (VendorWgos.Count <= 0) return 0f;
 
             var totalSalePrice = 0f;
             _vendorSales.Clear();
@@ -417,7 +422,7 @@ namespace GerrysJunkTrunk
             [HarmonyPostfix]
             public static void Postfix(ref bool __result, ref CraftDefinition cd)
             {
-//
+                //
                 if (_internalCfg.ShippingBoxBuilt && _shippingBox != null)
                 {
                     if (cd.id.Contains(ShippingItem))
@@ -434,7 +439,7 @@ namespace GerrysJunkTrunk
             [HarmonyPrefix]
             public static void Prefix(ref InventoryPanelGUI __instance)
             {
-//
+                //
                 AlreadyDone.Clear();
                 //AlreadyDone.Add(__instance.selected_item_gui);
             }
@@ -446,7 +451,7 @@ namespace GerrysJunkTrunk
             [HarmonyPrefix]
             public static void Prefix(ref ObjectCraftDefinition cd)
             {
-//
+                //
                 if (cd.id.Contains(ShippingItem))
                 {
                     _shippingBuild = true;
@@ -462,7 +467,7 @@ namespace GerrysJunkTrunk
             [HarmonyPrefix]
             public static void Prefix(ref ChestGUI __instance)
             {
-//
+                //
                 ClearGerryFlag(ref __instance);
             }
         }
@@ -474,7 +479,7 @@ namespace GerrysJunkTrunk
             [HarmonyPostfix]
             public static void Postfix(ref ChestGUI __instance)
             {
-//
+                //
                 if (__instance == null || !_usingShippingBox) return;
 
                 UpdateItemStates(__instance: ref __instance);
@@ -487,7 +492,7 @@ namespace GerrysJunkTrunk
             [HarmonyPrefix]
             public static void Prefix(ref ChestGUI __instance)
             {
-//
+                //
                 ClearGerryFlag(ref __instance);
             }
         }
@@ -499,7 +504,7 @@ namespace GerrysJunkTrunk
             [HarmonyPostfix]
             public static void Postfix(ref ChestGUI __instance)
             {
-//
+                //
 
                 if (__instance == null || !_usingShippingBox) return;
 
@@ -535,17 +540,18 @@ namespace GerrysJunkTrunk
             [HarmonyPrefix]
             public static void Prefix(ref InventoryPanelGUI __instance, ref BaseItemCellGUI item_gui)
             {
-//
+                //
                 //if (!_usingShippingBox) return;
                 if (!_cfg.ShowItemPriceTooltips) return;
-                if (__instance == null) return;
+                if (!UnlockedShippingBox()) return;
+                if (__instance == null || item_gui == null) return;
 
                 //Log($"[ItemGUI]: {item_gui.item.id}");
 
                 if (AlreadyDone.Contains(item_gui)) return;
                 if (item_gui.id_empty) return;
 
-                if (item_gui.x1.tooltip.has_info)
+                if (item_gui.x1 != null && item_gui.x1.tooltip != null && item_gui.x1.tooltip.has_info)
                 {
                     item_gui.x1.tooltip.AddData(new BubbleWidgetSeparatorData());
                     item_gui.x1.tooltip.AddData(new BubbleWidgetTextData(
@@ -554,7 +560,7 @@ namespace GerrysJunkTrunk
                     AlreadyDone.Add(item_gui);
                 }
 
-                if (item_gui.x2.tooltip.has_info)
+                if (item_gui.x2 != null && item_gui.x2.tooltip != null && item_gui.x2.tooltip.has_info)
                 {
                     item_gui.x2.tooltip.AddData(new BubbleWidgetSeparatorData());
                     item_gui.x2.tooltip.AddData(new BubbleWidgetTextData(
@@ -577,7 +583,8 @@ namespace GerrysJunkTrunk
             [HarmonyPostfix]
             public static void Postfix()
             {
-//
+                //
+                if (!UnlockedShippingBox()) return;
                 if (_internalCfg.ShippingBoxBuilt && _shippingBox != null)
                 {
                     foreach (var item in _shippingBox.data.inventory)
@@ -644,7 +651,7 @@ namespace GerrysJunkTrunk
             public static void BaseCraftGuiCommonOpenPostfix(ref BaseCraftGUI __instance, ref CraftComponent ___craft_component,
                 ref CraftsInventory ___crafts_inventory, ref List<CraftDefinition> ___crafts)
             {
-//
+                if (!UnlockedShippingBox()) return;
                 var newCd = new ObjectCraftDefinition();
                 var cd = GameBalance.me.GetData<ObjectCraftDefinition>("mf_wood_builddesk:p:mf_box_stuff_place");
                 newCd.craft_in = cd.craft_in;
@@ -717,7 +724,7 @@ namespace GerrysJunkTrunk
                 if (wgo == null) return;
                 if (wgo.obj_id.Contains("zombie")) return;
                 if (!wgo.obj_id.Contains("mf_wood_builddesk")) return;
-                if (!UnlockedShippingBox()) return;
+              
                 if (_internalCfg.ShippingBoxBuilt || _shippingBox != null) return;
                 //CrossModFields.GerrysJunkTrunk.ShippingBoxOcd = newCd;
                 ___crafts.Add(newCd);
@@ -744,7 +751,9 @@ namespace GerrysJunkTrunk
             [HarmonyPostfix]
             public static void Postfix(ref InventoryPanelGUI __instance, ref List<InventoryWidget> ____widgets)
             {
-//
+                //
+                if (!UnlockedShippingBox()) return;
+                if (__instance == null) return;
                 var isChest = __instance.name.ToLowerInvariant().Contains("chest");
                 var isPlayer = __instance.name.ToLowerInvariant().Contains("player");
                 if (_usingShippingBox && isChest && !isPlayer)
@@ -775,7 +784,9 @@ namespace GerrysJunkTrunk
             [HarmonyPostfix]
             public static void Postfix(ref InventoryPanelGUI __instance, ref List<InventoryWidget> ____widgets)
             {
-//
+                //
+                if (!UnlockedShippingBox()) return;
+                if (__instance == null) return;
                 var isChest = __instance.name.ToLowerInvariant().Contains("chest");
                 var isPlayer = __instance.name.ToLowerInvariant().Contains("player");
                 if (_usingShippingBox && isChest && !isPlayer)
@@ -806,7 +817,7 @@ namespace GerrysJunkTrunk
             [HarmonyPostfix]
             public static void Postfix()
             {
-//
+                //
                 if (!MainGame.game_started) return;
 
                 if (_internalCfg.ShowIntroMessage)
@@ -851,7 +862,7 @@ namespace GerrysJunkTrunk
             [HarmonyPostfix]
             public static void Postfix(ref TechTreeGUIItem __instance)
             {
-//
+                //
                 if (__instance == null) return;
                 {
                     var component = __instance.GetComponent<Tooltip>();
@@ -885,7 +896,7 @@ namespace GerrysJunkTrunk
             [HarmonyPostfix]
             public static void Postfix(ref TechUnlock __instance, ref Tooltip tooltip)
             {
-//
+                //
                 if (__instance != null)
                 {
                     if (LazyInput.gamepad_active) return;
@@ -921,7 +932,8 @@ namespace GerrysJunkTrunk
             [HarmonyPostfix]
             public static void Postfix(ref Vendor __instance, ref bool __result)
             {
-//
+                //
+                if (!UnlockedShippingBox()) return;
                 if (__instance == null || _myVendor == null || _myVendor.vendor == null) return;
                 if (__instance.Equals(_myVendor.vendor))
                 {
@@ -936,7 +948,9 @@ namespace GerrysJunkTrunk
             [HarmonyPostfix]
             public static void Postfix(ref WorldGameObject __instance)
             {
-//
+                //
+                if (!UnlockedShippingBox()) return;
+                if (__instance == null) return;
                 if (string.Equals(__instance.custom_tag, ShippingBoxTag))
                 {
                     Log($"Removed Shipping Box!");
@@ -954,7 +968,9 @@ namespace GerrysJunkTrunk
             [HarmonyPrefix]
             public static void Prefix(ref WorldGameObject __instance, ref WorldGameObject other_obj)
             {
-//
+                //
+                if (!UnlockedShippingBox()) return;
+                if (__instance == null) return;
                 _interactedObject = __instance;
                 if (string.Equals(__instance.custom_tag, ShippingBoxTag))
                 {
@@ -988,7 +1004,9 @@ namespace GerrysJunkTrunk
             [HarmonyPostfix]
             public static void Postfix(ref WorldGameObject __instance, ref string new_obj_id)
             {
-//
+                //
+                if (!UnlockedShippingBox()) return;
+                if (__instance == null) return;
                 if (_internalCfg.ShippingBoxBuilt && _shippingBox != null) return;
                 if (string.Equals(new_obj_id, "mf_box_stuff") && _shippingBuild)
                 {
@@ -1017,7 +1035,8 @@ namespace GerrysJunkTrunk
             [HarmonyPostfix]
             public static void Postfix(ref List<WorldGameObject> ____npcs)
             {
-//
+                //
+                if (____npcs == null) return;
                 foreach (var npc in ____npcs.Where(npc => npc.vendor != null))
                 {
                     var known =
@@ -1036,7 +1055,7 @@ namespace GerrysJunkTrunk
             [HarmonyPostfix]
             public static void Postfix(ref List<WorldGameObject> __result)
             {
-//
+                if (__result == null) return;
                 if (_interactedObject != null && _interactedObject.obj_def.interaction_type == ObjectDefinition.InteractionType.Builder) return;
                 foreach (var wgo in __result.Where(a => string.Equals(a.custom_tag, ShippingBoxTag) || string.Equals(a.data.drop_zone_id, ShippingBoxTag)))
                 {

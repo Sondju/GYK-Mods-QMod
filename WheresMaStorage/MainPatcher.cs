@@ -546,6 +546,7 @@ namespace WheresMaStorage
 
                 if ((_cfg.RemoveGapsBetweenSections && isPlayerPanel) || (_cfg.RemoveGapsBetweenSectionsVendor && isVendorPanel) || isResourcePanelProbably)
                 {
+                  
                     foreach (var sep in ____separators)
                     {
                         sep.Hide();
@@ -653,7 +654,7 @@ namespace WheresMaStorage
             [HarmonyPrefix]
             public static bool Prefix()
             {
-                if (!Tools.TutorialDone()) return true;
+                //if (!Tools.TutorialDone()) return true;
                 return !_cfg.DisableInventoryDimming;
             }
         }
@@ -696,8 +697,8 @@ namespace WheresMaStorage
                 }
 
                 var activeCount = ___items.Count(x => !x.is_inactive_state);
-
-                if (activeCount <= 0 && !__instance.inventory_data.id.Contains(Player))
+               // Log($"[InvDataID]: {__instance.inventory_data.id}");
+                if (activeCount <= 0)
                 {
                     __instance.Hide();
                 }
@@ -770,6 +771,135 @@ namespace WheresMaStorage
             }
         }
 
+        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetMultiInventory))]
+        public static class WorldGameObjectGetMultiInventoryPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(
+                WorldGameObject __instance,
+                ref MultiInventory __result,
+                bool include_toolbelt = false
+            )
+
+            {
+                ////if (!Tools.TutorialDone()) return;
+                _zombieWorker = (__instance.has_linked_worker && __instance.linked_worker.obj_id.Contains("zombie")) || __instance.obj_def.id.Contains("zombie");
+
+                if (!_cfg.SharedCraftInventory) return;
+
+                if (__instance.vendor != null)
+                {
+                    if (!_zombieWorker)
+                    {
+                        Log(
+                            $"[WorldGameObject.GetMultiInventory-Postfix]: REJECTED: __instance.vendor = {__instance.vendor.id} ");
+                    }
+
+                    return;
+                }
+
+                if (!_zombieWorker)
+                {
+                    if (__instance.obj_def.IsNPC())
+                    {
+                        Log(
+                            $"[WorldGameObject.GetMultiInventory-Postfix]: REJECTED: __instance.obj_def.IsNPC {__instance.obj_def.id} ");
+                        return;
+                    }
+                }
+
+                if (_cfg.CacheEligibleInventories && _mi.all.Count > 0)
+                {
+                    //if (!_zombieWorker)
+                    //{
+                    //    Log(
+                    //        $"[WorldGameObject.GetMultiInventory-Postfix]: Cached __instance: {__instance.obj_id}, _previousWgo: {_previousWgo.obj_id}");
+                    //}
+
+                    if (__instance.is_player)
+                    {
+                        if (!_zombieWorker)
+                        {
+                            Log(
+                                $"[WorldGameObject.GetMultiInventory-Postfix]: Sending cached inventory to Player: {__instance.obj_id}");
+                        }
+
+                        var pMi = new MultiInventory();
+                        var newInv = _mi.all.Where(a => !a.name.Contains("Toolbelt")).ToList();
+                        pMi.SetInventories(newInv);
+                        //instance = pMi;
+                        __result = pMi;
+
+                        return;
+                    }
+
+                    if (__instance == _previousWgo || __instance.obj_id.StartsWith("mf_"))
+                    {
+                        Log(
+                            $"[WorldGameObject.GetMultiInventory-Postfix]: _previousWgo == __instance. Sending cache: {__instance.obj_id}");
+
+                        __result = _mi;
+                        return;
+                    }
+                }
+
+                if (__instance.is_player || __instance == _wgo || _zombieWorker || __instance.obj_id.StartsWith("mf_"))
+                {
+                    _previousWgo = __instance;
+                    _mi = new MultiInventory();
+                    var playerInv = new Inventory(MainGame.me.player.data, "Player", string.Empty);
+                    playerInv.data.SetInventorySize(_invSize);
+
+                    _mi.AddInventory(playerInv);
+
+                    if (include_toolbelt)
+                    {
+                        var data = new Item
+                        {
+                            inventory = MainGame.me.player.data.secondary_inventory,
+                            inventory_size = 7
+                        };
+                        _mi.AddInventory(new Inventory(data, "Toolbelt", ""), -1);
+                    }
+
+                    foreach (var worldZoneDef in GameBalance.me.world_zones_data)
+                    {
+                        var worldZone = WorldZone.GetZoneByID(worldZoneDef.id, false);
+                        if (worldZone == null) continue;
+
+                        if (ZoneExclusions.Contains(worldZone.id)) continue;
+                        var worldZoneMulti =
+                            worldZone.GetMultiInventory(player_mi: MultiInventory.PlayerMultiInventory.ExcludePlayer,
+                                sortWGOS: true);
+                        if (worldZoneMulti == null) continue;
+                        foreach (var inv in worldZoneMulti.Where(inv => inv != null))// && inv.data.inventory.Count != 0))
+                        {
+                            if (!_cfg.IncludeRefugeeDepot)
+                            {
+                                if (worldZone.id.ToLowerInvariant().Contains("refugee"))
+                                {
+                                    if (inv.data.id.ToLowerInvariant().Contains("depot")) continue;
+                                    //Log($"[RefugeeInv]: Zone: {worldZone.id}, Inv: {inv.data.id}");
+                                }
+                            }
+
+                            inv.data.sub_name = inv._obj_id + "#" + worldZoneDef.id;
+                            _mi.AddInventory(inv);
+                        }
+                    }
+
+                    if (!_zombieWorker)
+                    {
+                        Log(
+                            $"[WorldGameObject.GetMultiInventory-Postfix]: Sending non-cached to __instance: {__instance.obj_id}, isPlayer: {__instance.is_player}, _previousWgo: {_previousWgo.obj_id}, Zombie: {_zombieWorker}");
+                    }
+
+                    //instance = _mi;
+                    __result = _mi;
+                }
+            }
+        }
+
         //[HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetMultiInventory))]
         //public static class WorldGameObjectGetMultiInventoryPatch
         //{
@@ -807,39 +937,18 @@ namespace WheresMaStorage
         //            }
         //        }
 
-        //        if (_cfg.CacheEligibleInventories && _mi.all.Count > 0)
+        //        if (_cfg.CacheEligibleInventories && _mi.all.Count > 0 && (__instance.obj_id.StartsWith("mf_") || _zombieWorker))
         //        {
-        //            //if (!_zombieWorker)
-        //            //{
-        //            //    Log(
-        //            //        $"[WorldGameObject.GetMultiInventory-Postfix]: Cached __instance: {__instance.obj_id}, _previousWgo: {_previousWgo.obj_id}");
-        //            //}
 
-        //            if (__instance.is_player)
-        //            {
-        //                if (!_zombieWorker)
-        //                {
-        //                    Log(
-        //                        $"[WorldGameObject.GetMultiInventory-Postfix]: Sending cached inventory to Player: {__instance.obj_id}");
-        //                }
-
-        //                var pMi = new MultiInventory();
-        //                var newInv = _mi.all.Where(a => !a.name.Contains("Toolbelt")).ToList();
-        //                pMi.SetInventories(newInv);
-        //                //instance = pMi;
-        //                __result = pMi;
-
-        //                return;
-        //            }
-
-        //            if (__instance == _previousWgo || __instance.obj_id.StartsWith("mf_"))
+        //            if (!_zombieWorker)
         //            {
         //                Log(
-        //                    $"[WorldGameObject.GetMultiInventory-Postfix]: _previousWgo == __instance. Sending cache: {__instance.obj_id}");
-
-        //                __result = _mi;
-        //                return;
+        //                    $"[WorldGameObject.GetMultiInventory-Postfix]: Sending cache: {__instance.obj_id}");
         //            }
+
+        //            __result = _mi;
+        //                return;
+                    
         //        }
 
         //        if (__instance.is_player || __instance == _wgo || _zombieWorker || __instance.obj_id.StartsWith("mf_"))
@@ -898,114 +1007,6 @@ namespace WheresMaStorage
         //        }
         //    }
         //}
-
-        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetMultiInventory))]
-        public static class WorldGameObjectGetMultiInventoryPatch
-        {
-            [HarmonyPostfix]
-            public static void Postfix(
-                WorldGameObject __instance,
-                ref MultiInventory __result,
-                bool include_toolbelt = false
-            )
-
-            {
-                ////if (!Tools.TutorialDone()) return;
-                _zombieWorker = (__instance.has_linked_worker && __instance.linked_worker.obj_id.Contains("zombie")) || __instance.obj_def.id.Contains("zombie");
-
-                if (!_cfg.SharedCraftInventory) return;
-
-                if (__instance.vendor != null)
-                {
-                    if (!_zombieWorker)
-                    {
-                        Log(
-                            $"[WorldGameObject.GetMultiInventory-Postfix]: REJECTED: __instance.vendor = {__instance.vendor.id} ");
-                    }
-
-                    return;
-                }
-
-                if (!_zombieWorker)
-                {
-                    if (__instance.obj_def.IsNPC())
-                    {
-                        Log(
-                            $"[WorldGameObject.GetMultiInventory-Postfix]: REJECTED: __instance.obj_def.IsNPC {__instance.obj_def.id} ");
-                        return;
-                    }
-                }
-
-                var craftery = GUIElements.me.craft.GetCrafteryWGO();
-                if (_cfg.CacheEligibleInventories && _mi.all.Count > 0)
-                {
-     
-                    if (craftery != null || __instance.obj_id.StartsWith("mf_"))
-                    {
-                        Log(
-                            $"[WorldGameObject.GetMultiInventory-Postfix]: Sending cache: {__instance.obj_id}");
-
-                        __result = _mi;
-                        return;
-                    }
-                }
-
-                if (__instance.is_player || craftery != null || _zombieWorker || __instance.obj_id.StartsWith("mf_"))
-                {
-                    _previousWgo = __instance;
-                    _mi = new MultiInventory();
-                    var playerInv = new Inventory(MainGame.me.player.data, "Player", string.Empty);
-                    playerInv.data.SetInventorySize(_invSize);
-
-                    _mi.AddInventory(playerInv);
-
-                    if (include_toolbelt)
-                    {
-                        var data = new Item
-                        {
-                            inventory = MainGame.me.player.data.secondary_inventory,
-                            inventory_size = 7
-                        };
-                        _mi.AddInventory(new Inventory(data, "Toolbelt", ""), -1);
-                    }
-
-                    foreach (var worldZoneDef in GameBalance.me.world_zones_data)
-                    {
-                        var worldZone = WorldZone.GetZoneByID(worldZoneDef.id, false);
-                        if (worldZone == null) continue;
-
-                        if (ZoneExclusions.Contains(worldZone.id)) continue;
-                        var worldZoneMulti =
-                            worldZone.GetMultiInventory(player_mi: MultiInventory.PlayerMultiInventory.ExcludePlayer,
-                                sortWGOS: true);
-                        if (worldZoneMulti == null) continue;
-                        foreach (var inv in worldZoneMulti.Where(inv => inv != null))// && inv.data.inventory.Count != 0))
-                        {
-                            if (!_cfg.IncludeRefugeeDepot)
-                            {
-                                if (worldZone.id.ToLowerInvariant().Contains("refugee"))
-                                {
-                                    if (inv.data.id.ToLowerInvariant().Contains("depot")) continue;
-                                    //Log($"[RefugeeInv]: Zone: {worldZone.id}, Inv: {inv.data.id}");
-                                }
-                            }
-
-                            inv.data.sub_name = inv._obj_id + "#" + worldZoneDef.id;
-                            _mi.AddInventory(inv);
-                        }
-                    }
-
-                    if (!_zombieWorker)
-                    {
-                        Log(
-                            $"[WorldGameObject.GetMultiInventory-Postfix]: Sending non-cached to __instance: {__instance.obj_id}, isPlayer: {__instance.is_player}, _previousWgo: {_previousWgo.obj_id}, Zombie: {_zombieWorker}");
-                    }
-
-                    //instance = _mi;
-                    __result = _mi;
-                }
-            }
-        }
 
         // private static MultiInventory instance;
 
