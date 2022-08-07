@@ -53,10 +53,8 @@ namespace BeamMeUpGerry
 
         private static Config.Options _cfg;
         private static bool _dotSelection;
-        private static bool _isNpc;
         private static MultiAnswerGUI _maGui;
         private static bool _usingStone;
-        private static string Lang { get; set; }
 
         public static void Patch()
         {
@@ -75,13 +73,13 @@ namespace BeamMeUpGerry
 
         private static void Beam()
         {
-            if (_usingStone || _dotSelection || _isNpc) return;
+            if (_usingStone || _dotSelection || CrossModFields.TalkingToNPC) return;
 
             var item = GetHearthstone();
             if (item != null)
             {
                 _usingStone = true;
-                _isNpc = false;
+                CrossModFields.TalkingToNPC = false;
                 MainGame.me.player.UseItemFromInventory(item);
             }
             else
@@ -147,6 +145,7 @@ namespace BeamMeUpGerry
 
         private static void SpawnGerry(string message, Vector3 customPosition, bool money = false)
         {
+            Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
             var location = MainGame.me.player_pos;
             location.x -= 75f;
             //location.y += 50f;
@@ -176,17 +175,6 @@ namespace BeamMeUpGerry
         private static List<AnswerVisualData> ValidateAnswerList(IEnumerable<AnswerVisualData> answers)
         {
             return answers.Where(answer => !RemoveZone(answer)).ToList();
-        }
-
-        [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
-        public static class GameSettingsApplyLanguageChange
-        {
-            [HarmonyPostfix]
-            public static void Postfix()
-            {
-                Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-            }
         }
 
         [HarmonyPatch(typeof(Item))]
@@ -238,7 +226,7 @@ namespace BeamMeUpGerry
                     ShowHud(true);
                     _usingStone = false;
                     _dotSelection = false;
-                    _isNpc = false;
+                    CrossModFields.TalkingToNPC = false;
 
                     MainGame.me.player.components.character.control_enabled = true;
                     return;
@@ -257,13 +245,13 @@ namespace BeamMeUpGerry
                     //leave option for npcs
                     _usingStone = false;
                     _dotSelection = false;
-                    _isNpc = false;
+                    CrossModFields.TalkingToNPC = false;
                     MainGame.me.player.components.character.control_enabled = true;
 
                     return;
                 }
 
-                if (_isNpc) return;
+                if (CrossModFields.TalkingToNPC) return;
 
                 _usingStone = false;
                 _dotSelection = false;
@@ -297,7 +285,7 @@ namespace BeamMeUpGerry
 
                 void Show(out string answer)
                 {
-                    _isNpc = false;
+                    CrossModFields.TalkingToNPC = false;
                     var cleanedAnswers = ValidateAnswerList(answers);
                     answer = "cancel";
                     _dotSelection = true;
@@ -312,7 +300,7 @@ namespace BeamMeUpGerry
 //
                 //  ShowHud();
                 if (!_cfg.EnableListExpansion) return;
-                if (_isNpc) return;
+                if (CrossModFields.TalkingToNPC) return;
                 if (string.Equals("cancel", chosen))
                 {
                     // ShowHud();
@@ -391,6 +379,7 @@ namespace BeamMeUpGerry
                 }
                 else
                 {
+                    Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
                     MainGame.me.player.Say(strings.DontKnow);
                     MainGame.me.player.components.character.control_enabled = true;
                     _maGui.DestroyBubble();
@@ -466,7 +455,7 @@ namespace BeamMeUpGerry
                         _maGui.DestroyBubble();
                         _usingStone = false;
                         _dotSelection = false;
-                        _isNpc = false;
+                        CrossModFields.TalkingToNPC = false;
                         MainGame.me.player.components.character.control_enabled = true;
                         _maGui = null;
                     }
@@ -484,79 +473,6 @@ namespace BeamMeUpGerry
                     }
                     Beam();
                 }
-            }
-        }
-
-        [HarmonyPatch(typeof(SmartAudioEngine))]
-        private static class SmartAudioEnginePatch
-        {
-            [HarmonyPatch(nameof(SmartAudioEngine.OnStartNPCInteraction))]
-            [HarmonyPostfix]
-            public static void OnStartNPCInteractionPostfix()
-            {
-//
-                _isNpc = true;
-            }
-
-            [HarmonyPatch(nameof(SmartAudioEngine.OnEndNPCInteraction))]
-            [HarmonyPostfix]
-            public static void OnEndNPCInteractionPostfix()
-            {
-//
-                _isNpc = false;
-            }
-        }
-
-        [HarmonyPatch(typeof(VendorGUI), nameof(VendorGUI.Open), typeof(WorldGameObject), typeof(GJCommons.VoidDelegate))]
-        public static class VendorGuiPatches1
-        {
-
-            [HarmonyPrefix]
-            public static void Prefix()
-            {
-                if (!MainGame.game_started) return;
-                _isNpc = true;
-            }
-
-        }
-
-        [HarmonyPatch(typeof(VendorGUI), nameof(VendorGUI.Hide), typeof(bool))]
-        public static class VendorGuiPatches2
-        {
-            [HarmonyPrefix]
-            public static void Prefix()
-            {
-                if (!MainGame.game_started) return;
-                _isNpc = false;
-            }
-
-        }
-
-
-        [HarmonyPatch(typeof(VendorGUI), nameof(VendorGUI.OnClosePressed))]
-        public static class VendorGuiPatches
-        {
-
-            [HarmonyPrefix]
-            public static void Prefix()
-            {
-                if (!MainGame.game_started) return;
-                _isNpc = false;
-            }
-
-        }
-
-
-        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
-        public static class WorldGameObjectInteractPatch
-        {
-            [HarmonyPrefix]
-            public static void Prefix(ref WorldGameObject __instance, ref WorldGameObject other_obj)
-            {
-//
-                //MainGame.me.player.data.money += 1000f;
-                _isNpc = __instance.obj_def.IsNPC();
-                  Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
             }
         }
     }

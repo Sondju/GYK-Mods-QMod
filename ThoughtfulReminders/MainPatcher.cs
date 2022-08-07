@@ -1,7 +1,6 @@
 using HarmonyLib;
 using Helper;
 using System;
-using System.Globalization;
 using System.Reflection;
 using System.Threading;
 using ThoughtfulReminders.lang;
@@ -13,8 +12,6 @@ public class MainPatcher
 {
     private static int _prevDayOfWeek;
     private static Config.Options _cfg;
-    private static float _timeOfDayFloat;
-    private static string Lang { get; set; }
 
     public static void Patch()
     {
@@ -38,44 +35,18 @@ public class MainPatcher
 
     private static void SayMessage(string msg)
     {
-        Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+        Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
         if (_cfg.SpeechBubbles)
         {
-            MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
-                SmartSpeechEngine.VoiceID.None, true);
+            Tools.ShowMessage(msg, sayAsPlayer:true);
         }
         else
         {
-            if (GJL.IsEastern())
-                MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
-                    SmartSpeechEngine.VoiceID.None, true);
-            else
-                EffectBubblesManager.ShowImmediately(MainGame.me.player_pos, msg,
-                    EffectBubblesManager.BubbleColor.Red,
-                    true, 4f);
+            Tools.ShowMessage(msg, sayAsPlayer: false, color:EffectBubblesManager.BubbleColor.Red, time:4f);
         }
+        
     }
-
-    [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
-    public static class GameSettingsApplyLanguageChange
-    {
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-        }
-    }
-
-    [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
-    public static class TimeOfDayUpdatePatch
-    {
-        [HarmonyPostfix]
-        public static void Postfix(TimeOfDay __instance)
-        {
-            _timeOfDayFloat = __instance.GetTimeK();
-        }
-    }
+    
 
     [HarmonyPatch(typeof(MainGame), nameof(MainGame.Update))]
     public static class MainGameUpdatePatch
@@ -91,11 +62,11 @@ public class MainPatcher
 
             if (_prevDayOfWeek == newDayOfWeek) return;
 
-            if (_timeOfDayFloat is <= 0.22f or >= 0.25f) return;
+            if (CrossModFields.TimeOfDayFloat is <= 0.22f or >= 0.25f) return;
 
             if (_cfg.DaysOnly)
             {
-                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+                Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
                 switch (newDayOfWeek)
                 {
                     case 0: //day of Sloth
@@ -129,7 +100,7 @@ public class MainPatcher
             }
             else
             {
-                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+                Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
                 switch (newDayOfWeek)
                 {
                     case 0: //day of Sloth

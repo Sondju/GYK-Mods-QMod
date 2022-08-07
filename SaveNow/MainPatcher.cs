@@ -82,31 +82,11 @@ public class MainPatcher : MonoBehaviour
             if (!found) SaveLocationsDictionary.Add(saveName, vectorToAdd);
         }
     }
-
-    private static void ShowMessage(string msg, Vector3 pos,
-        EffectBubblesManager.BubbleColor color = EffectBubblesManager.BubbleColor.Relation, float time = 3f)
-    {
-        Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-
-        if (GJL.IsEastern())
-        {
-            MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
-                SmartSpeechEngine.VoiceID.None, true);
-        }
-        else
-        {
-            var newPos = pos;
-            newPos.y += 125f;
-            EffectBubblesManager.ShowImmediately(newPos, msg,
-                color,
-                true, time);
-        }
-    }
-
+    
     //reads co-ords from player, and saves to file
     private static bool SaveLocation(bool menuExit, string saveFile)
     {
-        Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+        Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
 
         _pos = MainGame.me.player.pos3;
         _currentSave = MainGame.me.save_slot.filename_no_extension;
@@ -130,13 +110,13 @@ public class MainPatcher : MonoBehaviour
             if (!saveFile.Equals(string.Empty))
             {
                 if (_cfg.NewFileOnAutoSave)
-                    ShowMessage(strings.AutoSave + ": " + saveFile, _pos);
+                    Tools.ShowMessage(strings.AutoSave + ": " + saveFile);
                 else
-                    ShowMessage(strings.AutoSave + "!", _pos);
+                    Tools.ShowMessage(strings.AutoSave + "!");
             }
             else
             {
-                ShowMessage(strings.SaveMessage, _pos);
+                Tools.ShowMessage(strings.SaveMessage);
             }
         }
 
@@ -145,6 +125,7 @@ public class MainPatcher : MonoBehaviour
 
     private static void Resize<T>(List<T> list, int size)
     {
+        if (_cfg.DontPruneSaves) return;
         var count = list.Count;
         if (size < count) list.RemoveRange(size, count - size);
     }
@@ -152,20 +133,19 @@ public class MainPatcher : MonoBehaviour
     //reads co-ords from file and teleports player there
     private static void RestoreLocation()
     {
-        Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+        Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
 
         var homeVector = new Vector3(2841, -6396, -1332);
         var foundLocation =
             SaveLocationsDictionary.TryGetValue(MainGame.me.save_slot.filename_no_extension, out var posVector3);
         var pos = foundLocation ? posVector3 : homeVector;
         MainGame.me.player.PlaceAtPos(pos);
-        if (!_cfg.TurnOffTravelMessages) ShowMessage(strings.Rush, pos);
+        if (!_cfg.TurnOffTravelMessages) Tools.ShowMessage(strings.Rush);
 
         StartTimer();
         if (!_cfg.DisableAutoSaveInfo)
-            ShowMessage(
-                $"{strings.InfoAutoSave}: {_cfg.AutoSave}, {strings.InfoPeriod}: {_cfg.SaveInterval / 60} {strings.InfoMinutes}, {strings.InfoNewSaveOnAutoSave}: {_cfg.NewFileOnAutoSave}, {strings.InfoSavesToKeep}: {_cfg.AutoSavesToKeep}",
-                pos, EffectBubblesManager.BubbleColor.Red, 4f);
+            Tools.ShowMessage(
+                $"{strings.InfoAutoSave}: {_cfg.AutoSave}, {strings.InfoPeriod}: {_cfg.SaveInterval / 60} {strings.InfoMinutes}, {strings.InfoNewSaveOnAutoSave}: {_cfg.NewFileOnAutoSave}, {strings.InfoSavesToKeep}: {_cfg.AutoSavesToKeep}", color:EffectBubblesManager.BubbleColor.Red, time:4f);
     }
 
     private static void StartTimer()
@@ -204,16 +184,7 @@ public class MainPatcher : MonoBehaviour
         StartTimer();
     }
 
-    [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
-    public static class GameSettingsApplyLanguageChange
-    {
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-        }
-    }
+
 
     //games already loading, lets add some more work
     [HarmonyPatch(typeof(MainGame), "StartGameLoading")]
@@ -226,7 +197,11 @@ public class MainPatcher : MonoBehaviour
                 .GetFiles(PlatformSpecific.GetSaveFolder(), "*.info", SearchOption.TopDirectoryOnly)
                 .Select(file => new FileInfo(file)).ToList();
             var sortedFiles = files.OrderByDescending(o => o.CreationTime).ToList();
-            Resize(sortedFiles, _cfg.AutoSavesToKeep);
+          
+            if (sortedFiles.Count > _cfg.AutoSavesToKeep)
+            {
+                Resize(sortedFiles, _cfg.AutoSavesToKeep);
+            }
 
             foreach (var file in Directory.GetFiles(PlatformSpecific.GetSaveFolder(), "*.*",
                          SearchOption.TopDirectoryOnly))
@@ -254,24 +229,18 @@ public class MainPatcher : MonoBehaviour
                 var dDat = _savePath + Path.GetFileNameWithoutExtension(tFile.FullName) + ".dat";
                 var dInfo = _savePath + Path.GetFileNameWithoutExtension(tFile.FullName) + ".info";
 
-                if (_cfg.RemoveFromSaveListButKeepFile)
+                if (_cfg.DontPruneSaves) continue;
+
+                try
                 {
-                    try
-                    {
-                        File.Copy(sDat, dDat, true);
-                        File.Copy(sInfo, dInfo, true);
-                        File.Delete(sDat);
-                        File.Delete(sInfo);
-                    }
-                    catch (Exception e)
-                    {
-                        Log($"Error backing up save games. {e.Message}", true);
-                    }
-                }
-                else
-                {
+                    File.Copy(sDat, dDat, true);
+                    File.Copy(sInfo, dInfo, true);
                     File.Delete(sDat);
                     File.Delete(sInfo);
+                }
+                catch (Exception e)
+                {
+                    Log($"Error backing up save games. {e.Message}", true);
                 }
             }
         }
@@ -300,7 +269,10 @@ public class MainPatcher : MonoBehaviour
             }
 
             _sortedTrimmedSaveGames = AllSaveGames.OrderByDescending(o => o.game_time).ToList();
-            Resize(_sortedTrimmedSaveGames, _cfg.AutoSavesToKeep);
+            if (_sortedTrimmedSaveGames.Count > _cfg.AutoSavesToKeep)
+            {
+                Resize(_sortedTrimmedSaveGames, _cfg.AutoSavesToKeep);
+            }
             slot_datas = _sortedTrimmedSaveGames;
             focus_on_first = true;
         }
@@ -317,7 +289,7 @@ public class MainPatcher : MonoBehaviour
         //replaces the standard exit dialog with one that supports save on exit
         public static void Postfix(InGameMenuGUI __instance)
         {
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+            Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
 
             __instance.SetControllsActive(false);
             __instance.OnClosePressed();

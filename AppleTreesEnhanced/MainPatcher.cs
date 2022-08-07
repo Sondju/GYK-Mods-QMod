@@ -15,8 +15,6 @@ namespace AppleTreesEnhanced;
 public class MainPatcher
 {
     private static Config.Options _cfg;
-    private static string Lang { get; set; }
-
     private static bool _updateDone;
 
     public static void Patch()
@@ -43,7 +41,7 @@ public class MainPatcher
     {
         if (_cfg.ShowHarvestReadyMessages)
         {
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+            Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
             var newObjPos = obj.pos3;
 
             if (obj.obj_id.Contains("berry")) newObjPos.y += 100f;
@@ -227,18 +225,7 @@ public class MainPatcher
             }
         }
     }
-
-    [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
-    public static class GameSettingsApplyLanguageChange
-    {
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-        }
-    }
-
+    
     private static void ProcessRespawn(WorldGameObject wgo, string replaceString, string craftString)
     {
         wgo.ReplaceWithObject(replaceString, true);

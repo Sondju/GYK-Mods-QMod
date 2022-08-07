@@ -39,13 +39,6 @@
     <PackageReference Include="UnityEngine.Modules" Version="2020.3.17" IncludeAssets="compile" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Helper\QModHelper.csproj">
-      <Project>{17e3eeaa-86d5-4737-bc62-bb6dd43f0fee}</Project>
-      <Name>QModHelper</Name>
-      <Private>False</Private>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="0Harmony" IncludeAssets="compile">
       <HintPath>..\libs\0Harmony.dll</HintPath>
       <Private>False</Private>
@@ -58,6 +51,13 @@
       <HintPath>..\libs\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Helper\QModHelper.csproj">
+      <Project>{17e3eeaa-86d5-4737-bc62-bb6dd43f0fee}</Project>
+      <Name>QModHelper</Name>
+      <Private>False</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>

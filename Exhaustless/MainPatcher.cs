@@ -21,8 +21,6 @@ public static class MainPatcher
     };
 
     private static Config.Options _cfg;
-    private static string Lang { get; set; }
-
     public static void Patch()
     {
         try
@@ -51,7 +49,8 @@ public static class MainPatcher
         {
             if (!_cfg.YawnMessage) return;
             if (buff_id.Equals("buff_tired"))
-                MainGame.me.player.Say(strings.Yawn, null, null,
+                Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+            MainGame.me.player.Say(strings.Yawn, null, null,
                     SpeechBubbleGUI.SpeechBubbleType.Think, SmartSpeechEngine.VoiceID.None, true);
         }
     }
@@ -80,17 +79,6 @@ public static class MainPatcher
                     itemDef.durability_decrease_on_use_speed = 0.005f;
                 }
             }
-        }
-    }
-
-    [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
-    public static class GameSettingsApplyLanguageChange
-    {
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
         }
     }
 

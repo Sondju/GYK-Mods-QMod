@@ -50,6 +50,11 @@ public static class MainPatcher
         "blockage", "obstacle", "builddesk", "fix", "broken", "elevator", "zombie", "refugee"//, "mf_barrel"
     };
 
+    private static readonly string[] MultiOutCantQueue =
+    {
+        "chisel_2_2b", "marble_plate_3"
+    };
+
     private static readonly CraftDefinition.CraftType[] UnSafeCraftTypes =
     {
        // CraftDefinition.CraftType.PrayCraft, CraftDefinition.CraftType.Fixing
@@ -72,8 +77,6 @@ public static class MainPatcher
 
     private static WorldGameObject _previousWorldGameObject;
     private static float _timeAdjustment;
-    private static string Lang { get; set; }
-
     public static void Patch()
     {
         try
@@ -124,6 +127,11 @@ public static class MainPatcher
     private static bool IsUnsafeDefinition(CraftDefinition _craftDefinition)
     {
         return UnSafeCraftDefPartials.Any(_craftDefinition.id.Contains) || _craftDefinition.one_time_craft;
+    }
+
+    private static bool IsMultiOutCantQueue(CraftDefinition _craftDefinition)
+    {
+        return MultiOutCantQueue.Any(_craftDefinition.id.Contains);
     }
 
     [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
@@ -241,15 +249,7 @@ public static class MainPatcher
             }
         }
     }
-
-    public static void ShowMessage(string msg)
-    {
-        Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-        MainGame.me.player.Say(Lang.StartsWith("en") ? msg : strings.Message, null, false,
-            SpeechBubbleGUI.SpeechBubbleType.Think,
-            SmartSpeechEngine.VoiceID.None, true);
-    }
-
+    
     private static void LoadFasterCraftConfig()
     {
         try
@@ -274,16 +274,54 @@ public static class MainPatcher
         public static void Postfix(ref CraftDefinition __instance, ref bool __result)
         {
             //if (!Tools.TutorialDone()) return;
-            if (_unsafeInteraction || IsUnsafeDefinition(__instance))
+            if (_unsafeInteraction || IsUnsafeDefinition(__instance) || IsMultiOutCantQueue(__instance))
             {
-                Log($"Unsafe Craft: {__instance.id}");
+                Log($"Unsafe Craft: {__instance.id}, QueueType: {__instance.enqueue_type}");
                 return;
             }
 
-            Log($"UNKNOWN/Safe? Craft: {__instance.id}");
+            Log($"UNKNOWN/Safe? Craft: {__instance.id}, QueueType: {__instance.enqueue_type}");
             __result = true;
         }
     }
+
+    //[HarmonyPatch(typeof(CraftDefinition), nameof(CraftDefinition.IsMultiqualityOutput))]
+    //public static class CraftDefinitionIsMultiqualityOutputPatch
+    //{
+    //    [HarmonyPostfix]
+    //    public static void Postfix(ref CraftDefinition __instance, ref bool __result)
+    //    {
+    //        //if (!Tools.TutorialDone()) return;
+    //        if (_unsafeInteraction || IsUnsafeDefinition(__instance))
+    //        {
+    //            Log($"Unsafe Craft: {__instance.id}, QueueType: {__instance.enqueue_type}");
+    //            return;
+    //        }
+
+    //        Log($"UNKNOWN/Safe? Craft: {__instance.id}, QueueType: {__instance.enqueue_type}");
+    //        __result = false;
+    //    }
+    //}
+
+
+    //[HarmonyPatch(typeof(CraftDefinition), nameof(CraftDefinition.CanEnqueue))]
+    //public static class CraftDefinitionCanEnqueuePatch
+    //{
+    //    [HarmonyPostfix]
+    //    public static void Postfix(ref CraftDefinition __instance, ref bool __result)
+    //    {
+    //        //if (!Tools.TutorialDone()) return;
+    //        if (_unsafeInteraction || IsUnsafeDefinition(__instance))
+    //        {
+    //            Log($"Unsafe Craft: {__instance.id}, QueueType: {__instance.enqueue_type}");
+    //            return;
+    //        }
+
+    //        Log($"UNKNOWN/Safe? Craft: {__instance.id}, QueueType: {__instance.enqueue_type}");
+    //        __result = true;
+    //    }
+    //}
+
 
     [HarmonyPatch(typeof(CraftDefinition), nameof(CraftDefinition.GetSpendTxt))]
     public static class CraftDefinitionGetSpendTxtPatch
@@ -674,19 +712,13 @@ public static class MainPatcher
 
             if (time >= 300 && !_cfg.DisableComeBackLaterThoughts)
             {
-                var lang = GameSettings.me.language.Replace('_', '-').ToLower().Trim();
-                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(lang);
-
                 var endTime = time / 60;
                 var message = endTime % 1 == 0
                     ? $"Hmmm guess I'll come back in {time / 60:0} minutes..."
                     : $"Hmmm guess I'll come back in roughly {time / 60:0} minutes...";
-                MainGame.me.player.Say(
-                    !lang.Contains("en")
-                        ? strings.Message
-                        : message, null, false,
-                    SpeechBubbleGUI.SpeechBubbleType.Think,
-                    SmartSpeechEngine.VoiceID.None, true);
+
+                Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+                Tools.ShowMessage(CrossModFields.Lang.StartsWith("en") ? message : strings.Message, sayAsPlayer: true);
             }
         }
 
@@ -733,11 +765,13 @@ public static class MainPatcher
     public static class CraftComponentCraftReally
     {
         [HarmonyPrefix]
-        public static void Prefix()
+        public static void Prefix(ref CraftComponent __instance)
         {
             //if (!Tools.TutorialDone()) return;
             if (!MainGame.game_started) return;
             if (!_cfg.MakeEverythingAuto) return;
+
+            //Log($"[Craft]: {__instance.current_craft.id}, Amount: {__instance.craft_amount}");
 
             foreach (var wgo in currentlyCrafting.Where(wgo => wgo.components.craft.is_crafting && !wgo.has_linked_worker))
             {
@@ -755,7 +789,7 @@ public static class MainPatcher
         {
             //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction) return;
-            if (IsUnsafeDefinition(__instance.craft_definition))
+            if (IsUnsafeDefinition(__instance.craft_definition) || IsMultiOutCantQueue(__instance.craft_definition))
             {
                 _craftAmount = 1;
                 ____amount = 1;
@@ -777,7 +811,7 @@ public static class MainPatcher
                 ? MainGame.me.player.GetMultiInventoryForInteraction()
                 : GUIElements.me.craft.multi_inventory;
             const string path = "./qmods/multis.txt";
-            
+
             var message = GUIElements.me.craft.GetCrafteryWGO().obj_id + "\n---------------------\n" + "Item: " + __instance.current_craft.id + ", Craft Def: " + __instance.craft_definition.id + "\n";
 
 
@@ -855,17 +889,6 @@ public static class MainPatcher
                 ____amount = min;
             }
 
-        }
-    }
-
-    [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
-    public static class GameSettingsApplyLanguageChange
-    {
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
         }
     }
 }

@@ -4,7 +4,6 @@ using IBuildWhereIWant.lang;
 using Rewired;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -18,8 +17,6 @@ namespace IBuildWhereIWant
         private static WorldGameObject _buildDesk;
         private static WorldGameObject _buildDeskClone;
         private static Config.Options _cfg;
-
-        private static bool _craftAnywhere;
         private static CraftsInventory _craftsInventory;
 
         private static Dictionary<string, string> _craftDictionary;
@@ -28,8 +25,7 @@ namespace IBuildWhereIWant
         private const string BuildDesk = "buildanywhere_desk";
 
         private static int _unlockedCraftListCount;
-        private static string Lang { get; set; }
-        //private static bool _gerrysJunkTrunk;
+
 
         public static void Patch()
         {
@@ -52,19 +48,10 @@ namespace IBuildWhereIWant
             Tools.Log("IBuildWhereIWant", $"{message}", error);
         }
 
-        [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
-        public static class GameSettingsApplyLanguageChange
-        {
-            [HarmonyPostfix]
-            public static void Postfix()
-            {
-                Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-            }
-        }
 
         private static void OpenCraftAnywhere()
         {
+            if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
             if (MainGame.me.player.GetParamInt("in_tutorial") == 1 &&
                 MainGame.me.player.GetParamInt("tut_shown_tut_1") == 0)
             {
@@ -122,7 +109,7 @@ namespace IBuildWhereIWant
                 craftList.ForEach(craft => { _craftsInventory.AddCraft(craft.Value); });
             }
 
-            _craftAnywhere = true;
+            CrossModFields.CraftAnywhere = true;
 
             BuildModeLogics.last_build_desk = _buildDeskClone;
 
@@ -138,22 +125,18 @@ namespace IBuildWhereIWant
             [HarmonyPatch(nameof(BuildGrid.ShowBuildGrid))]
             public static void ShowBuildGridPrefix(ref bool show)
             {
-//
-                if (_cfg.DisableGrid)
-                {
-                    show = false;
-                }
+                if (!_cfg.DisableGrid) return;
+                if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
+                show = false;
             }
 
             [HarmonyPrefix]
             [HarmonyPatch(nameof(BuildGrid.ClearPreviousTotemRadius))]
             public static void ClearPreviousTotemRadiusPrefix(ref bool apply_colors)
             {
-//
-                if (_cfg.DisableGrid)
-                {
-                    apply_colors = false;
-                }
+                if (!_cfg.DisableGrid) return;
+                if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
+                apply_colors = false;
             }
         }
 
@@ -164,29 +147,24 @@ namespace IBuildWhereIWant
             [HarmonyPatch(nameof(BuildModeLogics.EnterRemoveMode))]
             public static void BuildModeLogicsEnterRemoveMode(ref GameObject ____remove_grey_spr)
             {
-//
-                if (_cfg.DisableGreyRemoveOverlay)
-                {
-                    ____remove_grey_spr.SetActive(false);
-                }
+                if (!_cfg.DisableGreyRemoveOverlay) return;
+                if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
+                ____remove_grey_spr.SetActive(false);
             }
 
             [HarmonyPrefix]
             [HarmonyPatch("CancelCurrentMode")]
             public static void CancelCurrentModePrefix()
             {
-//
-                if (_craftAnywhere)
-                {
-                    OpenCraftAnywhere();
-                }
+                if (!CrossModFields.CraftAnywhere) return;
+                if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
+                OpenCraftAnywhere();
             }
 
             [HarmonyPatch(nameof(BuildModeLogics.CanBuild))]
             [HarmonyPrefix]
             private static void CanBuildPrefix(ref MultiInventory ____multi_inventory)
             {
-//
                 ____multi_inventory = MainGame.me.player.GetMultiInventoryForInteraction();
             }
 
@@ -194,10 +172,10 @@ namespace IBuildWhereIWant
             [HarmonyPrefix]
             private static void DoPlacePrefix(ref MultiInventory ____multi_inventory)
             {
-//
                 ____multi_inventory = MainGame.me.player.GetMultiInventoryForInteraction();
-                if (_craftAnywhere && MainGame.me.player.cur_zone.Length <= 0)
+                if (CrossModFields.CraftAnywhere && MainGame.me.player.cur_zone.Length <= 0)
                 {
+                    if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
                     BuildGrid.ShowBuildGrid(false);
                 }
             }
@@ -206,30 +184,26 @@ namespace IBuildWhereIWant
             [HarmonyPatch("FocusCameraOnBuildZone")]
             private static void FocusCameraOnBuildZonePrefix(ref string zone_id)
             {
-//
-                if (_craftAnywhere)
-                {
-                    zone_id = string.Empty;
-                }
+                if (!CrossModFields.CraftAnywhere) return;
+                if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
+                zone_id = string.Empty;
             }
 
             [HarmonyPatch(nameof(BuildModeLogics.GetObjectRemoveCraftDefinition))]
             [HarmonyPostfix]
             private static void GetObjectRemoveCraftDefinitionPostfix(string obj_id, ref ObjectCraftDefinition __result)
             {
-//
-                if (_craftAnywhere)
+                if (!CrossModFields.CraftAnywhere) return;
+                if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
+                Debug.LogError($"[Remove]{obj_id}");
+                foreach (var objectCraftDefinition in GameBalance.me.craft_obj_data.Where(objectCraftDefinition =>
+                             objectCraftDefinition.out_obj == obj_id && objectCraftDefinition.build_type ==
+                             ObjectCraftDefinition.BuildType.Remove))
                 {
-                    Debug.LogError($"[Remove]{obj_id}");
-                    foreach (var objectCraftDefinition in GameBalance.me.craft_obj_data.Where(objectCraftDefinition =>
-                                 objectCraftDefinition.out_obj == obj_id && objectCraftDefinition.build_type ==
-                                 ObjectCraftDefinition.BuildType.Remove))
-                    {
-                        __result = objectCraftDefinition;
-                        return;
-                    }
-                    __result = null;
+                    __result = objectCraftDefinition;
+                    return;
                 }
+                __result = null;
             }
 
             [HarmonyPrefix]
@@ -237,14 +211,12 @@ namespace IBuildWhereIWant
             private static void OnBuildCraftSelectedPrefix(ref string ____cur_build_zone_id, ref WorldZone ____cur_build_zone,
                 ref Bounds ____cur_build_zone_bounds)
             {
-//
-                if (_craftAnywhere)
-                {
-                    BuildModeLogics.last_build_desk = _buildDeskClone;
-                    ____cur_build_zone_id = Zone;
-                    ____cur_build_zone = WorldZone.GetZoneByID(Zone, true);
-                    ____cur_build_zone_bounds = ____cur_build_zone.GetBounds();
-                }
+                if (!CrossModFields.CraftAnywhere) return;
+                if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
+                BuildModeLogics.last_build_desk = _buildDeskClone;
+                ____cur_build_zone_id = Zone;
+                ____cur_build_zone = WorldZone.GetZoneByID(Zone, true);
+                ____cur_build_zone_bounds = ____cur_build_zone.GetBounds();
             }
         }
 
@@ -255,7 +227,7 @@ namespace IBuildWhereIWant
             [HarmonyPatch(nameof(FlowGridCell.IsInsideWorldZone))]
             public static void IsInsideWorldZonePostfix(ref bool __result)
             {
-//
+                if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
                 __result = true;
             }
 
@@ -263,7 +235,7 @@ namespace IBuildWhereIWant
             [HarmonyPatch(nameof(FlowGridCell.IsPlaceAvailable))]
             public static void IsPlaceAvailablePostfix(ref bool __result)
             {
-//
+                if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
                 __result = true;
             }
         }
@@ -277,6 +249,8 @@ namespace IBuildWhereIWant
 //
                 if (!MainGame.game_started || MainGame.me.player.is_dead || MainGame.me.player.IsDisabled() ||
                     MainGame.paused || !BaseGUI.all_guis_closed) return;
+
+                if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
 
                 if (LazyInput.gamepad_active && ReInput.players.GetPlayer(0).GetButtonDown(6))
                 {
@@ -299,24 +273,12 @@ namespace IBuildWhereIWant
 //
                 if (_buildDeskClone == null) return;
                 if (__instance != _buildDeskClone) return;
-                // if (!string.Equals(__instance.obj_id, _buildDeskClone.obj_id)) return;
+                if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
+                Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
                 __result.header = strings.Header;
                 __result.descr = strings.Description;
             }
         }
 
-        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
-        public static class WorldGameObjectInteractPatch
-        {
-            [HarmonyPrefix]
-            public static void Prefix(ref WorldGameObject __instance)
-            {
-//
-                if (__instance.obj_def.interaction_type is not ObjectDefinition.InteractionType.None)
-                {
-                    _craftAnywhere = false;
-                }
-            }
-        }
     }
 }

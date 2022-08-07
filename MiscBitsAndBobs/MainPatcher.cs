@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using MiscBitsAndBobs.lang;
+using UnityEngine;
 
 namespace MiscBitsAndBobs;
 
@@ -154,6 +156,66 @@ public class MainPatcher
             if (____all_trails.Count <= 0) return;
             var trailObject = ____all_trails[____all_trails.Count - 1];
             trailObject.SetColor(byType.color, ____dirty_amount * 0.5f);
+        }
+    }
+
+    [HarmonyPatch(typeof(MovementComponent), "UpdateMovement", typeof(Vector2), typeof(float))]
+    public static class MovementComponentUpdateMovementPatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix(ref MovementComponent __instance)
+        {
+            if (__instance.wgo.is_dead) return;
+            //Log($"[MoveSpeed]: Instance: {__instance.wgo.obj_id}, Speed: {__instance.wgo.data.GetParam("speed")}");
+            var speed = __instance.wgo.data.GetParam("speed");
+            if (speed > 0)
+            {
+                speed = LazyConsts.PLAYER_SPEED + __instance.wgo.data.GetParam("speed_buff");
+            }
+
+            if (__instance.wgo.is_player)
+            {
+                if (_cfg.ModifyPlayerMovementSpeed)
+                {
+                    __instance.SetSpeed(speed * _cfg.PlayerMovementSpeed);
+                }
+                else
+                {
+                    __instance.SetSpeed(speed);
+                }
+            }
+
+            if (__instance.wgo.IsWorker() && __instance.wgo.worker.GetBackpack() != null)
+            {
+                //1 and 0 = the same speed in game for zombies
+                if (_cfg.ModifyPorterMovementSpeed)
+                {
+                    __instance.SetSpeed(_cfg.PorterMovementSpeed);
+                }
+                else
+                {
+                    __instance.SetSpeed(0);
+                }
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
+    public static class TimeOfDayUpdatePatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix()
+        {
+            if (!MainGame.game_started) return;
+            if (Input.GetKeyUp(KeyCode.F5))
+            {
+                _cfg = Config.GetOptions();
+                if (!CrossModFields.ConfigReloadShown)
+                {
+                    Tools.ShowMessage(strings.ConfigMessage, sayAsPlayer: false);
+                    CrossModFields.ConfigReloadShown = true;
+                }
+            }
         }
     }
 

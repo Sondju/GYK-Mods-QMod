@@ -56,8 +56,6 @@ public class MainPatcher
     private static float _lastScanTime;
     private static float _lastGetLocationScanTime;
 
-    private static string Lang { get; set; }
-
     public static void Patch()
     {
         try
@@ -80,18 +78,7 @@ public class MainPatcher
     {
         Tools.Log("AutoLootHeavies", $"{message}", error);
     }
-
-    [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
-    public static class GameSettingsApplyLanguageChange
-    {
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-        }
-    }
-
+    
     private static void UpdateConfig()
     {
         Config.WriteOptions();
@@ -250,15 +237,16 @@ public class MainPatcher
             _lastBubbleTime = Time.time;
 
             EffectBubblesManager.ShowImmediately(pwo.bubble_pos,
-                GJL.L("not_enough_something", $"({GameSettings.me.language})"),
+                GJL.L("not_enough_something", $"(en)"),
                 EffectBubblesManager.BubbleColor.Energy, true, 1f);
+
         }
     }
 
     private static void ShowMessage(string message, bool noStockpilesInRange, bool storageNowFull,
         bool cantStorageFull, string item)
     {
-        Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
+        Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
         var msg = message;
         if (noStockpilesInRange)
             msg = item switch
@@ -287,27 +275,8 @@ public class MainPatcher
                 _ => msg
             };
 
-        MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
-            SmartSpeechEngine.VoiceID.None, true);
-    }
-
-    private static void ShowMessage(string msg, Vector3 pos)
-    {
-        Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-        Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-
-        if (GJL.IsEastern())
-        {
-            MainGame.me.player.Say(msg, null, false, SpeechBubbleGUI.SpeechBubbleType.Think,
-                SmartSpeechEngine.VoiceID.None, true);
-        }
-        else
-        {
-            EffectBubblesManager.ShowImmediately(pos,
-                msg,
-                EffectBubblesManager.BubbleColor.Relation,
-                true, 3f);
-        }
+        Tools.ShowMessage(msg, Vector3.zero, EffectBubblesManager.BubbleColor.Relation, 3f, true);
+        
     }
 
     private static void GetClosestStockPile()
@@ -473,15 +442,15 @@ public class MainPatcher
                 if (!_cfg.Teleportation)
                 {
                     _cfg.Teleportation = true;
-                    ShowMessage(strings.TeleOn, MainGame.me.player_pos);
+                    Tools.ShowMessage(strings.TeleOn);
                     UpdateConfig();
                     GetLocations();
-                    typeof(MainGame).GetMethod(nameof(MainGame.Update))?.Invoke(null, null);
+                    //typeof(MainGame).GetMethod(nameof(MainGame.Update))?.Invoke(null, null);
                 }
                 else
                 {
                     _cfg.Teleportation = false;
-                    ShowMessage(strings.TeleOff, MainGame.me.player_pos);
+                    Tools.ShowMessage(strings.TeleOff);
                     UpdateConfig();
                 }
 
@@ -495,19 +464,19 @@ public class MainPatcher
                     if (!_cfg.Teleportation)
                     {
                         _cfg.Teleportation = true;
-                        ShowMessage(strings.TeleOn, MainGame.me.player_pos);
+                        Tools.ShowMessage(strings.TeleOn);
                         UpdateConfig();
                     }
 
                     _cfg.DistanceBasedTeleport = true;
-                    ShowMessage(strings.DistTeleOn, MainGame.me.player_pos);
+                    Tools.ShowMessage(strings.DistTeleOn);
                     UpdateConfig();
                     GetLocations();
                 }
                 else
                 {
                     _cfg.DistanceBasedTeleport = false;
-                    ShowMessage(strings.DistTeleOff, MainGame.me.player_pos);
+                    Tools.ShowMessage(strings.DistTeleOff);
                     UpdateConfig();
                 }
 
@@ -517,21 +486,21 @@ public class MainPatcher
             if (Input.GetKeyUp(KeyCode.Alpha7))
             {
                 _cfg.DesignatedTimberLocation = MainGame.me.player_pos;
-                ShowMessage(strings.DumpTimber, _cfg.DesignatedTimberLocation);
+                Tools.ShowMessage(strings.DumpTimber, _cfg.DesignatedTimberLocation);
                 UpdateConfig();
             }
 
             if (Input.GetKeyUp(KeyCode.Alpha8))
             {
                 _cfg.DesignatedOreLocation = MainGame.me.player_pos;
-                ShowMessage(strings.DumpOre, _cfg.DesignatedOreLocation);
+                Tools.ShowMessage(strings.DumpOre, _cfg.DesignatedOreLocation);
                 UpdateConfig();
             }
 
             if (Input.GetKeyUp(KeyCode.Alpha9))
             {
                 _cfg.DesignatedStoneLocation = MainGame.me.player_pos;
-                ShowMessage(strings.DumpStone, _cfg.DesignatedStoneLocation);
+                Tools.ShowMessage(strings.DumpStone, _cfg.DesignatedStoneLocation);
                 UpdateConfig();
             }
         }

@@ -36,9 +36,6 @@ namespace GerrysJunkTrunk
         private static List<VendorSale> _vendorSales = new();
         private static readonly List<ItemPrice> PriceCache = new();
         private static readonly List<BaseItemCellGUI> AlreadyDone = new();
-
-        private static string Lang { get; set; }
-
         public static void Patch()
         {
             try
@@ -58,6 +55,7 @@ namespace GerrysJunkTrunk
         private static void ShowSummary(string money)
         {
             if (!MainGame.game_started) return;
+            Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
             var result = string.Empty;
             foreach (var vendor in _vendorSales)
             {
@@ -276,6 +274,7 @@ namespace GerrysJunkTrunk
 
         private static void StartGerryRoutine(float num)
         {
+            Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
             var noSales = num <= 0;
             var money = Trading.FormatMoney(num, true);
             //var gerry = WorldMap.GetNPCByObjID("talking_skull");
@@ -540,6 +539,7 @@ namespace GerrysJunkTrunk
             [HarmonyPrefix]
             public static void Prefix(ref InventoryPanelGUI __instance, ref BaseItemCellGUI item_gui)
             {
+                Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
                 //
                 //if (!_usingShippingBox) return;
                 if (!_cfg.ShowItemPriceTooltips) return;
@@ -585,6 +585,7 @@ namespace GerrysJunkTrunk
             {
                 //
                 if (!UnlockedShippingBox()) return;
+                Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
                 if (_internalCfg.ShippingBoxBuilt && _shippingBox != null)
                 {
                     foreach (var item in _shippingBox.data.inventory)
@@ -652,6 +653,7 @@ namespace GerrysJunkTrunk
                 ref CraftsInventory ___crafts_inventory, ref List<CraftDefinition> ___crafts)
             {
                 if (!UnlockedShippingBox()) return;
+                Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
                 var newCd = new ObjectCraftDefinition();
                 var cd = GameBalance.me.GetData<ObjectCraftDefinition>("mf_wood_builddesk:p:mf_box_stuff_place");
                 newCd.craft_in = cd.craft_in;
@@ -731,18 +733,7 @@ namespace GerrysJunkTrunk
                 ___crafts_inventory?.AddCraft(newCd.id);
             }
         }
-
-        [HarmonyPatch(typeof(GameSettings), nameof(GameSettings.ApplyLanguageChange))]
-        public static class GameSettingsApplyLanguageChange
-        {
-            [HarmonyPostfix]
-            public static void Postfix()
-            {
-                Lang = GameSettings.me.language.Replace('_', '-').ToLower(CultureInfo.InvariantCulture).Trim();
-                Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(Lang);
-            }
-        }
-
+        
         [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
         [HarmonyPatch(typeof(InventoryPanelGUI), "DoOpening")]
         public static class InventoryWidgetDoOpeningPatch
@@ -754,6 +745,7 @@ namespace GerrysJunkTrunk
                 //
                 if (!UnlockedShippingBox()) return;
                 if (__instance == null) return;
+                Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
                 var isChest = __instance.name.ToLowerInvariant().Contains("chest");
                 var isPlayer = __instance.name.ToLowerInvariant().Contains("player");
                 if (_usingShippingBox && isChest && !isPlayer)
@@ -787,6 +779,7 @@ namespace GerrysJunkTrunk
                 //
                 if (!UnlockedShippingBox()) return;
                 if (__instance == null) return;
+                Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
                 var isChest = __instance.name.ToLowerInvariant().Contains("chest");
                 var isPlayer = __instance.name.ToLowerInvariant().Contains("player");
                 if (_usingShippingBox && isChest && !isPlayer)
@@ -865,6 +858,7 @@ namespace GerrysJunkTrunk
                 //
                 if (__instance == null) return;
                 {
+                    Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
                     var component = __instance.GetComponent<Tooltip>();
                     if (__instance.tech_id.ToLowerInvariant().Contains("Wood processing".ToLowerInvariant()))
                     {
@@ -899,6 +893,7 @@ namespace GerrysJunkTrunk
                 //
                 if (__instance != null)
                 {
+                    Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
                     if (LazyInput.gamepad_active) return;
                     var name = __instance.GetData().name;
 

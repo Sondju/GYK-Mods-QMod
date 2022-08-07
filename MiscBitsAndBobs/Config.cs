@@ -24,13 +24,29 @@ public static class Config
         bool.TryParse(_con.Value("AllowHandToolDestroy", "true"), out var allowHandToolDestroy);
         _options.AllowHandToolDestroy = allowHandToolDestroy;
 
-        bool.TryParse(_con.Value("QuietMusicInGUI", "true"), out var quietMusicInGUI);
-        _options.QuietMusicInGui = quietMusicInGUI;
+        bool.TryParse(_con.Value("QuietMusicInGUI", "true"), out var quietMusicInGui);
+        _options.QuietMusicInGui = quietMusicInGui;
 
         bool.TryParse(_con.Value("CondenseXpBar", "true"), out var condenseXpBar);
         _options.CondenseXpBar = condenseXpBar;
 
+        bool.TryParse(_con.Value("ModifyPlayerMovementSpeed", "true"), out var modifyPlayerMovementSpeed);
+        _options.ModifyPlayerMovementSpeed = modifyPlayerMovementSpeed;
 
+        var playerMs = float.TryParse(_con.Value("PlayerMovementSpeed", "1.0"), out var playerMovementSpeed);
+        if (playerMs)
+        {
+            _options.PlayerMovementSpeed = playerMovementSpeed < 1 ? 1.0f : playerMovementSpeed;
+        }
+
+        bool.TryParse(_con.Value("ModifyPorterMovementSpeed", "true"), out var modifyPorterMovementSpeed);
+        _options.ModifyPorterMovementSpeed = modifyPorterMovementSpeed;
+
+        var porterMs = float.TryParse(_con.Value("PorterMovementSpeed", "1.0"), out var porterMovementSpeed);
+        if (porterMs)
+        {
+            _options.PorterMovementSpeed = porterMovementSpeed < 1 ? 1.0f : porterMovementSpeed;
+        }
 
         bool.TryParse(_con.Value("HalloweenNow", "false"), out var halloweenNow);
         _options.HalloweenNow = halloweenNow;
@@ -53,7 +69,8 @@ public static class Config
         bool.TryParse(_con.Value("RemovePrayerOnUse", "false"), out var removePrayerOnUse);
         _options.RemovePrayerOnUse = removePrayerOnUse;
 
-  
+     
+
 
         _con.ConfigWrite();
 
@@ -65,6 +82,10 @@ public static class Config
     {
         public int TavernInvIncrease;
         public int EnergySpendBeforeSleepDebuff;
+        public bool ModifyPlayerMovementSpeed;
+        public float PlayerMovementSpeed = 1.0f;
+        public bool ModifyPorterMovementSpeed;
+        public float PorterMovementSpeed = 1.0f;
         public bool EnableToolAndPrayerStacking;
         public bool QuietMusicInGui;
         public bool AllowHandToolDestroy;

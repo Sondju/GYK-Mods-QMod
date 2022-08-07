@@ -27,10 +27,7 @@ public static class Config
 
         bool.TryParse(_con.Value("DisableAutoSaveInfo", "false"), out var disableAutoSaveInfo);
         _options.DisableAutoSaveInfo = disableAutoSaveInfo;
-
-        bool.TryParse(_con.Value("RemoveFromSaveListButKeepFile", "true"), out var removeFromSaveListButKeepFile);
-        _options.RemoveFromSaveListButKeepFile = removeFromSaveListButKeepFile;
-
+        
         bool.TryParse(_con.Value("TurnOffTravelMessages", "false"), out var turnOffTravelMessages);
         _options.TurnOffTravelMessages = turnOffTravelMessages;
 
@@ -43,6 +40,9 @@ public static class Config
 
         bool.TryParse(_con.Value("DisableSaveOnExit", "false"), out var disableSaveOnExit);
         _options.DisableSaveOnExit = disableSaveOnExit;
+
+        bool.TryParse(_con.Value("DontPruneSaves", "true"), out var dontPruneSaves);
+        _options.DontPruneSaves = dontPruneSaves;
 
         _con.ConfigWrite();
 
@@ -57,7 +57,7 @@ public static class Config
         public bool NewFileOnAutoSave;
         public int AutoSavesToKeep = 5;
         public bool DisableAutoSaveInfo;
-        public bool RemoveFromSaveListButKeepFile;
+        public bool DontPruneSaves;
         public bool TurnOffTravelMessages;
         public bool TurnOffSaveGameNotificationText;
         public bool ExitToDesktop;
