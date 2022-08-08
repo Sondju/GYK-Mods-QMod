@@ -4,7 +4,7 @@ namespace Helper
 {
     public static class CrossModFields
     {
-        public static bool TalkingToNPC { get; set; }
+        public static bool TalkingToNpc { get; set; }
         public static bool ConfigReloadShown { get; set; }
         public static float TimeOfDayFloat { get; set; }
         public static string Lang { get; set; }

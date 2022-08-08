@@ -100,14 +100,14 @@ namespace Helper
             [HarmonyPrefix]
             public static void OnStartNPCInteractionPrefix()
             {
-                CrossModFields.TalkingToNPC = true;
+                CrossModFields.TalkingToNpc = true;
             }
 
             [HarmonyPatch(nameof(SmartAudioEngine.OnEndNPCInteraction))]
             [HarmonyPrefix]
             public static void OnEndNPCInteractionPrefix()
             {
-                CrossModFields.TalkingToNPC = false;
+                CrossModFields.TalkingToNpc = false;
             }
         }
 
@@ -175,7 +175,7 @@ namespace Helper
             public static void VendorGuiOpenPrefix()
             {
                 if (!MainGame.game_started) return;
-                CrossModFields.TalkingToNPC = true;
+                CrossModFields.TalkingToNpc = true;
             }
 
             [HarmonyPatch(nameof(VendorGUI.Hide), typeof(bool))]
@@ -183,7 +183,7 @@ namespace Helper
             public static void VendorGuiHidePrefix()
             {
                 if (!MainGame.game_started) return;
-                CrossModFields.TalkingToNPC = false;
+                CrossModFields.TalkingToNpc = false;
             }
 
             [HarmonyPatch(nameof(VendorGUI.OnClosePressed))]
@@ -191,7 +191,7 @@ namespace Helper
             public static void VendorGUIOnClosePressedPrefix()
             {
                 if (!MainGame.game_started) return;
-                CrossModFields.TalkingToNPC = false;
+                CrossModFields.TalkingToNpc = false;
             }
         }
 
@@ -222,7 +222,7 @@ namespace Helper
                 }
 
                 //Beam Me Up Gerry
-                CrossModFields.TalkingToNPC = __instance.obj_def.IsNPC();
+                CrossModFields.TalkingToNpc = __instance.obj_def.IsNPC();
 
                 Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
             }

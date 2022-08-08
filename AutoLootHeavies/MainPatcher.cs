@@ -442,7 +442,7 @@ public class MainPatcher
                 if (!_cfg.Teleportation)
                 {
                     _cfg.Teleportation = true;
-                    Tools.ShowMessage(strings.TeleOn);
+                    Tools.ShowMessage(strings.TeleOn, Vector3.zero);
                     UpdateConfig();
                     GetLocations();
                     //typeof(MainGame).GetMethod(nameof(MainGame.Update))?.Invoke(null, null);
@@ -450,7 +450,7 @@ public class MainPatcher
                 else
                 {
                     _cfg.Teleportation = false;
-                    Tools.ShowMessage(strings.TeleOff);
+                    Tools.ShowMessage(strings.TeleOff, Vector3.zero);
                     UpdateConfig();
                 }
 
@@ -464,19 +464,19 @@ public class MainPatcher
                     if (!_cfg.Teleportation)
                     {
                         _cfg.Teleportation = true;
-                        Tools.ShowMessage(strings.TeleOn);
+                        Tools.ShowMessage(strings.TeleOn, Vector3.zero);
                         UpdateConfig();
                     }
 
                     _cfg.DistanceBasedTeleport = true;
-                    Tools.ShowMessage(strings.DistTeleOn);
+                    Tools.ShowMessage(strings.DistTeleOn, Vector3.zero);
                     UpdateConfig();
                     GetLocations();
                 }
                 else
                 {
                     _cfg.DistanceBasedTeleport = false;
-                    Tools.ShowMessage(strings.DistTeleOff);
+                    Tools.ShowMessage(strings.DistTeleOff, Vector3.zero);
                     UpdateConfig();
                 }
 

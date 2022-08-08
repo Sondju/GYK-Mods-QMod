@@ -14,7 +14,8 @@ namespace Helper
 
         public static void ShowMessage(
             string msg,
-            Vector3 pos = new(),
+            Vector3 pos
+            ,
             EffectBubblesManager.BubbleColor color = EffectBubblesManager.BubbleColor.Relation,
             float time = 3f,
             bool sayAsPlayer = false,

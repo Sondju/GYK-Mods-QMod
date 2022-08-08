@@ -73,13 +73,13 @@ namespace BeamMeUpGerry
 
         private static void Beam()
         {
-            if (_usingStone || _dotSelection || CrossModFields.TalkingToNPC) return;
+            if (_usingStone || _dotSelection || CrossModFields.TalkingToNpc) return;
 
             var item = GetHearthstone();
             if (item != null)
             {
                 _usingStone = true;
-                CrossModFields.TalkingToNPC = false;
+                CrossModFields.TalkingToNpc = false;
                 MainGame.me.player.UseItemFromInventory(item);
             }
             else
@@ -226,7 +226,7 @@ namespace BeamMeUpGerry
                     ShowHud(true);
                     _usingStone = false;
                     _dotSelection = false;
-                    CrossModFields.TalkingToNPC = false;
+                    CrossModFields.TalkingToNpc = false;
 
                     MainGame.me.player.components.character.control_enabled = true;
                     return;
@@ -245,13 +245,13 @@ namespace BeamMeUpGerry
                     //leave option for npcs
                     _usingStone = false;
                     _dotSelection = false;
-                    CrossModFields.TalkingToNPC = false;
+                    CrossModFields.TalkingToNpc = false;
                     MainGame.me.player.components.character.control_enabled = true;
 
                     return;
                 }
 
-                if (CrossModFields.TalkingToNPC) return;
+                if (CrossModFields.TalkingToNpc) return;
 
                 _usingStone = false;
                 _dotSelection = false;
@@ -285,7 +285,7 @@ namespace BeamMeUpGerry
 
                 void Show(out string answer)
                 {
-                    CrossModFields.TalkingToNPC = false;
+                    CrossModFields.TalkingToNpc = false;
                     var cleanedAnswers = ValidateAnswerList(answers);
                     answer = "cancel";
                     _dotSelection = true;
@@ -300,7 +300,7 @@ namespace BeamMeUpGerry
 //
                 //  ShowHud();
                 if (!_cfg.EnableListExpansion) return;
-                if (CrossModFields.TalkingToNPC) return;
+                if (CrossModFields.TalkingToNpc) return;
                 if (string.Equals("cancel", chosen))
                 {
                     // ShowHud();
@@ -455,7 +455,7 @@ namespace BeamMeUpGerry
                         _maGui.DestroyBubble();
                         _usingStone = false;
                         _dotSelection = false;
-                        CrossModFields.TalkingToNPC = false;
+                        CrossModFields.TalkingToNpc = false;
                         MainGame.me.player.components.character.control_enabled = true;
                         _maGui = null;
                     }

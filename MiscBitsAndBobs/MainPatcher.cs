@@ -1,11 +1,12 @@
 using HarmonyLib;
 using Helper;
+using MiscBitsAndBobs.lang;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using MiscBitsAndBobs.lang;
+using System.Threading;
 using UnityEngine;
 
 namespace MiscBitsAndBobs;
@@ -200,19 +201,26 @@ public class MainPatcher
         }
     }
 
+    private static string GetLocalizedString(string content)
+    {
+        Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+        return content;
+    }
+
     [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
     public static class TimeOfDayUpdatePatch
     {
         [HarmonyPrefix]
         public static void Prefix()
         {
-            if (!MainGame.game_started) return;
+            
             if (Input.GetKeyUp(KeyCode.F5))
             {
                 _cfg = Config.GetOptions();
+
                 if (!CrossModFields.ConfigReloadShown)
                 {
-                    Tools.ShowMessage(strings.ConfigMessage, sayAsPlayer: false);
+                    Tools.ShowMessage(GetLocalizedString(strings.ConfigMessage), Vector3.zero);
                     CrossModFields.ConfigReloadShown = true;
                 }
             }

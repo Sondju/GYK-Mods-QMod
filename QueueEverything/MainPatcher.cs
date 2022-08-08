@@ -152,27 +152,6 @@ public static class MainPatcher
                 Log($"UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
             }
         }
-
-        //[HarmonyPostfix]
-        //public static void Postfix(ref WorldGameObject __instance, WorldGameObject other_obj)
-        //{
-        //    var craftery = GUIElements.me.craft.GetCrafteryWGO();
-        //    if (craftery == null || craftery.has_linked_worker) return;
-        //    var dockPoint = __instance.RefindDockPointsAndGet();
-        //    if (other_obj.is_player)
-        //    {
-        //        var data = GameBalance.me.GetData<WorkerDefinition>("worker_zombie_1");
-        //        var item = MainGame.me.save.GenerateBody(1, 1, -1, -1);
-        //        var worker_wgo = WorldMap.SpawnWGO(MainGame.me.world_root, data.worker_wgo, new Vector3?(dockPoint[0].transform.position));
-        //        var worker = MainGame.me.save.workers.CreateNewWorker(worker_wgo, data.id, item);
-        //        worker.ForcingWorkerK(true, 1f);
-        //        //worker.UpdateWorkerLevel();
-        //        craftery.linked_worker = worker_wgo;
-        //        worker_wgo.enabled = false;
-
-        //    }
-        //    Log($"Object: {__instance.obj_id}, Other: {other_obj.obj_id}, Craftery: {GUIElements.me.craft.GetCrafteryWGO().obj_id}, Worker Attached: {craftery.has_linked_worker}");
-        //}
     }
 
     [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.FillCraftsList))]
@@ -181,12 +160,12 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix()
         {
-            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction) return;
             if (!_cfg.MakeEverythingAuto) return;
             try
             {
                 var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
+             
                 foreach (var craft in GameBalance.me.craft_data)
                 {
                     if (craft.is_auto) continue;
@@ -227,11 +206,8 @@ public static class MainPatcher
                     }
                     craft.energy = SmartExpression.ParseExpression("0");
                     craft.is_auto = true;
-                    //craft.needs.ForEach(need =>
-                    //{
-                    //    //int value = need.value * 10 / 100;
-                    //    need.value += (int) Math.Ceiling((decimal) need.value * 25 / 100);
-                    //});
+                    craft.enqueue_type = CraftDefinition.EnqueueType.CanEnqueue;
+
                     craft.output.ForEach(output =>
                     {
                         if (output.id is not ("r" or "g" or "b")) return;
@@ -273,7 +249,6 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref CraftDefinition __instance, ref bool __result)
         {
-            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction || IsUnsafeDefinition(__instance) || IsMultiOutCantQueue(__instance))
             {
                 Log($"Unsafe Craft: {__instance.id}, QueueType: {__instance.enqueue_type}");
@@ -285,44 +260,7 @@ public static class MainPatcher
         }
     }
 
-    //[HarmonyPatch(typeof(CraftDefinition), nameof(CraftDefinition.IsMultiqualityOutput))]
-    //public static class CraftDefinitionIsMultiqualityOutputPatch
-    //{
-    //    [HarmonyPostfix]
-    //    public static void Postfix(ref CraftDefinition __instance, ref bool __result)
-    //    {
-    //        //if (!Tools.TutorialDone()) return;
-    //        if (_unsafeInteraction || IsUnsafeDefinition(__instance))
-    //        {
-    //            Log($"Unsafe Craft: {__instance.id}, QueueType: {__instance.enqueue_type}");
-    //            return;
-    //        }
-
-    //        Log($"UNKNOWN/Safe? Craft: {__instance.id}, QueueType: {__instance.enqueue_type}");
-    //        __result = false;
-    //    }
-    //}
-
-
-    //[HarmonyPatch(typeof(CraftDefinition), nameof(CraftDefinition.CanEnqueue))]
-    //public static class CraftDefinitionCanEnqueuePatch
-    //{
-    //    [HarmonyPostfix]
-    //    public static void Postfix(ref CraftDefinition __instance, ref bool __result)
-    //    {
-    //        //if (!Tools.TutorialDone()) return;
-    //        if (_unsafeInteraction || IsUnsafeDefinition(__instance))
-    //        {
-    //            Log($"Unsafe Craft: {__instance.id}, QueueType: {__instance.enqueue_type}");
-    //            return;
-    //        }
-
-    //        Log($"UNKNOWN/Safe? Craft: {__instance.id}, QueueType: {__instance.enqueue_type}");
-    //        __result = true;
-    //    }
-    //}
-
-
+    
     [HarmonyPatch(typeof(CraftDefinition), nameof(CraftDefinition.GetSpendTxt))]
     public static class CraftDefinitionGetSpendTxtPatch
     {
@@ -545,7 +483,7 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref CraftGUI __instance, ref CraftItemGUI craft_item_gui)
         {
-            //if (!Tools.TutorialDone()) return;
+           
             if (_unsafeInteraction) return;
             if (_cfg.AutoSelectCraftButtonWithController && LazyInput.gamepad_active)
                 foreach (var uiButton in craft_item_gui.GetComponentsInChildren<UIButton>())
@@ -565,7 +503,6 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix()
         {
-            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction) return;
             _alreadyRun = true;
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
@@ -578,7 +515,6 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix()
         {
-            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction) return;
             _craftAmount = 1;
             _alreadyRun = false;
@@ -591,7 +527,6 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix()
         {
-            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction) return;
             _alreadyRun = true;
         }
@@ -599,7 +534,6 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix()
         {
-            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction) return;
             _craftAmount = 1;
             _alreadyRun = false;
@@ -612,7 +546,6 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref CraftDefinition craft_definition, ref int ____amount)
         {
-            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction || IsUnsafeDefinition(craft_definition)) return;
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
 
@@ -676,7 +609,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref CraftItemGUI __instance, ref int ____amount, ref WorldGameObject __state)
         {
-            //if (!Tools.TutorialDone()) return; 
+           
             Log($"Craft: {__instance.craft_definition.id}, One time: {__instance.craft_definition.one_time_craft}");
             if (_unsafeInteraction || IsUnsafeDefinition(__instance.craft_definition)) return;
 
@@ -718,14 +651,13 @@ public static class MainPatcher
                     : $"Hmmm guess I'll come back in roughly {time / 60:0} minutes...";
 
                 Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
-                Tools.ShowMessage(CrossModFields.Lang.StartsWith("en") ? message : strings.Message, sayAsPlayer: true);
+                Tools.ShowMessage(CrossModFields.Lang.StartsWith("en") ? message : strings.Message, Vector3.zero, sayAsPlayer: true);
             }
         }
 
         [HarmonyPostfix]
         public static void Postfix(WorldGameObject __state)
         {
-            //if (!Tools.TutorialDone()) return;
             if (!_cfg.MakeEverythingAuto) return;
             if (__state == null) return;
             if (__state.linked_worker != null) return;
@@ -744,7 +676,6 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix()
         {
-            //if (!Tools.TutorialDone()) return;
             if (!MainGame.game_started) return;
             if (!_cfg.MakeEverythingAuto) return;
             if (_craftsStarted) return;
@@ -767,11 +698,8 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref CraftComponent __instance)
         {
-            //if (!Tools.TutorialDone()) return;
             if (!MainGame.game_started) return;
             if (!_cfg.MakeEverythingAuto) return;
-
-            //Log($"[Craft]: {__instance.current_craft.id}, Amount: {__instance.craft_amount}");
 
             foreach (var wgo in currentlyCrafting.Where(wgo => wgo.components.craft.is_crafting && !wgo.has_linked_worker))
             {
@@ -787,7 +715,6 @@ public static class MainPatcher
         public static void Prefix(ref CraftItemGUI __instance, ref List<string> ____multiquality_ids,
             ref int ____amount)
         {
-            //if (!Tools.TutorialDone()) return;
             if (_unsafeInteraction) return;
             if (IsUnsafeDefinition(__instance.craft_definition) || IsMultiOutCantQueue(__instance.craft_definition))
             {

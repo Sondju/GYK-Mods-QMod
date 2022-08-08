@@ -2,10 +2,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{BFDA5D30-E513-42F7-9DEE-84959C58F0BF}</ProjectGuid>
+    <ProjectGuid>{AF7261B4-4ECC-44B9-AE26-DF0174A58EB8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
-    <AssemblyName>MiscBitsAndBobs</AssemblyName>
+    <AssemblyName>RegenerationReloaded</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -29,7 +29,7 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <RootNamespace>MiscBitsAndBobs</RootNamespace>
+    <RootNamespace>RegenerationReloaded</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
@@ -68,13 +68,13 @@
     <EmbeddedResource Include="lang\strings.ja.resx" />
     <EmbeddedResource Include="lang\strings.ko.resx" />
     <EmbeddedResource Include="lang\strings.pl.resx" />
-    <EmbeddedResource Include="lang\strings.pt-BR.resx" />
+    <EmbeddedResource Include="lang\strings.pt-br.resx" />
     <EmbeddedResource Include="lang\strings.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="lang\strings.ru.resx" />
-    <EmbeddedResource Include="lang\strings.zh-CN.resx" />
+    <EmbeddedResource Include="lang\strings.zh-cn.resx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Helper\QModHelper.csproj">

@@ -110,13 +110,13 @@ public class MainPatcher : MonoBehaviour
             if (!saveFile.Equals(string.Empty))
             {
                 if (_cfg.NewFileOnAutoSave)
-                    Tools.ShowMessage(strings.AutoSave + ": " + saveFile);
+                    Tools.ShowMessage(strings.AutoSave + ": " + saveFile, Vector3.zero);
                 else
-                    Tools.ShowMessage(strings.AutoSave + "!");
+                    Tools.ShowMessage(strings.AutoSave + "!", Vector3.zero);
             }
             else
             {
-                Tools.ShowMessage(strings.SaveMessage);
+                Tools.ShowMessage(strings.SaveMessage, Vector3.zero);
             }
         }
 
@@ -140,12 +140,12 @@ public class MainPatcher : MonoBehaviour
             SaveLocationsDictionary.TryGetValue(MainGame.me.save_slot.filename_no_extension, out var posVector3);
         var pos = foundLocation ? posVector3 : homeVector;
         MainGame.me.player.PlaceAtPos(pos);
-        if (!_cfg.TurnOffTravelMessages) Tools.ShowMessage(strings.Rush);
+        if (!_cfg.TurnOffTravelMessages) Tools.ShowMessage(strings.Rush, Vector3.zero);
 
         StartTimer();
         if (!_cfg.DisableAutoSaveInfo)
             Tools.ShowMessage(
-                $"{strings.InfoAutoSave}: {_cfg.AutoSave}, {strings.InfoPeriod}: {_cfg.SaveInterval / 60} {strings.InfoMinutes}, {strings.InfoNewSaveOnAutoSave}: {_cfg.NewFileOnAutoSave}, {strings.InfoSavesToKeep}: {_cfg.AutoSavesToKeep}", color:EffectBubblesManager.BubbleColor.Red, time:4f);
+                $"{strings.InfoAutoSave}: {_cfg.AutoSave}, {strings.InfoPeriod}: {_cfg.SaveInterval / 60} {strings.InfoMinutes}, {strings.InfoNewSaveOnAutoSave}: {_cfg.NewFileOnAutoSave}, {strings.InfoSavesToKeep}: {_cfg.AutoSavesToKeep}",  Vector3.zero, color: EffectBubblesManager.BubbleColor.Red, time:4f);
     }
 
     private static void StartTimer()

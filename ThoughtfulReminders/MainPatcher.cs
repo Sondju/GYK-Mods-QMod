@@ -38,11 +38,11 @@ public class MainPatcher
         Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
         if (_cfg.SpeechBubbles)
         {
-            Tools.ShowMessage(msg, sayAsPlayer:true);
+            Tools.ShowMessage(msg, Vector3.zero, sayAsPlayer: true);
         }
         else
         {
-            Tools.ShowMessage(msg, sayAsPlayer: false, color:EffectBubblesManager.BubbleColor.Red, time:4f);
+            Tools.ShowMessage(msg,  Vector3.zero, sayAsPlayer: false, color:EffectBubblesManager.BubbleColor.Red, time:4f);
         }
         
     }

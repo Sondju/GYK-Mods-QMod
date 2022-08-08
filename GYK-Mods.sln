@@ -69,6 +69,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GerrysJunkTrunk", "GerrysJu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FasterCraftReloaded", "FasterCraftReloaded\FasterCraftReloaded.csproj", "{23E99E91-DC6C-4FAC-920B-F5DB145B81E6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegenerationReloaded", "RegenerationReloaded\RegenerationReloaded.csproj", "{AF7261B4-4ECC-44B9-AE26-DF0174A58EB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -175,6 +177,10 @@ Global
 		{23E99E91-DC6C-4FAC-920B-F5DB145B81E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23E99E91-DC6C-4FAC-920B-F5DB145B81E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23E99E91-DC6C-4FAC-920B-F5DB145B81E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF7261B4-4ECC-44B9-AE26-DF0174A58EB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF7261B4-4ECC-44B9-AE26-DF0174A58EB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF7261B4-4ECC-44B9-AE26-DF0174A58EB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF7261B4-4ECC-44B9-AE26-DF0174A58EB8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
