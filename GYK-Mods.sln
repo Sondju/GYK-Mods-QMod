@@ -71,6 +71,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FasterCraftReloaded", "Fast
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegenerationReloaded", "RegenerationReloaded\RegenerationReloaded.csproj", "{AF7261B4-4ECC-44B9-AE26-DF0174A58EB8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EconomyReloaded", "EconomyReloaded\EconomyReloaded.csproj", "{B846B133-1DEC-4914-A0ED-7F16CB683F79}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -181,6 +183,10 @@ Global
 		{AF7261B4-4ECC-44B9-AE26-DF0174A58EB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF7261B4-4ECC-44B9-AE26-DF0174A58EB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF7261B4-4ECC-44B9-AE26-DF0174A58EB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B846B133-1DEC-4914-A0ED-7F16CB683F79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B846B133-1DEC-4914-A0ED-7F16CB683F79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B846B133-1DEC-4914-A0ED-7F16CB683F79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B846B133-1DEC-4914-A0ED-7F16CB683F79}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

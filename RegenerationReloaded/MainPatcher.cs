@@ -34,7 +34,7 @@ namespace RegenerationReloaded
         {
             if (_cfg.Debug || error)
             {
-                Tools.Log("QueueEverything", $"{message}", error);
+                Tools.Log("RegenerationReloaded", $"{message}", error);
             }
         }
 
