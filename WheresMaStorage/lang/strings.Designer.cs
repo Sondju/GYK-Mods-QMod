@@ -61,6 +61,15 @@ namespace WheresMaStorage.lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Config Reloaded!.
+        /// </summary>
+        public static string ConfigMessage {
+            get {
+                return ResourceManager.GetString("ConfigMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Player.
         /// </summary>
         public static string Player {

@@ -131,6 +131,7 @@ namespace WheresMaStorage
 
         private static void SetInventorySizeText(BaseInventoryWidget inventoryWidget)
         {
+            Log($"[Bag]: {inventoryWidget.inventory_data.is_bag}, ID: {inventoryWidget.inventory_data.id}");
             if (inventoryWidget.inventory_data.id.Contains(Writer)) return;
             if (inventoryWidget.header_label.text.Contains(Gerry)) return;
             if (!_cfg.ShowWorldZoneInTitles && !_cfg.ShowUsedSpaceInTitles) return;
@@ -177,6 +178,11 @@ namespace WheresMaStorage
             inventoryWidget.header_label.overflowMethod = UILabel.Overflow.ResizeFreely;
 
             var header = objId;
+
+            if (inventoryWidget.inventory_data.is_bag)
+            {
+                header = GJL.L(inventoryWidget.inventory_data.id);
+            }
 
             if (_cfg.ShowWorldZoneInTitles && !isPlayer)
             {
@@ -480,23 +486,23 @@ namespace WheresMaStorage
                 }
             }
         }
-        
+
         [HarmonyPatch(typeof(InventoryPanelGUI), "DoOpening")]
         public static class InventoryPanelGuiDoOpeningPatch
         {
             [HarmonyPostfix]
             public static void Postfix(ref InventoryPanelGUI __instance, ref MultiInventory multi_inventory, ref List<UIWidget> ____separators, ref List<InventoryWidget> ____widgets, ref List<CustomInventoryWidget> ____custom_widgets)
             {
-               
+
                 var isChestPanel = __instance.name.ToLowerInvariant().Contains(Chest);
                 var isVendorPanel = __instance.name.ToLowerInvariant().Contains(Vendor);
                 var isPlayerPanel = __instance.name.ToLowerInvariant().Contains(Player) || (__instance.name.ToLowerInvariant().Contains(Multi) && CrossModFields.CurrentWgoInteraction == null);
                 var isResourcePanelProbably = !isChestPanel && !isVendorPanel && !isPlayerPanel;
 
-       
+
                 if ((_cfg.RemoveGapsBetweenSections && isPlayerPanel) || (_cfg.RemoveGapsBetweenSectionsVendor && isVendorPanel) || isResourcePanelProbably)
                 {
-                  
+
                     foreach (var sep in ____separators)
                     {
                         sep.Hide();
@@ -507,7 +513,7 @@ namespace WheresMaStorage
                 {
                     foreach (var inventoryWidget in ____widgets)
                     {
-                     
+
                         SetInventorySizeText(inventoryWidget);
                     }
                 }
@@ -529,7 +535,7 @@ namespace WheresMaStorage
                 {
                     inventoryWidget.Deactivate();
                 }
-               
+
                 if (isVendorPanel || CrossModFields.IsBarman || CrossModFields.IsTavernCellar || CrossModFields.IsRefugee) return;
                 foreach (var customWidget in from customWidget in ____custom_widgets let id = customWidget.inventory_data.id where (_cfg.HideRefugeeWidgets && id.Contains(Refugee)) || (_cfg.HideStockpileWidgets && StockpileWidgetsPartials.Any(id.Contains)) || (_cfg.HideTavernWidgets && id.Contains(Tavern)) || (_cfg.HideWarehouseShopWidgets && id.Contains(Storage)) select customWidget)
                 {
@@ -548,9 +554,9 @@ namespace WheresMaStorage
             [HarmonyPrefix]
             public static void Prefix(ref InventoryPanelGUI __instance, ref MultiInventory multi_inventory)
             {
-              
+
                 var isVendorPanel = __instance.name.ToLowerInvariant().Contains(Vendor);
-              
+
                 if (isVendorPanel) return;
 
                 if (_cfg.DontShowEmptyRowsInInventory)
@@ -562,7 +568,7 @@ namespace WheresMaStorage
 
                 if (_cfg.ShowOnlyPersonalInventory || CrossModFields.IsBarman || CrossModFields.IsTavernCellar || CrossModFields.IsRefugee || CrossModFields.IsChest || CrossModFields.IsWritersTable)
                 {
-                   
+
 
                     var onlyMineInventory = new MultiInventory();
                     onlyMineInventory.AddInventory(multi_inventory.all[0]);
@@ -577,18 +583,38 @@ namespace WheresMaStorage
             [HarmonyPostfix]
             public static void Postfix(ref InventoryPanelGUI __instance, ref List<InventoryWidget> ____widgets)
             {
-                
+
                 if (MainGame.me.save.IsInTutorial()) return;
                 var isChest = __instance.name.ToLowerInvariant().Contains(Chest);
                 var isPlayer = __instance.name.ToLowerInvariant().Contains(Player) || (__instance.name.ToLowerInvariant().Contains(Multi) && CrossModFields.CurrentWgoInteraction == null);
 
-                
+
                 if ((isPlayer || isChest) && _cfg.ShowUsedSpaceInTitles)
                 {
                     foreach (var inventoryWidget in ____widgets)
                     {
                         // Log($"[InventoryWidget Redraw]: InvID: {inventoryWidget.inventory_data.id}, HeaderText: {inventoryWidget.header_label.text}, HeaderPrintedText: {inventoryWidget.header_label.printedText}");
                         SetInventorySizeText(inventoryWidget);
+                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
+        public static class TimeOfDayUpdatePatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix()
+            {
+
+                if (Input.GetKeyUp(KeyCode.F5))
+                {
+                    _cfg = Config.GetOptions();
+
+                    if (!CrossModFields.ConfigReloadShown)
+                    {
+                        Tools.ShowMessage(GetLocalizedString(strings.ConfigMessage), Vector3.zero);
+                        CrossModFields.ConfigReloadShown = true;
                     }
                 }
             }
@@ -604,14 +630,35 @@ namespace WheresMaStorage
             }
         }
 
+        private static bool _usingBag;
+
+        [HarmonyPatch(typeof(InventoryGUI))]
+        public static class InventoryGuiPatches
+        {
+            [HarmonyPostfix]
+            [HarmonyPatch(nameof(InventoryGUI.CloseBag))]
+            public static void CloseBagPostfix()
+            {
+                _usingBag = false;
+            }
+
+            [HarmonyPrefix]
+            [HarmonyPatch(nameof(InventoryGUI.OpenBag))]
+            public static void OpenBagPrefix()
+            {
+                _usingBag = true;
+            }
+        }
+
         [HarmonyPatch(typeof(InventoryWidget), nameof(InventoryWidget.FilterItems))]
         public static class InventoryWidgetFilterItemsPatch
         {
+            
             [HarmonyPostfix]
             public static void Postfix(ref InventoryWidget __instance,
                 ref InventoryWidget.ItemFilterDelegate filter_delegate, ref List<BaseItemCellGUI> ___items)
             {
-             
+                
 
                 if (__instance.gameObject.transform.parent.transform.parent.transform.parent.name.ToLowerInvariant()
                     .Contains(Vendor))
@@ -619,30 +666,34 @@ namespace WheresMaStorage
 
                 if (!_cfg.HideInvalidSelections) return;
 
+                if (_usingBag) return;
+
                 foreach (var baseItemCellGui in ___items)
                 {
-                    switch (filter_delegate(baseItemCellGui.item, __instance))
-                    {
-                        case InventoryWidget.ItemFilterResult.Active:
-                            baseItemCellGui.SetGrayState(false);
-                            break;
+                   
+                        switch (filter_delegate(baseItemCellGui.item, __instance))
+                        {
+                            case InventoryWidget.ItemFilterResult.Active:
+                                baseItemCellGui.SetGrayState(false);
+                                break;
 
-                        case InventoryWidget.ItemFilterResult.Inactive:
-                            baseItemCellGui.Deactivate();
-                            break;
+                            case InventoryWidget.ItemFilterResult.Inactive:
+                                baseItemCellGui.Deactivate();
+                                break;
 
-                        case InventoryWidget.ItemFilterResult.Hide:
-                            baseItemCellGui.Deactivate();
-                            break;
+                            case InventoryWidget.ItemFilterResult.Hide:
+                                baseItemCellGui.Deactivate();
+                                break;
 
-                        case InventoryWidget.ItemFilterResult.Unknown:
-                            baseItemCellGui.DrawUnknown();
-                            break;
-                    }
+                            case InventoryWidget.ItemFilterResult.Unknown:
+                                baseItemCellGui.DrawUnknown();
+                                break;
+                        }
+                    
                 }
 
                 var activeCount = ___items.Count(x => !x.is_inactive_state);
-               // Log($"[InvDataID]: {__instance.inventory_data.id}");
+                // Log($"[InvDataID]: {__instance.inventory_data.id}");
                 if (activeCount <= 0)
                 {
                     __instance.Hide();
