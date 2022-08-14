@@ -3,6 +3,7 @@ using HarmonyLib;
 using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -89,6 +90,7 @@ namespace Helper
                 return instructionsList.AsEnumerable();
             }
         }
+        
 
         //stops unnecessary duplicate objects spam from spawning clone vendors
         [HarmonyPatch(typeof(WorldMap), "GetWorldGameObjectByComparator")]

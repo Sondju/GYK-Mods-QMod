@@ -61,6 +61,15 @@ namespace QueueEverything.lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Config Reloaded!.
+        /// </summary>
+        public static string ConfigMessage {
+            get {
+                return ResourceManager.GetString("ConfigMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hmm, guess I&apos;ll come back later....
         /// </summary>
         public static string Message {

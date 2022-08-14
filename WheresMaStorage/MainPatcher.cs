@@ -28,35 +28,35 @@ namespace WheresMaStorage
         private const string Vendor = "vendor";
         private const string Gerry = "gerry";
 
-        private static readonly string[] ZoneExclusions =
-        {
-            "slava_test",
-            "morgue_outside",
-            "cabinet",
-            "farm",
-            "hill",
-            "tavern",
-            "vilage",
-            "flat_under_waterflow",
-            "flat_under_waterflow_2",
-            "flat_under_waterflow_3",
-            "swamp",
-            "witch_hut",
-            "wheat_land",
-            "beatch",
-            "forest_under_village",
-            "east_border",
-            "sealight",
-            "camp",
-            "marble_deposit",
-            "burned_house",
-            "nountain_fort",
-            "cliff",
-            "cellar_storage",
-            //"refugees_camp",
-            "euric_room",
-            "alarich_tent_inside"
-        };
+        //private static readonly string[] ZoneExclusions =
+        //{
+        //    "slava_test",
+        //    "morgue_outside",
+        //    "cabinet",
+        //    "farm",
+        //    "hill",
+        //    "tavern",
+        //    "vilage",
+        //    "flat_under_waterflow",
+        //    "flat_under_waterflow_2",
+        //    "flat_under_waterflow_3",
+        //    "swamp",
+        //    "witch_hut",
+        //    "wheat_land",
+        //    "beatch",
+        //    "forest_under_village",
+        //    "east_border",
+        //    "sealight",
+        //    "camp",
+        //    "marble_deposit",
+        //    "burned_house",
+        //    "nountain_fort",
+        //    "cliff",
+        //    "cellar_storage",
+        //    //"refugees_camp",
+        //    "euric_room",
+        //    "alarich_tent_inside"
+        //};
 
         private static readonly string[] AlwaysHidePartials =
         {
@@ -858,7 +858,7 @@ namespace WheresMaStorage
                         var worldZone = WorldZone.GetZoneByID(worldZoneDef.id, false);
                         if (worldZone == null) continue;
 
-                        if (ZoneExclusions.Contains(worldZone.id)) continue;
+                        //if (ZoneExclusions.Contains(worldZone.id)) continue;
                         var worldZoneMulti =
                             worldZone.GetMultiInventory(player_mi: MultiInventory.PlayerMultiInventory.ExcludePlayer,
                                 sortWGOS: true);

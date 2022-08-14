@@ -2,6 +2,7 @@ using EconomyReloaded.lang;
 using HarmonyLib;
 using Helper;
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using UnityEngine;
@@ -35,6 +36,25 @@ namespace EconomyReloaded
             }
         }
 
+        private static bool _gameBalanceAlreadyRun;
+
+        [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
+        public static class GameBalanceLoadGameBalancePatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                if (_cfg.OldSchoolMode) return;
+                if (_gameBalanceAlreadyRun) return;
+                _gameBalanceAlreadyRun = true;
+
+                foreach (var itemDef in GameBalance.me.items_data.Where(itemDef => itemDef.base_price > 0))
+                {
+                    itemDef.is_static_cost = true;
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(Trading))]
         internal class TradingPatches
         {
@@ -42,7 +62,7 @@ namespace EconomyReloaded
             [HarmonyPostfix]
             public static void TraderPostfix(ref float __result, Item item)
             {
-                if (!_cfg.DisableInflation) return;
+                if (!_cfg.OldSchoolMode) return;
                 if (__result != 0.0)
                 {
                     __result = item.definition.base_price;
@@ -53,13 +73,14 @@ namespace EconomyReloaded
             [HarmonyPostfix]
             public static void PlayerPostfix(ref float __result, Item item)
             {
-                if (!_cfg.DisableDeflation) return;
+                if (!_cfg.OldSchoolMode) return;
                 if (__result != 0.0)
                 {
                     __result = item.definition.base_price;
                 }
             }
         }
+
 
         private static string GetLocalizedString(string content)
         {

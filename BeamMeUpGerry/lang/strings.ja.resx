@@ -177,4 +177,7 @@
   <data name="Coal" xml:space="preserve">
     <value>石炭鉱脈</value>
   </data>
+  <data name="ConfigMessage" xml:space="preserve">
+    <value>設定がリロードされました!</value>
+  </data>
 </root>

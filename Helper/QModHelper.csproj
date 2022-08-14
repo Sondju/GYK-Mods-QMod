@@ -37,6 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CrossModFields.cs" />
+    <Compile Include="LoadedModsMainMenu.cs" />
     <Compile Include="MainPatcher.cs" />
     <Compile Include="MiscFixes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

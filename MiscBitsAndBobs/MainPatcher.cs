@@ -84,67 +84,7 @@ public class MainPatcher
         }
     }
 
-    //[HarmonyPatch(typeof(DropResGameObject), nameof(DropResGameObject.ProcessDropCollectorRangeCheck), typeof(WorldGameObject), typeof(Vector3) )]
-    //public static class DropResGameObjectPatch
-    //{
-    //    [HarmonyPrefix]
-    //    public static bool Prefix()
-    //    {
-    //        return false;
-    //    }
 
-    //    [HarmonyPostfix]
-    //    public static void Postfix(ref DropResGameObject __instance, ref WorldGameObject collector_wgo, Vector3 char_global_pos,
-    //        ref bool ____performing_drop_and_fly,
-    //        ref Transform ____tf,
-    //        ref WorldGameObject ____target_obj,
-    //        ref Transform ____target_char_tf,
-    //        ref float ____last_dist_to_target,
-    //        ref bool ____just_spawned)
-    //    {
-    //        Log($"[ProcessDropRange]: Postfix Hit");
-    //        if (____performing_drop_and_fly)
-    //        {
-    //            return;
-    //        }
-    //        var num = char_global_pos.DistSqrTo(____tf.position, 384f);
-    //        if (collector_wgo.is_player)
-    //        {
-    //            __instance.dist_sqr_to_player = num;
-    //        }
-    //        //if (num > 3.2399998f)
-    //        //{
-    //        //   // return;
-    //        //}
-    //        //if (collector_wgo.CanCollectDrop(__instance) <= 0)
-    //        //{
-    //        //    return;
-    //        //}
-    //        if (__instance.has_target || __instance.collect_delay > 0f)
-    //        {
-    //            return;
-    //        }
-    //        //__instance.ChangeKickableState(false);
-
-    //        typeof(DropResGameObject).GetMethod("ChangeKickableState", AccessTools.all)
-    //            ?.Invoke(__instance, new object[]
-    //            {
-    //              false
-    //            });
-
-    //        ____target_obj = collector_wgo;
-    //        ____target_char_tf = collector_wgo.transform;
-    //        ____last_dist_to_target = num;
-    //        ____just_spawned = false;
-    //        //__instance.SetDropCollectingState(true);
-
-    //        typeof(DropResGameObject).GetMethod("SetDropCollectingState", AccessTools.all)
-    //            ?.Invoke(__instance, new object[]
-    //            {
-    //                true
-    //            });
-    //    }
-    //}
 
     [HarmonyPatch(typeof(LeaveTrailComponent), "LeaveTrail")]
     public static class LeaveTrailComponentLeaveTrailPatch
@@ -160,6 +100,11 @@ public class MainPatcher
         }
     }
 
+    private static bool WorkerHasBackpack(WorldGameObject workerWgo)
+    {
+        return workerWgo.data.inventory.Any(backpack => backpack.id == "porter_backpack");
+    }
+
     [HarmonyPatch(typeof(MovementComponent), "UpdateMovement", typeof(Vector2), typeof(float))]
     public static class MovementComponentUpdateMovementPatch
     {
@@ -168,14 +113,15 @@ public class MainPatcher
         {
             if (__instance.wgo.is_dead) return;
             //Log($"[MoveSpeed]: Instance: {__instance.wgo.obj_id}, Speed: {__instance.wgo.data.GetParam("speed")}");
-            var speed = __instance.wgo.data.GetParam("speed");
-            if (speed > 0)
-            {
-                speed = LazyConsts.PLAYER_SPEED + __instance.wgo.data.GetParam("speed_buff");
-            }
 
             if (__instance.wgo.is_player)
             {
+                var speed = __instance.wgo.data.GetParam("speed");
+                if (speed > 0)
+                {
+                    speed = LazyConsts.PLAYER_SPEED + __instance.wgo.data.GetParam("speed_buff");
+                }
+
                 if (_cfg.ModifyPlayerMovementSpeed)
                 {
                     __instance.SetSpeed(speed * _cfg.PlayerMovementSpeed);
@@ -186,7 +132,7 @@ public class MainPatcher
                 }
             }
 
-            if (__instance.wgo.IsWorker() && __instance.wgo.worker.GetBackpack() != null)
+            if (__instance.wgo.IsWorker() && WorkerHasBackpack(__instance.wgo))
             {
                 //1 and 0 = the same speed in game for zombies
                 if (_cfg.ModifyPorterMovementSpeed)
@@ -213,7 +159,7 @@ public class MainPatcher
         [HarmonyPrefix]
         public static void Prefix()
         {
-            
+
             if (Input.GetKeyUp(KeyCode.F5))
             {
                 _cfg = Config.GetOptions();
@@ -301,7 +247,7 @@ public class MainPatcher
     [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.GetRemoveCraftForItem))]
     public static class GameBalanceGetRemoveCraftForItemPatch
     {
-        //needed for grave removals to work
+       //needed for grave removals to work
         [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
         [HarmonyPostfix]
         public static void Postfix(ref CraftDefinition __result)

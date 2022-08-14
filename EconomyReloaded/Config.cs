@@ -11,8 +11,7 @@ namespace EconomyReloaded
         public class Options
         {
             public bool Debug;
-            public bool DisableInflation = true;
-            public bool DisableDeflation = true;
+            public bool OldSchoolMode;
         }
 
         //public static void WriteOptions()
@@ -28,12 +27,9 @@ namespace EconomyReloaded
             bool.TryParse(_con.Value("Debug", "false"), out var debug);
             _options.Debug = debug;
 
-            bool.TryParse(_con.Value("DisableInflation", "true"), out var disableInflation);
-            _options.DisableInflation = disableInflation;
-
-            bool.TryParse(_con.Value("DisableDeflation", "true"), out var disableDeflation);
-            _options.DisableDeflation = disableDeflation;
-
+            bool.TryParse(_con.Value("OldSchoolMode", "false"), out var oldSchoolMode);
+            _options.OldSchoolMode = oldSchoolMode;
+            
             _con.ConfigWrite();
 
             return _options;

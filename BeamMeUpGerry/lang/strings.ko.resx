@@ -177,4 +177,7 @@
   <data name="Coal" xml:space="preserve">
     <value>탄광</value>
   </data>
+  <data name="ConfigMessage" xml:space="preserve">
+    <value>구성이 다시 로드되었습니다!</value>
+  </data>
 </root>

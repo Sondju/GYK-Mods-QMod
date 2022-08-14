@@ -30,7 +30,7 @@ public static class MainPatcher
         "zombie_vineyard_desk_1", "zombie_vineyard_desk_2", "zombie_vineyard_desk_3", "graveyard_builddesk", "blockage_H_low", "blockage_V_low",
         "blockage_H_high", "blockage_V_high", "wood_obstacle_v", "refugee_camp_garden_bed", "refugee_camp_garden_bed_1", "refugee_camp_garden_bed_2",
         "refugee_camp_garden_bed_3", "carrot_box", "elevator_top", "zombie_crafting_table", "mf_balsamation","mf_balsamation_1","mf_balsamation_2",
-        "mf_balsamation_3"
+        "mf_balsamation_3","blockage_H_high"
     };
 
     //individual zones
@@ -42,7 +42,7 @@ public static class MainPatcher
     //individual craft definitions
     private static readonly string[] UnSafeCraftDefPartials =
     {
-        "soul_workbench_craft", "remove", "zombie", "refugee", "_to_", "upgrade", "fountain"
+        "soul_workbench_craft", "remove", "zombie", "refugee", "upgrade", "fountain"
     };
 
     private static readonly string[] UnSafePartials =
@@ -252,6 +252,7 @@ public static class MainPatcher
             if (_unsafeInteraction || IsUnsafeDefinition(__instance) || IsMultiOutCantQueue(__instance))
             {
                 Log($"Unsafe Craft: {__instance.id}, QueueType: {__instance.enqueue_type}");
+                __result = false;
                 return;
             }
 
@@ -473,7 +474,39 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static bool Prefix()
         {
-            return false;
+            return _unsafeInteraction;
+        }
+    }
+
+    private static void ReloadConfig()
+    {
+        _cfg = Config.GetOptions();
+        _fCcfg = FcConfig.GetOptions();
+    }
+
+    private static string GetLocalizedString(string content)
+    {
+        Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+        return content;
+    }
+
+    [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
+    public static class TimeOfDayUpdatePatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix()
+        {
+
+            if (Input.GetKeyUp(KeyCode.F5))
+            {
+                ReloadConfig();
+
+                if (!CrossModFields.ConfigReloadShown)
+                {
+                    Tools.ShowMessage(GetLocalizedString(strings.ConfigMessage), Vector3.zero);
+                    CrossModFields.ConfigReloadShown = true;
+                }
+            }
         }
     }
 

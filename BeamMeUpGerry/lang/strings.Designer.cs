@@ -79,6 +79,15 @@ namespace BeamMeUpGerry.lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Config Reloaded!.
+        /// </summary>
+        public static string ConfigMessage {
+            get {
+                return ResourceManager.GetString("ConfigMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to I don&apos;t know where that is!.
         /// </summary>
         public static string DontKnow {

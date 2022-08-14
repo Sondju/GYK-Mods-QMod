@@ -88,6 +88,7 @@ namespace BeamMeUpGerry
             }
         }
 
+  
         private static Item GetHearthstone()
         {
             return MainGame.me.player.data.GetItemWithID("hearthstone");
@@ -204,9 +205,12 @@ namespace BeamMeUpGerry
         private static void TakeMoney(Vector3 vector)
         {
             vector.y += 125f;
-            MainGame.me.player.data.money -= Fee;
+            var dynamicFee = (float)Math.Round((0.1f * MainGame.me.player.data.money) / 100f, 2);
+           var feeToPay = dynamicFee > Fee ? Fee : dynamicFee;
+           Log($"[Fee]: {feeToPay}\n[DynFee]: {dynamicFee}\nMoney: {MainGame.me.player.data.money}");
+            MainGame.me.player.data.money -= feeToPay;
             Sounds.PlaySound("coins_sound", vector, true);
-            EffectBubblesManager.ShowImmediately(vector, $"-{Trading.FormatMoney(Fee, true)}", EffectBubblesManager.BubbleColor.Red, true, 3f);
+            EffectBubblesManager.ShowImmediately(vector, $"-{Trading.FormatMoney(feeToPay, true)}", EffectBubblesManager.BubbleColor.Red, true, 3f);
         }
 
         [HarmonyPatch(typeof(MultiAnswerGUI), nameof(MultiAnswerGUI.OnChosen))]
@@ -217,6 +221,7 @@ namespace BeamMeUpGerry
             {
 //
                 if (!_cfg.EnableListExpansion) return;
+                if (CrossModFields.TalkingToNpc) return;
 
                 Log($"[Answer]: {answer}");
 
@@ -251,7 +256,7 @@ namespace BeamMeUpGerry
                     return;
                 }
 
-                if (CrossModFields.TalkingToNpc) return;
+                //if (CrossModFields.TalkingToNpc) return;
 
                 _usingStone = false;
                 _dotSelection = false;
@@ -264,6 +269,7 @@ namespace BeamMeUpGerry
             {
 //
                 if (!_cfg.EnableListExpansion) return;
+                if (CrossModFields.TalkingToNpc) return;
                 // if (_isNpc) return;
                 List<AnswerVisualData> answers;
 
@@ -424,12 +430,32 @@ namespace BeamMeUpGerry
             }
         }
 
+        private static string GetLocalizedString(string content)
+        {
+            Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+            return content;
+        }
+
+
         [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
         public static class TimeOfDayUpdatePatch
         {
+
             [HarmonyPrefix]
             public static void Prefix()
             {
+
+                if (Input.GetKeyUp(KeyCode.F5))
+                {
+                    _cfg = Config.GetOptions();
+
+                    if (!CrossModFields.ConfigReloadShown)
+                    {
+                        Tools.ShowMessage(GetLocalizedString(strings.ConfigMessage), Vector3.zero);
+                        CrossModFields.ConfigReloadShown = true;
+                    }
+                }
+
                 if (!MainGame.game_started || MainGame.me.player.is_dead || MainGame.me.player.IsDisabled() ||
                     MainGame.paused || !BaseGUI.all_guis_closed) return;
 

@@ -1,5 +1,4 @@
-using DLCRefugees;
-using HarmonyLib;
+﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using UnityEngine;
 
 namespace Helper
 {
@@ -20,7 +20,7 @@ namespace Helper
         {
             Tools.Log("QModHelper", $"{message}", error);
         }
-
+        
         public static void Patch()
         {
             try
@@ -40,6 +40,7 @@ namespace Helper
             }
         }
 
+ 
         [HarmonyPatch(typeof(BaseGUI))]
         public static class BaseGuiPatches
         {
@@ -93,13 +94,15 @@ namespace Helper
             }
         }
 
+
         [HarmonyPatch(typeof(SmartAudioEngine))]
         private static class SmartAudioEnginePatches
         {
             [HarmonyPatch(nameof(SmartAudioEngine.OnStartNPCInteraction))]
             [HarmonyPrefix]
-            public static void OnStartNPCInteractionPrefix()
+            public static void OnStartNPCInteractionPrefix(BalanceBaseObject npc)
             {
+                if (npc.id.Contains("zombie")) return;
                 CrossModFields.TalkingToNpc = true;
             }
 
@@ -110,6 +113,8 @@ namespace Helper
                 CrossModFields.TalkingToNpc = false;
             }
         }
+
+        //private static UILabel labelToMimic;
 
         [HarmonyPatch(typeof(MainMenuGUI))]
         public static class MainMenuGuiPatches
@@ -163,7 +168,47 @@ namespace Helper
                     comp.overflowMethod = UILabel.Overflow.ResizeFreely;
                     comp.multiLine = true;
                     comp.MakePixelPerfect();
+                    //labelToMimic = comp;
                 }
+
+                // var hudGameObject = GameObject.Find("UI Root/Main menu");
+                // var layerNgui = LayerMask.NameToLayer("NGUI");
+
+                // var go = new GameObject("(Game Object Name)");
+                // var pos = new Vector3(380, 265, 0);
+
+                // go.transform.SetParent(hudGameObject.transform);
+                // go.transform.localPosition = pos;
+                // go.transform.localScale = Vector3.one;
+                // go.layer = layerNgui;
+
+                // var label = go.AddComponent<UILabel>();
+
+                // var assemblies = new List<string>
+                // {
+                //     "Test1",
+                //     "Test2",
+                //     "Test3",
+                //     "Test4",
+                //     "Test5",
+                //     "Test6",
+                //     "Test7"
+                // };
+
+                // var joinedAssemblies = string.Join("\n", Tools.LoadedMods.ToArray());
+
+                // UITextStyles.Set(label, UITextStyles.TextStyle.Usual);
+                ////label.fontStyle = FontStyle.Normal;
+                //label.alignment = NGUIText.Alignment.Right;
+                // label.text = joinedAssemblies;
+                // label.depth = 12;
+                // label.color = Color.white;
+                // label.fontSize = 14;
+
+                // label.maxLineCount = Tools.LoadedMods.Count();
+                // label.MakePixelPerfect();
+
+                // go.transform.localPosition = new Vector3(pos.x, pos.y - (label.printedSize.y / 2), 0.0f);
             }
         }
 
@@ -222,7 +267,7 @@ namespace Helper
                 }
 
                 //Beam Me Up Gerry
-                CrossModFields.TalkingToNpc = __instance.obj_def.IsNPC();
+                CrossModFields.TalkingToNpc = __instance.obj_def.IsNPC() && !__instance.obj_id.Contains("zombie");
 
                 Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
             }

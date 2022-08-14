@@ -177,4 +177,7 @@
   <data name="Coal" xml:space="preserve">
     <value>Żyła węglowa</value>
   </data>
+  <data name="ConfigMessage" xml:space="preserve">
+    <value>Konfiguracja została ponownie załadowana!</value>
+  </data>
 </root>

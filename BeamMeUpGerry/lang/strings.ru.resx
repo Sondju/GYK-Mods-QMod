@@ -177,4 +177,7 @@
   <data name="Coal" xml:space="preserve">
     <value>Угольная жила</value>
   </data>
+  <data name="ConfigMessage" xml:space="preserve">
+    <value>Конфиг перезагружен!</value>
+  </data>
 </root>

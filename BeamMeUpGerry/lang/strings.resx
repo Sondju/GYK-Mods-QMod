@@ -177,4 +177,7 @@
   <data name="Coal" xml:space="preserve">
     <value>Coal vein</value>
   </data>
+  <data name="ConfigMessage" xml:space="preserve">
+    <value>Config Reloaded!</value>
+  </data>
 </root>

@@ -177,4 +177,7 @@
   <data name="Coal" xml:space="preserve">
     <value>Vena di carbone</value>
   </data>
+  <data name="ConfigMessage" xml:space="preserve">
+    <value>Configurazione ricaricata!</value>
+  </data>
 </root>
