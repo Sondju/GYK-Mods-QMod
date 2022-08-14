@@ -56,7 +56,7 @@ namespace EconomyReloaded
         }
 
         [HarmonyPatch(typeof(Trading))]
-        internal class TradingPatches
+        public static class TradingPatches
         {
             [HarmonyPatch(nameof(Trading.GetSingleItemCostInTraderInventory), typeof(Item), typeof(int))]
             [HarmonyPostfix]
