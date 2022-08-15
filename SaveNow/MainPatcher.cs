@@ -25,7 +25,6 @@ public class MainPatcher : MonoBehaviour
     private static readonly Dictionary<string, Vector3> SaveLocationsDictionary = new();
 
     private static Config.Options _cfg;
-    private static string Lang { get; set; }
 
     public static void Patch()
     {
@@ -229,12 +228,13 @@ public class MainPatcher : MonoBehaviour
                 var dDat = _savePath + Path.GetFileNameWithoutExtension(tFile.FullName) + ".dat";
                 var dInfo = _savePath + Path.GetFileNameWithoutExtension(tFile.FullName) + ".info";
 
-                if (_cfg.DontPruneSaves) continue;
-
                 try
                 {
                     File.Copy(sDat, dDat, true);
                     File.Copy(sInfo, dInfo, true);
+
+                    if (_cfg.DontPruneSaves) continue;
+
                     File.Delete(sDat);
                     File.Delete(sInfo);
                 }
@@ -295,49 +295,46 @@ public class MainPatcher : MonoBehaviour
             __instance.OnClosePressed();
 
             var messageText = strings.SaveAreYouSureMenu + "?\n\n" +
-                              (_cfg.DisableSaveOnExit ? strings.SaveProgressNotSaved : strings.SaveProgressSaved) + ".";
+                              (_cfg.DisableSaveOnExit ? strings.SaveProgressNotSaved : CrossModFields.IsInDungeon ? strings.SaveProgressNotSaved : strings.SaveProgressSaved) + ".";
 
             if (_cfg.ExitToDesktop)
             {
                 messageText = strings.SaveAreYouSureDesktop + "?\n\n" +
-                              (_cfg.DisableSaveOnExit ? strings.SaveProgressNotSaved : strings.SaveProgressSaved) + ".";
+                              (_cfg.DisableSaveOnExit ? strings.SaveProgressNotSaved : CrossModFields.IsInDungeon ? strings.SaveProgressNotSaved : strings.SaveProgressSaved) + ".";
             }
 
             GUIElements.me.dialog.OpenYesNo(messageText
                 ,
                 delegate
                 {
-                    if (_cfg.DisableSaveOnExit)
+                    if (_cfg.DisableSaveOnExit || CrossModFields.IsInDungeon)
                     {
-                        if (_cfg.ExitToDesktop)
-                        {
-                            GC.Collect();
-                            Resources.UnloadUnusedAssets();
-                            Application.Quit();
-                        }
-                        else
-                        {
-                            LoadingGUI.Show(__instance.ReturnToMainMenu);
-                        }
+                        SaveExit();
                     }
                     else
                     {
                         if (SaveLocation(true, string.Empty))
-                            PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save, delegate
-                            {
-                                if (_cfg.ExitToDesktop)
-                                {
-                                    GC.Collect();
-                                    Resources.UnloadUnusedAssets();
-                                    Application.Quit();
-                                }
-                                else
-                                {
-                                    LoadingGUI.Show(__instance.ReturnToMainMenu);
-                                }
-                            });
+                        {
+                            PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
+                                delegate { SaveExit(); });
+                        }
                     }
                 }, null, delegate { __instance.SetControllsActive(true); });
+
+            return;
+            void SaveExit()
+            {
+                if (_cfg.ExitToDesktop)
+                {
+                    GC.Collect();
+                    Resources.UnloadUnusedAssets();
+                    Application.Quit();
+                }
+                else
+                {
+                    LoadingGUI.Show(__instance.ReturnToMainMenu);
+                }
+            }
         }
     }
 
@@ -390,6 +387,12 @@ public class MainPatcher : MonoBehaviour
         }
     }
 
+    private static string GetLocalizedString(string content)
+    {
+        Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+        return content;
+    }
+
     //hooks into the time of day update and saves if the K key was pressed
     [HarmonyPatch(typeof(TimeOfDay))]
     [HarmonyPatch(nameof(TimeOfDay.Update))]
@@ -399,8 +402,17 @@ public class MainPatcher : MonoBehaviour
         public static void Prefix()
         {
             if (Input.GetKeyUp(KeyCode.K))
-                PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
-                    delegate { SaveLocation(false, string.Empty); });
+            {
+                if (CrossModFields.IsInDungeon)
+                {
+                    Tools.SpawnGerry(GetLocalizedString(strings.CantSaveHere), Vector3.zero);
+                }
+                else
+                {
+                    PlatformSpecific.SaveGame(MainGame.me.save_slot, MainGame.me.save,
+                        delegate { SaveLocation(false, string.Empty); });
+                }
+            }
         }
     }
 }

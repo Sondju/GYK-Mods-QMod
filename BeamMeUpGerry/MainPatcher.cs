@@ -17,40 +17,37 @@ namespace BeamMeUpGerry
 {
     public class MainPatcher
     {
-        private const float Fee = 5f;
-        // private const float Fee = 100000f; //testing
-
-        private static readonly Dictionary<string, Vector3> LocationByVectorPartOne = new()
+        private static readonly List<Location> LocationsPartOne = new()
         {
-            { "zone_witch_hut", new Vector3(-4964.0f, -1772.0f, -370.2f) }, //gd_witch_27
-            { "zone_cellar", new Vector3(10841.9f, -9241.7f, -1923.1f) },
-            { "zone_alchemy", new Vector3(8249.0f, -10180.7f, -2119.3f) },
-            { "zone_morgue", new Vector3(9744.0f, -11327.5f, -2357.9f) },
-            { "zone_beegarden", new Vector3(3234.0f, 1815.0f, 378.81f) },
-            { "zone_hill", new Vector3(8292.7f, 1396.6f, 292.71f) },
-            { "zone_sacrifice", new Vector3(9529.1f, -8427.1f, -1753.71f) },
-            { "zone_beatch", new Vector3(22507.9f, 314.9f, 70.3f) },
-            { "zone_vineyard", new Vector3(6712.3f, 42.1f, 10.2f) },
-            { "zone_camp", new Vector3(20690.7f, 2818.7f, 591.5f) },
-            { "....", Vector3.zero },
-            { "cancel", Vector3.zero }
+            new Location("zone_witch_hut","",new Vector3(-4964.0f, -1772.0f, -370.2f)),
+            new Location("zone_cellar","mortuary",new Vector3(10841.9f, -9241.7f, -1923.1f), EnvironmentEngine.State.Inside),
+            new Location("zone_alchemy","mortuary",new Vector3(8249.0f, -10180.7f, -2119.3f), EnvironmentEngine.State.Inside),
+            new Location("zone_morgue","mortuary",new Vector3(9744.0f, -11327.5f, -2357.9f), EnvironmentEngine.State.Inside),
+            new Location("zone_beegarden","",new Vector3(3234.0f, 1815.0f, 378.81f)),
+            new Location("zone_hill","",new Vector3(8292.7f, 1396.6f, 292.71f)),
+            new Location("zone_sacrifice","",new Vector3(9529.1f, -8427.1f, -1753.71f), EnvironmentEngine.State.Inside),
+            new Location("zone_beatch","", new Vector3(22507.9f, 314.9f, 70.3f)),
+            new Location("zone_vineyard","",new Vector3(6712.3f, 42.1f, 10.2f) ),
+            new Location("zone_camp","",new Vector3(20690.7f, 2818.7f, 591.5f)),
+            new Location("....","",Vector3.zero),
+            new Location("cancel","",Vector3.zero),
         };
 
-        private static readonly Dictionary<string, Vector3> LocationByVectorPartTwo = new()
-        {//-505.5, 6098.0, 1270.3
-            { "zone_souls", new Vector3(11050.1f, -10807.1f, -2249.21f) },
-            { "zone_graveyard", new Vector3(1635.7f, -1506.9f, -313.61f) },
-            { "zone_euric_room", new Vector3(20108.0f, -11599.6f, -2412.41f) },
-            { "zone_church", new Vector3(190.6f, -8715.7f, -1815.7f) },
-            { "zone_zombie_sawmill", new Vector3(2204.3f, 3409.7f, 710.8f) },
-            { strings.Coal, new Vector3(-505.5f, 6098.0f, 1270.3f) },
-            { strings.Clay, new Vector3(595.4f, -3185.8f, -663.6f) },
-            { strings.Sand, new Vector3(334.3f, 875.9f, 182.5f) },
-            { strings.Mill, new Vector3(11805.2f, -768.9f, -157.7f) }, //mill_to_crossroads
-            { strings.Farmer, new Vector3(11800.7f, -3251.7f, -675.0f) }, //none suitable
-            { "cancel", Vector3.zero }
+        private static readonly List<Location> LocationsPartTwo = new()
+        {
+            new Location("zone_souls","mortuary",new Vector3(11050.1f, -10807.1f, -2249.21f), EnvironmentEngine.State.Inside),
+            new Location("zone_graveyard","",new Vector3(1635.7f, -1506.9f, -313.61f)),
+            new Location("zone_euric_room","euric",new Vector3(20108.0f, -11599.6f, -2412.41f), EnvironmentEngine.State.Inside),
+            new Location("zone_church","church",new Vector3(182.4f, -8218.1f, -1712.1f), EnvironmentEngine.State.Inside),
+            new Location("zone_zombie_sawmill","",new Vector3(2204.3f, 3409.7f, 710.8f) ),
+            new Location(strings.Coal,"",new Vector3(-505.5f, 6098.0f, 1270.3f)),
+            new Location(strings.Clay,"",new Vector3(595.4f, -3185.8f, -663.6f) ),
+            new Location(strings.Sand,"",  new Vector3(334.3f, 875.9f, 182.5f)),
+            new Location(strings.Mill,"", new Vector3(11805.2f, -768.9f, -157.7f)  ),
+            new Location(strings.Farmer,"",new Vector3(11800.7f, -3251.7f, -675.0f)),
+            new Location("cancel","",Vector3.zero),
         };
-
+        
         private static Config.Options _cfg;
         private static bool _dotSelection;
         private static MultiAnswerGUI _maGui;
@@ -78,9 +75,17 @@ namespace BeamMeUpGerry
             var item = GetHearthstone();
             if (item != null)
             {
-                _usingStone = true;
+                if (CrossModFields.IsInDungeon)
+                {
+                    _usingStone = false;
+                    SpawnGerry(strings.CantUseHere, Vector3.zero);
+                }
+                else
+                {
+                    _usingStone = true;
+                    MainGame.me.player.UseItemFromInventory(item);
+                }
                 CrossModFields.TalkingToNpc = false;
-                MainGame.me.player.UseItemFromInventory(item);
             }
             else
             {
@@ -144,8 +149,12 @@ namespace BeamMeUpGerry
             return shuffledList[0];
         }
 
+        private static WorldGameObject _gerry;
+        private static bool _gerryRunning;
+
         private static void SpawnGerry(string message, Vector3 customPosition, bool money = false)
         {
+            if (_gerryRunning) return;
             Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
             var location = MainGame.me.player_pos;
             location.x -= 75f;
@@ -154,17 +163,27 @@ namespace BeamMeUpGerry
             {
                 location = customPosition;
             }
-            var gerry = WorldMap.SpawnWGO(MainGame.me.world_root.transform, "talking_skull", location);
-            gerry.ReplaceWithObject("talking_skull", true);
 
+            if (_gerry == null)
+            {
+                _gerry = WorldMap.SpawnWGO(MainGame.me.world_root.transform, "talking_skull", location);
+                _gerry.ReplaceWithObject("talking_skull", true);
+                _gerryRunning = true;
+            }
+
+            
             GJTimer.AddTimer(0.5f, delegate
             {
-                gerry.Say(!money ? message : $"{GetMoneyMessage()}", delegate
+                if (_gerry == null) return;
+                _gerry.Say(!money ? message : $"{GetMoneyMessage()}", delegate
                 {
                     GJTimer.AddTimer(0.25f, delegate
                     {
-                        gerry.ReplaceWithObject("talking_skull", true);
-                        gerry.DestroyMe();
+                        if (_gerry == null) return;
+                        _gerry.ReplaceWithObject("talking_skull", true);
+                        _gerry.DestroyMe();
+                        _gerry = null;
+                        _gerryRunning = false;
                         if (!money) return;
 
                         TakeMoney(MainGame.me.player_pos);
@@ -185,14 +204,24 @@ namespace BeamMeUpGerry
             [HarmonyPostfix]
             public static void Postfix(ref Item __instance, ref int __result)
             {
-//
                 if (__instance is not { id: "hearthstone" }) return;
 
                 __result = 0;
             }
         }
 
-        private static void ShowHud(bool animate = false)
+        //[HarmonyPatch(typeof(EnvironmentPreset))]
+        //[HarmonyPatch(nameof(EnvironmentPreset.Load))]
+        //public static class EnvironmentPresetLoadPatch
+        //{
+        //    [HarmonyPrefix]
+        //    public static void Prefix(string id)
+        //    {
+        //        Log($"[EnvironmentPresetLoad]: {id}",true);
+        //    }
+        //}
+
+        private static void ShowHud(Location chosen, bool animate = false)
         {
             GUIElements.me.EnableHUD(true);
             GUIElements.ChangeHUDAlpha(true, animate);
@@ -200,17 +229,43 @@ namespace BeamMeUpGerry
             GUIElements.me.overhead_panel.gameObject.SetActive(true);
             GUIElements.me.relation.ChangeHUDAlpha(true, animate);
             GUIElements.me.relation.Update();
+
+            if (chosen == null) return;
+      
+            EnvironmentEngine.me.SetEngineGlobalState(chosen.State);
+            Log($"[ApplyCurrentEnvironmentPreset, id] = {chosen.Preset}");
+            var environmentPreset = EnvironmentPreset.Load(chosen.Preset);
+            EnvironmentEngine.me.ApplyEnvironmentPreset(environmentPreset);
+        }
+
+        private static float GenerateFee()
+        {
+            var dynamicFee = (float)Math.Round((0.1f * MainGame.me.player.data.money) / 100f, 2);
+            const float minimumFee = 0.01f;
+            var feeToPay = dynamicFee switch
+            {
+                < minimumFee => minimumFee,
+                > 5f => 5f,
+                _ => dynamicFee
+            };
+
+            Log($"[Fee]: {Trading.FormatMoney(feeToPay,true)}\n[DynFee]: {Trading.FormatMoney(dynamicFee,true)}\nMoney: {Trading.FormatMoney(MainGame.me.player.data.money,true)}, Minimum: {Trading.FormatMoney(minimumFee,true)}");
+            return feeToPay;
         }
 
         private static void TakeMoney(Vector3 vector)
         {
             vector.y += 125f;
-            var dynamicFee = (float)Math.Round((0.1f * MainGame.me.player.data.money) / 100f, 2);
-           var feeToPay = dynamicFee > Fee ? Fee : dynamicFee;
-           Log($"[Fee]: {feeToPay}\n[DynFee]: {dynamicFee}\nMoney: {MainGame.me.player.data.money}");
+            var feeToPay = GenerateFee();
             MainGame.me.player.data.money -= feeToPay;
             Sounds.PlaySound("coins_sound", vector, true);
             EffectBubblesManager.ShowImmediately(vector, $"-{Trading.FormatMoney(feeToPay, true)}", EffectBubblesManager.BubbleColor.Red, true, 3f);
+        }
+
+        private static bool CanUseStone()
+        {
+            if (CrossModFields.IsInDungeon || CrossModFields.TalkingToNpc) return false;
+            return true;
         }
 
         [HarmonyPatch(typeof(MultiAnswerGUI), nameof(MultiAnswerGUI.OnChosen))]
@@ -221,14 +276,14 @@ namespace BeamMeUpGerry
             {
 //
                 if (!_cfg.EnableListExpansion) return;
-                if (CrossModFields.TalkingToNpc) return;
+                if (!CanUseStone()) return;
 
                 Log($"[Answer]: {answer}");
 
                 if (string.Equals("cancel", answer) && !_dotSelection)
                 {
                     //real cancel
-                    ShowHud(true);
+                    ShowHud(null,true);
                     _usingStone = false;
                     _dotSelection = false;
                     CrossModFields.TalkingToNpc = false;
@@ -269,7 +324,7 @@ namespace BeamMeUpGerry
             {
 //
                 if (!_cfg.EnableListExpansion) return;
-                if (CrossModFields.TalkingToNpc) return;
+                if (!CanUseStone()) return;
                 // if (_isNpc) return;
                 List<AnswerVisualData> answers;
 
@@ -277,14 +332,16 @@ namespace BeamMeUpGerry
 
                 if (answer == "...")
                 {
-                    answers = LocationByVectorPartOne.Select(location => new AnswerVisualData() { id = location.Key }).ToList();
+                    // answers = LocationByVectorPartOne.Select(location => new AnswerVisualData() { id = location.Key }).ToList();
+                    answers = LocationsPartOne.Select(location => new AnswerVisualData() { id = location.Zone }).ToList();
                     Show(out answer);
                     return;
                 }
 
                 if (answer == "....")
                 {
-                    answers = LocationByVectorPartTwo.Select(location => new AnswerVisualData() { id = location.Key }).ToList();
+                    //answers = LocationByVectorPartTwo.Select(location => new AnswerVisualData() { id = location.Key }).ToList();
+                    answers = LocationsPartTwo.Select(location => new AnswerVisualData() { id = location.Zone }).ToList();
                     Show(out answer);
                     return;
                 }
@@ -306,14 +363,14 @@ namespace BeamMeUpGerry
 //
                 //  ShowHud();
                 if (!_cfg.EnableListExpansion) return;
-                if (CrossModFields.TalkingToNpc) return;
+                if (!CanUseStone()) return;
                 if (string.Equals("cancel", chosen))
                 {
                     // ShowHud();
                     return;
                 }
 
-                if (MainGame.me.player.data.money < Fee)
+                if (MainGame.me.player.data.money < GenerateFee())
                 {
                     var location = MainGame.me.player_pos;
                     location.x += 125f;
@@ -322,17 +379,20 @@ namespace BeamMeUpGerry
                     return;
                 }
 
-                var partOne = LocationByVectorPartOne.TryGetValue(chosen, out var vectorOne);
-                var partTwo = LocationByVectorPartTwo.TryGetValue(chosen, out var vectorTwo);
+                var partOne = LocationsPartOne.Exists(a => a.Zone == chosen);
+                var partTwo = LocationsPartTwo.Exists(a => a.Zone == chosen);
 
                 Vector3 vector;
+                Location chosenLocation = null;
                 if (partOne)
                 {
-                    vector = vectorOne;
+                    chosenLocation = LocationsPartOne.Find(a => a.Zone == chosen);
+                    vector = chosenLocation.Coords;
                 }
                 else if (partTwo)
                 {
-                    vector = vectorTwo;
+                    chosenLocation = LocationsPartTwo.Find(a => a.Zone == chosen);
+                    vector = chosenLocation.Coords;
                 }
                 else
                 {
@@ -351,7 +411,7 @@ namespace BeamMeUpGerry
                             MainGame.me.player.components.character.control_enabled = true;
                             GJTimer.AddTimer(1.25f, delegate
                             {
-                                ShowHud(true);
+                                ShowHud(chosenLocation, true);
                                 CameraFader.current.FadeIn(0.15f);
                                 GJTimer.AddTimer(0.20f, delegate
                                 {
@@ -369,7 +429,7 @@ namespace BeamMeUpGerry
                     }
                     else
                     {
-                        ShowHud(false);
+                        ShowHud(null,false);
                         MainGame.me.player.PlaceAtPos(vector);
                         MainGame.me.player.components.character.control_enabled = true;
                         if (_cfg.DisableGerry)
@@ -474,7 +534,7 @@ namespace BeamMeUpGerry
                 {
                     if (_maGui != null)
                     {
-                        ShowHud();
+                        ShowHud(null,true);
                         Sounds.OnClosePressed();
                         //_maGui.OnChosen("cancel");
                         //_maGui.OnChosen("leave");

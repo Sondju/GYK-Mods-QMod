@@ -180,4 +180,7 @@
   <data name="ConfigMessage" xml:space="preserve">
     <value>Config Reloaded!</value>
   </data>
+  <data name="CantUseHere" xml:space="preserve">
+    <value>I can’t use that here, boss!</value>
+  </data>
 </root>

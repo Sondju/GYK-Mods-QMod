@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Helper
 {
     public static class Tools
     {
-
         public static void ShowMessage(
             string msg,
             Vector3 pos
@@ -29,7 +23,6 @@ namespace Helper
             }
             else
             {
-
                 if (sayAsPlayer)
                 {
                     MainGame.me.player.Say(msg, null, false, speechBubbleType,
@@ -105,7 +98,7 @@ namespace Helper
         }
 
         public static void SetAllInteractionsFalse()
-        { 
+        {
             CrossModFields.IsVendor = false;
             CrossModFields.IsCraft = false;
             CrossModFields.IsChest = false;
@@ -113,6 +106,45 @@ namespace Helper
             CrossModFields.IsTavernCellar = false;
             CrossModFields.IsRefugee = false;
             CrossModFields.IsWritersTable = false;
+        }
+
+        private static WorldGameObject _gerry;
+        private static bool _gerryRunning;
+
+        public static void SpawnGerry(string message, Vector3 customPosition)
+        {
+            if (_gerryRunning) return;
+            Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+            var location = MainGame.me.player_pos;
+            location.x -= 75f;
+            //location.y += 50f;
+            if (customPosition != Vector3.zero)
+            {
+                location = customPosition;
+            }
+
+            if (_gerry == null)
+            {
+                _gerry = WorldMap.SpawnWGO(MainGame.me.world_root.transform, "talking_skull", location);
+                _gerry.ReplaceWithObject("talking_skull", true);
+                _gerryRunning = true;
+            }
+
+            GJTimer.AddTimer(0.5f, delegate
+            {
+                if (_gerry == null) return;
+                _gerry.Say(message, delegate
+                {
+                    GJTimer.AddTimer(0.25f, delegate
+                    {
+                        if (_gerry == null) return;
+                        _gerry.ReplaceWithObject("talking_skull", true);
+                        _gerry.DestroyMe();
+                        _gerry = null;
+                        _gerryRunning = false;
+                    });
+                }, null, SpeechBubbleGUI.SpeechBubbleType.Talk, SmartSpeechEngine.VoiceID.Skull);
+            });
         }
     }
 }

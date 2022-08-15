@@ -180,4 +180,7 @@
   <data name="ConfigMessage" xml:space="preserve">
     <value>구성이 다시 로드되었습니다!</value>
   </data>
+  <data name="CantUseHere" xml:space="preserve">
+    <value>여기에서는 사용할 수 없습니다, 보스!</value>
+  </data>
 </root>

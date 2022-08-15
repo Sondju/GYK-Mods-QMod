@@ -70,6 +70,15 @@ namespace SaveNow.lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can&apos;t save here, boss!.
+        /// </summary>
+        public static string CantSaveHere {
+            get {
+                return ResourceManager.GetString("CantSaveHere", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Exit to desktop.
         /// </summary>
         public static string ExitButtonText {

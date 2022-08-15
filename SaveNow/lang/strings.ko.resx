@@ -136,4 +136,7 @@
   <data name="SaveMessage" xml:space="preserve">
     <value>게임 저장됨</value>
   </data>
+  <data name="CantSaveHere" xml:space="preserve">
+    <value>여기에 저장할 수 없습니다, 보스!</value>
+  </data>
 </root>

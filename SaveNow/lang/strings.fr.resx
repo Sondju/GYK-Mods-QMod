@@ -136,4 +136,7 @@
   <data name="SaveMessage" xml:space="preserve">
     <value>Partie sauvegardée</value>
   </data>
+  <data name="CantSaveHere" xml:space="preserve">
+    <value>Impossible de sauvegarder ici, patron !</value>
+  </data>
 </root>

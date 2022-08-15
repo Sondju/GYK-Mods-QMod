@@ -9,7 +9,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using UnityEngine;
-using static CraftDefinition;
 
 // ReSharper disable InconsistentNaming
 
@@ -18,19 +17,9 @@ namespace QueueEverything;
 [HarmonyAfter("p1xel8ted.GraveyardKeeper.exhaust-less", "com.glibfire.graveyardkeeper.fastercraft.mod", "com.graveyardkeeper.urbanvibes.maxbutton", "p1xel8ted.GraveyardKeeper.INeedSticks")]
 public static class MainPatcher
 {
-    private static readonly List<WorldGameObject> currentlyCrafting = new();
-
-    //"axe", "hammer", "shovel", "sword",
-    private static readonly string[] MultiOutCantQueue =
-    {
-        "chisel_2_2b", "marble_plate_3"
-    };
-
-    //individual craft definitions
-    private static readonly string[] UnSafeCraftDefPartials =
-    {
-         "remove", "zombie", "refugee", "upgrade", "fountain","blockage", "obstacle", "builddesk", "fix", "broken", "elevator", "zombie", "refugee"//, "mf_barrel"
-    };
+    private static readonly Dictionary<string, SmartExpression> Crafts = new();
+    private static readonly Dictionary<string, int> FireCrafts = new();
+    private static bool _unsafeInteraction;
 
     //unsafe crafting objects as a whole
     private static readonly string[] UnSafeCraftObjects =
@@ -40,21 +29,53 @@ public static class MainPatcher
         "zombie_vineyard_desk_1", "zombie_vineyard_desk_2", "zombie_vineyard_desk_3", "graveyard_builddesk", "blockage_H_low", "blockage_V_low",
         "blockage_H_high", "blockage_V_high", "wood_obstacle_v", "refugee_camp_garden_bed", "refugee_camp_garden_bed_1", "refugee_camp_garden_bed_2",
         "refugee_camp_garden_bed_3", "carrot_box", "elevator_top", "zombie_crafting_table", "mf_balsamation","mf_balsamation_1","mf_balsamation_2",
-        "mf_balsamation_3","blockage_H_high", "soul_workbench_craft","grow_desk_planting","grow_vineyard_planting"
+        "mf_balsamation_3","blockage_H_high"
+    };
+
+    //individual zones
+    private static readonly string[] UnSafeCraftZones =
+    {
+        "church"
+    };
+
+    //individual craft definitions
+    private static readonly string[] UnSafeCraftDefPartials =
+    {
+        "soul_workbench_craft", "remove", "zombie", "refugee", "upgrade", "fountain"
+    };
+
+    private static readonly string[] UnSafePartials =
+    {
+        "blockage", "obstacle", "builddesk", "fix", "broken", "elevator", "zombie", "refugee"//, "mf_barrel"
+    };
+
+    private static readonly string[] MultiOutCantQueue =
+    {
+        "chisel_2_2b", "marble_plate_3"
+    };
+
+    private static readonly CraftDefinition.CraftType[] UnSafeCraftTypes =
+    {
+       // CraftDefinition.CraftType.PrayCraft, CraftDefinition.CraftType.Fixing
+    };
+
+    private static readonly string[] UnSafeItems =
+    {
+        "zombie","grow_desk_planting","refugee","grow_vineyard_planting", "axe", "hammer", "shovel", "sword", "mf_balsamation"
     };
 
     private static bool _alreadyRun;
-    private static bool _ccAlreadyRun;
     private static Config.Options _cfg;
-    private static bool _craftsStarted;
-    private static bool _exhaustlessEnabled;
-    private static FcConfig.Options _fasterCfg;
-    private static bool _fasterCraftEnabled;
+    private static FcConfig.Options _fCcfg;
+    private static int _craftAmount = 1;
+    private static bool _exhaustless;
+
+    private static bool _fasterCraft;
     private static bool _fasterCraftReloaded;
-    private static bool _originalFasterCraft;
+    private static bool _oGfasterCraft;
 
+    private static WorldGameObject _previousWorldGameObject;
     private static float _timeAdjustment;
-
     public static void Patch()
     {
         try
@@ -64,25 +85,26 @@ public static class MainPatcher
 
             _cfg = Config.GetOptions();
 
-            _fasterCraftEnabled = false;
+            _fasterCraft = false;
             _fasterCraftReloaded = false;
-            _originalFasterCraft = false;
-            _exhaustlessEnabled = false;
+            _oGfasterCraft = false;
+            _exhaustless = false;
+            _alreadyRun = false;
 
             _fasterCraftReloaded = Tools.IsModLoaded("FasterCraftReloaded") || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.FasterCraftReloaded");
-            _originalFasterCraft = Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod");
-            _exhaustlessEnabled = Tools.IsModLoaded("Exhaustless") || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.exhaust-less");
+            _oGfasterCraft = Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod");
+            _exhaustless = Tools.IsModLoaded("Exhaustless") || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.exhaust-less");
 
             if (_fasterCraftReloaded)
             {
-                _fasterCfg = FcConfig.GetOptions();
-                _timeAdjustment = _fasterCfg.CraftSpeedMultiplier;
-                _fasterCraftEnabled = true;
+                _fCcfg = FcConfig.GetOptions();
+                _timeAdjustment = _fCcfg.CraftSpeedMultiplier;
+                _fasterCraft = true;
                 Log($"FasterCraft Reloaded! detected, using its config.");
             }
-            else if (_originalFasterCraft)
+            else if (_oGfasterCraft)
             {
-                _fasterCraftEnabled = true;
+                _fasterCraft = true;
                 Log($"OG FasterCraft detected, using its config.");
                 LoadFasterCraftConfig();
             }
@@ -93,23 +115,116 @@ public static class MainPatcher
         }
     }
 
-    private static string GetLocalizedString(string content)
+    private static void Log(string message, bool error = false)
     {
-        Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
-        return content;
+        if (_cfg.Debug || error)
+        {
+            Tools.Log("QueueEverything", $"{message}", error);
+        }
     }
 
     private static bool IsUnsafeDefinition(CraftDefinition _craftDefinition)
     {
-        var zombieCraft = _craftDefinition.craft_in.Any(craftIn => craftIn.Contains("zombie"));
-        var refugeeCraft = _craftDefinition.craft_in.Any(craftIn => craftIn.Contains("refugee"));
-
-        return refugeeCraft || zombieCraft ||
-               _craftDefinition.craft_time_is_zero || _craftDefinition.one_time_craft ||
-               UnSafeCraftDefPartials.Any(_craftDefinition.id.Contains) || _craftDefinition.craft_in.Any(craftIn => UnSafeCraftObjects.Contains(craftIn) ||
-                   MultiOutCantQueue.Any(_craftDefinition.id.Contains));
+        return UnSafeCraftDefPartials.Any(_craftDefinition.id.Contains) || _craftDefinition.one_time_craft;
     }
 
+    private static bool IsMultiOutCantQueue(CraftDefinition _craftDefinition)
+    {
+        return MultiOutCantQueue.Any(_craftDefinition.id.Contains);
+    }
+
+    [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.Interact))]
+    public static class WorldGameObjectInteractPatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix(ref WorldGameObject __instance)
+        {
+            //if (!Tools.TutorialDone()) return;
+            if (UnSafeCraftZones.Contains(__instance.GetMyWorldZoneId()) || UnSafePartials.Any(__instance.obj_id.Contains) || UnSafeCraftObjects.Contains(__instance.obj_id))
+            {
+                _unsafeInteraction = true;
+                Log($"Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
+            }
+            else
+            {
+                _unsafeInteraction = false;
+                Log($"UNKNOWN/SAFE?: Object: {__instance.obj_id}, Zone: {__instance.GetMyWorldZoneId()}, Custom Tag: {__instance.custom_tag}");
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.FillCraftsList))]
+    public static class CraftComponentFillCraftsListPatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix()
+        {
+            if (_unsafeInteraction) return;
+            if (!_cfg.MakeEverythingAuto) return;
+            try
+            {
+                var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
+             
+                foreach (var craft in GameBalance.me.craft_data)
+                {
+                    if (craft.is_auto) continue;
+
+                    var zombieCraft = craft.craft_in.Any(craftIn => craftIn.Contains("zombie"));
+                    var refugeeCraft = craft.craft_in.Any(craftIn => craftIn.Contains("refugee"));
+                    var graveCraft = false;
+                    var bodyCraft = false;
+                    var cookingTableCraft = false;
+                    if (!_cfg.MakeHandTasksAuto)
+                    {
+                        graveCraft = craft.craft_in.Any(craftIn => craftIn.Contains("grave"));
+                        bodyCraft = craft.craft_in.Any(craftIn => craftIn.Contains("mf_preparation"));
+                        cookingTableCraft = craft.craft_in.Any(craftIn => craftIn.Contains("cooking_table") && !refugeeCraft);
+                    }
+
+                    if (UnSafeItems.Any(craft.id.Contains) || refugeeCraft || cookingTableCraft || zombieCraft || graveCraft || bodyCraft ||
+                       UnSafeCraftTypes.Contains(craft.craft_type) || craft.craft_time_is_zero || craft.one_time_craft) continue;
+
+                    // var ct = craft.energy.EvaluateFloat(crafteryWgo, MainGame.me.player);
+                    var ct = craft.energy.EvaluateFloat();
+                    //ct *= 1.5f;
+                    if (_fasterCraft)
+                    {
+                        if (_timeAdjustment < 0)
+                        {
+                            ct /= _timeAdjustment;
+                        }
+                        else
+                        {
+                            ct *= _timeAdjustment;
+                        }
+                        craft.craft_time = SmartExpression.ParseExpression(ct.ToString(CultureInfo.InvariantCulture));
+                    }
+                    else
+                    {
+                        craft.craft_time = SmartExpression.ParseExpression(ct.ToString(CultureInfo.InvariantCulture));
+                    }
+                    craft.energy = SmartExpression.ParseExpression("0");
+                    craft.is_auto = true;
+                    craft.enqueue_type = CraftDefinition.EnqueueType.CanEnqueue;
+
+                    craft.output.ForEach(output =>
+                    {
+                        if (output.id is not ("r" or "g" or "b")) return;
+                        output.value /= 2;
+                        if (output.value < 1)
+                        {
+                            output.value = 1;
+                        }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
+            }
+        }
+    }
+    
     private static void LoadFasterCraftConfig()
     {
         try
@@ -123,114 +238,7 @@ public static class MainPatcher
         catch (Exception)
         {
             Log("Issue reading FasterCraft Config, disabling integration.");
-            _fasterCraftEnabled = false;
-        }
-    }
-
-    private static void Log(string message, bool error = false)
-    {
-        if (_cfg.Debug || error)
-        {
-            Tools.Log("QueueEverything", $"{message}", error);
-        }
-    }
-
-    private static void ReloadConfig()
-    {
-        _cfg = Config.GetOptions();
-        _fasterCfg = FcConfig.GetOptions();
-    }
-
-    [HarmonyPatch(typeof(CraftComponent), "CraftReally")]
-    public static class CraftComponentCraftReally
-    {
-        [HarmonyPrefix]
-        public static void Prefix(ref CraftComponent __instance)
-        {
-            if (!MainGame.game_started) return;
-            if (!_cfg.MakeEverythingAuto) return;
-
-            foreach (var wgo in currentlyCrafting.Where(wgo => wgo != null && wgo.components.craft.is_crafting && !wgo.has_linked_worker))
-            {
-                wgo.OnWorkAction();
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.FillCraftsList))]
-    public static class CraftComponentFillCraftsListPatch
-    {
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            if (_ccAlreadyRun) return;
-            _ccAlreadyRun = true;
-
-            try
-            {
-                foreach (var craft in GameBalance.me.craft_data)
-                {
-                    if (_cfg.HalfFireRequirements)
-                    {
-                        foreach (var item in craft.needs_from_wgo.Where(item => item.id == "fire"))
-                        {
-                            item.value = Mathf.CeilToInt(item.value / 2f);//
-                        }
-                    }
-
-                    if (craft.is_auto || IsUnsafeDefinition(craft)) continue;
-
-                    if (_cfg.ForceMultiCraft)
-                    {
-                        craft.force_multi_craft = true;
-                        craft.disable_multi_craft = false;
-                    }
-
-                    if (_cfg.MakeEverythingAuto)
-                    {
-                        var refugeeCraft = craft.craft_in.Any(craftIn => craftIn.Contains("refugee"));
-                        var graveCraft = false;
-                        var bodyCraft = false;
-                        var cookingTableCraft = false;
-
-                        if (!_cfg.MakeHandTasksAuto)
-                        {
-                            graveCraft = craft.craft_in.Any(craftIn => craftIn.Contains("grave"));
-                            bodyCraft = craft.craft_in.Any(craftIn => craftIn.Contains("mf_preparation"));
-                            cookingTableCraft = craft.craft_in.Any(craftIn => craftIn.Contains("cooking_table") && !refugeeCraft);
-                        }
-
-                        if (cookingTableCraft || graveCraft || bodyCraft) continue;
-
-                        var craftEnergyTime = craft.energy.EvaluateFloat(MainGame.me.player);
-
-                        //add a penalty to the time for making it auto.
-                        craftEnergyTime *= 1.50f;
-
-                        if (craftEnergyTime % 1 != 0)
-                        {
-                            craftEnergyTime = Mathf.CeilToInt(craftEnergyTime);
-                        }
-
-                        craft.craft_time =
-                            SmartExpression.ParseExpression(craftEnergyTime.ToString(CultureInfo.InvariantCulture));
-                        craft.energy = SmartExpression.ParseExpression("0");
-                        craft.is_auto = true;
-                        craft.enqueue_type = EnqueueType.CanEnqueue;
-
-                        craft.output.ForEach(output =>
-                        {
-                            if (output.id is not ("r" or "g" or "b")) return;
-                            output.value /= 2;
-                            output.value = output.value < 1 ? 1 : Mathf.CeilToInt(output.value);
-                        });
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
-            }
+            _fasterCraft = false;
         }
     }
 
@@ -240,13 +248,19 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref CraftDefinition __instance, ref bool __result)
         {
-            if (__instance.IsMultiqualityOutput() && !IsUnsafeDefinition(__instance) && _cfg.ForceMultiCraft)
+            if (_unsafeInteraction || IsUnsafeDefinition(__instance) || IsMultiOutCantQueue(__instance))
             {
-                __result = true;
+                Log($"Unsafe Craft: {__instance.id}, QueueType: {__instance.enqueue_type}");
+                __result = false;
+                return;
             }
+
+            Log($"UNKNOWN/Safe? Craft: {__instance.id}, QueueType: {__instance.enqueue_type}");
+            __result = true;
         }
     }
 
+    
     [HarmonyPatch(typeof(CraftDefinition), nameof(CraftDefinition.GetSpendTxt))]
     public static class CraftDefinitionGetSpendTxtPatch
     {
@@ -254,16 +268,17 @@ public static class MainPatcher
         public static void Postfix(ref CraftDefinition __instance, ref WorldGameObject wgo, ref string __result,
             int multiplier = 1)
         {
+            if (_unsafeInteraction) return;
             var text = "";
             int num;
             if (GlobalCraftControlGUI.is_global_control_active)
                 num = __instance.gratitude_points_craft_cost is not { has_expression: true }
                     ? 0
-                    : Mathf.CeilToInt(__instance.gratitude_points_craft_cost.EvaluateFloat(wgo));
+                    : Mathf.RoundToInt(__instance.gratitude_points_craft_cost.EvaluateFloat(wgo));
             else
                 num = __instance.energy is not { has_expression: true }
                     ? 0
-                    : Mathf.CeilToInt(__instance.energy.EvaluateFloat(wgo));
+                    : Mathf.RoundToInt(__instance.energy.EvaluateFloat(wgo));
 
             if (num != 0)
             {
@@ -300,17 +315,17 @@ public static class MainPatcher
                         if (num3 < num2) num2 = num3;
                     }
 
-                if (!num2.EqualsTo(1f, 0.01f)) num = Mathf.CeilToInt(num * num2);
+                if (!num2.EqualsTo(1f, 0.01f)) num = Mathf.RoundToInt(num * num2);
 
                 if (GlobalCraftControlGUI.is_global_control_active)
                 {
                     var gratitudePoints = MainGame.me.player.gratitude_points;
                     var smartExpression = __instance.gratitude_points_craft_cost;
-                    if (num > 0) num = Mathf.CeilToInt(num) * multiplier;
+                    if (num > 0) num *= _craftAmount;
 
-                    if (_exhaustlessEnabled)
+                    if (_exhaustless)
                     {
-                        var adjustedNum = Mathf.CeilToInt(num / 2f);
+                        var adjustedNum = (float)Math.Round(num / 2f, 2);
                         if (gratitudePoints < (smartExpression?.EvaluateFloat(MainGame.me.player) ?? 0f))
                         {
                             if (adjustedNum % 1 == 0)
@@ -337,12 +352,11 @@ public static class MainPatcher
                 }
                 else
                 {
-                    // if (num > 0) num = Mathf.CeilToInt(num * multiplier);
+                    if (num > 0) num *= _craftAmount;
 
-                    if (_exhaustlessEnabled)
+                    if (_exhaustless)
                     {
-                        // var adjustedNum = (float)Math.Round(num / 2f, 2);
-                        var adjustedNum = Mathf.CeilToInt(num / 2f) * multiplier;
+                        var adjustedNum = (float)Math.Round(num / 2f, 2);
                         if (adjustedNum % 1 == 0)
                             text = text + "[c](en)[/c]" + adjustedNum.ToString("0");
                         else
@@ -350,7 +364,7 @@ public static class MainPatcher
                     }
                     else
                     {
-                        text = text + "[c](en)[/c]" + Mathf.CeilToInt(num * multiplier);
+                        text = text + "[c](en)[/c]" + num;
                     }
                 }
             }
@@ -359,40 +373,65 @@ public static class MainPatcher
             {
                 float num4 = 0;
 
-                num4 = __instance.craft_time.EvaluateFloat(wgo);
-                Log($"[CraftText]: Craft: {__instance.id}, BaseTime: {num4}");
+                var found = Crafts.TryGetValue(__instance.id, out var value);
+                if (found)
+                    num4 = value is not { has_expression: true }
+                        ? 0
+                        : value.EvaluateFloat(wgo);
 
                 if (num4 != 0)
                 {
-                    if (_fasterCraftEnabled)
+                    if (_fasterCraft)
                     {
                         if (_timeAdjustment < 0)
-                        {
                             num4 *= _timeAdjustment;
-                        }
                         else
-                        {
                             num4 /= _timeAdjustment;
-                        }
                     }
 
-                    num4 = Mathf.CeilToInt(num4);
-                    if (num4 > 0) num4 *= multiplier;
+                    if (num4 > 0) num4 *= _craftAmount;
 
-                    var timeSpan = TimeSpan.FromSeconds(num4);
+                    var timeSpan = TimeSpan.FromSeconds(Mathf.RoundToInt(num4));
                     text = text.ConcatWithSeparator(timeSpan.Hours >= 1
                         ? $"[c](time)[/c]{timeSpan.Hours:0}:{timeSpan.Minutes:00}:{timeSpan.Seconds:00}"
                         : $"[c](time)[/c]{timeSpan.Minutes:0}:{timeSpan.Seconds:00}");
                 }
             }
 
+            //stops the fire price being the same on everything as the first one you visited
+            var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
+            if (_previousWorldGameObject == null) _previousWorldGameObject = crafteryWgo;
+
+            if (!string.Equals(crafteryWgo.obj_id, _previousWorldGameObject.obj_id))
+            {
+                FireCrafts.Clear();
+                _previousWorldGameObject = crafteryWgo;
+            }
+
             foreach (var item in __instance.needs_from_wgo.Where(item => item.id == "fire"))
             {
-                var amount = Mathf.CeilToInt(item.value * multiplier);
+                var found = FireCrafts.TryGetValue(__instance.id, out var value);
+                if (!found)
+                {
+                    FireCrafts.Add(__instance.id, item.value);
+                }
+                else
+                {
+                    if (_cfg.HalfFireRequirements)
+                    {
+                        item.value = (int)Math.Round((double)value / 2, MidpointRounding.AwayFromZero);
+                    }
+                    else
+                    {
+                        item.value = value;
+                    }
+                }
+
+                var amount = item.value * multiplier;
                 var text2 = amount % 1 == 0
                     ? $"[c](fire2)[/c]{item.value * multiplier:0}"
                     : $"[c](fire2)[/c]{item.value * multiplier:0.0}";
-                if (!wgo!.data.IsEnoughItems(item, "", 0, multiplier)) text2 = "[ff1111]" + text2 + "[/c]";
+                if (!wgo.data.IsEnoughItems(item, "", 0, multiplier)) text2 = "[ff1111]" + text2 + "[/c]";
 
                 text = text.ConcatWithSeparator(text2);
             }
@@ -408,7 +447,7 @@ public static class MainPatcher
                 flag3 = objDef2?.tool_actions != null;
             }
 
-            if (flag3 && !__instance.is_auto)
+            if (flag3)
                 for (var j = 0; j < wgo.obj_def.tool_actions.action_tools.Count; j++)
                 {
                     var itemType2 = wgo.obj_def.tool_actions.action_tools[j];
@@ -430,6 +469,44 @@ public static class MainPatcher
 
             __result = text;
         }
+
+        [HarmonyPrefix]
+        public static bool Prefix()
+        {
+            return _unsafeInteraction;
+        }
+    }
+
+    private static void ReloadConfig()
+    {
+        _cfg = Config.GetOptions();
+        _fCcfg = FcConfig.GetOptions();
+    }
+
+    private static string GetLocalizedString(string content)
+    {
+        Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+        return content;
+    }
+
+    [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
+    public static class TimeOfDayUpdatePatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix()
+        {
+
+            if (Input.GetKeyUp(KeyCode.F5))
+            {
+                ReloadConfig();
+
+                if (!CrossModFields.ConfigReloadShown)
+                {
+                    Tools.ShowMessage(GetLocalizedString(strings.ConfigMessage), Vector3.zero);
+                    CrossModFields.ConfigReloadShown = true;
+                }
+            }
+        }
     }
 
     [HarmonyPatch(typeof(CraftGUI), nameof(CraftGUI.ExpandItem))]
@@ -438,7 +515,8 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref CraftGUI __instance, ref CraftItemGUI craft_item_gui)
         {
-            if (IsUnsafeDefinition(craft_item_gui.craft_definition)) return;
+           
+            if (_unsafeInteraction) return;
             if (_cfg.AutoSelectCraftButtonWithController && LazyInput.gamepad_active)
                 foreach (var uiButton in craft_item_gui.GetComponentsInChildren<UIButton>())
                 {
@@ -452,17 +530,25 @@ public static class MainPatcher
     [HarmonyPatch(typeof(CraftGUI), nameof(CraftGUI.Open))]
     public static class CraftGuiOpenPatch
     {
+        private static string previousObjId;
+
         [HarmonyPostfix]
         public static void Postfix()
         {
+            if (_unsafeInteraction) return;
             _alreadyRun = true;
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
+
+            if (string.Equals(crafteryWgo.obj_id, previousObjId)) return;
+            previousObjId = crafteryWgo.obj_id;
             File.AppendAllText("./QMods/QueueEverything/interacted-objects.txt", crafteryWgo.obj_id + "\n");
         }
 
         [HarmonyPrefix]
         public static void Prefix()
         {
+            if (_unsafeInteraction) return;
+            _craftAmount = 1;
             _alreadyRun = false;
         }
     }
@@ -473,53 +559,123 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix()
         {
-            // if (_unsafeInteraction) return;
+            if (_unsafeInteraction) return;
             _alreadyRun = true;
         }
 
         [HarmonyPrefix]
         public static void Prefix()
         {
-            // if (_unsafeInteraction) return;
-            //_craftAmount = 1;
+            if (_unsafeInteraction) return;
+            _craftAmount = 1;
             _alreadyRun = false;
+        }
+    }
+
+    [HarmonyPatch(typeof(CraftItemGUI), nameof(CraftItemGUI.Draw))]
+    public static class CraftItemGuiDrawPatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix(ref CraftDefinition craft_definition, ref int ____amount)
+        {
+            if (_unsafeInteraction || IsUnsafeDefinition(craft_definition)) return;
+            var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
+
+            ____amount = 1;
+            _craftAmount = 1;
+
+            if (_previousWorldGameObject == null) _previousWorldGameObject = crafteryWgo;
+
+            if (!string.Equals(crafteryWgo.obj_id, _previousWorldGameObject.obj_id))
+            {
+                FireCrafts.Clear();
+                _previousWorldGameObject = crafteryWgo;
+            }
+
+            foreach (var item in craft_definition.needs_from_wgo.Where(item => item.id == "fire"))
+            {
+                var foundFire = FireCrafts.TryGetValue(craft_definition.id, out var fireValue);
+                if (!foundFire)
+                {
+                    FireCrafts.Add(craft_definition.id, item.value);
+                }
+                else
+                {
+                    if (_cfg.HalfFireRequirements)
+                        item.value = (int)Math.Round((double)fireValue / 2, MidpointRounding.AwayFromZero);
+                    else
+                        item.value = fireValue;
+                }
+            }
+
+            var found = Crafts.TryGetValue(craft_definition.id, out _);
+            if (!found) Crafts.Add(craft_definition.id, craft_definition.craft_time);
+
+            Crafts.TryGetValue(craft_definition.id, out var value);
+
+            if (_fasterCraft)
+            {
+                var ct = value?.EvaluateFloat(crafteryWgo);
+
+                if (_timeAdjustment < 0)
+                {
+                    ct *= _timeAdjustment;
+                    craft_definition.craft_time = SmartExpression.ParseExpression(ct.ToString());
+                }
+                else
+                {
+                    ct /= _timeAdjustment;
+                    craft_definition.craft_time = SmartExpression.ParseExpression(ct.ToString());
+                }
+            }
+            else
+            {
+                craft_definition.craft_time = value;
+                var time = value.EvaluateFloat(crafteryWgo);
+                //Log($"[CraftDefTime]: {craft_definition.id}:{craft_definition.craft_time!.EvaluateFloat(crafteryWgo)}");
+            }
+            
         }
     }
 
     [HarmonyPatch(typeof(CraftItemGUI), "OnCraftPressed")]
     public static class CraftItemGuiOnCraftPressedPatch
     {
-        [HarmonyPostfix]
-        public static void Postfix(WorldGameObject __state)
-        {
-            if (!_cfg.MakeEverythingAuto) return;
-            if (__state == null) return;
-            if (__state.linked_worker != null) return;
-            if (__state.has_linked_worker) return;
-            currentlyCrafting.Add(__state);
-            __state.OnWorkAction();
-        }
-
         [HarmonyPrefix]
         public static void Prefix(ref CraftItemGUI __instance, ref int ____amount, ref WorldGameObject __state)
         {
+           
             Log($"Craft: {__instance.craft_definition.id}, One time: {__instance.craft_definition.one_time_craft}");
-            if (IsUnsafeDefinition(__instance.craft_definition)) return;
+            if (_unsafeInteraction || IsUnsafeDefinition(__instance.craft_definition)) return;
 
             var crafteryWgo = GUIElements.me.craft.GetCrafteryWGO();
             __state = crafteryWgo;
-
-            var time = __instance.craft_definition.craft_time.EvaluateFloat(crafteryWgo);
-
-            if (_fasterCraftEnabled)
+            var found = Crafts.TryGetValue(__instance.craft_definition.id, out var value);
+            float originalTimeFloat;
+            if (found)
             {
-                if (_timeAdjustment < 0)
-                    time /= _timeAdjustment;
-                else
-                    time *= _timeAdjustment;
+                originalTimeFloat = value.EvaluateFloat(crafteryWgo);
+            }
+            else
+            {
+                Crafts.Add(__instance.craft_definition.id, __instance.craft_definition.craft_time);
+                originalTimeFloat =
+                    __instance.craft_definition.craft_time.EvaluateFloat(crafteryWgo);
             }
 
-            time = Mathf.CeilToInt(time);
+            __instance.craft_definition.craft_time =
+                SmartExpression.ParseExpression(originalTimeFloat.ToString(CultureInfo.InvariantCulture));
+
+            var time = originalTimeFloat;
+
+            if (_fasterCraft)
+            {
+                if (_timeAdjustment < 0)
+                    time *= _timeAdjustment;
+                else
+                    time /= _timeAdjustment;
+            }
+
             time *= ____amount;
 
             if (time >= 300 && !_cfg.DisableComeBackLaterThoughts)
@@ -533,6 +689,58 @@ public static class MainPatcher
                 Tools.ShowMessage(CrossModFields.Lang.StartsWith("en") ? message : strings.Message, Vector3.zero, sayAsPlayer: true);
             }
         }
+
+        [HarmonyPostfix]
+        public static void Postfix(WorldGameObject __state)
+        {
+            if (!_cfg.MakeEverythingAuto) return;
+            if (__state == null) return;
+            if (__state.linked_worker != null) return;
+            if (__state.has_linked_worker) return;
+            currentlyCrafting.Add(__state);
+            __state.OnWorkAction();
+        }
+    }
+
+    private static readonly List<WorldGameObject> currentlyCrafting = new();
+    private static bool _craftsStarted;
+
+    [HarmonyPatch(typeof(MainGame), nameof(MainGame.Update))]
+    public static class MainGameUpdatePatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix()
+        {
+            if (!MainGame.game_started) return;
+            if (!_cfg.MakeEverythingAuto) return;
+            if (_craftsStarted) return;
+
+            foreach (var wgo in MainGame.me.world.GetComponentsInChildren<WorldGameObject>(true))
+            {
+                if (wgo.components.craft.is_crafting && !wgo.has_linked_worker)
+                {
+                    currentlyCrafting.Add(wgo);
+                }
+            }
+
+            _craftsStarted = true;
+        }
+    }
+
+    [HarmonyPatch(typeof(CraftComponent), "CraftReally")]
+    public static class CraftComponentCraftReally
+    {
+        [HarmonyPrefix]
+        public static void Prefix(ref CraftComponent __instance)
+        {
+            if (!MainGame.game_started) return;
+            if (!_cfg.MakeEverythingAuto) return;
+
+            foreach (var wgo in currentlyCrafting.Where(wgo => wgo.components.craft.is_crafting && !wgo.has_linked_worker))
+            {
+                wgo.OnWorkAction();
+            }
+        }
     }
 
     [HarmonyPatch(typeof(CraftItemGUI), nameof(CraftItemGUI.Redraw))]
@@ -542,14 +750,17 @@ public static class MainPatcher
         public static void Prefix(ref CraftItemGUI __instance, ref List<string> ____multiquality_ids,
             ref int ____amount)
         {
-            if (IsUnsafeDefinition(__instance.craft_definition))
+            if (_unsafeInteraction) return;
+            if (IsUnsafeDefinition(__instance.craft_definition) || IsMultiOutCantQueue(__instance.craft_definition))
             {
+                _craftAmount = 1;
                 ____amount = 1;
                 return;
             }
 
-            if (_alreadyRun) return;
+            _craftAmount = ____amount;
 
+            if (_alreadyRun) return;
             List<int> craftable = new();
             List<int> notCraftable = new();
             craftable.Clear();
@@ -564,6 +775,7 @@ public static class MainPatcher
             const string path = "./qmods/multis.txt";
 
             var message = GUIElements.me.craft.GetCrafteryWGO().obj_id + "\n---------------------\n" + "Item: " + __instance.current_craft.id + ", Craft Def: " + __instance.craft_definition.id + "\n";
+
 
             for (var i = 0; i < ____multiquality_ids.Count; i++)
                 if (string.IsNullOrWhiteSpace(____multiquality_ids[i]))
@@ -621,6 +833,7 @@ public static class MainPatcher
             {
                 if (isMultiQualCraft && multiMin != 0)
                 {
+                    _craftAmount = min;
                     ____amount = min;
                 }
             }
@@ -634,49 +847,10 @@ public static class MainPatcher
             {
                 if (isMultiQualCraft) return;
                 if (notCraftable.Count > 0) return;
+                _craftAmount = min;
                 ____amount = min;
             }
-        }
-    }
 
-    [HarmonyPatch(typeof(MainGame), nameof(MainGame.Update))]
-    public static class MainGameUpdatePatch
-    {
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            if (!MainGame.game_started) return;
-            if (!_cfg.MakeEverythingAuto) return;
-            if (_craftsStarted) return;
-
-            foreach (var wgo in MainGame.me.world.GetComponentsInChildren<WorldGameObject>(true))
-            {
-                if (wgo != null && wgo.components.craft.is_crafting && !wgo.has_linked_worker)
-                {
-                    currentlyCrafting.Add(wgo);
-                }
-            }
-
-            _craftsStarted = true;
-        }
-    }
-
-    [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
-    public static class TimeOfDayUpdatePatch
-    {
-        [HarmonyPrefix]
-        public static void Prefix()
-        {
-            if (Input.GetKeyUp(KeyCode.F5))
-            {
-                ReloadConfig();
-
-                if (!CrossModFields.ConfigReloadShown)
-                {
-                    Tools.ShowMessage(GetLocalizedString(strings.ConfigMessage), Vector3.zero);
-                    CrossModFields.ConfigReloadShown = true;
-                }
-            }
         }
     }
 }

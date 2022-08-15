@@ -9,13 +9,15 @@ using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
 
+
 namespace Helper
 {
-    // [HarmonyPatchAll]
+    [HarmonyPriority(1)]
     internal class MiscFixes
     {
 
         //stops unnecessary log spam due to spawning clone objects that don't have matching sprites
+        [HarmonyPriority(1)]
         [HarmonyPatch(typeof(EasySpritesCollection), nameof(EasySpritesCollection.GetSprite))]
         public static class EasySpritesCollectionGetSpritePatch
         {
@@ -27,6 +29,7 @@ namespace Helper
         }
 
         //stops unnecessary log spam due to wheres ma storage inventory changes
+        [HarmonyPriority(1)]
         [HarmonyPatch(typeof(MultiInventory), "IsEmpty")]
         public static class MultiInventoryIsEmptyPatch
         {
@@ -79,6 +82,7 @@ namespace Helper
 
         //stops unnecessary path finding failed log spam
         [HarmonyPatch(typeof(MovementComponent), "OnPathFailed")]
+        [HarmonyPriority(1)]
         public static class MovementComponentOnPathFailedPatch
         {
             [HarmonyTranspiler]
@@ -94,6 +98,7 @@ namespace Helper
 
         //stops unnecessary duplicate objects spam from spawning clone vendors
         [HarmonyPatch(typeof(WorldMap), "GetWorldGameObjectByComparator")]
+        [HarmonyPriority(1)]
         public static class WorldMapGetWorldGameObjectByComparatorPatch
         {
             [HarmonyTranspiler]
@@ -107,6 +112,7 @@ namespace Helper
         }
 
         //stops unnecessary carrying item spr null errors
+        [HarmonyPriority(1)]
         [HarmonyPatch(typeof(BaseCharacterComponent), nameof(BaseCharacterComponent.SetCarryingItem), typeof(Item))]
         public static class BaseCharacterComponentSetCarryingItemPatch
         {
@@ -121,6 +127,7 @@ namespace Helper
         }
 
         //stops unnecessary no animator spam
+        [HarmonyPriority(1)]
         [HarmonyPatch(typeof(CustomNetworkAnimatorSync), "Init", typeof(GameObject))]
         public static class CustomNetworkAnimatorSyncInitPatch
         {
@@ -135,7 +142,7 @@ namespace Helper
         }
 
         //stops unnecessary duplicate objects spam from spawning clone vendors
-        //[HarmonyDebug]
+        [HarmonyPriority(1)]
         [HarmonyPatch(typeof(Flow_TryFreeIdlePoint))]
         public static class FlowTryFreeIdlePointRegisterPortsPatch
         {

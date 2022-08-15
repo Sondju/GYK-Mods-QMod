@@ -180,4 +180,7 @@
   <data name="ConfigMessage" xml:space="preserve">
     <value>Конфиг перезагружен!</value>
   </data>
+  <data name="CantUseHere" xml:space="preserve">
+    <value>Я не могу использовать это здесь, босс!</value>
+  </data>
 </root>

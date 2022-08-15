@@ -7,10 +7,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using UnityEngine;
 
 namespace Helper
 {
+    [HarmonyPriority(1)]
     public static class MainPatcher
     {
         private const string DisablePath = "./QMods/disable";
@@ -40,10 +40,12 @@ namespace Helper
             }
         }
 
- 
+
+        [HarmonyPriority(1)]
         [HarmonyPatch(typeof(BaseGUI))]
         public static class BaseGuiPatches
         {
+            [HarmonyPriority(1)]
             [HarmonyPostfix]
             [HarmonyPatch("Hide", typeof(bool))]
             public static void BaseGuiHidePostfix()
@@ -55,9 +57,11 @@ namespace Helper
             }
         }
 
+        [HarmonyPriority(1)]
         [HarmonyPatch(typeof(GameSettings))]
         public static class GameSettingsPatches
         {
+            [HarmonyPriority(1)]
             [HarmonyPostfix]
             [HarmonyPatch(nameof(GameSettings.ApplyLanguageChange))]
             public static void GameSettingsApplyLanguageChangePostfix()
@@ -68,9 +72,11 @@ namespace Helper
             }
         }
 
+        [HarmonyPriority(1)]
         [HarmonyPatch(typeof(QuestSystem))]
         public static class QuestSystemPatches
         {
+            [HarmonyPriority(1)]
             [HarmonyPostfix]
             [HarmonyPatch("OnQuestSucceed", typeof(QuestState))]
             public static void QuestSystemOnQuestSucceedPostfix(ref List<string> ____succed_quests)
@@ -81,10 +87,11 @@ namespace Helper
                 }
             }
         }
-
+        [HarmonyPriority(1)]
         [HarmonyPatch(typeof(TimeOfDay))]
         public static class TimeOfDayPatches
         {
+            [HarmonyPriority(1)]
             [HarmonyPostfix]
             [HarmonyPatch(nameof(TimeOfDay.Update))]
             public static void TimeOfDayUpdatePostfix(TimeOfDay __instance)
@@ -94,10 +101,11 @@ namespace Helper
             }
         }
 
-
+        [HarmonyPriority(1)]
         [HarmonyPatch(typeof(SmartAudioEngine))]
         private static class SmartAudioEnginePatches
         {
+            [HarmonyPriority(1)]
             [HarmonyPatch(nameof(SmartAudioEngine.OnStartNPCInteraction))]
             [HarmonyPrefix]
             public static void OnStartNPCInteractionPrefix(BalanceBaseObject npc)
@@ -105,7 +113,7 @@ namespace Helper
                 if (npc.id.Contains("zombie")) return;
                 CrossModFields.TalkingToNpc = true;
             }
-
+            [HarmonyPriority(1)]
             [HarmonyPatch(nameof(SmartAudioEngine.OnEndNPCInteraction))]
             [HarmonyPrefix]
             public static void OnEndNPCInteractionPrefix()
@@ -115,10 +123,11 @@ namespace Helper
         }
 
         //private static UILabel labelToMimic;
-
+        [HarmonyPriority(1)]
         [HarmonyPatch(typeof(MainMenuGUI))]
         public static class MainMenuGuiPatches
         {
+            [HarmonyPriority(1)]
             [HarmonyPrefix]
             [HarmonyPatch(nameof(MainMenuGUI.Open))]
             public static void MainMenuGuiOpenPrefix()
@@ -142,7 +151,7 @@ namespace Helper
                     //
                 }
             }
-
+            [HarmonyPriority(1)]
             [HarmonyPostfix]
             [HarmonyPatch(nameof(MainMenuGUI.Open))]
             public static void MainMenuGuiOpenPostfix(ref MainMenuGUI __instance)
@@ -211,10 +220,11 @@ namespace Helper
                 // go.transform.localPosition = new Vector3(pos.x, pos.y - (label.printedSize.y / 2), 0.0f);
             }
         }
-
+        [HarmonyPriority(1)]
         [HarmonyPatch(typeof(VendorGUI))]
         public static class VendorGuiPatches
         {
+            [HarmonyPriority(1)]
             [HarmonyPrefix]
             [HarmonyPatch(nameof(VendorGUI.Open), typeof(WorldGameObject), typeof(GJCommons.VoidDelegate))]
             public static void VendorGuiOpenPrefix()
@@ -222,7 +232,7 @@ namespace Helper
                 if (!MainGame.game_started) return;
                 CrossModFields.TalkingToNpc = true;
             }
-
+            [HarmonyPriority(1)]
             [HarmonyPatch(nameof(VendorGUI.Hide), typeof(bool))]
             [HarmonyPrefix]
             public static void VendorGuiHidePrefix()
@@ -230,7 +240,7 @@ namespace Helper
                 if (!MainGame.game_started) return;
                 CrossModFields.TalkingToNpc = false;
             }
-
+            [HarmonyPriority(1)]
             [HarmonyPatch(nameof(VendorGUI.OnClosePressed))]
             [HarmonyPrefix]
             public static void VendorGUIOnClosePressedPrefix()
@@ -239,10 +249,11 @@ namespace Helper
                 CrossModFields.TalkingToNpc = false;
             }
         }
-
+        [HarmonyPriority(1)]
         [HarmonyPatch(typeof(WorldGameObject))]
         public static class WorldGameObjectPatches
         {
+            [HarmonyPriority(1)]
             [HarmonyPrefix]
             [HarmonyPatch(nameof(WorldGameObject.Interact))]
             public static void WorldGameObjectInteractPrefix(ref WorldGameObject __instance, ref WorldGameObject other_obj)
@@ -259,6 +270,10 @@ namespace Helper
                 CrossModFields.IsTavernCellar = __instance.obj_id.ToLowerInvariant().Contains("tavern_cellar");
                 CrossModFields.IsRefugee = __instance.obj_id.ToLowerInvariant().Contains("refugee");
                 CrossModFields.IsWritersTable = __instance.obj_id.ToLowerInvariant().Contains("writer");
+               
+                //Beam Me Up & Save Now
+                CrossModFields.IsInDungeon = __instance.obj_id.ToLowerInvariant().Contains("dungeon_enter");
+               // Log($"[InDungeon]: {CrossModFields.IsInDungeon}");
 
                 //I Build Where I Want
                 if (__instance.obj_def.interaction_type is not ObjectDefinition.InteractionType.None)
@@ -269,7 +284,7 @@ namespace Helper
                 //Beam Me Up Gerry
                 CrossModFields.TalkingToNpc = __instance.obj_def.IsNPC() && !__instance.obj_id.Contains("zombie");
 
-                Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
+               // Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
             }
         }
     }

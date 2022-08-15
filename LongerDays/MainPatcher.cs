@@ -22,13 +22,13 @@ public class MainPatcher
 
     private static float _seconds;
 
-    public static float GetTime()
-    {
-        var adj = GetTimeMulti();
-        var time = Time.deltaTime;
-        var newTime = time / adj;
-        return newTime;
-    }
+    //public static float GetTime()
+    //{
+    //    var adj = GetTimeMulti();
+    //    var time = Time.deltaTime;
+    //    var newTime = time / adj;
+    //    return newTime;
+    //}
 
     public static void Patch()
     {
@@ -54,54 +54,64 @@ public class MainPatcher
         }
     }
 
-    private static float GetTimeMulti()
-    {
-        var num = _seconds switch
-        {
-            SecondsInDay675 => 1.5f,
-            SecondsInDay900 => 2f,
-            SecondsInDay1125 => 2.5f,
-            SecondsInDay1350 => 3f,
-            _ => 1f
-        };
-        return num;
-    }
+    //private static float GetTimeMulti()
+    //{
+    //    var num = _seconds switch
+    //    {
+    //        SecondsInDay675 => 1.5f,
+    //        SecondsInDay900 => 2f,
+    //        SecondsInDay1125 => 2.5f,
+    //        SecondsInDay1350 => 3f,
+    //        _ => 1f
+    //    };
+    //    return num;
+    //}
 
     private static void Log(string message, bool error = false)
     {
         Tools.Log("LongerDays", $"{message}", error);
     }
 
-    [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.UpdateAllCrafts))]
-    public static class CraftComponentUpdateAllCraftsPatch
-    {
-        [HarmonyPrefix]
-        public static void Prefix(ref float delta_time)
-        {
-            delta_time = GetTime();
-        }
-    }
+    //[HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.UpdateAllCrafts))]
+    //public static class CraftComponentUpdateAllCraftsPatch
+    //{
+    //    [HarmonyPrefix]
+    //    public static void Prefix(ref float delta_time)
+    //    {
+    //        delta_time = GetTime();
+    //    }
+    //}
 
-    [HarmonyPatch(typeof(EnvironmentEngine), nameof(EnvironmentEngine.Update))]
-    public static class EnvironmentEngineUpdatePatch
-    {
-        [HarmonyTranspiler]
-        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-        {
-            var instructionsList = new List<CodeInstruction>(instructions);
-            var time = AccessTools.Property(typeof(Time), nameof(Time.deltaTime)).GetGetMethod();
+    //[HarmonyPatch(typeof(EnvironmentEngine), nameof(EnvironmentEngine.Update))]
+    //public static class EnvironmentEngineUpdatePatch
+    //{
+    //    [HarmonyTranspiler]
+    //    private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+    //    {
+    //        var instructionsList = new List<CodeInstruction>(instructions);
+    //        var time = AccessTools.Property(typeof(Time), nameof(Time.deltaTime)).GetGetMethod();
 
-            foreach (var t in instructionsList)
-            {
-                var instruction = t;
-                if (instruction.opcode == OpCodes.Call && instruction.OperandIs(time))
-                {
-                    yield return instruction;
-                    instruction = new CodeInstruction(opcode: OpCodes.Call,
-                        operand: typeof(MainPatcher).GetMethod("GetTime"));
-                }
-                yield return instruction;
-            }
+    //        foreach (var t in instructionsList)
+    //        {
+    //            var instruction = t;
+    //            if (instruction.opcode == OpCodes.Call && instruction.OperandIs(time))
+    //            {
+    //                yield return instruction;
+    //                instruction = new CodeInstruction(opcode: OpCodes.Call,
+    //                    operand: typeof(MainPatcher).GetMethod("GetTime"));
+    //            }
+    //            yield return instruction;
+    //        }
+    //    }
+    //}
+
+    [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.FromTimeKToSeconds))]
+    public static class TimeOfDayFromTimeKToSecondsPatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(ref float time_in_time_k, ref float __result)
+        {
+            __result = time_in_time_k * _seconds;
         }
     }
 

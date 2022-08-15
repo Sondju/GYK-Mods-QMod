@@ -180,4 +180,7 @@
   <data name="ConfigMessage" xml:space="preserve">
     <value>Konfiguracja została ponownie załadowana!</value>
   </data>
+  <data name="CantUseHere" xml:space="preserve">
+    <value>Nie mogę tego tutaj użyć, szefie!</value>
+  </data>
 </root>

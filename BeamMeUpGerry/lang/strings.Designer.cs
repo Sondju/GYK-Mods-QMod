@@ -61,6 +61,15 @@ namespace BeamMeUpGerry.lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to I can’t use that here, boss!.
+        /// </summary>
+        public static string CantUseHere {
+            get {
+                return ResourceManager.GetString("CantUseHere", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Clay pit.
         /// </summary>
         public static string Clay {

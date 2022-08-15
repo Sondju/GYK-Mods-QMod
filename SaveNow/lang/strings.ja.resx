@@ -136,4 +136,7 @@
   <data name="SaveMessage" xml:space="preserve">
     <value>ゲームを保存しました</value>
   </data>
+  <data name="CantSaveHere" xml:space="preserve">
+    <value>ここでは保存できません、ボス！</value>
+  </data>
 </root>

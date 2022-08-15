@@ -40,6 +40,10 @@ public static class Config
             out var disableComeBackLaterThoughts);
         _options.DisableComeBackLaterThoughts = disableComeBackLaterThoughts;
 
+        bool.TryParse(_con.Value("ForceMultiCraft", "true"),
+            out var forceMultiCraft);
+        _options.ForceMultiCraft = forceMultiCraft;
+
         bool.TryParse(_con.Value("Debug", "false"), out var debug);
         _options.Debug = debug;
 
@@ -59,6 +63,7 @@ public static class Config
         public bool MakeEverythingAuto;
         public bool MakeHandTasksAuto;
         public bool DisableComeBackLaterThoughts;
+        public bool ForceMultiCraft;
         public bool Debug;
     }
 }

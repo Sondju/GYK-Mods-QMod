@@ -180,4 +180,7 @@
   <data name="ConfigMessage" xml:space="preserve">
     <value>配置重新加载！</value>
   </data>
+  <data name="CantUseHere" xml:space="preserve">
+    <value>我不能在这里使用它，老板！</value>
+  </data>
 </root>

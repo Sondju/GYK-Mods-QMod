@@ -31,8 +31,10 @@ namespace WheresMaStorage
             public bool CacheEligibleInventories;
             public bool IncludeRefugeeDepot;
             public bool Debug;
-            public bool EnableChiselInkStacking;
+            public bool EnableChiselStacking;
             public bool EnableToolAndPrayerStacking;
+            public bool EnableGaveItemStacking;
+            public bool EnablePenPaperInkStacking;
             public bool AllowHandToolDestroy;
         }
 
@@ -44,9 +46,14 @@ namespace WheresMaStorage
             bool.TryParse(_con.Value("ModifyInventorySize", "true"), out var modifyInventorySize);
             _options.ModifyInventorySize = modifyInventorySize;
 
+            bool.TryParse(_con.Value("EnableGaveItemStacking", "false"), out var enableGaveItemStacking);
+            _options.EnableGaveItemStacking = enableGaveItemStacking;
 
-            bool.TryParse(_con.Value("EnableChiselInkStacking", "false"), out var enableChiselInkStacking);
-            _options.EnableChiselInkStacking = enableChiselInkStacking;
+            bool.TryParse(_con.Value("EnablePenPaperInkStacking", "false"), out var enablePenPaperInkStacking);
+            _options.EnablePenPaperInkStacking = enablePenPaperInkStacking;
+
+            bool.TryParse(_con.Value("EnableChiselStacking", "false"), out var enableChiselStacking);
+            _options.EnableChiselStacking = enableChiselStacking;
 
             bool.TryParse(_con.Value("EnableToolAndPrayerStacking", "true"), out var enableToolAndPrayerStacking);
             _options.EnableToolAndPrayerStacking = enableToolAndPrayerStacking;
