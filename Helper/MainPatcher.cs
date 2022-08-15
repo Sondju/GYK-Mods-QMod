@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using Object = UnityEngine.Object;
 
 namespace Helper
 {
@@ -87,6 +88,9 @@ namespace Helper
                 }
             }
         }
+
+        private static bool _cleanGerryRun;
+
         [HarmonyPriority(1)]
         [HarmonyPatch(typeof(TimeOfDay))]
         public static class TimeOfDayPatches
@@ -96,6 +100,21 @@ namespace Helper
             [HarmonyPatch(nameof(TimeOfDay.Update))]
             public static void TimeOfDayUpdatePostfix(TimeOfDay __instance)
             {
+                if (!_cleanGerryRun)
+                {
+                    if (!MainGame.game_started) return;
+                    var oldGerry = Object.FindObjectsOfType<WorldGameObject>(true)
+                        .Where(x => x.obj_id.Contains("talking_skull"))
+                        .Where(x=>x.cur_gd_point.Length<=0).ToList();
+
+                    foreach (var gerry in oldGerry)
+                    {
+                        gerry.DestroyMe();
+                    }
+
+                    _cleanGerryRun = true;
+                }
+
                 CrossModFields.TimeOfDayFloat = __instance.GetTimeK();
                 CrossModFields.ConfigReloadShown = false;
             }
