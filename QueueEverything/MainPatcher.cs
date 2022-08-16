@@ -103,11 +103,17 @@ public static class MainPatcher
     {
         var zombieCraft = _craftDefinition.craft_in.Any(craftIn => craftIn.Contains("zombie"));
         var refugeeCraft = _craftDefinition.craft_in.Any(craftIn => craftIn.Contains("refugee"));
+        var unsafeOne = UnSafeCraftDefPartials.Any(_craftDefinition.id.Contains);
+        var unsafeTwo = !_craftDefinition.icon.Contains("fire") && _craftDefinition.craft_in.Any(craftIn => UnSafeCraftObjects.Contains(craftIn));
+        var unsafeThree = MultiOutCantQueue.Any(_craftDefinition.id.Contains);
 
-        return refugeeCraft || zombieCraft ||
-               _craftDefinition.craft_time_is_zero || _craftDefinition.one_time_craft ||
-               UnSafeCraftDefPartials.Any(_craftDefinition.id.Contains) || _craftDefinition.craft_in.Any(craftIn => UnSafeCraftObjects.Contains(craftIn) ||
-                   MultiOutCantQueue.Any(_craftDefinition.id.Contains));
+        if (zombieCraft || refugeeCraft || unsafeOne || unsafeTwo || unsafeThree)
+        {
+            return true;
+        }
+
+        return false;
+
     }
 
     private static void LoadFasterCraftConfig()
@@ -240,10 +246,14 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref CraftDefinition __instance, ref bool __result)
         {
-            if (__instance.IsMultiqualityOutput() && !IsUnsafeDefinition(__instance) && _cfg.ForceMultiCraft)
+            if (IsUnsafeDefinition(__instance) || !_cfg.ForceMultiCraft)
             {
-                __result = true;
+                Log($"[Unsafe]: {__instance.id}, CraftTimeZero: {__instance.craft_time_is_zero}");
+                __result = false;
+                return;
             }
+            Log($"[Safe?]: {__instance.id}, CraftTimeZero: {__instance.craft_time_is_zero}");
+            __result = true;
         }
     }
 
@@ -544,11 +554,16 @@ public static class MainPatcher
         {
             if (IsUnsafeDefinition(__instance.craft_definition))
             {
+                Log($"[CraftItemRedraw]: Unsafe Returning: {__instance.craft_definition.id}");
                 ____amount = 1;
                 return;
             }
 
-            if (_alreadyRun) return;
+            if (_alreadyRun)
+            {
+                Log($"[CraftItemRedraw]: AlreadyRun Returning: {__instance.craft_definition.id}");
+                return;
+            }
 
             List<int> craftable = new();
             List<int> notCraftable = new();
