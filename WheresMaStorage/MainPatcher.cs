@@ -99,6 +99,7 @@ namespace WheresMaStorage
         private static bool _zombieWorker;
 
         private static MultiInventory _mi = new();
+        private static MultiInventory _refugeeMi = new();
 
         public static void Patch()
         {
@@ -204,6 +205,16 @@ namespace WheresMaStorage
         //this method gets inserted into the CraftReally method using the transpiler below, overwriting any inventory the game sets during crafting
         public static MultiInventory GetMi(CraftDefinition craft, MultiInventory orig, WorldGameObject otherGameObject)
         {
+            if (!_cfg.IncludeRefugeeDepot)
+            {
+                if (otherGameObject.is_player && craft.id.StartsWith("camp") || craft.id.Contains("refugee") ||
+                    otherGameObject.obj_id.Contains("refugee"))
+                {
+                    Log($"[Refugee-InvRedirect]: Returned refugee multi-inventory to them!: Requester: {otherGameObject.obj_id}, Craft: {craft.id}");
+                    return _refugeeMi;
+                }
+            }
+
             if ((otherGameObject.has_linked_worker && otherGameObject.linked_worker.obj_id.Contains("zombie")) || otherGameObject.obj_id.Contains("zombie") || otherGameObject.obj_id.StartsWith("mf_") || _gratitudeCraft || (_cfg.IncludeRefugeeDepot && (otherGameObject.obj_id.Contains("refugee") || craft.id.Contains("camp")) && !(otherGameObject.obj_id.Contains("well") || otherGameObject.obj_id.Contains("hive"))))
             {
                 Log($"[InvRedirect]: Redirected craft inventory to player MultiInventory! Object: {otherGameObject.obj_id}, Craft: {craft.id}, Gratitude: {_gratitudeCraft}");
@@ -214,7 +225,7 @@ namespace WheresMaStorage
                 return _mi;
             }
 
-            Log($"[InvRedirect]: Original inventory sent back to requester! Object: {otherGameObject.obj_id}, Craft: {craft.id}, Gratitude: {_gratitudeCraft}");
+            Log($"[InvRedirect]: Original inventory sent back to requester! IsPlayer: {otherGameObject.is_player}, Object: {otherGameObject.obj_id}, Craft: {craft.id}, Gratitude: {_gratitudeCraft}");
             _zombieWorker = false;
             return orig;
         }
@@ -406,7 +417,7 @@ namespace WheresMaStorage
                     }
                 }
 
-                if (_cfg.EnableToolAndPrayerStacking || _cfg.EnableGaveItemStacking || _cfg.EnablePenPaperInkStacking || _cfg.EnableChiselStacking)
+                if (_cfg.EnableToolAndPrayerStacking || _cfg.EnableGraveItemStacking || _cfg.EnablePenPaperInkStacking || _cfg.EnableChiselStacking)
                 {
                     foreach (var item in GameBalance.me.items_data.Where(item => item.stack_count == 1))
                     {
@@ -418,7 +429,7 @@ namespace WheresMaStorage
                             }
                         }
 
-                        if (_cfg.EnableGaveItemStacking)
+                        if (_cfg.EnableGraveItemStacking)
                         {
                             if (GraveItems.Contains(item.type))
                             {
@@ -801,6 +812,8 @@ namespace WheresMaStorage
             )
 
             {
+               // Log($"[WGO-Get]: {__instance.obj_id}");
+         
                 ////if (!Tools.TutorialDone()) return;
                 _zombieWorker = (__instance.has_linked_worker && __instance.linked_worker.obj_id.Contains("zombie")) || __instance.obj_def.id.Contains("zombie");
 
@@ -848,8 +861,8 @@ namespace WheresMaStorage
 
                     if (__instance == CrossModFields.PreviousWgoInteraction || __instance.obj_id.StartsWith("mf_"))
                     {
-                        Log(
-                            $"[WorldGameObject.GetMultiInventory-Postfix]: _previousWgo == __instance. Sending cache: {__instance.obj_id}");
+                        //Log(
+                        //    $"[WorldGameObject.GetMultiInventory-Postfix]: _previousWgo == __instance. Sending cache: {__instance.obj_id}");
 
                         __result = _mi;
                         return;
@@ -860,6 +873,7 @@ namespace WheresMaStorage
                 {
                     CrossModFields.PreviousWgoInteraction = __instance;
                     _mi = new MultiInventory();
+                    _refugeeMi = new MultiInventory();
                     var playerInv = new Inventory(MainGame.me.player.data, "Player", string.Empty);
                     playerInv.data.SetInventorySize(_invSize);
 
@@ -887,6 +901,11 @@ namespace WheresMaStorage
                         if (worldZoneMulti == null) continue;
                         foreach (var inv in worldZoneMulti.Where(inv => inv != null))// && inv.data.inventory.Count != 0))
                         {
+                            if (worldZone.id.ToLowerInvariant().Contains("refugee"))
+                            {
+                                _refugeeMi.AddInventory(inv);
+                            }
+
                             if (!_cfg.IncludeRefugeeDepot)
                             {
                                 if (worldZone.id.ToLowerInvariant().Contains("refugee"))

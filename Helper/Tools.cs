@@ -106,6 +106,7 @@ namespace Helper
             CrossModFields.IsTavernCellar = false;
             CrossModFields.IsRefugee = false;
             CrossModFields.IsWritersTable = false;
+            CrossModFields.TalkingToNpc("QModHelper: SetAllInteractionsFalse", false);
         }
 
         private static WorldGameObject _gerry;

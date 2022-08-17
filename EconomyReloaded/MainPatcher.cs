@@ -63,6 +63,7 @@ namespace EconomyReloaded
             public static void TraderPostfix(ref float __result, Item item)
             {
                 if (!_cfg.OldSchoolMode) return;
+                if (!_cfg.DisableInflation) return;
                 if (__result != 0.0)
                 {
                     __result = item.definition.base_price;
@@ -74,6 +75,7 @@ namespace EconomyReloaded
             public static void PlayerPostfix(ref float __result, Item item)
             {
                 if (!_cfg.OldSchoolMode) return;
+                if (!_cfg.DisableDeflation) return;
                 if (__result != 0.0)
                 {
                     __result = item.definition.base_price;

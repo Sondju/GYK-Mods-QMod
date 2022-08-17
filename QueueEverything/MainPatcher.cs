@@ -151,7 +151,7 @@ public static class MainPatcher
     public static class CraftComponentCraftReally
     {
         [HarmonyPrefix]
-        public static void Prefix(ref CraftComponent __instance)
+        public static void Prefix()
         {
             if (!MainGame.game_started) return;
             if (!_cfg.MakeEverythingAuto) return;
@@ -174,6 +174,7 @@ public static class MainPatcher
 
             try
             {
+
                 foreach (var craft in GameBalance.me.craft_data)
                 {
                     if (_cfg.HalfFireRequirements)
@@ -246,6 +247,7 @@ public static class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref CraftDefinition __instance, ref bool __result)
         {
+            if (__result) return;
             if (IsUnsafeDefinition(__instance) || !_cfg.ForceMultiCraft)
             {
                 Log($"[Unsafe]: {__instance.id}, CraftTimeZero: {__instance.craft_time_is_zero}");
@@ -552,7 +554,7 @@ public static class MainPatcher
         public static void Prefix(ref CraftItemGUI __instance, ref List<string> ____multiquality_ids,
             ref int ____amount)
         {
-            if (IsUnsafeDefinition(__instance.craft_definition))
+            if (!__instance.craft_definition.CanCraftMultiple())
             {
                 Log($"[CraftItemRedraw]: Unsafe Returning: {__instance.craft_definition.id}");
                 ____amount = 1;
@@ -643,7 +645,7 @@ public static class MainPatcher
             message += "Max Craftable: " + min + "\n";
             message += "Ingredient list count: " + craftable.Count + "\n";
             message += "---------------------\n";
-            File.AppendAllText(path, message);
+           // File.AppendAllText(path, message);
 
             if (_cfg.AutoMaxNormalCrafts)
             {

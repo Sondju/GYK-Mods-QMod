@@ -103,10 +103,12 @@ namespace Helper
                 if (!_cleanGerryRun)
                 {
                     if (!MainGame.game_started) return;
+                    if (!Tools.TutorialDone()) return;
                     var oldGerry = Object.FindObjectsOfType<WorldGameObject>(true)
                         .Where(x => x.obj_id.Contains("talking_skull"))
                         .Where(x=>x.cur_gd_point.Length<=0).ToList();
 
+                    if (oldGerry.Count <= 1) return;
                     foreach (var gerry in oldGerry)
                     {
                         gerry.DestroyMe();
@@ -124,20 +126,21 @@ namespace Helper
         [HarmonyPatch(typeof(SmartAudioEngine))]
         private static class SmartAudioEnginePatches
         {
-            [HarmonyPriority(1)]
-            [HarmonyPatch(nameof(SmartAudioEngine.OnStartNPCInteraction))]
-            [HarmonyPrefix]
-            public static void OnStartNPCInteractionPrefix(BalanceBaseObject npc)
-            {
-                if (npc.id.Contains("zombie")) return;
-                CrossModFields.TalkingToNpc = true;
-            }
+            //[HarmonyPriority(1)]
+            //[HarmonyPatch(nameof(SmartAudioEngine.OnStartNPCInteraction))]
+            //[HarmonyPrefix]
+            //public static void OnStartNPCInteractionPrefix(BalanceBaseObject npc)
+            //{
+            //    if (npc.id.Contains("zombie")) return;
+            //    CrossModFields.TalkingToNpc("QModHelper: SmartAudioEngine.OnStartNPCInteraction", true);
+            //}
+
             [HarmonyPriority(1)]
             [HarmonyPatch(nameof(SmartAudioEngine.OnEndNPCInteraction))]
             [HarmonyPrefix]
             public static void OnEndNPCInteractionPrefix()
             {
-                CrossModFields.TalkingToNpc = false;
+                CrossModFields.TalkingToNpc("QModHelper: SmartAudioEngine.OnEndNPCInteraction", false);
             }
         }
 
@@ -249,7 +252,7 @@ namespace Helper
             public static void VendorGuiOpenPrefix()
             {
                 if (!MainGame.game_started) return;
-                CrossModFields.TalkingToNpc = true;
+                CrossModFields.TalkingToNpc("QModHelper: VendorGUI.Open", true);
             }
             [HarmonyPriority(1)]
             [HarmonyPatch(nameof(VendorGUI.Hide), typeof(bool))]
@@ -257,7 +260,7 @@ namespace Helper
             public static void VendorGuiHidePrefix()
             {
                 if (!MainGame.game_started) return;
-                CrossModFields.TalkingToNpc = false;
+                CrossModFields.TalkingToNpc("QModHelper: VendorGUI.Hide", false);
             }
             [HarmonyPriority(1)]
             [HarmonyPatch(nameof(VendorGUI.OnClosePressed))]
@@ -265,7 +268,7 @@ namespace Helper
             public static void VendorGUIOnClosePressedPrefix()
             {
                 if (!MainGame.game_started) return;
-                CrossModFields.TalkingToNpc = false;
+                CrossModFields.TalkingToNpc("QModHelper: VendorGUI.OnClosePressed", false);
             }
         }
         [HarmonyPriority(1)]
@@ -301,9 +304,9 @@ namespace Helper
                 }
 
                 //Beam Me Up Gerry
-                CrossModFields.TalkingToNpc = __instance.obj_def.IsNPC() && !__instance.obj_id.Contains("zombie");
+                CrossModFields.TalkingToNpc("QModHelper: WorldGameObject.Interact", __instance.obj_def.IsNPC() && !__instance.obj_id.Contains("zombie"));
 
-               // Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
+                // Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
             }
         }
     }

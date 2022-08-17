@@ -33,7 +33,7 @@ namespace WheresMaStorage
             public bool Debug;
             public bool EnableChiselStacking;
             public bool EnableToolAndPrayerStacking;
-            public bool EnableGaveItemStacking;
+            public bool EnableGraveItemStacking;
             public bool EnablePenPaperInkStacking;
             public bool AllowHandToolDestroy;
         }
@@ -46,8 +46,8 @@ namespace WheresMaStorage
             bool.TryParse(_con.Value("ModifyInventorySize", "true"), out var modifyInventorySize);
             _options.ModifyInventorySize = modifyInventorySize;
 
-            bool.TryParse(_con.Value("EnableGaveItemStacking", "false"), out var enableGaveItemStacking);
-            _options.EnableGaveItemStacking = enableGaveItemStacking;
+            bool.TryParse(_con.Value("EnableGraveItemStacking", "false"), out var enableGraveItemStacking);
+            _options.EnableGraveItemStacking = enableGraveItemStacking;
 
             bool.TryParse(_con.Value("EnablePenPaperInkStacking", "false"), out var enablePenPaperInkStacking);
             _options.EnablePenPaperInkStacking = enablePenPaperInkStacking;

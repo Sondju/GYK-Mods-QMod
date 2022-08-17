@@ -70,7 +70,7 @@ namespace BeamMeUpGerry
 
         private static void Beam()
         {
-            if (_usingStone || _dotSelection || CrossModFields.TalkingToNpc) return;
+            if (_usingStone || _dotSelection || CrossModFields._talkingToNpc) return;
 
             var item = GetHearthstone();
             if (item != null)
@@ -85,7 +85,7 @@ namespace BeamMeUpGerry
                     _usingStone = true;
                     MainGame.me.player.UseItemFromInventory(item);
                 }
-                CrossModFields.TalkingToNpc = false;
+                CrossModFields.TalkingToNpc("BeamMeUpGerry: Beam()",false);
             }
             else
             {
@@ -264,7 +264,9 @@ namespace BeamMeUpGerry
 
         private static bool CanUseStone()
         {
-            if (CrossModFields.IsInDungeon || CrossModFields.TalkingToNpc) return false;
+            var inDungeon = CrossModFields.IsInDungeon;
+            var talkingToNpc = CrossModFields._talkingToNpc;
+            if (inDungeon || talkingToNpc) return false;
             return true;
         }
 
@@ -286,7 +288,7 @@ namespace BeamMeUpGerry
                     ShowHud(null,true);
                     _usingStone = false;
                     _dotSelection = false;
-                    CrossModFields.TalkingToNpc = false;
+                    CrossModFields.TalkingToNpc("BeamMeUpGerry: MultiAnswerGuiOnChosenPatch Postfix: string = cancel, !_dotSelection", false);
 
                     MainGame.me.player.components.character.control_enabled = true;
                     return;
@@ -305,7 +307,7 @@ namespace BeamMeUpGerry
                     //leave option for npcs
                     _usingStone = false;
                     _dotSelection = false;
-                    CrossModFields.TalkingToNpc = false;
+                    CrossModFields.TalkingToNpc("BeamMeUpGerry: MultiAnswerGuiOnChosenPatch Postfix: string = leave, answer.ToLowerInvariant", false);
                     MainGame.me.player.components.character.control_enabled = true;
 
                     return;
@@ -324,7 +326,8 @@ namespace BeamMeUpGerry
             {
 //
                 if (!_cfg.EnableListExpansion) return;
-                if (!CanUseStone()) return;
+                var canUseStone = CanUseStone();
+                if (!canUseStone) return;
                 // if (_isNpc) return;
                 List<AnswerVisualData> answers;
 
@@ -348,7 +351,7 @@ namespace BeamMeUpGerry
 
                 void Show(out string answer)
                 {
-                    CrossModFields.TalkingToNpc = false;
+                    CrossModFields.TalkingToNpc("BeamMeUpGerry: MultiAnswerGuiOnChosenPatch Prefix: void Show", false);
                     var cleanedAnswers = ValidateAnswerList(answers);
                     answer = "cancel";
                     _dotSelection = true;
@@ -541,7 +544,7 @@ namespace BeamMeUpGerry
                         _maGui.DestroyBubble();
                         _usingStone = false;
                         _dotSelection = false;
-                        CrossModFields.TalkingToNpc = false;
+                        CrossModFields.TalkingToNpc("BeamMeUpGerry: TimeOfDayUpdate Prefix: _maGui != null", false);
                         MainGame.me.player.components.character.control_enabled = true;
                         _maGui = null;
                     }
