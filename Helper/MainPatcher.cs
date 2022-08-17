@@ -104,6 +104,7 @@ namespace Helper
                 {
                     if (!MainGame.game_started) return;
                     if (!Tools.TutorialDone()) return;
+                    _cleanGerryRun = true;
                     var oldGerry = Object.FindObjectsOfType<WorldGameObject>(true)
                         .Where(x => x.obj_id.Contains("talking_skull"))
                         .Where(x=>x.cur_gd_point.Length<=0).ToList();
@@ -114,7 +115,6 @@ namespace Helper
                         gerry.DestroyMe();
                     }
 
-                    _cleanGerryRun = true;
                 }
 
                 CrossModFields.TimeOfDayFloat = __instance.GetTimeK();
