@@ -11,7 +11,7 @@ namespace WheresMaStorage
         [Serializable]
         public class Options
         {
-            public bool SharedCraftInventory;
+            public bool SharedInventory;
             public bool DontShowEmptyRowsInInventory;
             public bool HideInvalidSelections;
             public bool ShowOnlyPersonalInventory;
@@ -70,8 +70,8 @@ namespace WheresMaStorage
             bool.TryParse(_con.Value("Debug", "false"), out var debug);
             _options.Debug = debug;
 
-            bool.TryParse(_con.Value("SharedCraftInventory", "true"), out var sharedCraftInventory);
-            _options.SharedCraftInventory = sharedCraftInventory;
+            bool.TryParse(_con.Value("SharedInventory", "true"), out var sharedInventory);
+            _options.SharedInventory = sharedInventory;
 
             bool.TryParse(_con.Value("DontShowEmptyRowsInInventory", "true"), out var dontShowEmptyRowsInInventory);
             _options.DontShowEmptyRowsInInventory = dontShowEmptyRowsInInventory;

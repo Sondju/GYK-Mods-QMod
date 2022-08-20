@@ -117,76 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NotReady" xml:space="preserve">
-		<value>Это пока нельзя использовать!</value>
-	</data>
-  <data name="Ready" xml:space="preserve">
-		<value>Телепорт-камень готов!</value>
-	</data>
-  <data name="WhereIsIt" xml:space="preserve">
-		<value>Где я оставил этот камень...</value>
-	</data>
-  <data name="Clay" xml:space="preserve">
-		<value>Глиняный карьер</value>
-	</data>
-  <data name="Sand" xml:space="preserve">
-		<value>Песчаная насыпь</value>
-	</data>
-  <data name="Farmer" xml:space="preserve">
-		<value>Фермер</value>
-	</data>
-  <data name="Mill" xml:space="preserve">
-		<value>Мельница</value>
-	</data>
-  <data name="MoreCoin" xml:space="preserve">
-    <value>Вам нужно больше монет!!</value>
-  </data>
-  <data name="DontKnow" xml:space="preserve">
-    <value>Я не знаю, где это!</value>
-  </data>
-  <data name="M1" xml:space="preserve">
-    <value>Где моя монета?</value>
-  </data>
-  <data name="M2" xml:space="preserve">
-    <value>Передать его.</value>
-  </data>
-  <data name="M3" xml:space="preserve">
-    <value>Монета. В настоящее время.</value>
-  </data>
-  <data name="M4" xml:space="preserve">
-    <value>Ты вернешься в мгновение ока.</value>
-  </data>
-  <data name="M5" xml:space="preserve">
-    <value>Это не благотворительность...</value>
-  </data>
-  <data name="M6" xml:space="preserve">
-    <value>Прокашляйся, приятель.</value>
-  </data>
-  <data name="M7" xml:space="preserve">
-    <value>Приятная поездка?</value>
-  </data>
-  <data name="M8" xml:space="preserve">
-    <value>Снова здесь?!</value>
-  </data>
-  <data name="M9" xml:space="preserve">
-    <value>Мы уже на месте?</value>
-  </data>
-  <data name="M10" xml:space="preserve">
-    <value>Товарищ по деньгам.</value>
-  </data>
-  <data name="Coal" xml:space="preserve">
-    <value>Угольная жила</value>
-  </data>
   <data name="ConfigMessage" xml:space="preserve">
-    <value>Конфиг перезагружен!</value>
-  </data>
-  <data name="CantUseHere" xml:space="preserve">
-    <value>Я не могу использовать это здесь, босс!</value>
-  </data>
-  <data name="InTutorial" xml:space="preserve">
-    <value>Я пока не могу этого сделать! Кое-что об учебнике….</value>
-  </data>
-  <data name="InTutorialNoStone" xml:space="preserve">
-    <value>Я пока не могу этого сделать! Что-то насчет туториала - а у тебя нет камня телепорта.</value>
+    <value>Config Reloaded!</value>
   </data>
 </root>

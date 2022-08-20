@@ -115,6 +115,24 @@ namespace BeamMeUpGerry.lang {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to I can’t do that just yet! Something about a tutorial…..
+        /// </summary>
+        public static string InTutorial {
+            get {
+                return ResourceManager.GetString("InTutorial", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to I can’t do that just yet! Something about a tutorial - and you don’t have a teleport stone..
+        /// </summary>
+        public static string InTutorialNoStone {
+            get {
+                return ResourceManager.GetString("InTutorialNoStone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Where&apos;s my coin?.
         /// </summary>
         public static string M1 {

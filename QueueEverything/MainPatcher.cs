@@ -29,7 +29,7 @@ public static class MainPatcher
     //individual craft definitions
     private static readonly string[] UnSafeCraftDefPartials =
     {
-         "remove", "zombie", "refugee", "upgrade", "fountain","blockage", "obstacle", "builddesk", "fix", "broken", "elevator", "zombie", "refugee"//, "mf_barrel"
+        "burgers_place", "beer_barrels_place", "remove", "zombie", "refugee", "upgrade", "fountain","blockage", "obstacle", "builddesk", "fix", "broken", "elevator", "zombie", "refugee"//, "mf_barrel"
     };
 
     //unsafe crafting objects as a whole

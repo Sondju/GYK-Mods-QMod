@@ -11,19 +11,7 @@ public static class Config
     {
         _options = new Options();
         _con = new ConfigReader();
-
-        int.TryParse(_con.Value("TavernInvIncrease", "30"), out var tavernInvIncrease);
-        _options.TavernInvIncrease = tavernInvIncrease;
-
-        bool.TryParse(_con.Value("EnableChiselInkStacking", "false"), out var enableChiselInkStacking);
-        _options.EnableChiselInkStacking = enableChiselInkStacking;
-
-        bool.TryParse(_con.Value("EnableToolAndPrayerStacking", "true"), out var enableToolAndPrayerStacking);
-        _options.EnableToolAndPrayerStacking = enableToolAndPrayerStacking;
-
-        bool.TryParse(_con.Value("AllowHandToolDestroy", "true"), out var allowHandToolDestroy);
-        _options.AllowHandToolDestroy = allowHandToolDestroy;
-
+        
         bool.TryParse(_con.Value("QuietMusicInGUI", "true"), out var quietMusicInGui);
         _options.QuietMusicInGui = quietMusicInGui;
 
@@ -69,9 +57,6 @@ public static class Config
         bool.TryParse(_con.Value("RemovePrayerOnUse", "false"), out var removePrayerOnUse);
         _options.RemovePrayerOnUse = removePrayerOnUse;
 
-     
-
-
         _con.ConfigWrite();
 
         return _options;
@@ -80,15 +65,11 @@ public static class Config
     [Serializable]
     public class Options
     {
-        public int TavernInvIncrease;
-        public int EnergySpendBeforeSleepDebuff;
         public bool ModifyPlayerMovementSpeed;
         public float PlayerMovementSpeed = 1.0f;
         public bool ModifyPorterMovementSpeed;
         public float PorterMovementSpeed = 1.0f;
-        public bool EnableToolAndPrayerStacking;
         public bool QuietMusicInGui;
-        public bool AllowHandToolDestroy;
         public bool HalloweenNow;
         public bool HideCreditsButtonOnMainMenu;
         public bool CondenseXpBar;
@@ -97,6 +78,5 @@ public static class Config
         public bool KitsuneKitoMode;
         public bool LessenFootprintImpact;
         public bool RemovePrayerOnUse;
-        public bool EnableChiselInkStacking;
     }
 }

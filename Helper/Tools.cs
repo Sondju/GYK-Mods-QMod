@@ -97,6 +97,61 @@ namespace Helper
             Debug.LogError($"[{caller}]: {message}");
         }
 
+        public static bool RefugeeGardenCraft(string craftId)
+        {
+            return craftId.StartsWith("refugee_garden");
+        }
+
+        public static bool RefugeeGardenCraft(WorldGameObject wgo, CraftComponent craftComponent = null)
+        {
+            return wgo.obj_id.StartsWith("refugee_camp_garden_");
+        }
+
+        public static bool PlayerGardenCraft(string craftId)
+        {
+            return craftId.StartsWith("garden") && craftId.Contains("planting") && !craftId.Contains("grow_desk_planting");
+        }
+
+        public static bool PlayerGardenCraft(WorldGameObject wgo, CraftComponent craftComponent = null)
+        {
+            return wgo.obj_id.StartsWith("garden_");
+        }
+
+        public static bool ZombieSawmillCraft(WorldGameObject wgo, CraftComponent craftComponent = null)
+        {
+            return wgo.obj_id.StartsWith("zombie_sawmill_");
+        }
+
+        public static bool ZombieMineCraft(WorldGameObject wgo, CraftComponent craftComponent = null)
+        {
+            return wgo.obj_id.StartsWith("zombie_mine_") || wgo.obj_id.StartsWith("mine_zombie_");
+        }
+
+        public static bool CompostCraft(WorldGameObject wgo, CraftComponent craftComponent = null)
+        {
+            return wgo.obj_id.Contains("compost_heap");
+        }
+
+        public static bool ZombieVineyardCraft(string craftId)
+        {
+            return craftId.Contains("grow_vineyard_planting");
+        }
+
+        public static bool ZombieGardenCraft(string craftId)
+        {
+            return craftId.Contains("grow_desk_planting");
+        }
+
+        public static bool ZombieGardenCraft(WorldGameObject wgo, CraftComponent craftComponent = null)
+        {
+            return wgo.obj_id.Contains("zombie_garden_");
+        }
+
+        public static bool ZombieVineyardCraft(WorldGameObject wgo, CraftComponent craftComponent = null)
+        {
+            return wgo.obj_id.Contains("zombie_vineyard_");
+        }
+
         public static void SetAllInteractionsFalse()
         {
             CrossModFields.IsVendor = false;

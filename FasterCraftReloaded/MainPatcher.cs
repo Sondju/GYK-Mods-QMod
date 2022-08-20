@@ -1,8 +1,11 @@
+using FasterCraftReloaded.lang;
 using HarmonyLib;
 using Helper;
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using UnityEngine;
 
 namespace FasterCraftReloaded
 {
@@ -11,7 +14,7 @@ namespace FasterCraftReloaded
         private static Config.Options _cfg;
 
         private static readonly string[] Exclude = {
-            "zombie","refugee","bee","tree","berry","bush","pump", "compost", "peat", "slime", "candelabrum", "incense"
+            "zombie","refugee","bee","tree","berry","bush","pump", "compost", "peat", "slime", "candelabrum", "incense", "garden","planting"
         };
 
         public static void Patch()
@@ -37,14 +40,121 @@ namespace FasterCraftReloaded
             }
         }
 
+        private static string GetLocalizedString(string content)
+        {
+            Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+            return content;
+        }
+
+        [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
+        public static class TimeOfDayUpdatePatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix()
+            {
+                if (Input.GetKeyUp(KeyCode.F5))
+                {
+                    _cfg = Config.GetOptions();
+
+                    if (!CrossModFields.ConfigReloadShown)
+                    {
+                        Tools.ShowMessage(GetLocalizedString(strings.ConfigMessage), Vector3.zero);
+                        CrossModFields.ConfigReloadShown = true;
+                    }
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(CraftComponent), nameof(CraftComponent.DoAction))]
         public static class CraftComponentDoActionPatch
         {
             [HarmonyPrefix]
+            public static void Prefix(CraftComponent __instance, ref float delta_time, ref WorldGameObject ___other_obj)
+            {
+                // if (__instance?.current_craft == null) return;
+                if (___other_obj == null) return;
+                if (!___other_obj.is_player) return;
+
+                if (Exclude.Any(__instance.wgo.obj_id.ToLowerInvariant().Contains))
+                {
+                    // Log($"[ModifyCraftSpeed - REJECTED]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+                    return;
+                }
+
+                Log(
+                    $"[CC.DoAction]: WGO: {__instance.wgo.obj_id}, WgoIsPlayer: {__instance.wgo.is_player}, Craft: {__instance.current_craft.id}, OtherObj: {___other_obj.obj_id}, OtherWgoIsPlayer: {___other_obj.is_player}");
+
+                delta_time *= _cfg.CraftSpeedMultiplier;
+            }
+        }
+
+        [HarmonyPatch(typeof(CraftComponent), "ReallyUpdateComponent")]
+        public static class CraftComponentReallyUpdateComponentPatch
+        {
+            [HarmonyPrefix]
             public static void Prefix(CraftComponent __instance, ref float delta_time)
             {
-                if (Exclude.Any(__instance.wgo.obj_id.ToLowerInvariant().Contains)) return;
-                Log($"[CraftComponent.DoAction]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+                if (__instance?.current_craft == null) return;
+
+                //   Log(
+                //  $"[CraftComponent.ReallyUpdateComponent]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+
+                if (_cfg.ModifyCompostSpeed && Tools.CompostCraft(__instance.wgo))
+                {
+                    delta_time *= _cfg.CompostSpeedMultiplier;
+                   //  Log($"[ModifyCompostSpeed]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+                    return;
+                }
+
+                if (_cfg.ModifyZombieMinesSpeed && Tools.ZombieMineCraft(__instance.wgo))
+                {
+                    delta_time *= _cfg.ZombieMinesSpeedMultiplier;
+                  //   Log($"[ModifyZombieMinesSpeed]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+                    return;
+                }
+
+                if (_cfg.ModifyZombieSawmillSpeed && Tools.ZombieSawmillCraft(__instance.wgo))
+                {
+                    delta_time *= _cfg.ZombieSawmillSpeedMultiplier;
+                   // Log($"[ZombieSawmillSpeedMultiplier]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+                    return;
+                }
+
+                if (_cfg.ModifyPlayerGardenSpeed && Tools.PlayerGardenCraft(__instance.wgo))
+                {
+                    delta_time *= _cfg.PlayerGardenSpeedMultiplier;
+                    // Log($"[ModifyPlayerGardenSpeed]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+                    return;
+                }
+
+                if (_cfg.ModifyRefugeeGardenSpeed && Tools.RefugeeGardenCraft(__instance.wgo))
+                {
+                    delta_time *= _cfg.RefugeeGardenSpeedMultiplier;
+                  //   Log($"[ModifyRefugeeGardenSpeed]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+                    return;
+                }
+
+                if (_cfg.ModifyZombieGardenSpeed && Tools.ZombieGardenCraft(__instance.wgo))
+                {
+                    delta_time *= _cfg.ZombieGardenSpeedMultiplier;
+                    // Log($"[ModifyZombieGardenSpeed]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+                    return;
+                }
+
+                if (_cfg.ModifyZombieVineyardSpeed && Tools.ZombieVineyardCraft(__instance.wgo))
+                {
+                    delta_time *= _cfg.ZombieVineyardSpeedMultiplier;
+                   //  Log($"[ModifyZombieVineyardSpeed]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+                    return;
+                }
+
+                if (Exclude.Any(__instance.wgo.obj_id.ToLowerInvariant().Contains))
+                {
+                   // Log($"[ModifyCraftSpeed - REJECTED]: WGO: {__instance.wgo.obj_id}, Craft: {__instance.current_craft.id}");
+                    return;
+                }
+                Log(
+                    $"[CC.ReallyUpdateComponent]: WGO: {__instance.wgo.obj_id}, WgoIsPlayer: {__instance.wgo.is_player}, Craft: {__instance.current_craft.id}");
                 delta_time *= _cfg.CraftSpeedMultiplier;
             }
         }

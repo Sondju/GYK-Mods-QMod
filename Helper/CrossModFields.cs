@@ -21,6 +21,10 @@ namespace Helper
         public static bool IsWritersTable { get; internal set; }
         public static bool IsInDungeon { get; internal set; }
 
+        public static bool PlayerIsDead { get; internal set; }
+        public static bool PlayerIsControlled { get; internal set; }
+        public static bool PlayerFollowingTarget { get; internal set; }
+
         public static void TalkingToNpc(string caller, bool setTalkingToNpc)
         {
            // Tools.Log("[QModHelper]",$"[SettingTalkingToNPC: {caller}]: Setting NPC to: {setTalkingToNpc}");

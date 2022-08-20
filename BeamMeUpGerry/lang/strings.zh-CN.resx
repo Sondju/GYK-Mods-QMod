@@ -183,4 +183,10 @@
   <data name="CantUseHere" xml:space="preserve">
     <value>我不能在这里使用它，老板！</value>
   </data>
+  <data name="InTutorial" xml:space="preserve">
+    <value>我还不能这样做！关于教程的东西......</value>
+  </data>
+  <data name="InTutorialNoStone" xml:space="preserve">
+    <value>我还不能这样做！关于教程的东西 - 你没有传送石。</value>
+  </data>
 </root>

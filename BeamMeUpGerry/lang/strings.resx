@@ -183,4 +183,10 @@
   <data name="CantUseHere" xml:space="preserve">
     <value>I can’t use that here, boss!</value>
   </data>
+  <data name="InTutorial" xml:space="preserve">
+    <value>I can’t do that just yet! Something about a tutorial….</value>
+  </data>
+  <data name="InTutorialNoStone" xml:space="preserve">
+    <value>I can’t do that just yet! Something about a tutorial - and you don’t have a teleport stone.</value>
+  </data>
 </root>

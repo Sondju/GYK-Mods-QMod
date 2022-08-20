@@ -15,31 +15,6 @@ public class MainPatcher
 {
     private static Config.Options _cfg;
     private static WorldGameObject _wgo;
-    private const string WheresMaStorage = "WheresMaStorage";
-
-    private static readonly string[] TavernItems =
-    {
-        "npc_tavern_barman", "tavern_cellar_rack", "tavern_cellar_rack_1", "tavern_cellar_rack_2",
-        "tavern_cellar_rack_3", "tavern_cellar_rack_4", "tavern_cellar_rack_5"
-    };
-
-    private static readonly string[] MakeStackable =
-    {
-        "book","chapter"
-    };
-
-    private static readonly ItemDefinition.ItemType[] GraveItems =
-    {
-        ItemDefinition.ItemType.GraveStone, ItemDefinition.ItemType.GraveFence, ItemDefinition.ItemType.GraveCover,
-        ItemDefinition.ItemType.GraveStoneReq, ItemDefinition.ItemType.GraveFenceReq, ItemDefinition.ItemType.GraveCoverReq,
-    };
-
-    private static readonly ItemDefinition.ItemType[] ToolItems =
-    {
-        ItemDefinition.ItemType.Axe, ItemDefinition.ItemType.Shovel, ItemDefinition.ItemType.Hammer,
-        ItemDefinition.ItemType.Pickaxe, ItemDefinition.ItemType.FishingRod, ItemDefinition.ItemType.BodyArmor,
-        ItemDefinition.ItemType.HeadArmor, ItemDefinition.ItemType.Sword, ItemDefinition.ItemType.Preach,
-    };
 
     public static void Patch()
     {
@@ -84,8 +59,6 @@ public class MainPatcher
         }
     }
 
-
-
     [HarmonyPatch(typeof(LeaveTrailComponent), "LeaveTrail")]
     public static class LeaveTrailComponentLeaveTrailPatch
     {
@@ -111,7 +84,7 @@ public class MainPatcher
         [HarmonyPrefix]
         public static void Prefix(ref MovementComponent __instance)
         {
-            if (__instance.wgo.is_dead) return;
+            if (__instance.wgo.is_dead || __instance.player_controlled_by_script) return;
             //Log($"[MoveSpeed]: Instance: {__instance.wgo.obj_id}, Speed: {__instance.wgo.data.GetParam("speed")}");
 
             if (__instance.wgo.is_player)
@@ -159,7 +132,6 @@ public class MainPatcher
         [HarmonyPrefix]
         public static void Prefix()
         {
-
             if (Input.GetKeyUp(KeyCode.F5))
             {
                 _cfg = Config.GetOptions();
@@ -228,116 +200,6 @@ public class MainPatcher
         }
     }
 
-    [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
-    [HarmonyPatch(typeof(DropResGameObject), nameof(DropResGameObject.CollectDrop))]
-    public static class DropResGameObjectCollectDrop
-    {
-        //set stack size back up before collecting
-        [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
-        [HarmonyPrefix]
-        public static void Prefix(ref DropResGameObject __instance)
-        {
-            if (Tools.IsModLoaded(WheresMaStorage)) return;
-            if (!GraveItems.Contains(__instance.res.definition.type)) return;
-            __instance.res.definition.stack_count = 999;
-        }
-    }
-
-    [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
-    [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.GetRemoveCraftForItem))]
-    public static class GameBalanceGetRemoveCraftForItemPatch
-    {
-       //needed for grave removals to work
-        [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
-        [HarmonyPostfix]
-        public static void Postfix(ref CraftDefinition __result)
-        {
-            if (Tools.IsModLoaded(WheresMaStorage)) return;
-            foreach (var item in __result.output.Where(a => GraveItems.Contains(a.definition.type)))
-            {
-                item.definition.stack_count = 1;
-            }
-        }
-    }
-
-    [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
-    [HarmonyPatch(typeof(CraftDefinition), "takes_item_durability", MethodType.Getter)]
-    public static class CraftDefinitionTakesItemDurabilityPatch
-    {
-        [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
-        [HarmonyPostfix]
-        public static void Postfix(ref CraftDefinition __instance, ref bool __result)
-        {
-            if (Tools.IsModLoaded(WheresMaStorage)) return;
-            if (!_cfg.EnableChiselInkStacking) return;
-            if (__instance == null) return;
-            if (__instance.needs.Exists(item => item.id.Equals("pen:ink_pen")) && __instance.dur_needs_item > 0)
-            {
-                __result = false;
-            }
-            if (__instance.needs.Exists(item => item.id.Contains("chisel")) && __instance.dur_needs_item > 0)
-            {
-                __result = false;
-            }
-        }
-    }
-
-    [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
-    [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
-    public static class GameBalanceLoadGameBalancePatch
-    {
-        [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
-        [HarmonyPostfix]
-        private static void Postfix()
-        {
-            if (Tools.IsModLoaded(WheresMaStorage)) return;
-            if (_cfg.AllowHandToolDestroy)
-            {
-                foreach (var itemDef in GameBalance.me.items_data.Where(a => ToolItems.Contains(a.type)))
-                {
-                    itemDef.player_cant_throw_out = false;
-                }
-            }
-
-            if (_cfg.EnableToolAndPrayerStacking || _cfg.EnableChiselInkStacking)
-            {
-                foreach (var item in GameBalance.me.items_data.Where(item => item.stack_count == 1))
-                {
-                    if (_cfg.EnableToolAndPrayerStacking)
-                    {
-                        if (ToolItems.Contains(item.type) || GraveItems.Contains(item.type) ||
-                            MakeStackable.Any(item.id.Contains))
-                        {
-                            item.stack_count = 999;
-                        }
-                    }
-
-                    if (_cfg.EnableChiselInkStacking)
-                    {
-                        if (item.id.Contains("ink") || item.id.Contains("pen") || item.id.Contains("chisel"))
-                        {
-                            item.stack_count = 999;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    //makes the racks and the barman inventory larger
-    [HarmonyPatch(typeof(WorldGameObject), "InitNewObject")]
-    public static class WorldGameObjectInitNewObjectPatch
-    {
-        [HarmonyPostfix]
-        private static void Postfix(ref WorldGameObject __instance)
-        {
-            if (Tools.IsModLoaded(WheresMaStorage)) return;
-            if (TavernItems.Contains(__instance.obj_id))
-            {
-                __instance.data.SetInventorySize(__instance.obj_def.inventory_size + _cfg.TavernInvIncrease);
-            }
-        }
-    }
 
     [HarmonyPatch(typeof(GameGUI), nameof(GameGUI.Open))]
     public static class GameGuiOpenPatch
@@ -443,31 +305,16 @@ public class MainPatcher
         [HarmonyPostfix]
         private static void Postfix()
         {
-            if (_cfg.HalloweenNow)
-            {
-                foreach (var globalEventBase in new List<GlobalEventBase>
+            var year = DateTime.Now.Year;
+            foreach (var globalEventBase in new List<GlobalEventBase>
                          {
-                             new("halloween", DateTime.Now, new TimeSpan(14, 0, 0, 0))
+                             new("halloween",_cfg.HalloweenNow ? DateTime.Now : new DateTime(year, 10, 29), new TimeSpan(14, 0, 0, 0))
                              {
                                  on_start_script = new Scene1100_To_SceneHelloween(),
                                  on_finish_script = new SceneHelloween_To_Scene1100()
                              }
                          })
-                    globalEventBase.Process();
-            }
-            else
-            {
-                var year = DateTime.Now.Year;
-                foreach (var globalEventBase in new List<GlobalEventBase>
-                         {
-                             new("halloween", new DateTime(year, 10, 29), new TimeSpan(14, 0, 0, 0))
-                             {
-                                 on_start_script = new Scene1100_To_SceneHelloween(),
-                                 on_finish_script = new SceneHelloween_To_Scene1100()
-                             }
-                         })
-                    globalEventBase.Process();
-            }
+                globalEventBase.Process();
         }
     }
 }

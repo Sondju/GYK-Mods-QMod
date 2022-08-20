@@ -70,6 +70,7 @@ namespace BeamMeUpGerry
 
         private static void Beam()
         {
+            if (InTutorial()) return;
             if (_usingStone || _dotSelection || CrossModFields._talkingToNpc) return;
 
             var item = GetHearthstone();
@@ -266,7 +267,9 @@ namespace BeamMeUpGerry
         {
             var inDungeon = CrossModFields.IsInDungeon;
             var talkingToNpc = CrossModFields._talkingToNpc;
-            if (inDungeon || talkingToNpc) return false;
+            var inTutorial = !Tools.TutorialDone() || MainGame.me.save.IsInTutorial();
+            var controlled = CrossModFields.PlayerIsControlled;
+            if (inDungeon || talkingToNpc || inTutorial || controlled) return false;
             return true;
         }
 
@@ -276,7 +279,8 @@ namespace BeamMeUpGerry
             [HarmonyPostfix]
             public static void Postfix(string answer)
             {
-//
+                //
+                if (InTutorial()) return;
                 if (!_cfg.EnableListExpansion) return;
                 if (!CanUseStone()) return;
 
@@ -324,7 +328,8 @@ namespace BeamMeUpGerry
             [HarmonyPrefix]
             public static void Prefix(ref string answer)
             {
-//
+                //
+                if (InTutorial()) return;
                 if (!_cfg.EnableListExpansion) return;
                 var canUseStone = CanUseStone();
                 if (!canUseStone) return;
@@ -363,7 +368,8 @@ namespace BeamMeUpGerry
 
             private static void BeamGerryOnChosen(string chosen)
             {
-//
+                if (InTutorial()) return;
+                //
                 //  ShowHud();
                 if (!_cfg.EnableListExpansion) return;
                 if (!CanUseStone()) return;
@@ -462,7 +468,7 @@ namespace BeamMeUpGerry
             [HarmonyPrefix]
             public static void Prefix(ref Flow_MultiAnswer __instance)
             {
-//
+                 if (InTutorial()) return;
                 if (__instance == null) return;
                 if (!_usingStone) return;
 
@@ -479,7 +485,8 @@ namespace BeamMeUpGerry
             [HarmonyPrefix]
             public static void Prefix(ref MultiAnswerGUI __instance)
             {
-//
+                //
+                if (InTutorial()) return;
                 if (__instance == null) return;
 
                 _maGui = __instance;
@@ -497,6 +504,11 @@ namespace BeamMeUpGerry
         {
             Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
             return content;
+        }
+
+        private static bool InTutorial()
+        {
+            return !Tools.TutorialDone() || MainGame.me.save.IsInTutorial();
         }
 
 
@@ -552,6 +564,12 @@ namespace BeamMeUpGerry
 
                 static void DoLoggingAndBeam()
                 {
+                    if (InTutorial() && !CrossModFields.PlayerIsControlled)
+                    {
+                        var item = GetHearthstone();
+                        Tools.SpawnGerry(GetLocalizedString(item == null ? strings.InTutorialNoStone : strings.InTutorial), Vector3.zero);
+                        return;
+                    }
                     Log($"[ZONE]: {GJL.L("zone_" + MainGame.me.player.GetMyWorldZoneId())}, ID: {"zone_" + MainGame.me.player.GetMyWorldZoneId()}, Vector: {MainGame.me.player_pos}");
                     var gdPoint = Util.FindNearestGdPoint();
                     if (gdPoint != null)

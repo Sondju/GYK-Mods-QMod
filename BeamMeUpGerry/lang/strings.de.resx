@@ -183,4 +183,10 @@
   <data name="CantUseHere" xml:space="preserve">
     <value>Das kann ich hier nicht verwenden, Boss!</value>
   </data>
+  <data name="InTutorial" xml:space="preserve">
+    <value>Ich kann das noch nicht! Irgendwas mit Tutorial….</value>
+  </data>
+  <data name="InTutorialNoStone" xml:space="preserve">
+    <value>Ich kann das noch nicht! Etwas über ein Tutorial - und Sie haben keinen Teleportstein.</value>
+  </data>
 </root>

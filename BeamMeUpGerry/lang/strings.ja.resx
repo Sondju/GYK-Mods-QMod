@@ -183,4 +183,10 @@
   <data name="CantUseHere" xml:space="preserve">
     <value>ここでは使えません、ボス！</value>
   </data>
+  <data name="InTutorial" xml:space="preserve">
+    <value>私はまだそれを行うことはできません!チュートリアルの何か…。</value>
+  </data>
+  <data name="InTutorialNoStone" xml:space="preserve">
+    <value>私はまだそれを行うことはできません!チュートリアルについての何か - テレポート ストーンを持っていません。</value>
+  </data>
 </root>

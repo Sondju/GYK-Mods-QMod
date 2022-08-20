@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace Helper
@@ -141,6 +142,23 @@ namespace Helper
             public static void OnEndNPCInteractionPrefix()
             {
                 CrossModFields.TalkingToNpc("QModHelper: SmartAudioEngine.OnEndNPCInteraction", false);
+            }
+        }
+
+        [HarmonyPriority(1)]
+        [HarmonyPatch(typeof(MovementComponent), "UpdateMovement", typeof(Vector2), typeof(float))]
+        public static class MovementComponentUpdateMovementPatch
+        {
+            [HarmonyPriority(1)]
+            [HarmonyPrefix]
+            public static void Prefix(ref MovementComponent __instance)
+            {
+                if (__instance.wgo.is_player)
+                {
+                    CrossModFields.PlayerIsDead = __instance.wgo.is_dead;
+                    CrossModFields.PlayerIsControlled = __instance.player_controlled_by_script;
+                    CrossModFields.PlayerFollowingTarget = __instance.is_following_target;
+                }
             }
         }
 

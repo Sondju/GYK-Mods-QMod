@@ -183,4 +183,10 @@
   <data name="CantUseHere" xml:space="preserve">
     <value>여기에서는 사용할 수 없습니다, 보스!</value>
   </data>
+  <data name="InTutorial" xml:space="preserve">
+    <value>아직은 할 수 없다! 튜토리얼에 대해 뭔가....</value>
+  </data>
+  <data name="InTutorialNoStone" xml:space="preserve">
+    <value>아직은 할 수 없다! 튜토리얼에 관한 것 - 그리고 텔레포트 스톤이 없습니다.</value>
+  </data>
 </root>

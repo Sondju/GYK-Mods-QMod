@@ -183,4 +183,10 @@
   <data name="CantUseHere" xml:space="preserve">
     <value>Eu não posso usar isso aqui, chefe!</value>
   </data>
+  <data name="InTutorial" xml:space="preserve">
+    <value>Eu não posso fazer isso ainda! Algo sobre um tutorial….</value>
+  </data>
+  <data name="InTutorialNoStone" xml:space="preserve">
+    <value>Eu não posso fazer isso ainda! Algo sobre um tutorial - e você não tem uma pedra de teletransporte.</value>
+  </data>
 </root>
