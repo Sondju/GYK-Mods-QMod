@@ -57,6 +57,9 @@ public static class Config
         bool.TryParse(_con.Value("RemovePrayerOnUse", "false"), out var removePrayerOnUse);
         _options.RemovePrayerOnUse = removePrayerOnUse;
 
+        bool.TryParse(_con.Value("AddCoalToTavernOven", "true"), out var addCoalToTavernOven);
+        _options.AddCoalToTavernOven = addCoalToTavernOven;
+
         _con.ConfigWrite();
 
         return _options;
@@ -78,5 +81,6 @@ public static class Config
         public bool KitsuneKitoMode;
         public bool LessenFootprintImpact;
         public bool RemovePrayerOnUse;
+        public bool AddCoalToTavernOven;
     }
 }

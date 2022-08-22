@@ -73,6 +73,18 @@ public class MainPatcher
         }
     }
 
+    [HarmonyPatch(typeof(GameBalance), nameof(GameBalance.LoadGameBalance))]
+    public static class GameBalanceLoadGameBalancePatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix()
+        {
+            if (!_cfg.AddCoalToTavernOven) return;
+            var coal = GameBalance.me.GetData<CraftDefinition>("mf_furnace_0_fuel_coal");
+            coal?.craft_in.Add("tavern_oven");
+        }
+    }
+
     private static bool WorkerHasBackpack(WorldGameObject workerWgo)
     {
         return workerWgo.data.inventory.Any(backpack => backpack.id == "porter_backpack");

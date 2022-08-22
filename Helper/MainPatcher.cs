@@ -324,7 +324,7 @@ namespace Helper
                 //Beam Me Up Gerry
                 CrossModFields.TalkingToNpc("QModHelper: WorldGameObject.Interact", __instance.obj_def.IsNPC() && !__instance.obj_id.Contains("zombie"));
 
-                // Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
+                //Log($"[WorldGameObject.Interact]: Instance: {__instance.obj_id}, InstanceIsPlayer: {__instance.is_player},  Other: {other_obj.obj_id}, OtherIsPlayer: {other_obj.is_player}");
             }
         }
     }
