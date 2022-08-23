@@ -22,7 +22,7 @@ namespace Helper
         {
             Tools.Log("QModHelper", $"{message}", error);
         }
-        
+
         public static void Patch()
         {
             try
@@ -41,7 +41,6 @@ namespace Helper
                 Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
             }
         }
-
 
         [HarmonyPriority(1)]
         [HarmonyPatch(typeof(BaseGUI))]
@@ -108,14 +107,13 @@ namespace Helper
                     _cleanGerryRun = true;
                     var oldGerry = Object.FindObjectsOfType<WorldGameObject>(true)
                         .Where(x => x.obj_id.Contains("talking_skull"))
-                        .Where(x=>x.cur_gd_point.Length<=0).ToList();
+                        .Where(x => x.cur_gd_point.Length <= 0).ToList();
 
                     if (oldGerry.Count <= 1) return;
                     foreach (var gerry in oldGerry)
                     {
                         gerry.DestroyMe();
                     }
-
                 }
 
                 CrossModFields.TimeOfDayFloat = __instance.GetTimeK();
@@ -174,23 +172,46 @@ namespace Helper
             {
                 try
                 {
-                    var mods = AppDomain.CurrentDomain.GetAssemblies()
+                    var mods = AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic)
                         .Where(a => a.Location.ToLowerInvariant().Contains("qmods"));
-                    Tools.LoadedMods.Clear();
+                    Tools.LoadedModsById.Clear();
+                    Tools.LoadedModsByName.Clear();
+                    Tools.LoadedModsByFileName.Clear();
                     foreach (var mod in mods)
                     {
                         var modInfo = FileVersionInfo.GetVersionInfo(mod.Location);
+                        var fileInfo = new FileInfo(modInfo.FileName);
                         if (!string.IsNullOrEmpty(modInfo.Comments))
                         {
-                            Tools.LoadedMods.Add(modInfo.Comments);
+                            Tools.LoadedModsById.Add(modInfo.Comments);
                         }
+                        if (!string.IsNullOrEmpty(modInfo.ProductName))
+                        {
+                            Tools.LoadedModsByName.Add(modInfo.ProductName);
+                        }
+                        Tools.LoadedModsByFileName.Add(fileInfo.Name);
                     }
+
+                    foreach (var m in Tools.LoadedModsByFileName)
+                    {
+                        Log($"[ModFileName]: {m}");
+                    }
+
+                    var max = Mathf.Max(new int[]
+                    {
+                        Tools.LoadedModsById.Count,
+                        Tools.LoadedModsByName.Count,
+                        Tools.LoadedModsByFileName.Count
+                    });
+
+                    Log($"Total loaded mod count: {max}");
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    //
+                    Log($"{ex.Message}");
                 }
             }
+
             [HarmonyPriority(1)]
             [HarmonyPostfix]
             [HarmonyPatch(nameof(MainMenuGUI.Open))]
@@ -244,7 +265,7 @@ namespace Helper
                 //     "Test7"
                 // };
 
-                // var joinedAssemblies = string.Join("\n", Tools.LoadedMods.ToArray());
+                // var joinedAssemblies = string.Join("\n", Tools.LoadedModsByID.ToArray());
 
                 // UITextStyles.Set(label, UITextStyles.TextStyle.Usual);
                 ////label.fontStyle = FontStyle.Normal;
@@ -254,12 +275,13 @@ namespace Helper
                 // label.color = Color.white;
                 // label.fontSize = 14;
 
-                // label.maxLineCount = Tools.LoadedMods.Count();
+                // label.maxLineCount = Tools.LoadedModsByID.Count();
                 // label.MakePixelPerfect();
 
                 // go.transform.localPosition = new Vector3(pos.x, pos.y - (label.printedSize.y / 2), 0.0f);
             }
         }
+
         [HarmonyPriority(1)]
         [HarmonyPatch(typeof(VendorGUI))]
         public static class VendorGuiPatches
@@ -272,6 +294,7 @@ namespace Helper
                 if (!MainGame.game_started) return;
                 CrossModFields.TalkingToNpc("QModHelper: VendorGUI.Open", true);
             }
+
             [HarmonyPriority(1)]
             [HarmonyPatch(nameof(VendorGUI.Hide), typeof(bool))]
             [HarmonyPrefix]
@@ -280,6 +303,7 @@ namespace Helper
                 if (!MainGame.game_started) return;
                 CrossModFields.TalkingToNpc("QModHelper: VendorGUI.Hide", false);
             }
+
             [HarmonyPriority(1)]
             [HarmonyPatch(nameof(VendorGUI.OnClosePressed))]
             [HarmonyPrefix]
@@ -289,6 +313,7 @@ namespace Helper
                 CrossModFields.TalkingToNpc("QModHelper: VendorGUI.OnClosePressed", false);
             }
         }
+
         [HarmonyPriority(1)]
         [HarmonyPatch(typeof(WorldGameObject))]
         public static class WorldGameObjectPatches
@@ -310,10 +335,10 @@ namespace Helper
                 CrossModFields.IsTavernCellar = __instance.obj_id.ToLowerInvariant().Contains("tavern_cellar");
                 CrossModFields.IsRefugee = __instance.obj_id.ToLowerInvariant().Contains("refugee");
                 CrossModFields.IsWritersTable = __instance.obj_id.ToLowerInvariant().Contains("writer");
-               
+
                 //Beam Me Up & Save Now
                 CrossModFields.IsInDungeon = __instance.obj_id.ToLowerInvariant().Contains("dungeon_enter");
-               // Log($"[InDungeon]: {CrossModFields.IsInDungeon}");
+                // Log($"[InDungeon]: {CrossModFields.IsInDungeon}");
 
                 //I Build Where I Want
                 if (__instance.obj_def.interaction_type is not ObjectDefinition.InteractionType.None)

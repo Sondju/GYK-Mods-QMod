@@ -106,15 +106,20 @@ namespace WheresMaStorage
         {
             if (!_cfg.SharedInventory) return orig;
 
-            if (craft.id.StartsWith("refugee_garden") || craft.id.StartsWith("refugee_builddesk"))
+            var wz = otherGameObject.GetMyWorldZone();
+            if (wz != null)
             {
-                if (!(Time.time - _timeSix > LogGap)) return _mi;
-                _timeSix = Time.time;
+                if (wz.IsPlayerInZone() &&
+                    (craft.id.StartsWith("refugee_garden") || craft.id.StartsWith("refugee_builddesk")))
+                {
+                    if (!(Time.time - _timeSix > LogGap)) return _mi;
+                    _timeSix = Time.time;
 
-                Log(
-                    $"[RefugeeGarden&Desk-InvRedirect]: Returned player multi-inventory to refugee garden!: Requester: {otherGameObject.obj_id}, Craft: {craft.id}");
+                    Log(
+                        $"[RefugeeGarden&Desk-InvRedirect]: Returned player multi-inventory to refugee garden!: Requester: {otherGameObject.obj_id}, Craft: {craft.id}, isPlayer: {otherGameObject.is_player}");
 
-                return _mi;
+                    return _mi;
+                }
             }
 
             if (!_cfg.IncludeRefugeeDepot)
@@ -845,6 +850,24 @@ namespace WheresMaStorage
             }
         }
 
+
+        [HarmonyPatch]
+        public static class WorldZonePatch
+        {
+            //public static WorldZone GetZoneByID(string id, bool null_is_error = true)
+            //{
+            //    foreach (WorldZone allZone in WorldZone._all_zones)
+            //    {
+            //        if (!(allZone.id != id) && !allZone.IsDisabled())
+            //            return allZone;
+            //    }
+            //    if (null_is_error)
+            //        Debug.LogError((object)("Could't find zone [" + id + "]"));
+            //    return (WorldZone)null;
+            //}
+        }
+
+
         [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetMultiInventory))]
         public static class WorldGameObjectGetMultiInventoryPatch
         {
@@ -921,13 +944,12 @@ namespace WheresMaStorage
                         return;
                     }
 
-                    if (__instance.obj_id.Contains("invisible"))
+                    if (__instance.obj_id.Contains("invisible") || __instance.obj_id.Contains("refugee_camp_garden"))
                     {
                         if (Time.time - _timeFour > LogGap)
                         {
                             _timeFour = Time.time;
-                            Log(
-                                $"[WorldGameObject.GetMultiInventory-Postfix]: Most likely refugee farm. Sending cache: {__instance.obj_id}");
+                            Log($"[WorldGameObject.GetMultiInventory-Postfix]: Refugee farm or Invisible worker. Sending cache: {__instance.obj_id}, isPlayer: {__instance.is_player}");
                         }
 
                         __result = _mi;
@@ -964,33 +986,41 @@ namespace WheresMaStorage
                         _mi.AddInventory(new Inventory(data, "Toolbelt", ""), -1);
                     }
 
-                    foreach (var worldZoneDef in GameBalance.me.world_zones_data)
+                    var zones = (List<WorldZone>)AccessTools.Field(typeof(WorldZone), "_all_zones").GetValue(null);
+                    //Log($"-------------");
+                    //foreach (var z in zones)
+                    //{
+                    //    Log($"[Zone]: {z.id}");
+                    //}
+                    //Log($"-------------");
+                    foreach (var zone in zones)
+                        //foreach (var worldZoneDef in GameBalance.me.world_zones_data)
                     {
-                        var worldZone = WorldZone.GetZoneByID(worldZoneDef.id, false);
-                        if (worldZone == null) continue;
+                        //var worldZone = WorldZone.GetZoneByID(worldZoneDef.id, false);
+                        //if (worldZone == null) continue;
 
                         //if (ZoneExclusions.Contains(worldZone.id)) continue;
                         var worldZoneMulti =
-                            worldZone.GetMultiInventory(player_mi: MultiInventory.PlayerMultiInventory.ExcludePlayer,
+                            zone.GetMultiInventory(player_mi: MultiInventory.PlayerMultiInventory.ExcludePlayer,
                                 sortWGOS: true);
                         if (worldZoneMulti == null) continue;
                         foreach (var inv in worldZoneMulti.Where(inv => inv != null))// && inv.data.inventory.Count != 0))
                         {
-                            if (worldZone.id.ToLowerInvariant().Contains("refugee"))
+                            if (zone.id.ToLowerInvariant().Contains("refugee"))
                             {
                                 _refugeeMi.AddInventory(inv);
                             }
 
                             if (!_cfg.IncludeRefugeeDepot)
                             {
-                                if (worldZone.id.ToLowerInvariant().Contains("refugee"))
+                                if (zone.id.ToLowerInvariant().Contains("refugee"))
                                 {
                                     if (inv.data.id.ToLowerInvariant().Contains("depot")) continue;
                                     //Log($"[RefugeeInv]: Zone: {worldZone.id}, Inv: {inv.data.id}");
                                 }
                             }
 
-                            inv.data.sub_name = inv._obj_id + "#" + worldZoneDef.id;
+                            inv.data.sub_name = inv._obj_id + "#" + zone.id;
                             _mi.AddInventory(inv);
                         }
                     }

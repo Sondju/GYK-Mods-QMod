@@ -100,4 +100,10 @@
   <data name="ConfigMessage" xml:space="preserve">
     <value>Конфиг перезагружен!</value>
   </data>
+  <data name="Title" xml:space="preserve">
+    <value>Обнаружена несовместимость модов</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>Похоже, у вас установлен Sprint Reloaded. К сожалению Разное. Bits &amp; Bobs и Sprint Reloaded редактируют одни и те же значения при изменении скорости игрока и несовместимы друг с другом. Сторона игрока Разное. Bits &amp; Bobs будут отключены. Скорость Портера не должна быть затронута.</value>
+  </data>
 </root>

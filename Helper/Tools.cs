@@ -66,7 +66,9 @@ namespace Helper
             "player_repairs_sword",
         };
 
-        internal static readonly List<string> LoadedMods = new();
+        internal static readonly List<string> LoadedModsById = new();
+        internal static readonly List<string> LoadedModsByName = new();
+        internal static readonly List<string> LoadedModsByFileName = new();
 
         public static bool TutorialDone()
         {
@@ -80,9 +82,38 @@ namespace Helper
             return !MainGame.me.save.IsInTutorial() && completed;
         }
 
-        public static bool IsModLoaded(string mod)
+        public static bool ModLoadedById(string modId)
         {
-            return LoadedMods.Contains(mod);
+            return LoadedModsById.Contains(modId);
+        }
+
+        public static bool ModLoadedByName(string name)
+        {
+            return LoadedModsByName.Contains(name);
+        }
+
+        public static bool ModLoadedByFile(string fileName)
+        {
+            return LoadedModsByFileName.Contains(fileName);
+        }
+
+        public static bool ModLoaded(string modId = "", string fileName = "", string name = "")
+        {
+            if (!string.IsNullOrEmpty(modId))
+            {
+                return LoadedModsById.Contains(modId);
+            }
+            else if (!string.IsNullOrEmpty(fileName))
+            {
+                return LoadedModsByFileName.Contains(fileName);
+            }else if (!string.IsNullOrEmpty(name))
+            {
+                return LoadedModsByName.Contains(name);
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public static void Log(string caller, string message, bool error = false)
@@ -150,6 +181,11 @@ namespace Helper
         public static bool ZombieVineyardCraft(WorldGameObject wgo, CraftComponent craftComponent = null)
         {
             return wgo.obj_id.Contains("zombie_vineyard_");
+        }
+
+        public static void ShowAlertDialog(string text1, string text2 = "", string text3 = "", bool separateWithStars = false)
+        {
+            GUIElements.me.dialog.OpenOK(text1, null, text2, separateWithStars, text3);
         }
 
         public static void SetAllInteractionsFalse()

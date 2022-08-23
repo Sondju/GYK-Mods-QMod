@@ -100,4 +100,10 @@
   <data name="ConfigMessage" xml:space="preserve">
     <value>配置重新加载！</value>
   </data>
+  <data name="Title" xml:space="preserve">
+    <value>检测到模组不兼容</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>看起来您已经安装了 Sprint Reloaded。不幸的是杂项。 Bits &amp; Bobs 和 Sprint Reloaded 在修改玩家速度时编辑相同的值并且彼此不兼容。 Misc 的玩家方面。 Bits &amp; Bobs 将被禁用。搬运工的速度应该不受影响。</value>
+  </data>
 </root>

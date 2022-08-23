@@ -15,6 +15,7 @@ public class MainPatcher
 {
     private static Config.Options _cfg;
     private static WorldGameObject _wgo;
+    private static bool _sprintTools, _sprintHarmony, _sprint;
 
     public static void Patch()
     {
@@ -29,6 +30,7 @@ public class MainPatcher
             Log($"{ex.Message}, {ex.Source}, {ex.StackTrace}", true);
         }
     }
+
 
     private static void Log(string message, bool error = false)
     {
@@ -99,7 +101,7 @@ public class MainPatcher
             if (__instance.wgo.is_dead || __instance.player_controlled_by_script) return;
             //Log($"[MoveSpeed]: Instance: {__instance.wgo.obj_id}, Speed: {__instance.wgo.data.GetParam("speed")}");
 
-            if (__instance.wgo.is_player)
+            if (__instance.wgo.is_player && !_sprint)
             {
                 var speed = __instance.wgo.data.GetParam("speed");
                 if (speed > 0)
@@ -138,12 +140,22 @@ public class MainPatcher
         return content;
     }
 
+    private static bool _sprintMsgShown = false;
+
     [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
     public static class TimeOfDayUpdatePatch
     {
         [HarmonyPrefix]
         public static void Prefix()
         {
+            if (!MainGame.game_started) return;
+
+            if (MainGame.game_started && !_sprintMsgShown && _sprint && _cfg.ModifyPlayerMovementSpeed)
+            {
+                Tools.ShowAlertDialog(GetLocalizedString(strings.Title), GetLocalizedString(strings.Content), separateWithStars:true);
+                _sprintMsgShown = true;
+            }
+
             if (Input.GetKeyUp(KeyCode.F5))
             {
                 _cfg = Config.GetOptions();
@@ -212,7 +224,6 @@ public class MainPatcher
         }
     }
 
-
     [HarmonyPatch(typeof(GameGUI), nameof(GameGUI.Open))]
     public static class GameGuiOpenPatch
     {
@@ -223,6 +234,7 @@ public class MainPatcher
         }
     }
 
+    [HarmonyAfter("p1xel8ted.GraveyardKeeper.QModHelper")]
     [HarmonyPatch(typeof(MainMenuGUI), nameof(MainMenuGUI.Open))]
     public static class MainMenuGuiOpenPatch
     {
@@ -238,6 +250,18 @@ public class MainPatcher
                 comp.SetState(UIButtonColor.State.Disabled, true);
                 comp.SetActive(false);
             }
+        }
+
+        [HarmonyPostfix]
+        public static void Postfix()
+        {
+            _sprintTools = Tools.ModLoaded("", "SprintReloaded.dll", "Sprint Reloaded");
+            _sprintHarmony = Harmony.HasAnyPatches("mugen.GraveyardKeeper.SprintReloaded");
+            _sprint = _sprintTools || _sprintHarmony;
+
+            Log($"[MBB]: Sprint Detected via Tools: {_sprintTools}");
+
+            Log($"[MBB]: Sprint Detected via Harmony: {_sprintHarmony}");
         }
     }
 

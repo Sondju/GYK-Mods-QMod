@@ -63,29 +63,6 @@ public static class MainPatcher
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             _cfg = Config.GetOptions();
-
-            _fasterCraftEnabled = false;
-            _fasterCraftReloaded = false;
-            _originalFasterCraft = false;
-            _exhaustlessEnabled = false;
-
-            _fasterCraftReloaded = Tools.IsModLoaded("FasterCraftReloaded") || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.FasterCraftReloaded");
-            _originalFasterCraft = Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod");
-            _exhaustlessEnabled = Tools.IsModLoaded("Exhaustless") || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.exhaust-less");
-
-            if (_fasterCraftReloaded)
-            {
-                _fasterCfg = FcConfig.GetOptions();
-                _timeAdjustment = _fasterCfg.CraftSpeedMultiplier;
-                _fasterCraftEnabled = true;
-                Log($"FasterCraft Reloaded! detected, using its config.");
-            }
-            else if (_originalFasterCraft)
-            {
-                _fasterCraftEnabled = true;
-                Log($"OG FasterCraft detected, using its config.");
-                LoadFasterCraftConfig();
-            }
         }
         catch (Exception ex)
         {
@@ -159,6 +136,43 @@ public static class MainPatcher
             foreach (var wgo in currentlyCrafting.Where(wgo => wgo != null && wgo.components.craft.is_crafting && !wgo.has_linked_worker))
             {
                 wgo.OnWorkAction();
+            }
+        }
+    }
+
+    [HarmonyAfter("p1xel8ted.GraveyardKeeper.QModHelper")]
+    [HarmonyPatch(typeof(MainMenuGUI), nameof(MainMenuGUI.Open))]
+    public static class MainMenuGuiOpenPatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix()
+        {
+            _fasterCraftEnabled = false;
+            _fasterCraftReloaded = false;
+            _originalFasterCraft = false;
+            _exhaustlessEnabled = false;
+
+            _fasterCraftReloaded = Tools.ModLoaded("FasterCraftReloaded", "", "") || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.FasterCraftReloaded");
+            _originalFasterCraft = Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod");
+            _exhaustlessEnabled = Tools.ModLoaded("Exhaustless", "", "") || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.exhaust-less");
+
+            if (_fasterCraftReloaded)
+            {
+                _fasterCfg = FcConfig.GetOptions();
+                _timeAdjustment = _fasterCfg.CraftSpeedMultiplier;
+                _fasterCraftEnabled = true;
+                Log($"FasterCraft Reloaded! detected, using its config.");
+            }
+            else if (_originalFasterCraft)
+            {
+                _fasterCraftEnabled = true;
+                Log($"OG FasterCraft detected, using its config.");
+                LoadFasterCraftConfig();
+            }
+
+            if (_exhaustlessEnabled)
+            {
+                Log($"Exhaust-less! detected, using its config.");
             }
         }
     }

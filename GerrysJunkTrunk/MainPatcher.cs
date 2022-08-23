@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Profiling.Memory.Experimental;
 using Object = UnityEngine.Object;
 
 namespace GerrysJunkTrunk
@@ -36,6 +37,9 @@ namespace GerrysJunkTrunk
         private static List<VendorSale> _vendorSales = new();
         private static readonly List<ItemPrice> PriceCache = new();
         private static readonly List<BaseItemCellGUI> AlreadyDone = new();
+        private static ObjectCraftDefinition _newItem;
+        private const string ShippingBoxId = "mf_wood_builddesk:p:mf_shipping_box_place";
+
         public static void Patch()
         {
             try
@@ -98,7 +102,6 @@ namespace GerrysJunkTrunk
             RefreshVendors();
 
             if (VendorWgos.Count <= 0) return 0f;
-
 
             var totalSalePrice = 0f;
             var totalCount = 0;
@@ -643,20 +646,24 @@ namespace GerrysJunkTrunk
             }
         }
 
-        [HarmonyBefore("p1xel8ted.GraveyardKeeper.IBuildWhereIWant")]
-        [HarmonyPatch(typeof(BaseCraftGUI), "CommonOpen")]
-        public static class GameBalanceLoadGameBalancePatch
+
+        [HarmonyBefore("p1xel8ted.GraveyardKeeper.QueueEverything")]
+        [HarmonyPatch(typeof(GameBalance))]
+        public static class GameBalanceLoadGameBalancePatches
         {
-            [HarmonyBefore("p1xel8ted.GraveyardKeeper.IBuildWhereIWant")]
+            [HarmonyBefore("p1xel8ted.GraveyardKeeper.QueueEverything")]
+            [HarmonyPatch(nameof(GameBalance.LoadGameBalance))]
             [HarmonyPostfix]
-            public static void BaseCraftGuiCommonOpenPostfix(ref BaseCraftGUI __instance, ref CraftComponent ___craft_component,
-                ref CraftsInventory ___crafts_inventory, ref List<CraftDefinition> ___crafts)
+            public static void Postfix()
             {
-                if (!UnlockedShippingBox()) return;
-                Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
+                if (GameBalance.me.craft_data.Exists(a => a == _newItem)) return;
+
+                //Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
                 var newCd = new ObjectCraftDefinition();
                 var cd = GameBalance.me.GetData<ObjectCraftDefinition>("mf_wood_builddesk:p:mf_box_stuff_place");
                 newCd.craft_in = cd.craft_in;
+                newCd.builder_ids = cd.builder_ids;
+                newCd.out_obj = "mf_shipping_box_place";
                 newCd.needs = cd.needs;
                 newCd.needs_from_wgo = cd.needs_from_wgo;
                 newCd.output = cd.output;
@@ -676,7 +683,7 @@ namespace GerrysJunkTrunk
                 newCd.gratitude_points_craft_cost = cd.gratitude_points_craft_cost;
                 newCd.sanity = cd.sanity;
                 newCd.hidden = false;
-                newCd.needs_unlock = false;
+                newCd.needs_unlock = true;
                 newCd.icon = cd.icon;
                 newCd.craft_type = cd.craft_type;
                 newCd.is_auto = cd.is_auto;
@@ -688,7 +695,7 @@ namespace GerrysJunkTrunk
                 newCd.use_variations = cd.use_variations;
                 newCd.variation_index = cd.variation_index;
                 newCd.craft_after_finish = cd.craft_after_finish;
-                newCd.one_time_craft = cd.one_time_craft;
+                newCd.one_time_craft = true;
                 newCd.force_multi_craft = cd.force_multi_craft;
                 newCd.disable_multi_craft = cd.disable_multi_craft;
                 newCd.sub_type = cd.sub_type;
@@ -721,19 +728,33 @@ namespace GerrysJunkTrunk
                 newCd.store_last_craft_slot = cd.store_last_craft_slot;
                 newCd.hide_quality_icon = cd.hide_quality_icon;
                 newCd.enqueue_type = cd.enqueue_type;
-                newCd.id = "mf_wood_builddesk:p:mf_shipping_box_place";
-                var wgo = GUIElements.me.craft.GetCrafteryWGO();
-                if (wgo == null) return;
-                if (wgo.obj_id.Contains("zombie")) return;
-                if (!wgo.obj_id.Contains("mf_wood_builddesk")) return;
-              
-                if (_internalCfg.ShippingBoxBuilt || _shippingBox != null) return;
-                //CrossModFields.GerrysJunkTrunk.ShippingBoxOcd = newCd;
-                ___crafts.Add(newCd);
-                ___crafts_inventory?.AddCraft(newCd.id);
+                newCd.id = ShippingBoxId;
+
+                _newItem = newCd;
+
+                GameBalance.me.craft_data.Add(_newItem);
+                GameBalance.me.craft_obj_data.Add(_newItem);
+                GameBalance.me.AddDataUniversal(_newItem);
+                GameBalance.me.AddData(_newItem);
             }
         }
-        
+
+        //[HarmonyPatch]
+        //public static class GameBalanceGetDataPatch
+        //{
+        //    [HarmonyTargetMethod]
+        //    public static MethodBase TargetMethod()
+        //    {
+        //        return AccessTools.Method(typeof(GameBalanceBase), "GetData", generics: new []{typeof(ObjectCraftDefinition) }).MakeGenericMethod(typeof(string));
+        //    }
+
+        //    [HarmonyPrefix]
+        //    public static void Prefix(ref string id)
+        //    {
+        //        //blah blah
+        //    }
+        //}
+
         [HarmonyAfter("p1xel8ted.GraveyardKeeper.WheresMaStorage")]
         [HarmonyPatch(typeof(InventoryPanelGUI), "DoOpening")]
         public static class InventoryWidgetDoOpeningPatch
@@ -804,14 +825,37 @@ namespace GerrysJunkTrunk
             }
         }
 
+        private static void CheckShippingBox()
+        {
+            if (UnlockedShippingBox())
+            {
+                MainGame.me.save.UnlockCraft(ShippingBoxId);
+                Log($"Tech requirements met, unlocking shipping box craft!");
+            }
+            else
+            {
+                MainGame.me.save.LockCraft(ShippingBoxId);
+                Log($"Tech requirements not met, locking shipping box craft!");
+            }
+        }
+
+        private static int _techCount;
+        private static int _oldTechCount;
+
         [HarmonyPatch(typeof(MainGame), nameof(MainGame.Update))]
         public static class MainGameUpdatePatch
         {
             [HarmonyPostfix]
             public static void Postfix()
             {
-                //
                 if (!MainGame.game_started) return;
+
+                _techCount = MainGame.me.save.unlocked_techs.Count;
+                if (_techCount > _oldTechCount)
+                {
+                    _oldTechCount = _techCount;
+                    CheckShippingBox();
+                }
 
                 if (_internalCfg.ShowIntroMessage)
                 {
@@ -951,6 +995,8 @@ namespace GerrysJunkTrunk
                     Log($"Removed Shipping Box!");
                     _shippingBox = null;
                     _internalCfg.ShippingBoxBuilt = false;
+                    var sbCraft = GameBalance.me.GetData<ObjectCraftDefinition>(ShippingBoxId);
+                    sbCraft.hidden = false;
 
                     UpdateInternalConfig();
                 }
@@ -1006,6 +1052,8 @@ namespace GerrysJunkTrunk
                 if (string.Equals(new_obj_id, "mf_box_stuff") && _shippingBuild)
                 {
                     Log($"Built Shipping Box!");
+                    var sbCraft = GameBalance.me.GetData<ObjectCraftDefinition>(ShippingBoxId);
+                    sbCraft.hidden = true;
                     __instance.custom_tag = ShippingBoxTag;
 
                     _shippingBuild = false;
