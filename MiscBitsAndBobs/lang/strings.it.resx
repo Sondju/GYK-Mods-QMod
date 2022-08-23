@@ -100,4 +100,10 @@
   <data name="ConfigMessage" xml:space="preserve">
     <value>Configurazione ricaricata!</value>
   </data>
+  <data name="Title" xml:space="preserve">
+    <value>Rilevata incompatibilità mod</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>Sembra che tu abbia installato Sprint Reloaded. Purtroppo Varie Bit &amp; Bob e Sprint Reloaded modificano gli stessi valori quando si modifica la velocità del giocatore e sono incompatibili tra loro. Il lato giocatore di Misc. Bit e Bob saranno disabilitati. La velocità del portiere non dovrebbe essere influenzata.</value>
+  </data>
 </root>

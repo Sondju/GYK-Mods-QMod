@@ -68,5 +68,23 @@ namespace MiscBitsAndBobs.lang {
                 return ResourceManager.GetString("ConfigMessage", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to It looks like you have Sprint Reloaded installed. Unfortunately Misc. Bits &amp; Bobs and Sprint Reloaded edit the same values when modifying player speed and are incompatible with each other. The player side of Misc. Bits &amp; Bobs will be disabled. Porter speed should be unaffected..
+        /// </summary>
+        public static string Content {
+            get {
+                return ResourceManager.GetString("Content", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mod Incompatibility Detected.
+        /// </summary>
+        public static string Title {
+            get {
+                return ResourceManager.GetString("Title", resourceCulture);
+            }
+        }
     }
 }

@@ -8,7 +8,9 @@ namespace AddStraightToTable;
 
 public static class MainPatcher
 {
-    private const string WheresMaStorage = "WheresMaStorage";
+    private const string WheresMaStorageId = "WheresMaStorageId";
+    private const string WheresMaStorageFileName = "WheresMaStorage.dll";
+    private const string WheresMaStorageName = "Where's Ma' Storage!";
     private static Config.Options _cfg;
     private static bool _wms;
 
@@ -36,7 +38,7 @@ public static class MainPatcher
         [HarmonyPrefix]
         public static bool Prefix()
         {
-            _wms = Tools.IsModLoaded(WheresMaStorage) || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.WheresMaStorage");
+            _wms = Tools.ModLoaded(WheresMaStorageId, WheresMaStorageFileName, WheresMaStorageName) || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.WheresMaStorage");
             if (_wms)
             {
                 _cfg = Config.GetOptions();

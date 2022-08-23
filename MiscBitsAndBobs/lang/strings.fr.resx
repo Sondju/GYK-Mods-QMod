@@ -100,4 +100,10 @@
   <data name="ConfigMessage" xml:space="preserve">
     <value>Configuration rechargée !</value>
   </data>
+  <data name="Title" xml:space="preserve">
+    <value>Incompatibilité de module détectée</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>Il semble que Sprint Reloaded soit installé. Malheureusement Divers. Bits &amp; Bobs et Sprint Reloaded modifient les mêmes valeurs lors de la modification de la vitesse du joueur et sont incompatibles entre eux. Le côté joueur de Misc. Les Bits &amp; Bobs seront désactivés. La vitesse du porteur ne devrait pas être affectée.</value>
+  </data>
 </root>

@@ -100,4 +100,10 @@
   <data name="ConfigMessage" xml:space="preserve">
     <value>設定がリロードされました!</value>
   </data>
+  <data name="Title" xml:space="preserve">
+    <value>Mod の非互換性が検出されました</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>Sprint Reloaded がインストールされているようです。残念ながらその他。 Bits &amp; Bobs と Sprint Reloaded は、プレイヤーの速度を変更するときに同じ値を編集し、互いに互換性がありません。その他のプレーヤー側。 Bits &amp; Bobs は無効になります。ポーターの速度は影響を受けません。</value>
+  </data>
 </root>

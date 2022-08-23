@@ -120,4 +120,10 @@
   <data name="ConfigMessage" xml:space="preserve">
     <value>Config Reloaded!</value>
   </data>
+  <data name="Title" xml:space="preserve">
+    <value>Mod Incompatibility Detected</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>It looks like you have Sprint Reloaded installed. Unfortunately Misc. Bits &amp; Bobs and Sprint Reloaded edit the same values when modifying player speed and are incompatible with each other. The player side of Misc. Bits &amp; Bobs will be disabled. Porter speed should be unaffected.</value>
+  </data>
 </root>

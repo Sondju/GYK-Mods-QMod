@@ -225,7 +225,7 @@ namespace IBuildWhereIWant
         {
             [HarmonyPostfix]
             [HarmonyPatch(nameof(FlowGridCell.IsInsideWorldZone))]
-            public static void IsInsideWorldZonePostfix(ref bool __result)
+            public static void InsideWorldZonePostfix(ref bool __result)
             {
                 if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
                 __result = true;
@@ -233,7 +233,7 @@ namespace IBuildWhereIWant
 
             [HarmonyPostfix]
             [HarmonyPatch(nameof(FlowGridCell.IsPlaceAvailable))]
-            public static void IsPlaceAvailablePostfix(ref bool __result)
+            public static void PlaceAvailablePostfix(ref bool __result)
             {
                 if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
                 __result = true;

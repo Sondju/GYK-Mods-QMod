@@ -100,4 +100,10 @@
   <data name="ConfigMessage" xml:space="preserve">
     <value>구성이 다시 로드되었습니다!</value>
   </data>
+  <data name="Title" xml:space="preserve">
+    <value>모드 비호환성 감지됨</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>Sprint Reloaded가 설치된 것 같습니다. 불행히도 기타. Bits &amp; Bobs 및 Sprint Reloaded는 플레이어 속도를 수정할 때 동일한 값을 편집하며 서로 호환되지 않습니다. Misc의 플레이어 측. Bits &amp; Bobs가 비활성화됩니다. 포터 속도는 영향을 받지 않아야 합니다.</value>
+  </data>
 </root>

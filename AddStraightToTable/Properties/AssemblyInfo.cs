@@ -3,7 +3,7 @@ using System.Resources;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Skips the confirm dialog on the autopsy table.")]
-[assembly: AssemblyDescription("AddStraightToTable")]
+[assembly: AssemblyDescription("AddStraightToTable")] //ID to allow Helper to search for loaded mods by ID as Harmony relies on load orders
 [assembly: AssemblyConfiguration("AddStraightToTable")]
 [assembly: AssemblyCompany("p1xel8ted")]
 [assembly: AssemblyProduct("Add Straight To Table!")]
@@ -12,6 +12,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
 [assembly: Guid("b07cf3fc-0508-4041-b4f5-b8469eb20cb0")]
-[assembly: AssemblyVersion("2.2")]
-[assembly: AssemblyFileVersion("2.2")]
+[assembly: AssemblyVersion("2.2.1")]
+[assembly: AssemblyFileVersion("2.2.1")]
 [assembly: NeutralResourcesLanguage("en")]

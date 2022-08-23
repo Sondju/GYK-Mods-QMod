@@ -100,4 +100,10 @@
   <data name="ConfigMessage" xml:space="preserve">
     <value>¡Configuración recargada!</value>
   </data>
+  <data name="Title" xml:space="preserve">
+    <value>Incompatibilidad de mods detectada</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>Parece que tienes Sprint Reloaded instalado. Desafortunadamente Misc. Bits &amp; Bobs y Sprint Reloaded editan los mismos valores al modificar la velocidad del jugador y son incompatibles entre sí. El lado del jugador de Misc. Bits &amp; Bobs se desactivará. La velocidad de Porter no debería verse afectada.</value>
+  </data>
 </root>
