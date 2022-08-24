@@ -61,24 +61,6 @@ namespace AutoLootHeavies.lang {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Distance-based teleportation is now OFF..
-        /// </summary>
-        public static string DistTeleOff {
-            get {
-                return ResourceManager.GetString("DistTeleOff", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Distance-based teleportation is now ON..
-        /// </summary>
-        public static string DistTeleOn {
-            get {
-                return ResourceManager.GetString("DistTeleOn", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Dump ore here!.
         /// </summary>
         public static string DumpOre {
@@ -106,69 +88,6 @@ namespace AutoLootHeavies.lang {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Something went wrong with the magic of teleporting resources - please let me know. A log was saved in the mod directory..
-        /// </summary>
-        public static string ErrorMsg {
-            get {
-                return ResourceManager.GetString("ErrorMsg", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Dang, no ore stockpiles in range....
-        /// </summary>
-        public static string NoOreInRange {
-            get {
-                return ResourceManager.GetString("NoOreInRange", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to I can&apos;t do that, I have no ore storage left!.
-        /// </summary>
-        public static string NoOreStorageLeft {
-            get {
-                return ResourceManager.GetString("NoOreStorageLeft", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Dang, no stone stockpiles in range....
-        /// </summary>
-        public static string NoStoneInRange {
-            get {
-                return ResourceManager.GetString("NoStoneInRange", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to I can&apos;t do that, I have no stone storage left!.
-        /// </summary>
-        public static string NoStoneStorageLeft {
-            get {
-                return ResourceManager.GetString("NoStoneStorageLeft", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Dang, no timber stockpiles in range....
-        /// </summary>
-        public static string NoTimberInRange {
-            get {
-                return ResourceManager.GetString("NoTimberInRange", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to I can&apos;t do that, I have no timber storage left!.
-        /// </summary>
-        public static string NoTimberStorageLeft {
-            get {
-                return ResourceManager.GetString("NoTimberStorageLeft", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Phew...ore storage is now full!.
         /// </summary>
         public static string OreFull {
@@ -187,7 +106,7 @@ namespace AutoLootHeavies.lang {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Teleportation is now OFF..
+        ///   Looks up a localized string similar to Teleporting to dump sites when all stockpiles are full is now OFF..
         /// </summary>
         public static string TeleOff {
             get {
@@ -196,7 +115,7 @@ namespace AutoLootHeavies.lang {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Teleportation is now ON..
+        ///   Looks up a localized string similar to Teleporting to dump sites when all stockpiles are full is now ON..
         /// </summary>
         public static string TeleOn {
             get {

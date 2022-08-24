@@ -117,24 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NoOreInRange" xml:space="preserve">
-    <value>Verdammt, keine Erzvorräte in Reichweite ...</value>
-  </data>
-  <data name="NoOreStorageLeft" xml:space="preserve">
-    <value>Das kann ich nicht, ich habe kein Erzlager mehr!</value>
-  </data>
-  <data name="NoStoneInRange" xml:space="preserve">
-    <value>Verdammt, keine Steinvorräte in Reichweite ...</value>
-  </data>
-  <data name="NoStoneStorageLeft" xml:space="preserve">
-    <value>Das kann ich nicht, ich habe kein Steinlager mehr!</value>
-  </data>
-  <data name="NoTimberInRange" xml:space="preserve">
-    <value>Verdammt, keine Holzvorräte in Reichweite ...</value>
-  </data>
-  <data name="NoTimberStorageLeft" xml:space="preserve">
-    <value>Das kann ich nicht, ich habe kein Holzlager mehr!</value>
-  </data>
   <data name="OreFull" xml:space="preserve">
     <value>Das Phe...ore-Lager ist jetzt voll!</value>
   </data>
@@ -143,18 +125,6 @@
   </data>
   <data name="TimberFull" xml:space="preserve">
     <value>Puh ... das Holzlager ist jetzt voll!</value>
-  </data>
-  <data name="TeleOn" xml:space="preserve">
-    <value>Teleportation ist jetzt AN.</value>
-  </data>
-  <data name="TeleOff" xml:space="preserve">
-    <value>Teleportation ist jetzt AUS.</value>
-  </data>
-  <data name="DistTeleOn" xml:space="preserve">
-    <value>Die entfernungsbasierte Teleportation ist jetzt aktiviert.</value>
-  </data>
-  <data name="DistTeleOff" xml:space="preserve">
-    <value>Entfernungsbasierte Teleportation ist jetzt AUS.</value>
   </data>
   <data name="DumpTimber" xml:space="preserve">
     <value>Hier Holz entsorgen!</value>
@@ -165,7 +135,10 @@
   <data name="DumpStone" xml:space="preserve">
     <value>Hier Stein &amp; Marmor entsorgen!</value>
   </data>
-  <data name="ErrorMsg" xml:space="preserve">
-    <value>Irgendetwas ist mit der Magie des Teleportierens von Ressourcen schief gelaufen – bitte lass es mich wissen. Ein Protokoll wurde im Mod-Verzeichnis gespeichert.</value>
+  <data name="TeleOn" xml:space="preserve">
+    <value>Das Teleportieren zu Mülldeponien, wenn alle Lagerbestände voll sind, ist jetzt aktiviert.</value>
+  </data>
+  <data name="TeleOff" xml:space="preserve">
+    <value>Das Teleportieren zu Mülldeponien, wenn alle Lagerbestände voll sind, ist jetzt AUS.</value>
   </data>
 </root>

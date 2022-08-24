@@ -117,24 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NoOreInRange" xml:space="preserve">
-    <value>Dang, no ore stockpiles in range...</value>
-  </data>
-  <data name="NoOreStorageLeft" xml:space="preserve">
-    <value>I can't do that, I have no ore storage left!</value>
-  </data>
-  <data name="NoStoneInRange" xml:space="preserve">
-    <value>Dang, no stone stockpiles in range...</value>
-  </data>
-  <data name="NoStoneStorageLeft" xml:space="preserve">
-    <value>I can't do that, I have no stone storage left!</value>
-  </data>
-  <data name="NoTimberInRange" xml:space="preserve">
-    <value>Dang, no timber stockpiles in range...</value>
-  </data>
-  <data name="NoTimberStorageLeft" xml:space="preserve">
-    <value>I can't do that, I have no timber storage left!</value>
-  </data>
   <data name="OreFull" xml:space="preserve">
     <value>Phew...ore storage is now full!</value>
   </data>
@@ -145,16 +127,10 @@
     <value>Phew...timber storage is now full!</value>
   </data>
   <data name="TeleOn" xml:space="preserve">
-    <value>Teleportation is now ON.</value>
+    <value>Teleporting to dump sites when all stockpiles are full is now ON.</value>
   </data>
   <data name="TeleOff" xml:space="preserve">
-    <value>Teleportation is now OFF.</value>
-  </data>
-  <data name="DistTeleOn" xml:space="preserve">
-    <value>Distance-based teleportation is now ON.</value>
-  </data>
-  <data name="DistTeleOff" xml:space="preserve">
-    <value>Distance-based teleportation is now OFF.</value>
+    <value>Teleporting to dump sites when all stockpiles are full is now OFF.</value>
   </data>
   <data name="DumpTimber" xml:space="preserve">
     <value>Dump timber here!</value>
@@ -164,8 +140,5 @@
   </data>
   <data name="DumpStone" xml:space="preserve">
     <value>Dump stone &amp; marble here!</value>
-  </data>
-  <data name="ErrorMsg" xml:space="preserve">
-    <value>Something went wrong with the magic of teleporting resources - please let me know. A log was saved in the mod directory.</value>
   </data>
 </root>

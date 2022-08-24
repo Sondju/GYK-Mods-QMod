@@ -117,24 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NoOreInRange" xml:space="preserve">
-    <value>该死，范围内没有矿石库存...</value>
-  </data>
-  <data name="NoOreStorageLeft" xml:space="preserve">
-    <value>我不能那样做，我没有矿石仓库了！</value>
-  </data>
-  <data name="NoStoneInRange" xml:space="preserve">
-    <value>该死，范围内没有石头库存...</value>
-  </data>
-  <data name="NoStoneStorageLeft" xml:space="preserve">
-    <value>我不能那样做，我没有剩下的石库了！</value>
-  </data>
-  <data name="NoTimberInRange" xml:space="preserve">
-    <value>该死，范围内没有木材库存...</value>
-  </data>
-  <data name="NoTimberStorageLeft" xml:space="preserve">
-    <value>我不能那样做，我没有剩下的木材仓库了！</value>
-  </data>
   <data name="OreFull" xml:space="preserve">
     <value>呼……矿石仓库已满！</value>
   </data>
@@ -143,18 +125,6 @@
   </data>
   <data name="TimberFull" xml:space="preserve">
     <value>呼……木材仓库已满！</value>
-  </data>
-  <data name="TeleOn" xml:space="preserve">
-    <value>传送现已开启。</value>
-  </data>
-  <data name="TeleOff" xml:space="preserve">
-    <value>传送现在关闭。</value>
-  </data>
-  <data name="DistTeleOn" xml:space="preserve">
-    <value>基于距离的传送现已开启。</value>
-  </data>
-  <data name="DistTeleOff" xml:space="preserve">
-    <value>基于距离的传送现在关闭。</value>
   </data>
   <data name="DumpTimber" xml:space="preserve">
     <value>在这里倾倒木材！</value>
@@ -165,7 +135,10 @@
   <data name="DumpStone" xml:space="preserve">
     <value>在这里倾倒石头和大理石！</value>
   </data>
-  <data name="ErrorMsg" xml:space="preserve">
-    <value>传送资源的魔法出了点问题 - 请告诉我。日志保存在 mod 目录中。</value>
+  <data name="TeleOn" xml:space="preserve">
+    <value>当所有库存已满时传送到垃圾场现已开启。</value>
+  </data>
+  <data name="TeleOff" xml:space="preserve">
+    <value>当所有库存已满时传送到垃圾场现已关闭。</value>
   </data>
 </root>

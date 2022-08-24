@@ -110,16 +110,17 @@ namespace BeamMeUpGerry
 
         private static bool RemoveZone(AnswerVisualData answer)
         {
-            var wheatExists = MainGame.me.save.known_world_zones.Exists(a => string.Equals(a, "zone_wheat_land"));
-            var coalExists = MainGame.me.save.known_world_zones.Exists(a => string.Equals(a, "zone_flat_under_waterflow"));
+          
+           var wheatExists = Tools.PlayerHasSeenZone("zone_wheat_land");
+           var coalExists = Tools.PlayerHasSeenZone("zone_flat_under_waterflow");
             if (answer.id.Contains(strings.Farmer))
             {
-                return wheatExists && MainGame.me.save.known_npcs.npcs.Exists(a => a.npc_id.Contains("farmer"));
+                return wheatExists && Tools.PlayerKnowsNpcPartial("farmer");
             }
 
             if (answer.id.Contains(strings.Mill))
             {
-                return wheatExists && MainGame.me.save.known_npcs.npcs.Exists(a => a.npc_id.Contains("miller"));
+                return wheatExists && Tools.PlayerKnowsNpcPartial("miller");
             }
 
             if (answer.id.Contains(strings.Coal))

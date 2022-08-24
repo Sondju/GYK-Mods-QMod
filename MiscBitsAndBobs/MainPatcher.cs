@@ -81,9 +81,33 @@ public class MainPatcher
         [HarmonyPostfix]
         public static void Postfix()
         {
-            if (!_cfg.AddCoalToTavernOven) return;
-            var coal = GameBalance.me.GetData<CraftDefinition>("mf_furnace_0_fuel_coal");
-            coal?.craft_in.Add("tavern_oven");
+            if (_cfg.AddCoalToTavernOven)
+            {
+                var coal = GameBalance.me.GetData<CraftDefinition>("mf_furnace_0_fuel_coal");
+                coal?.craft_in.Add("tavern_oven");
+            }
+
+            if (_cfg.AddZombiesToPyreAndCrematorium)
+            {
+                var mfPyre = GameBalance.me.GetData<ObjectDefinition>("mf_pyre");
+                mfPyre.can_insert_items.Add("working_zombie_on_ground_1");
+                mfPyre.can_insert_items.Add("working_zombie_pseudoitem_1");
+                mfPyre.can_insert_zombie = true;
+
+                var mfCrematorium = GameBalance.me.GetData<ObjectDefinition>("mf_crematorium");
+                mfCrematorium.can_insert_items.Add("working_zombie_on_ground_1");
+                mfCrematorium.can_insert_items.Add("working_zombie_pseudoitem_1");
+                mfCrematorium.can_insert_items.Add("body");
+                mfCrematorium.can_insert_items.Add("body_guard");
+                mfCrematorium.can_insert_zombie = true;
+
+                var mfCrematoriumCorp = GameBalance.me.GetData<ObjectDefinition>("mf_crematorium_corp");
+                mfCrematoriumCorp.can_insert_items.Add("working_zombie_on_ground_1");
+                mfCrematoriumCorp.can_insert_items.Add("working_zombie_pseudoitem_1");
+                mfCrematoriumCorp.can_insert_items.Add("body");
+                mfCrematoriumCorp.can_insert_items.Add("body_guard");
+                mfCrematoriumCorp.can_insert_zombie = true;
+            }
         }
     }
 

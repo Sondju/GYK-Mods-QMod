@@ -865,6 +865,7 @@ namespace GerrysJunkTrunk
                 }
 
                 if (!UnlockedShippingBox()) return;
+                var sbCraft = GameBalance.me.GetData<ObjectCraftDefinition>(ShippingBoxId);
                 if (_internalCfg.ShippingBoxBuilt && _shippingBox == null)
                 {
                     _shippingBox = Object.FindObjectsOfType<WorldGameObject>(true)
@@ -873,6 +874,7 @@ namespace GerrysJunkTrunk
                     {
                         Log("No Shipping Box Found!");
                         _internalCfg.ShippingBoxBuilt = false;
+                        sbCraft.hidden = false;
                     }
                     else
                     {
@@ -886,6 +888,9 @@ namespace GerrysJunkTrunk
                             invSize = LargeInvSize;
                         }
                         _shippingBox.data.SetInventorySize(invSize);
+
+                       
+                        sbCraft.hidden = true;
                     }
 
                     UpdateInternalConfig();

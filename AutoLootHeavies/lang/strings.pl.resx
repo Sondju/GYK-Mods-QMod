@@ -117,24 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NoOreInRange" xml:space="preserve">
-    <value>Cholera, nie ma zapasów rudy w zasięgu...</value>
-  </data>
-  <data name="NoOreStorageLeft" xml:space="preserve">
-    <value>Nie mogę tego zrobić, nie mam już magazynu rudy!</value>
-  </data>
-  <data name="NoStoneInRange" xml:space="preserve">
-    <value>Cholera, nie ma zapasów kamieni w zasięgu...</value>
-  </data>
-  <data name="NoStoneStorageLeft" xml:space="preserve">
-    <value>Nie mogę tego zrobić, nie mam już żadnego magazynu na kamienie!</value>
-  </data>
-  <data name="NoTimberInRange" xml:space="preserve">
-    <value>Cholera, w zasięgu nie ma składów drewna...</value>
-  </data>
-  <data name="NoTimberStorageLeft" xml:space="preserve">
-    <value>Nie mogę tego zrobić, nie mam już żadnego magazynu drewna!</value>
-  </data>
   <data name="OreFull" xml:space="preserve">
     <value>Uff… magazyn rudy jest już pełny!</value>
   </data>
@@ -143,18 +125,6 @@
   </data>
   <data name="TimberFull" xml:space="preserve">
     <value>Uff… magazyn drewna jest już pełny!</value>
-  </data>
-  <data name="TeleOn" xml:space="preserve">
-    <value>Teleportacja jest teraz WŁĄCZONA.</value>
-  </data>
-  <data name="TeleOff" xml:space="preserve">
-    <value>Teleportacja jest teraz WYŁĄCZONA.</value>
-  </data>
-  <data name="DistTeleOn" xml:space="preserve">
-    <value>Teleportacja na odległość jest teraz WŁĄCZONA.</value>
-  </data>
-  <data name="DistTeleOff" xml:space="preserve">
-    <value>Teleportacja na odległość jest teraz WYŁĄCZONA.</value>
   </data>
   <data name="DumpTimber" xml:space="preserve">
     <value>Zrzuć tutaj drewno!</value>
@@ -165,7 +135,10 @@
   <data name="DumpStone" xml:space="preserve">
     <value>Zrzuć tutaj kamień i marmur!</value>
   </data>
-  <data name="ErrorMsg" xml:space="preserve">
-    <value>Coś poszło nie tak z magią teleportacji zasobów - daj mi znać. Dziennik został zapisany w katalogu mod.</value>
+  <data name="TeleOn" xml:space="preserve">
+    <value>Teleportacja do wysypisk, gdy wszystkie zapasy są pełne, jest teraz WŁĄCZONA.</value>
+  </data>
+  <data name="TeleOff" xml:space="preserve">
+    <value>Teleportacja do wysypisk, gdy wszystkie zapasy są pełne, jest teraz WYŁĄCZONA.</value>
   </data>
 </root>

@@ -25,6 +25,7 @@ namespace WheresMaStorage
             public bool HideTavernWidgets;
             public bool HideRefugeeWidgets;
             public bool HideWarehouseShopWidgets;
+            public bool HideSoulWidgets;
             public bool DisableInventoryDimming;
             public bool ShowUsedSpaceInTitles;
             public bool ShowWorldZoneInTitles;
@@ -118,6 +119,9 @@ namespace WheresMaStorage
 
             bool.TryParse(_con.Value("HideRefugeeWidgets", "true"), out var hideRefugeeWidgets);
             _options.HideRefugeeWidgets = hideRefugeeWidgets;
+
+                 bool.TryParse(_con.Value("HideSoulWidgets", "true"), out var hideSoulWidgets);
+            _options.HideSoulWidgets = hideSoulWidgets;
 
             bool.TryParse(_con.Value("HideWarehouseShopWidgets", "true"), out var hideWarehouseShopWidgets);
             _options.HideWarehouseShopWidgets = hideWarehouseShopWidgets;

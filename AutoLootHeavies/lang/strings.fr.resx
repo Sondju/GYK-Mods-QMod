@@ -117,24 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NoOreInRange" xml:space="preserve">
-    <value>Dang, pas de stocks de minerai à portée...</value>
-  </data>
-  <data name="NoOreStorageLeft" xml:space="preserve">
-    <value>Je ne peux pas faire ça, je n'ai plus de stockage de minerai !</value>
-  </data>
-  <data name="NoStoneInRange" xml:space="preserve">
-    <value>Dang, pas de stocks de pierres à portée...</value>
-  </data>
-  <data name="NoStoneStorageLeft" xml:space="preserve">
-    <value>Je ne peux pas faire ça, je n'ai plus de stockage de pierre !</value>
-  </data>
-  <data name="NoTimberInRange" xml:space="preserve">
-    <value>Dang, pas de stocks de bois à portée...</value>
-  </data>
-  <data name="NoTimberStorageLeft" xml:space="preserve">
-    <value>Je ne peux pas faire ça, je n'ai plus de stockage de bois !</value>
-  </data>
   <data name="OreFull" xml:space="preserve">
     <value>Ouf... le stockage de minerai est maintenant plein !</value>
   </data>
@@ -143,18 +125,6 @@
   </data>
   <data name="TimberFull" xml:space="preserve">
     <value>Ouf... le stockage du bois est maintenant plein !</value>
-  </data>
-  <data name="TeleOn" xml:space="preserve">
-    <value>La téléportation est maintenant activée.</value>
-  </data>
-  <data name="TeleOff" xml:space="preserve">
-    <value>La téléportation est maintenant désactivée.</value>
-  </data>
-  <data name="DistTeleOn" xml:space="preserve">
-    <value>La téléportation basée sur la distance est désormais activée.</value>
-  </data>
-  <data name="DistTeleOff" xml:space="preserve">
-    <value>La téléportation basée sur la distance est maintenant désactivée.</value>
   </data>
   <data name="DumpTimber" xml:space="preserve">
     <value>Déposez du bois ici !</value>
@@ -165,7 +135,10 @@
   <data name="DumpStone" xml:space="preserve">
     <value>Déchargez la pierre et le marbre ici !</value>
   </data>
-  <data name="ErrorMsg" xml:space="preserve">
-    <value>Quelque chose s'est mal passé avec la magie de la téléportation des ressources - faites-le moi savoir. Un journal a été enregistré dans le répertoire mod.</value>
+  <data name="TeleOn" xml:space="preserve">
+    <value>La téléportation vers les sites de décharge lorsque tous les stocks sont pleins est désormais activée.</value>
+  </data>
+  <data name="TeleOff" xml:space="preserve">
+    <value>La téléportation vers les sites de décharge lorsque tous les stocks sont pleins est désormais désactivée.</value>
   </data>
 </root>

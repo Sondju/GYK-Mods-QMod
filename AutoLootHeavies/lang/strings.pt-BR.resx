@@ -117,24 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NoOreInRange" xml:space="preserve">
-    <value>Droga, nenhum estoque de minério ao alcance...</value>
-  </data>
-  <data name="NoOreStorageLeft" xml:space="preserve">
-    <value>Não posso fazer isso, não tenho mais armazenamento de minério!</value>
-  </data>
-  <data name="NoStoneInRange" xml:space="preserve">
-    <value>Droga, nenhum estoque de pedra ao alcance...</value>
-  </data>
-  <data name="NoStoneStorageLeft" xml:space="preserve">
-    <value>Não posso fazer isso, não tenho mais armazenamento de pedra!</value>
-  </data>
-  <data name="NoTimberInRange" xml:space="preserve">
-    <value>Droga, não há estoques de madeira ao alcance...</value>
-  </data>
-  <data name="NoTimberStorageLeft" xml:space="preserve">
-    <value>Não posso fazer isso, não tenho mais armazenamento de madeira!</value>
-  </data>
   <data name="OreFull" xml:space="preserve">
     <value>Ufa... o armazenamento de minério agora está cheio!</value>
   </data>
@@ -143,18 +125,6 @@
   </data>
   <data name="TimberFull" xml:space="preserve">
     <value>Ufa... o armazenamento de madeira agora está cheio!</value>
-  </data>
-  <data name="TeleOn" xml:space="preserve">
-    <value>O teletransporte agora está LIGADO.</value>
-  </data>
-  <data name="TeleOff" xml:space="preserve">
-    <value>O teletransporte agora está DESLIGADO.</value>
-  </data>
-  <data name="DistTeleOn" xml:space="preserve">
-    <value>O teletransporte baseado em distância agora está LIGADO.</value>
-  </data>
-  <data name="DistTeleOff" xml:space="preserve">
-    <value>O teletransporte baseado em distância agora está DESLIGADO.</value>
   </data>
   <data name="DumpTimber" xml:space="preserve">
     <value>Jogue madeira aqui!</value>
@@ -165,7 +135,10 @@
   <data name="DumpStone" xml:space="preserve">
     <value>Despeje pedra e mármore aqui!</value>
   </data>
-  <data name="ErrorMsg" xml:space="preserve">
-    <value>Algo deu errado com a magia dos recursos de teletransporte - por favor, me avise. Um log foi salvo no diretório mod.</value>
+  <data name="TeleOn" xml:space="preserve">
+    <value>Teletransportar para locais de despejo quando todos os estoques estão cheios agora está LIGADO.</value>
+  </data>
+  <data name="TeleOff" xml:space="preserve">
+    <value>Teletransportar para locais de despejo quando todos os estoques estão cheios agora está DESLIGADO.</value>
   </data>
 </root>

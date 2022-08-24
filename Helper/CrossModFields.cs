@@ -16,9 +16,10 @@ namespace Helper
         public static bool IsCraft { get; internal set; }
         public static bool IsChest { get; internal set; }
         public static bool IsBarman { get; internal set; }
-        public static bool IsTavernCellar { get; internal set; }
+        public static bool IsTavernCellarRack { get; internal set; }
         public static bool IsRefugee { get; internal set; }
         public static bool IsWritersTable { get; internal set; }
+        public static bool IsSoulBox { get; internal set; }
         public static bool IsInDungeon { get; internal set; }
 
         public static bool PlayerIsDead { get; internal set; }

@@ -60,6 +60,9 @@ public static class Config
         bool.TryParse(_con.Value("AddCoalToTavernOven", "true"), out var addCoalToTavernOven);
         _options.AddCoalToTavernOven = addCoalToTavernOven;
 
+        bool.TryParse(_con.Value("AddZombiesToPyreAndCrematorium", "true"), out var addZombiesToPyreAndCrematorium);
+        _options.AddZombiesToPyreAndCrematorium = addZombiesToPyreAndCrematorium;
+
         _con.ConfigWrite();
 
         return _options;
@@ -82,5 +85,6 @@ public static class Config
         public bool LessenFootprintImpact;
         public bool RemovePrayerOnUse;
         public bool AddCoalToTavernOven;
+        public bool AddZombiesToPyreAndCrematorium;
     }
 }

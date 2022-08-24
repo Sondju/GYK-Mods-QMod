@@ -3,14 +3,14 @@ using UnityEngine;
 
 namespace AutoLootHeavies
 {
-    internal class Stockpile
+    public class Stockpile
     {
         private readonly Vector3 _location;
         private readonly StockpileType _type;
         private float _distanceFromPlayer;
         private readonly WorldGameObject _wgo;
 
-        public Stockpile(Vector3 location, StockpileType type, float distanceFromPlayer, WorldGameObject wgo)
+        internal Stockpile(Vector3 location, StockpileType type, float distanceFromPlayer, WorldGameObject wgo)
         {
             _location = location;
             _type = type;
@@ -36,7 +36,7 @@ namespace AutoLootHeavies
             return _location;
         }
 
-        public StockpileType GetStockpileType()
+        internal StockpileType GetStockpileType()
         {
             return _type;
         }

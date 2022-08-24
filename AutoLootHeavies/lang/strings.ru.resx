@@ -117,24 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NoOreInRange" xml:space="preserve">
-    <value>Чёрт, поблизости нет запасов руды...</value>
-  </data>
-  <data name="NoOreStorageLeft" xml:space="preserve">
-    <value>Я не могу этого сделать, у меня не осталось склада руды!</value>
-  </data>
-  <data name="NoStoneInRange" xml:space="preserve">
-    <value>Чёрт, поблизости нет запасов камней...</value>
-  </data>
-  <data name="NoStoneStorageLeft" xml:space="preserve">
-    <value>Я не могу этого сделать, у меня не осталось запаса камней!</value>
-  </data>
-  <data name="NoTimberInRange" xml:space="preserve">
-    <value>Черт, поблизости нет запасов древесины...</value>
-  </data>
-  <data name="NoTimberStorageLeft" xml:space="preserve">
-    <value>Я не могу этого сделать, у меня не осталось склада древесины!</value>
-  </data>
   <data name="OreFull" xml:space="preserve">
     <value>Уф... хранилище руды заполнено!</value>
   </data>
@@ -143,18 +125,6 @@
   </data>
   <data name="TimberFull" xml:space="preserve">
     <value>Уф... лесохранилище заполнено!</value>
-  </data>
-  <data name="TeleOn" xml:space="preserve">
-    <value>Телепортация теперь включена.</value>
-  </data>
-  <data name="TeleOff" xml:space="preserve">
-    <value>Телепортация отключена.</value>
-  </data>
-  <data name="DistTeleOn" xml:space="preserve">
-    <value>Телепортация на основе расстояния теперь включена.</value>
-  </data>
-  <data name="DistTeleOff" xml:space="preserve">
-    <value>Телепортация на основе расстояния отключена.</value>
   </data>
   <data name="DumpTimber" xml:space="preserve">
     <value>Сваливай сюда дрова!</value>
@@ -165,7 +135,10 @@
   <data name="DumpStone" xml:space="preserve">
     <value>Свалка камня и мрамора сюда!</value>
   </data>
-  <data name="ErrorMsg" xml:space="preserve">
-    <value>Что-то пошло не так с магией телепортации ресурсов - пожалуйста, дайте мне знать. Журнал был сохранен в каталоге мода.</value>
+  <data name="TeleOn" xml:space="preserve">
+    <value>Телепортация на свалку, когда все склады заполнены, теперь включена.</value>
+  </data>
+  <data name="TeleOff" xml:space="preserve">
+    <value>Телепортация к местам свалки, когда все склады заполнены, отключена.</value>
   </data>
 </root>

@@ -332,9 +332,15 @@ namespace Helper
                 CrossModFields.IsCraft = other_obj.is_player && __instance.obj_def.interaction_type != ObjectDefinition.InteractionType.Chest && __instance.obj_def.has_craft;
                 CrossModFields.IsChest = __instance.obj_def.interaction_type == ObjectDefinition.InteractionType.Chest;
                 CrossModFields.IsBarman = __instance.obj_id.ToLowerInvariant().Contains("barman");
-                CrossModFields.IsTavernCellar = __instance.obj_id.ToLowerInvariant().Contains("tavern_cellar");
+                CrossModFields.IsTavernCellarRack = __instance.obj_id.ToLowerInvariant().Contains("tavern_cellar_rack");
                 CrossModFields.IsRefugee = __instance.obj_id.ToLowerInvariant().Contains("refugee");
                 CrossModFields.IsWritersTable = __instance.obj_id.ToLowerInvariant().Contains("writer");
+                CrossModFields.IsSoulBox = __instance.obj_id.ToLowerInvariant().Contains("soul_container");
+
+                if (__instance.obj_def.inventory_size > 0)
+                {
+                    __instance.data.sub_name = __instance.obj_id + "#" + __instance.GetMyWorldZoneId();
+                }
 
                 //Beam Me Up & Save Now
                 CrossModFields.IsInDungeon = __instance.obj_id.ToLowerInvariant().Contains("dungeon_enter");

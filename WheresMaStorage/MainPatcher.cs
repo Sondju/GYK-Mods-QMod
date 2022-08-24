@@ -7,8 +7,10 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
+using Expressive;
 using UnityEngine;
 using WheresMaStorage.lang;
+using System.Security.Policy;
 
 namespace WheresMaStorage
 {
@@ -26,6 +28,7 @@ namespace WheresMaStorage
         private const string Tavern = "tavern";
         private const string Vendor = "vendor";
         private const string Writer = "writer";
+        private const string Soul = "soul_container";
 
         private static readonly string[] AlwaysHidePartials =
         {
@@ -118,7 +121,7 @@ namespace WheresMaStorage
                     Log(
                         $"[RefugeeGarden&Desk-InvRedirect]: Returned player multi-inventory to refugee garden!: Requester: {otherGameObject.obj_id}, Craft: {craft.id}, isPlayer: {otherGameObject.is_player}");
 
-                    return _mi;
+                    return GetMiInventory();
                 }
             }
 
@@ -145,7 +148,7 @@ namespace WheresMaStorage
                 _timeEight = Time.time;
                 Log($"[InvRedirect]: Redirected craft inventory to player MultiInventory! Object: {otherGameObject.obj_id}, Craft: {craft.id}, Gratitude: {_gratitudeCraft}");
 
-                return _mi;
+                return GetMiInventory();
             }
 
             _zombieWorker = false;
@@ -175,6 +178,18 @@ namespace WheresMaStorage
             }
         }
 
+        private static MultiInventory GetMiInventory()
+        {
+            if (WildernessInventories.Count <= 0) return _mi;
+
+            foreach (var inv in WildernessInventories)
+            {
+                _mi.AddInventory(inv);
+            }
+
+            return _mi;
+        }
+
         private static string GetLocalizedString(string content)
         {
             Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
@@ -188,6 +203,49 @@ namespace WheresMaStorage
                 Tools.Log("WheresMaStorage", $"{message}", error);
             }
         }
+
+        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.ReplaceWithObject))]
+        public static class WorldGameObjectReplaceWithObjectPatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref WorldGameObject __instance)
+            {
+                LoadWildernessInventories(__instance);
+            }
+        }
+
+        private static readonly string[] ExcludeTheseWildernessInventories =
+        {   
+            "vendor", "npc", "donkey", "zombie", "worker", "refugee", "pile", "carrot", "cooking", "guard", "working", "obj_church"
+        };
+
+        private static void LoadWildernessInventories(WorldGameObject wgo)
+        {
+            if (wgo.obj_def.inventory_size <= 0 || ExcludeTheseWildernessInventories.Any(wgo.obj_id.Contains) || wgo.data.inventory_size == _cfg.AdditionalInventorySpace) return;
+
+            var zoneId = wgo.GetMyWorldZoneId();
+            wgo.data.sub_name = wgo.obj_id + "#" + zoneId;
+
+            if (!string.IsNullOrEmpty(zoneId)) return;
+
+            var exists = WildernessMultiInventories.ContainsKey(wgo);
+            if (!exists)
+            {
+                WildernessMultiInventories.Add(wgo, wgo.GetMultiInventoryOfWGOWithoutWorldZone());
+                Log($"Added {wgo.obj_id}'s ({zoneId}, {wgo.pos3}) MultiInventory to WildernessMultiInventories.");
+            }
+
+            var invCount = 0;
+            foreach (var inv in wgo.GetMultiInventoryOfWGOWithoutWorldZone().all.Where(inv => !WildernessInventories.Contains(inv)))
+            {
+                invCount++;
+                WildernessInventories.Add(inv);
+                Log($"Added {wgo.obj_id}'s ({zoneId}, {wgo.pos3}) Inventory {inv._obj_id} (#{invCount}) to WildernessInventories.");
+            }
+        }
+
+        private static readonly Dictionary<WorldGameObject, MultiInventory> WildernessMultiInventories = new();
+        private static readonly List<Inventory> WildernessInventories = new();
 
         private static void SetInventorySizeText(BaseInventoryWidget inventoryWidget)
         {
@@ -331,7 +389,7 @@ namespace WheresMaStorage
                             $"[BaseCraftGUI.multi_inventory (Getter)]: {__instance.name}, Craftery: {__instance.GetCrafteryWGO().obj_id}");
                     }
                 }
-                __result = _mi;
+                __result = GetMiInventory();
             }
         }
 
@@ -576,14 +634,6 @@ namespace WheresMaStorage
                     }
                 }
 
-                if (isResourcePanelProbably || isPlayerPanel || isChestPanel)
-                {
-                    foreach (var inventoryWidget in ____widgets)
-                    {
-                        SetInventorySizeText(inventoryWidget);
-                    }
-                }
-
                 if (isResourcePanelProbably)
                 {
                     foreach (var customWidget in ____custom_widgets)
@@ -602,13 +652,23 @@ namespace WheresMaStorage
                     inventoryWidget.Deactivate();
                 }
 
-                if (isVendorPanel || CrossModFields.IsBarman || CrossModFields.IsTavernCellar || CrossModFields.IsRefugee) return;
+                if (isResourcePanelProbably || isPlayerPanel || isChestPanel)
+                {
+                    foreach (var inventoryWidget in ____widgets.Where(a=>a.gameObject.activeSelf))
+                    {
+                        SetInventorySizeText(inventoryWidget);
+                    }
+                }
+
+
+                if (isVendorPanel || CrossModFields.IsBarman || CrossModFields.IsTavernCellarRack || CrossModFields.IsSoulBox || CrossModFields.IsRefugee) return;
+               
                 foreach (var customWidget in from customWidget in ____custom_widgets let id = customWidget.inventory_data.id where (_cfg.HideRefugeeWidgets && id.Contains(Refugee)) || (_cfg.HideStockpileWidgets && StockpileWidgetsPartials.Any(id.Contains)) || (_cfg.HideTavernWidgets && id.Contains(Tavern)) || (_cfg.HideWarehouseShopWidgets && id.Contains(Storage)) select customWidget)
                 {
                     customWidget.Deactivate();
                 }
 
-                foreach (var inventoryWidget in from inventoryWidget in ____widgets let id = inventoryWidget.inventory_data.id where (_cfg.HideRefugeeWidgets && id.Contains(Refugee)) || (_cfg.HideStockpileWidgets && StockpileWidgetsPartials.Any(id.Contains)) || (_cfg.HideTavernWidgets && id.Contains(Tavern)) || (_cfg.HideWarehouseShopWidgets && id.Contains(Storage)) select inventoryWidget)
+                foreach (var inventoryWidget in from inventoryWidget in ____widgets let id = inventoryWidget.inventory_data.id where (_cfg.HideRefugeeWidgets && id.Contains(Refugee)) || (_cfg.HideSoulWidgets && id.Contains(Soul)) || (_cfg.HideStockpileWidgets && StockpileWidgetsPartials.Any(id.Contains)) || (_cfg.HideTavernWidgets && id.Contains(Tavern)) || (_cfg.HideWarehouseShopWidgets && id.Contains(Storage)) select inventoryWidget)
                 {
                     if (!inventoryWidget.inventory_data.id.Contains(Writer))
                     {
@@ -631,7 +691,7 @@ namespace WheresMaStorage
 
                 if (CrossModFields.IsCraft || CrossModFields.IsVendor) return;
 
-                if (_cfg.ShowOnlyPersonalInventory || CrossModFields.IsBarman || CrossModFields.IsTavernCellar || CrossModFields.IsRefugee || CrossModFields.IsChest || CrossModFields.IsWritersTable)
+                if (_cfg.ShowOnlyPersonalInventory || CrossModFields.IsBarman || CrossModFields.IsTavernCellarRack || CrossModFields.IsSoulBox || CrossModFields.IsRefugee || CrossModFields.IsChest || CrossModFields.IsWritersTable)
                 {
                     var onlyMineInventory = new MultiInventory();
                     onlyMineInventory.AddInventory(multi_inventory.all[0]);
@@ -831,12 +891,55 @@ namespace WheresMaStorage
             }
         }
 
+        [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.DestroyMe))]
+        public static class WorldGameObjectDestroyMePatch
+        {
+            [HarmonyPostfix]
+            public static void Postfix(ref WorldGameObject __instance)
+            {
+                if (__instance.data.inventory_size <= 0 || !string.IsNullOrEmpty(__instance.GetMyWorldZoneId())) return;
+
+                if (WildernessMultiInventories.ContainsKey(__instance))
+                {
+                    WildernessMultiInventories.Remove(__instance);
+                }
+
+                foreach (var inv in __instance.GetMultiInventoryOfWGOWithoutWorldZone().all.Where(inv => WildernessInventories.Contains(inv)))
+                {
+                    WildernessInventories.Remove(inv);
+                }
+
+                foreach (var inv in __instance.GetMultiInventoryOfWGOWithoutWorldZone().all.Where(inv => _mi.all.Contains(inv)))
+                {
+                    _mi.all.Remove(inv);
+                }
+
+
+            }
+        }
+
+
+        private static bool _wildInvsLoaded;
+
         [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]
         public static class TimeOfDayUpdatePatch
         {
             [HarmonyPrefix]
             public static void Prefix()
             {
+                if(!MainGame.game_started) return;
+
+                if (!_wildInvsLoaded)
+                {
+                    _wildInvsLoaded = true;
+                    var wgos = UnityEngine.Object.FindObjectsOfType<WorldGameObject>(true).Where(a =>
+                        a.data.inventory_size > 0 && string.IsNullOrEmpty(a.GetMyWorldZoneId()));
+                    foreach (var wgo in wgos)
+                    {
+                        LoadWildernessInventories(wgo);
+                    }
+                }
+
                 if (Input.GetKeyUp(KeyCode.F5))
                 {
                     _cfg = Config.GetOptions();
@@ -849,25 +952,7 @@ namespace WheresMaStorage
                 }
             }
         }
-
-
-        [HarmonyPatch]
-        public static class WorldZonePatch
-        {
-            //public static WorldZone GetZoneByID(string id, bool null_is_error = true)
-            //{
-            //    foreach (WorldZone allZone in WorldZone._all_zones)
-            //    {
-            //        if (!(allZone.id != id) && !allZone.IsDisabled())
-            //            return allZone;
-            //    }
-            //    if (null_is_error)
-            //        Debug.LogError((object)("Could't find zone [" + id + "]"));
-            //    return (WorldZone)null;
-            //}
-        }
-
-
+        
         [HarmonyPatch(typeof(WorldGameObject), nameof(WorldGameObject.GetMultiInventory))]
         public static class WorldGameObjectGetMultiInventoryPatch
         {
@@ -952,7 +1037,7 @@ namespace WheresMaStorage
                             Log($"[WorldGameObject.GetMultiInventory-Postfix]: Refugee farm or Invisible worker. Sending cache: {__instance.obj_id}, isPlayer: {__instance.is_player}");
                         }
 
-                        __result = _mi;
+                        __result = GetMiInventory();
                         return;
                     }
 
@@ -961,7 +1046,7 @@ namespace WheresMaStorage
                         //Log(
                         //    $"[WorldGameObject.GetMultiInventory-Postfix]: _previousWgo == __instance. Sending cache: {__instance.obj_id}");
 
-                        __result = _mi;
+                        __result = GetMiInventory();
                         return;
                     }
                 }
@@ -1000,12 +1085,15 @@ namespace WheresMaStorage
                         //if (worldZone == null) continue;
 
                         //if (ZoneExclusions.Contains(worldZone.id)) continue;
+                        var get = MainGame.me.save.known_world_zones.Exists(a => string.Equals(a, zone.id));
+                        if (!get) continue;
                         var worldZoneMulti =
                             zone.GetMultiInventory(player_mi: MultiInventory.PlayerMultiInventory.ExcludePlayer,
                                 sortWGOS: true);
                         if (worldZoneMulti == null) continue;
                         foreach (var inv in worldZoneMulti.Where(inv => inv != null))// && inv.data.inventory.Count != 0))
                         {
+                            
                             if (zone.id.ToLowerInvariant().Contains("refugee"))
                             {
                                 _refugeeMi.AddInventory(inv);
@@ -1020,7 +1108,15 @@ namespace WheresMaStorage
                                 }
                             }
 
-                            inv.data.sub_name = inv._obj_id + "#" + zone.id;
+                            if (inv._obj_id.Length <= 0)
+                            {
+                                inv.data.sub_name = "Unknown" + "#" + zone.id;
+                            }
+                            else
+                            {
+                                inv.data.sub_name = inv._obj_id + "#" + zone.id;
+                            }
+                            
                             _mi.AddInventory(inv);
                         }
                     }
@@ -1035,7 +1131,7 @@ namespace WheresMaStorage
                         }
                     }
 
-                    __result = _mi;
+                    __result = GetMiInventory();
                 }
             }
         }

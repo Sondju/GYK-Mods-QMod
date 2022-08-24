@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
@@ -194,14 +195,33 @@ namespace Helper
             CrossModFields.IsCraft = false;
             CrossModFields.IsChest = false;
             CrossModFields.IsBarman = false;
-            CrossModFields.IsTavernCellar = false;
+            CrossModFields.IsTavernCellarRack = false;
             CrossModFields.IsRefugee = false;
             CrossModFields.IsWritersTable = false;
+            CrossModFields.IsSoulBox = false;
             CrossModFields.TalkingToNpc("QModHelper: SetAllInteractionsFalse", false);
         }
 
         private static WorldGameObject _gerry;
         private static bool _gerryRunning;
+
+
+        
+
+        public static bool PlayerHasSeenZone(string zoneId)
+        {
+            return MainGame.me.save.known_world_zones.Exists(a => string.Equals(a, zoneId));
+        }
+
+        public static bool PlayerKnowsNpcExact(string exactNpcId)
+        {
+            return MainGame.me.save.known_npcs.npcs.Exists(a => string.Equals(a.npc_id,exactNpcId,StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        public static bool PlayerKnowsNpcPartial(string partialNpcId)
+        {
+            return MainGame.me.save.known_npcs.npcs.Exists(a => a.npc_id.Contains(partialNpcId));
+        }
 
         public static void SpawnGerry(string message, Vector3 customPosition)
         {

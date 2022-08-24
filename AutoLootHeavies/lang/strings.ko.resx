@@ -117,24 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NoOreInRange" xml:space="preserve">
-    <value>젠장, 범위에 광석 비축량이 없습니다...</value>
-  </data>
-  <data name="NoOreStorageLeft" xml:space="preserve">
-    <value>할 수 없습니다. 남은 광석 저장소가 없습니다!</value>
-  </data>
-  <data name="NoStoneInRange" xml:space="preserve">
-    <value>젠장, 범위에 돌 비축이 없어...</value>
-  </data>
-  <data name="NoStoneStorageLeft" xml:space="preserve">
-    <value>할 수 없어, 남은 돌 창고가 없어!</value>
-  </data>
-  <data name="NoTimberInRange" xml:space="preserve">
-    <value>젠장, 범위에 목재 비축량이 없습니다...</value>
-  </data>
-  <data name="NoTimberStorageLeft" xml:space="preserve">
-    <value>할 수 없습니다. 남은 목재 창고가 없습니다!</value>
-  </data>
   <data name="OreFull" xml:space="preserve">
     <value>휴...광석 저장소가 가득 찼습니다!</value>
   </data>
@@ -143,18 +125,6 @@
   </data>
   <data name="TimberFull" xml:space="preserve">
     <value>휴...목재 창고가 가득 찼습니다!</value>
-  </data>
-  <data name="TeleOn" xml:space="preserve">
-    <value>순간이동이 켜져 있습니다.</value>
-  </data>
-  <data name="TeleOff" xml:space="preserve">
-    <value>이제 순간이동이 꺼져 있습니다.</value>
-  </data>
-  <data name="DistTeleOn" xml:space="preserve">
-    <value>이제 거리 기반 순간이동이 켜집니다.</value>
-  </data>
-  <data name="DistTeleOff" xml:space="preserve">
-    <value>이제 거리 기반 순간이동이 꺼져 있습니다.</value>
   </data>
   <data name="DumpTimber" xml:space="preserve">
     <value>여기에 목재를 버리십시오!</value>
@@ -165,7 +135,10 @@
   <data name="DumpStone" xml:space="preserve">
     <value>여기에 돌과 대리석을 버리십시오!</value>
   </data>
-  <data name="ErrorMsg" xml:space="preserve">
-    <value>자원을 순간이동하는 마법에 문제가 발생했습니다. 알려주세요. 모드 디렉토리에 로그가 저장되었습니다.</value>
+  <data name="TeleOn" xml:space="preserve">
+    <value>모든 비축량이 가득 찼을 때 투기장으로 순간이동하는 기능이 켜져 있습니다.</value>
+  </data>
+  <data name="TeleOff" xml:space="preserve">
+    <value>모든 비축량이 가득 찼을 때 덤프 사이트로 순간 이동하는 기능이 해제되었습니다.</value>
   </data>
 </root>

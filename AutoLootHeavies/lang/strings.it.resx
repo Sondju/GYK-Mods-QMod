@@ -117,24 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NoOreInRange" xml:space="preserve">
-    <value>Dannazione, nessuna riserva di minerale nel raggio d'azione...</value>
-  </data>
-  <data name="NoOreStorageLeft" xml:space="preserve">
-    <value>Non posso farlo, non ho più spazio di archiviazione!</value>
-  </data>
-  <data name="NoStoneInRange" xml:space="preserve">
-    <value>Dannazione, nessuna scorta di pietre nel raggio di azione...</value>
-  </data>
-  <data name="NoStoneStorageLeft" xml:space="preserve">
-    <value>Non posso farlo, non ho più deposito di pietre!</value>
-  </data>
-  <data name="NoTimberInRange" xml:space="preserve">
-    <value>Dannazione, nessuna scorta di legname a portata di mano...</value>
-  </data>
-  <data name="NoTimberStorageLeft" xml:space="preserve">
-    <value>Non posso farlo, non ho più deposito di legname!</value>
-  </data>
   <data name="OreFull" xml:space="preserve">
     <value>Phew... lo spazio di archiviazione del minerale è ora pieno!</value>
   </data>
@@ -143,18 +125,6 @@
   </data>
   <data name="TimberFull" xml:space="preserve">
     <value>Uff... lo stoccaggio del legname è ora pieno!</value>
-  </data>
-  <data name="TeleOn" xml:space="preserve">
-    <value>Il teletrasporto è ora attivo.</value>
-  </data>
-  <data name="TeleOff" xml:space="preserve">
-    <value>Il teletrasporto è ora DISATTIVATO.</value>
-  </data>
-  <data name="DistTeleOn" xml:space="preserve">
-    <value>Il teletrasporto basato sulla distanza è ora ATTIVO.</value>
-  </data>
-  <data name="DistTeleOff" xml:space="preserve">
-    <value>Il teletrasporto basato sulla distanza è ora DISATTIVATO.</value>
   </data>
   <data name="DumpTimber" xml:space="preserve">
     <value>Scarica legname qui!</value>
@@ -165,7 +135,10 @@
   <data name="DumpStone" xml:space="preserve">
     <value>Scarica pietra e marmo qui!</value>
   </data>
-  <data name="ErrorMsg" xml:space="preserve">
-    <value>Qualcosa è andato storto con la magia del teletrasporto delle risorse - per favore fatemelo sapere. Un registro è stato salvato nella directory mod.</value>
+  <data name="TeleOn" xml:space="preserve">
+    <value>Il teletrasporto verso le discariche quando tutte le scorte sono piene è ora ATTIVO.</value>
+  </data>
+  <data name="TeleOff" xml:space="preserve">
+    <value>Il teletrasporto ai siti di discarica quando tutte le scorte sono piene è ora DISATTIVATO.</value>
   </data>
 </root>
