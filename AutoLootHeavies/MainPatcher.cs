@@ -76,7 +76,10 @@ public class MainPatcher
 
     private static void Log(string message, bool error = false)
     {
-        Tools.Log("AutoLootHeavies", $"{message}", error);
+        if (_cfg.Debug || error)
+        {
+            Tools.Log("AutoLootHeavies", $"{message}", error);
+        }
     }
 
     private static void ScanStockpiles()
@@ -275,6 +278,7 @@ public class MainPatcher
             if (type != Stockpile.StockpileType.Unknown)
             {
                 SortedStockpiles.Add(newStockpile);
+                _needScanning = true;
             }
         }
     }
@@ -304,7 +308,7 @@ public class MainPatcher
                 __instance.obj_id.Contains(Constants.ItemObjectId.Stone))
             {
                 AddStockpile(__instance);
-                _needScanning = true;
+               
             }
         }
 
@@ -322,15 +326,23 @@ public class MainPatcher
         }
     }
 
+    private static bool OverheadItemIsHeavy(Item item)
+    {
+        return item.id.Contains(Constants.ItemDefinitionId.Wood) ||
+            item.id.Contains(Constants.ItemDefinitionId.Ore) ||
+            item.id.Contains(Constants.ItemDefinitionId.Stone) ||
+            item.id.Contains(Constants.ItemDefinitionId.Marble);
+    }
+
     [HarmonyPatch(typeof(BaseCharacterComponent), nameof(BaseCharacterComponent.DropOverheadItem))]
     public class BaseCharacterComponentDropOverheadItemPatch
     {
         [HarmonyPostfix]
         public static void Postfix(ref BaseCharacterComponent __instance, ref Item ___overhead_item,
-            ref (bool wood, bool stone, bool iron, bool runCode) __state)
+            ref bool __state)
         {
             if (!__instance.wgo.is_player) return;
-            if (!__state.runCode) return;
+            if (!__state) return;
 
             List<Item> insert = new();
             var item = ___overhead_item;
@@ -373,45 +385,15 @@ public class MainPatcher
 
         [HarmonyPrefix]
         public static bool Prefix(ref BaseCharacterComponent __instance, ref Item ___overhead_item,
-            ref (bool wood, bool stone, bool iron, bool runCode) __state)
+            ref bool __state)
         {
-            if (!__instance.wgo.is_player) return true;
-            if (!___overhead_item.id.Contains(Constants.ItemDefinitionId.Wood) ||
-                !___overhead_item.id.Contains(Constants.ItemDefinitionId.Ore) ||
-                !___overhead_item.id.Contains(Constants.ItemDefinitionId.Stone) ||
-                !___overhead_item.id.Contains(Constants.ItemDefinitionId.Marble))
+            if (OverheadItemIsHeavy(___overhead_item) && __instance.wgo.is_player)
             {
-                return true;
+                __state = true;
+                return false;
             }
 
-            var itemIdentifier = ___overhead_item.definition.id;
-
-            var itemIsLog = itemIdentifier.ToLower().Contains(Constants.ItemDefinitionId.Wood);
-            var itemIsStone = itemIdentifier.Contains(Constants.ItemDefinitionId.Stone) ||
-                              itemIdentifier.Contains(Constants.ItemDefinitionId.Marble);
-            var itemIsOre = itemIdentifier.Contains(Constants.ItemDefinitionId.Ore);
-
-            var run = itemIsLog || itemIsStone || itemIsOre;
-            if (!run) return true;
-            //UpdateStockpiles();
-
-            var stocks = string.Empty;
-            foreach (var s in SortedStockpiles)
-            {
-                var stockpile = s.GetStockpileObject();
-                stocks += $"\nStockpile: {s.GetStockpileType()}\n";
-                stocks += $"Location (Vector3): {s.GetLocation()}\n";
-                stocks += $"Zone: {GJL.L(s.GetStockpileObject().GetMyWorldZoneId())}\n";
-                stocks += $"Distance from player: {s.GetDistanceFromPlayer()}\n";
-                stocks += $"Total Space: {stockpile.data.inventory_size}\n";
-                stocks += $"Free Space: {stockpile.data.inventory_size - stockpile.data.inventory.Count}\n";
-                stocks += "---------------";
-            }
-
-            Log($"{stocks}");
-
-            __state = (itemIsLog, itemIsStone, itemIsOre, true);
-            return false;
+            return true;
         }
     }
 
@@ -421,16 +403,10 @@ public class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(ref BaseCharacterComponent __instance, ref Item item)
         {
-            if (__instance.wgo.is_player && item != null)
+            if (__instance.wgo.is_player && item != null && OverheadItemIsHeavy(item))
             {
-                if (item.id.Contains(Constants.ItemDefinitionId.Wood) ||
-                    item.id.Contains(Constants.ItemDefinitionId.Ore) ||
-                    item.id.Contains(Constants.ItemDefinitionId.Stone) ||
-                    item.id.Contains(Constants.ItemDefinitionId.Marble))
-                {
-                    RunFullUpdate();
-                    UpdateStockpiles();
-                }
+                RunFullUpdate();
+                UpdateStockpiles();
             }
         }
     }

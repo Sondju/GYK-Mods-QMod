@@ -31,6 +31,9 @@ public static class Config
         bool.TryParse(_con.Value("DisableImmersionMode", "false"), out var disableImmersionMode);
         _options.DisableImmersionMode = disableImmersionMode;
 
+        bool.TryParse(_con.Value("Debug", "false"), out var debug);
+        _options.Debug = debug;
+
         var tempT = _con.Value("DesignatedTimberLocation", "-3712.003,6144,1294.643".ToString(CultureInfo.InvariantCulture)).Split(',');
         var tempO = _con.Value("DesignatedOreLocation", "-3712.003,6144,1294.643".ToString(CultureInfo.InvariantCulture)).Split(',');
         var tempS = _con.Value("DesignatedStoneLocation", "-3712.003,6144,1294.643".ToString(CultureInfo.InvariantCulture)).Split(',');
@@ -55,5 +58,6 @@ public static class Config
         public Vector3 DesignatedOreLocation;
         public Vector3 DesignatedStoneLocation;
         public bool DisableImmersionMode;
+        public bool Debug;
     }
 }

@@ -152,9 +152,9 @@ public static class MainPatcher
             _originalFasterCraft = false;
             _exhaustlessEnabled = false;
 
-            _fasterCraftReloaded = Tools.ModLoaded("FasterCraftReloaded", "", "") || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.FasterCraftReloaded");
+            _fasterCraftReloaded = Tools.ModLoaded("FasterCraftReloaded", "FasterCraftReloaded.dll", "FasterCraft Reloaded!") || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.FasterCraftReloaded");
             _originalFasterCraft = Harmony.HasAnyPatches("com.glibfire.graveyardkeeper.fastercraft.mod");
-            _exhaustlessEnabled = Tools.ModLoaded("Exhaustless", "", "") || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.exhaust-less");
+            _exhaustlessEnabled = Tools.ModLoaded("Exhaustless", "Exhaust-less.dll", "Exhaust-less") || Harmony.HasAnyPatches("p1xel8ted.GraveyardKeeper.exhaust-less");
 
             if (_fasterCraftReloaded)
             {
