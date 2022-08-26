@@ -8,7 +8,7 @@ namespace AddStraightToTable;
 
 public static class MainPatcher
 {
-    private const string WheresMaStorageId = "WheresMaStorageId";
+    private const string WheresMaStorageId = "WheresMaStorage";
     private const string WheresMaStorageFileName = "WheresMaStorage.dll";
     private const string WheresMaStorageName = "Where's Ma' Storage!";
     private static Config.Options _cfg;
