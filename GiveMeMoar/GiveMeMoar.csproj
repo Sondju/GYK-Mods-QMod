@@ -2,10 +2,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{23E99E91-DC6C-4FAC-920B-F5DB145B81E6}</ProjectGuid>
+    <ProjectGuid>{92EC5055-76E8-484D-8E09-6292FDA083A1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
-    <AssemblyName>FasterCraftReloaded</AssemblyName>
+    <AssemblyName>GiveMeMoar</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -29,7 +29,7 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <RootNamespace>FasterCraftReloaded</RootNamespace>
+    <RootNamespace>GiveMeMoar</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
@@ -42,7 +42,7 @@
     <Compile Include="MainPatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-    <ItemGroup>
+  <ItemGroup>
     <PackageReference Include="UnityEngine.Modules" Version="2020.3.17" IncludeAssets="compile" />
   </ItemGroup>
   <ItemGroup>
@@ -64,7 +64,6 @@
     <ProjectReference Include="..\Helper\QModHelper.csproj">
       <Project>{17e3eeaa-86d5-4737-bc62-bb6dd43f0fee}</Project>
       <Name>QModHelper</Name>
-      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -75,13 +74,13 @@
     <EmbeddedResource Include="lang\strings.ja.resx" />
     <EmbeddedResource Include="lang\strings.ko.resx" />
     <EmbeddedResource Include="lang\strings.pl.resx" />
-    <EmbeddedResource Include="lang\strings.pt-br.resx" />
+    <EmbeddedResource Include="lang\strings.pt-BR.resx" />
     <EmbeddedResource Include="lang\strings.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="lang\strings.ru.resx" />
-    <EmbeddedResource Include="lang\strings.zh-cn.resx" />
+    <EmbeddedResource Include="lang\strings.zh-CN.resx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>

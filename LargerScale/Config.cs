@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace LargerScale;
 
@@ -12,8 +13,8 @@ public static class Config
         _options = new Options();
         _con = new ConfigReader();
 
-        var gameScaleBool = int.TryParse(_con.Value("GameScale", "2"), out var gameScale);
-        _options.GameScale = gameScaleBool ? gameScale : 2;
+        int.TryParse(_con.Value("GameScale", "2"), NumberStyles.Integer, CultureInfo.InvariantCulture, out var gameScale);
+        _options.GameScale = gameScale;
 
         _con.ConfigWrite();
 
@@ -23,6 +24,6 @@ public static class Config
     [Serializable]
     public class Options
     {
-        public int GameScale = 2;
+        public int GameScale;
     }
 }

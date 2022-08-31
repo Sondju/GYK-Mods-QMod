@@ -215,8 +215,24 @@ namespace IBuildWhereIWant
                 if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
                 BuildModeLogics.last_build_desk = _buildDeskClone;
                 ____cur_build_zone_id = Zone;
-                ____cur_build_zone = WorldZone.GetZoneByID(Zone, true);
+                ____cur_build_zone = WorldZone.GetZoneByID(Zone);
                 ____cur_build_zone_bounds = ____cur_build_zone.GetBounds();
+            }
+        }
+
+        [HarmonyPatch(typeof(FloatingWorldGameObject), "RecalculateAvailability")]
+        public static class FloatingWorldGameObjectPatch
+        {
+   
+            [HarmonyPostfix]
+            [HarmonyPatch("RecalculateAvailability")]
+            public static void Postfix()
+            {
+                if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
+                if (_cfg.DisableBuildingCollision)
+                {
+                    FloatingWorldGameObject.can_be_built = true;
+                }
             }
         }
 
@@ -238,6 +254,7 @@ namespace IBuildWhereIWant
                 if (MainGame.me.player.GetMyWorldZoneId().Contains("refugee")) return;
                 __result = true;
             }
+            
         }
 
         [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.Update))]

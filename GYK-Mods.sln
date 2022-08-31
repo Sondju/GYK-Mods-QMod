@@ -73,6 +73,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegenerationReloaded", "Reg
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EconomyReloaded", "EconomyReloaded\EconomyReloaded.csproj", "{B846B133-1DEC-4914-A0ED-7F16CB683F79}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GiveMeMoar", "GiveMeMoar\GiveMeMoar.csproj", "{92EC5055-76E8-484D-8E09-6292FDA083A1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -187,6 +189,10 @@ Global
 		{B846B133-1DEC-4914-A0ED-7F16CB683F79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B846B133-1DEC-4914-A0ED-7F16CB683F79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B846B133-1DEC-4914-A0ED-7F16CB683F79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92EC5055-76E8-484D-8E09-6292FDA083A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92EC5055-76E8-484D-8E09-6292FDA083A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92EC5055-76E8-484D-8E09-6292FDA083A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92EC5055-76E8-484D-8E09-6292FDA083A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

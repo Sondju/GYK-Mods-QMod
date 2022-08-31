@@ -39,7 +39,7 @@ public class MainPatcher
             _introPlaying = string.Equals(g.name, "red_eye_talk_1");
         }
     }
-
+    
     [HarmonyPatch(typeof(SmartWeatherState), nameof(SmartWeatherState.Update))]
     public static class SmartWeatherStateUpdatePatch
     {

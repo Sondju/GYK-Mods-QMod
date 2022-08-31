@@ -17,6 +17,9 @@ public static class Config
 
         bool.TryParse(_con.Value("DisableGreyRemoveOverlay", "true"), out var disableGreyRemoveOverlay);
         _options.DisableGreyRemoveOverlay = disableGreyRemoveOverlay;
+        
+        bool.TryParse(_con.Value("DisableBuildingCollision", "false"), out var disableBuildingCollision);
+        _options.DisableBuildingCollision = disableBuildingCollision;
 
         _con.ConfigWrite();
 
@@ -28,5 +31,6 @@ public static class Config
     {
         public bool DisableGrid;
         public bool DisableGreyRemoveOverlay;
+        public bool DisableBuildingCollision;
     }
 }

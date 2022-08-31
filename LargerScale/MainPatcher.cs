@@ -36,10 +36,12 @@ public class MainPatcher
         [HarmonyPostfix]
         public static void Postfix(int width, int height, ref ResolutionConfig __result)
         {
-            __result ??= new ResolutionConfig(width, height)
+            var res = new ResolutionConfig(width, height)
             {
                 pixel_size = _cfg.GameScale
             };
+            __result = res;
+
         }
     }
 }
