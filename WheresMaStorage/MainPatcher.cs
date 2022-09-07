@@ -284,7 +284,7 @@ namespace WheresMaStorage
             {
                 wzLabel = GetLocalizedString(strings.Wilderness);
             }
-
+            
             var cultureInfo = CrossModFields.Culture;
             var textInfo = cultureInfo.TextInfo;
             wzLabel = textInfo.ToTitleCase(wzLabel);
