@@ -307,7 +307,7 @@ namespace GerrysJunkTrunk
                     gerry2.Say($"{money}", delegate
                         {
                             _shippingBox.data.inventory.Clear();
-                            if (_cfg.ShowSoldMessagesOnPlayer)
+                            if (_cfg.showSoldMessagesOnPlayer)
                             {
                                 Sounds.PlaySound("coins_sound", MainGame.me.player_pos, true);
                                 var pos = MainGame.me.player_pos;
@@ -425,7 +425,7 @@ namespace GerrysJunkTrunk
             public static void Postfix(ref bool __result, ref CraftDefinition cd)
             {
                 //
-                if (_internalCfg.ShippingBoxBuilt && _shippingBox != null)
+                if (_internalCfg.shippingBoxBuilt && _shippingBox != null)
                 {
                     if (cd.id.Contains(ShippingItem))
                     {
@@ -545,7 +545,7 @@ namespace GerrysJunkTrunk
                 Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
                 //
                 //if (!_usingShippingBox) return;
-                if (!_cfg.ShowItemPriceTooltips) return;
+                if (!_cfg.showItemPriceTooltips) return;
                 if (!UnlockedShippingBox()) return;
                 if (__instance == null || item_gui == null) return;
 
@@ -589,7 +589,7 @@ namespace GerrysJunkTrunk
                 //
                 if (!UnlockedShippingBox()) return;
                 Thread.CurrentThread.CurrentUICulture = CrossModFields.Culture;
-                if (_internalCfg.ShippingBoxBuilt && _shippingBox != null)
+                if (_internalCfg.shippingBoxBuilt && _shippingBox != null)
                 {
                     foreach (var item in _shippingBox.data.inventory)
                     {
@@ -610,7 +610,7 @@ namespace GerrysJunkTrunk
 
                     Vector3 position;
                     float time;
-                    if (_cfg.ShowSoldMessagesOnPlayer)
+                    if (_cfg.showSoldMessagesOnPlayer)
                     {
                         position = MainGame.me.player_pos;
                         position.y += 125f;
@@ -623,13 +623,13 @@ namespace GerrysJunkTrunk
                         time = 7f;
                     }
 
-                    if (_cfg.EnableGerry)
+                    if (_cfg.enableGerry)
                     {
                         StartGerryRoutine(earnings);
                     }
                     else
                     {
-                        if (_cfg.DisableSoldMessageWhenNoSale) return;
+                        if (_cfg.disableSoldMessageWhenNoSale) return;
 
                         Sounds.PlaySound("coins_sound", position, true);
                         _shippingBox.data.inventory.Clear();
@@ -638,7 +638,7 @@ namespace GerrysJunkTrunk
                             true, time);
                     }
 
-                    if (_cfg.ShowSummary && !_cfg.EnableGerry && earnings > 0)
+                    if (_cfg.showSummary && !_cfg.enableGerry && earnings > 0)
                     {
                         ShowSummary(money);
                     }
@@ -781,7 +781,7 @@ namespace GerrysJunkTrunk
                             1 => $"{strings.Header} (T{tier}) - {vendorCount} {strings.Vendor}",
                             _ => $"{strings.Header} (T{tier})"
                         };
-                        inventoryWidget.header_label.text = _cfg.ShowKnownVendorCount ? header : $"{strings.Header} (T{tier})";
+                        inventoryWidget.header_label.text = _cfg.showKnownVendorCount ? header : $"{strings.Header} (T{tier})";
                         inventoryWidget.dont_show_empty_rows = true;
                         inventoryWidget.SetInactiveStateToEmptyCells();
                     }
@@ -815,7 +815,7 @@ namespace GerrysJunkTrunk
                             1 => $"{strings.Header} (T{tier}) - {vendorCount} {strings.Vendor}",
                             _ => $"{strings.Header} (T{tier})"
                         };
-                        inventoryWidget.header_label.text = _cfg.ShowKnownVendorCount ? header : $"{strings.Header} (T{tier})";
+                        inventoryWidget.header_label.text = _cfg.showKnownVendorCount ? header : $"{strings.Header} (T{tier})";
                         inventoryWidget.dont_show_empty_rows = true;
                         inventoryWidget.SetInactiveStateToEmptyCells();
                     }
@@ -857,29 +857,29 @@ namespace GerrysJunkTrunk
                     CheckShippingBox();
                 }
 
-                if (_internalCfg.ShowIntroMessage)
+                if (_internalCfg.showIntroMessage)
                 {
                     ShowIntroMessage();
-                    _internalCfg.ShowIntroMessage = false;
+                    _internalCfg.showIntroMessage = false;
                     UpdateInternalConfig();
                 }
 
                 if (!UnlockedShippingBox()) return;
                 var sbCraft = GameBalance.me.GetData<ObjectCraftDefinition>(ShippingBoxId);
-                if (_internalCfg.ShippingBoxBuilt && _shippingBox == null)
+                if (_internalCfg.shippingBoxBuilt && _shippingBox == null)
                 {
                     _shippingBox = Object.FindObjectsOfType<WorldGameObject>(true)
                         .FirstOrDefault(x => string.Equals(x.custom_tag, ShippingBoxTag));
                     if (_shippingBox == null)
                     {
                         Log("No Shipping Box Found!");
-                        _internalCfg.ShippingBoxBuilt = false;
+                        _internalCfg.shippingBoxBuilt = false;
                         sbCraft.hidden = false;
                     }
                     else
                     {
                         Log($"Found Shipping Box at {_shippingBox.pos3}");
-                        _internalCfg.ShippingBoxBuilt = true;
+                        _internalCfg.shippingBoxBuilt = true;
                         _shippingBox.data.drop_zone_id = ShippingBoxTag;
 
                         var invSize = SmallInvSize;
@@ -999,7 +999,7 @@ namespace GerrysJunkTrunk
                 {
                     Log($"Removed Shipping Box!");
                     _shippingBox = null;
-                    _internalCfg.ShippingBoxBuilt = false;
+                    _internalCfg.shippingBoxBuilt = false;
                     var sbCraft = GameBalance.me.GetData<ObjectCraftDefinition>(ShippingBoxId);
                     sbCraft.hidden = false;
 
@@ -1021,7 +1021,7 @@ namespace GerrysJunkTrunk
                 if (string.Equals(__instance.custom_tag, ShippingBoxTag))
                 {
                     Log($"Found Shipping Box! {__instance.data.drop_zone_id}, Other: {other_obj.obj_id}");
-                    _internalCfg.ShippingBoxBuilt = true;
+                    _internalCfg.shippingBoxBuilt = true;
                     UpdateInternalConfig();
                     _usingShippingBox = true;
                     __instance.data.drop_zone_id = ShippingBoxTag;
@@ -1053,7 +1053,7 @@ namespace GerrysJunkTrunk
                 //
                 if (!UnlockedShippingBox()) return;
                 if (__instance == null) return;
-                if (_internalCfg.ShippingBoxBuilt && _shippingBox != null) return;
+                if (_internalCfg.shippingBoxBuilt && _shippingBox != null) return;
                 if (string.Equals(new_obj_id, "mf_box_stuff") && _shippingBuild)
                 {
                     Log($"Built Shipping Box!");
@@ -1071,7 +1071,7 @@ namespace GerrysJunkTrunk
                     __instance.data.drop_zone_id = ShippingBoxTag;
                     _shippingBox = __instance;
 
-                    _internalCfg.ShippingBoxBuilt = true;
+                    _internalCfg.shippingBoxBuilt = true;
                     UpdateInternalConfig();
                 }
             }

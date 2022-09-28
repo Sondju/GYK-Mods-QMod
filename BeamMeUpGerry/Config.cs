@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine.Serialization;
 
 namespace BeamMeUpGerry
 {
@@ -10,11 +11,11 @@ namespace BeamMeUpGerry
         [Serializable]
         public class Options
         {
-            public bool FadeForCustomLocations;
-            public bool IncreaseMenuAnimationSpeed;
-            public bool EnableListExpansion;
-            public bool DisableGerry;
-            public bool Debug;
+            [FormerlySerializedAs("FadeForCustomLocations")] public bool fadeForCustomLocations;
+            [FormerlySerializedAs("IncreaseMenuAnimationSpeed")] public bool increaseMenuAnimationSpeed;
+            [FormerlySerializedAs("EnableListExpansion")] public bool enableListExpansion;
+            [FormerlySerializedAs("DisableGerry")] public bool disableGerry;
+            [FormerlySerializedAs("Debug")] public bool debug;
         }
 
         public static Options GetOptions()
@@ -23,19 +24,19 @@ namespace BeamMeUpGerry
             _con = new ConfigReader();
 
             bool.TryParse(_con.Value("IncreaseMenuAnimationSpeed", "true"), out var increaseMenuAnimationSpeed);
-            _options.IncreaseMenuAnimationSpeed = increaseMenuAnimationSpeed;
+            _options.increaseMenuAnimationSpeed = increaseMenuAnimationSpeed;
 
             bool.TryParse(_con.Value("FadeForCustomLocations", "true"), out var fadeForCustomLocations);
-            _options.FadeForCustomLocations = fadeForCustomLocations;
+            _options.fadeForCustomLocations = fadeForCustomLocations;
 
             bool.TryParse(_con.Value("EnableListExpansion", "true"), out var enableListExpansion);
-            _options.EnableListExpansion = enableListExpansion;
+            _options.enableListExpansion = enableListExpansion;
 
             bool.TryParse(_con.Value("DisableGerry", "false"), out var disableGerry);
-            _options.DisableGerry = disableGerry;
+            _options.disableGerry = disableGerry;
 
             bool.TryParse(_con.Value("Debug", "false"), out var debug);
-            _options.Debug = debug;
+            _options.debug = debug;
 
             _con.ConfigWrite();
 

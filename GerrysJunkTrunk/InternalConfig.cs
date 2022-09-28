@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine.Serialization;
 
 namespace GerrysJunkTrunk;
 
@@ -9,8 +10,8 @@ public static class InternalConfig
 
     public static void WriteOptions()
     {
-        _con.UpdateValue("ShippingBoxBuilt", _options.ShippingBoxBuilt.ToString());
-        _con.UpdateValue("ShowIntroMessage", _options.ShowIntroMessage.ToString());
+        _con.UpdateValue("ShippingBoxBuilt", _options.shippingBoxBuilt.ToString());
+        _con.UpdateValue("ShowIntroMessage", _options.showIntroMessage.ToString());
     }
 
     public static Options GetOptions()
@@ -19,10 +20,10 @@ public static class InternalConfig
         _con = new InternalConfigReader();
 
         bool.TryParse(_con.Value("ShippingBoxBuilt", "false"), out var shippingBoxBuilt);
-        _options.ShippingBoxBuilt = shippingBoxBuilt;
+        _options.shippingBoxBuilt = shippingBoxBuilt;
 
         bool.TryParse(_con.Value("ShowIntroMessage", "true"), out var showIntroMessage);
-        _options.ShowIntroMessage = showIntroMessage;
+        _options.showIntroMessage = showIntroMessage;
 
         _con.ConfigWrite();
 
@@ -32,7 +33,7 @@ public static class InternalConfig
     [Serializable]
     public class Options
     {
-        public bool ShippingBoxBuilt;
-        public bool ShowIntroMessage;
+        [FormerlySerializedAs("ShippingBoxBuilt")] public bool shippingBoxBuilt;
+        [FormerlySerializedAs("ShowIntroMessage")] public bool showIntroMessage;
     }
 }

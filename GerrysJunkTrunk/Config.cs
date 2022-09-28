@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine.Serialization;
 
 namespace GerrysJunkTrunk;
 
@@ -13,22 +14,22 @@ public static class Config
         _con = new ConfigReader();
 
         bool.TryParse(_con.Value("ShowSoldMessagesOnPlayer", "true"), out var showSoldMessagesOnPlayer);
-        _options.ShowSoldMessagesOnPlayer = showSoldMessagesOnPlayer;
+        _options.showSoldMessagesOnPlayer = showSoldMessagesOnPlayer;
 
         bool.TryParse(_con.Value("DisableSoldMessageWhenNoSale", "false"), out var disableSoldMessageWhenNoSale);
-        _options.DisableSoldMessageWhenNoSale = disableSoldMessageWhenNoSale;
+        _options.disableSoldMessageWhenNoSale = disableSoldMessageWhenNoSale;
 
         bool.TryParse(_con.Value("EnableGerry", "true"), out var enableGerry);
-        _options.EnableGerry = enableGerry;
+        _options.enableGerry = enableGerry;
 
         bool.TryParse(_con.Value("ShowSummary", "true"), out var showSummary);
-        _options.ShowSummary = showSummary;
+        _options.showSummary = showSummary;
 
         bool.TryParse(_con.Value("ShowItemPriceTooltips", "true"), out var showItemPriceTooltips);
-        _options.ShowItemPriceTooltips = showItemPriceTooltips;
+        _options.showItemPriceTooltips = showItemPriceTooltips;
 
         bool.TryParse(_con.Value("ShowKnownVendorCount", "true"), out var showKnownVendorCount);
-        _options.ShowKnownVendorCount = showKnownVendorCount;
+        _options.showKnownVendorCount = showKnownVendorCount;
 
         _con.ConfigWrite();
 
@@ -38,11 +39,11 @@ public static class Config
     [Serializable]
     public class Options
     {
-        public bool ShowSoldMessagesOnPlayer = true;
-        public bool DisableSoldMessageWhenNoSale;
-        public bool EnableGerry;
-        public bool ShowSummary;
-        public bool ShowItemPriceTooltips;
-        public bool ShowKnownVendorCount;
+        [FormerlySerializedAs("ShowSoldMessagesOnPlayer")] public bool showSoldMessagesOnPlayer = true;
+        [FormerlySerializedAs("DisableSoldMessageWhenNoSale")] public bool disableSoldMessageWhenNoSale;
+        [FormerlySerializedAs("EnableGerry")] public bool enableGerry;
+        [FormerlySerializedAs("ShowSummary")] public bool showSummary;
+        [FormerlySerializedAs("ShowItemPriceTooltips")] public bool showItemPriceTooltips;
+        [FormerlySerializedAs("ShowKnownVendorCount")] public bool showKnownVendorCount;
     }
 }

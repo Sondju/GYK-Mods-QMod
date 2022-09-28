@@ -106,8 +106,8 @@ namespace Helper
                     if (!Tools.TutorialDone()) return;
                     _cleanGerryRun = true;
                     var oldGerry = Object.FindObjectsOfType<WorldGameObject>(true)
-                        .Where(x => x.obj_id.Contains("talking_skull"))
-                        .Where(x => x.cur_gd_point.Length <= 0).ToList();
+                        .Where(x => x.obj_id.Contains("talking_skull") && x.cur_gd_point.Length <= 0)
+                        .ToList();
 
                     if (oldGerry.Count <= 1) return;
                     foreach (var gerry in oldGerry)

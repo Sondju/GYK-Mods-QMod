@@ -19,32 +19,32 @@ namespace BeamMeUpGerry
     {
         private static readonly List<Location> LocationsPartOne = new()
         {
-            new Location("zone_witch_hut","",new Vector3(-4964.0f, -1772.0f, -370.2f)),
-            new Location("zone_cellar","mortuary",new Vector3(10841.9f, -9241.7f, -1923.1f), EnvironmentEngine.State.Inside),
-            new Location("zone_alchemy","mortuary",new Vector3(8249.0f, -10180.7f, -2119.3f), EnvironmentEngine.State.Inside),
-            new Location("zone_morgue","mortuary",new Vector3(9744.0f, -11327.5f, -2357.9f), EnvironmentEngine.State.Inside),
-            new Location("zone_beegarden","",new Vector3(3234.0f, 1815.0f, 378.81f)),
-            new Location("zone_hill","",new Vector3(8292.7f, 1396.6f, 292.71f)),
-            new Location("zone_sacrifice","",new Vector3(9529.1f, -8427.1f, -1753.71f), EnvironmentEngine.State.Inside),
-            new Location("zone_beatch","", new Vector3(22507.9f, 314.9f, 70.3f)),
-            new Location("zone_vineyard","",new Vector3(6712.3f, 42.1f, 10.2f) ),
-            new Location("zone_camp","",new Vector3(20690.7f, 2818.7f, 591.5f)),
+            new Location("zone_witch_hut","",new Vector3(-4964, -1772, -370)),
+            new Location("zone_cellar","mortuary",new Vector3(10841, -9241, -1923), EnvironmentEngine.State.Inside),
+            new Location("zone_alchemy","mortuary",new Vector3(8249, -10180, -2119), EnvironmentEngine.State.Inside),
+            new Location("zone_morgue","mortuary",new Vector3(9744, -11327, -2357), EnvironmentEngine.State.Inside),
+            new Location("zone_beegarden","",new Vector3(3234, 1815, 378)),
+            new Location("zone_hill","",new Vector3(8292, 1396, 292)),
+            new Location("zone_sacrifice","",new Vector3(9529, -8427, -1753), EnvironmentEngine.State.Inside),
+            new Location("zone_beatch","", new Vector3(22507, 314, 70)),
+            new Location("zone_vineyard","",new Vector3(6712, 42, 10) ),
+            new Location("zone_camp","",new Vector3(20690, 2818, 591)),
             new Location("....","",Vector3.zero),
             new Location("cancel","",Vector3.zero),
         };
 
         private static readonly List<Location> LocationsPartTwo = new()
         {
-            new Location("zone_souls","mortuary",new Vector3(11050.1f, -10807.1f, -2249.21f), EnvironmentEngine.State.Inside),
-            new Location("zone_graveyard","",new Vector3(1635.7f, -1506.9f, -313.61f)),
-            new Location("zone_euric_room","euric",new Vector3(20108.0f, -11599.6f, -2412.41f), EnvironmentEngine.State.Inside),
-            new Location("zone_church","church",new Vector3(182.4f, -8218.1f, -1712.1f), EnvironmentEngine.State.Inside),
-            new Location("zone_zombie_sawmill","",new Vector3(2204.3f, 3409.7f, 710.8f) ),
-            new Location(strings.Coal,"",new Vector3(-505.5f, 6098.0f, 1270.3f)),
-            new Location(strings.Clay,"",new Vector3(595.4f, -3185.8f, -663.6f) ),
-            new Location(strings.Sand,"",  new Vector3(334.3f, 875.9f, 182.5f)),
-            new Location(strings.Mill,"", new Vector3(11805.2f, -768.9f, -157.7f)  ),
-            new Location(strings.Farmer,"",new Vector3(11800.7f, -3251.7f, -675.0f)),
+            new Location("zone_souls","mortuary",new Vector3(11050, -10807, -2249), EnvironmentEngine.State.Inside),
+            new Location("zone_graveyard","",new Vector3(1635, -1506, -313)),
+            new Location("zone_euric_room","euric",new Vector3(20108, -11599, -2412), EnvironmentEngine.State.Inside),
+            new Location("zone_church","church",new Vector3(182, -8218, -1712), EnvironmentEngine.State.Inside),
+            new Location("zone_zombie_sawmill","",new Vector3(2204, 3409, 710) ),
+            new Location(strings.Coal,"",new Vector3(-505, 6098, 1270)),
+            new Location(strings.Clay,"",new Vector3(595, -3185, -663) ),
+            new Location(strings.Sand,"",  new Vector3(334, 875, 182)),
+            new Location(strings.Mill,"", new Vector3(11805, -768, -157)  ),
+            new Location(strings.Farmer,"",new Vector3(11800, -3251, -675)),
             new Location("cancel","",Vector3.zero),
         };
         
@@ -102,7 +102,7 @@ namespace BeamMeUpGerry
 
         private static void Log(string message, bool error = false)
         {
-            if (_cfg.Debug || error)
+            if (_cfg.debug || error)
             {
                 Tools.Log("BeamMeUpGerry", $"{message}", error);
             }
@@ -282,7 +282,7 @@ namespace BeamMeUpGerry
             {
                 //
                 if (InTutorial()) return;
-                if (!_cfg.EnableListExpansion) return;
+                if (!_cfg.enableListExpansion) return;
                 if (!CanUseStone()) return;
 
                 Log($"[Answer]: {answer}");
@@ -331,7 +331,7 @@ namespace BeamMeUpGerry
             {
                 //
                 if (InTutorial()) return;
-                if (!_cfg.EnableListExpansion) return;
+                if (!_cfg.enableListExpansion) return;
                 var canUseStone = CanUseStone();
                 if (!canUseStone) return;
                 // if (_isNpc) return;
@@ -372,7 +372,7 @@ namespace BeamMeUpGerry
                 if (InTutorial()) return;
                 //
                 //  ShowHud();
-                if (!_cfg.EnableListExpansion) return;
+                if (!_cfg.enableListExpansion) return;
                 if (!CanUseStone()) return;
                 if (string.Equals("cancel", chosen))
                 {
@@ -412,7 +412,7 @@ namespace BeamMeUpGerry
                 var found = partOne || partTwo;
                 if (found)
                 {
-                    if (_cfg.FadeForCustomLocations)
+                    if (_cfg.fadeForCustomLocations)
                     {
                         CameraFader.current.FadeOut(0.15f);
                         GJTimer.AddTimer(0.15f, delegate
@@ -425,7 +425,7 @@ namespace BeamMeUpGerry
                                 CameraFader.current.FadeIn(0.15f);
                                 GJTimer.AddTimer(0.20f, delegate
                                 {
-                                    if (_cfg.DisableGerry)
+                                    if (_cfg.disableGerry)
                                     {
                                         TakeMoney(vector);
                                     }
@@ -442,7 +442,7 @@ namespace BeamMeUpGerry
                         ShowHud(null,false);
                         MainGame.me.player.PlaceAtPos(vector);
                         MainGame.me.player.components.character.control_enabled = true;
-                        if (_cfg.DisableGerry)
+                        if (_cfg.disableGerry)
                         {
                             TakeMoney(vector);
                         }
@@ -473,7 +473,7 @@ namespace BeamMeUpGerry
                 if (__instance == null) return;
                 if (!_usingStone) return;
 
-                if (!_cfg.EnableListExpansion) return;
+                if (!_cfg.enableListExpansion) return;
                 if (_dotSelection) return;
 
                 __instance.answers.Insert(__instance.answers.Count - 1, @"...");
@@ -493,7 +493,7 @@ namespace BeamMeUpGerry
                 _maGui = __instance;
 
                 if (!_usingStone) return;
-                if (_cfg.IncreaseMenuAnimationSpeed)
+                if (_cfg.increaseMenuAnimationSpeed)
                 {
                     __instance.anim_delay /= 3f;
                     __instance.anim_time /= 3f;

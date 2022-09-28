@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine.Serialization;
 
 namespace AddStraightToTable
 {
@@ -10,7 +11,7 @@ namespace AddStraightToTable
         [Serializable]
         public class Options
         {
-            public bool HideInvalidSelections;
+            [FormerlySerializedAs("HideInvalidSelections")] public bool hideInvalidSelections;
         }
 
         public static Options GetOptions()
@@ -19,7 +20,7 @@ namespace AddStraightToTable
             _con = new ConfigReader();
 
             bool.TryParse(_con.Value("HideInvalidSelections", "true"), out var hideInvalidSelections);
-            _options.HideInvalidSelections = hideInvalidSelections;
+            _options.hideInvalidSelections = hideInvalidSelections;
 
             return _options;
         }

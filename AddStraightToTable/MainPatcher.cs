@@ -61,7 +61,7 @@ public static class MainPatcher
                     {
                         if (item == null || item.IsEmpty())
                         {
-                            if (_wms && _cfg.HideInvalidSelections)
+                            if (_wms && _cfg.hideInvalidSelections)
                             {
                                 return InventoryWidget.ItemFilterResult.Inactive;
                             }
