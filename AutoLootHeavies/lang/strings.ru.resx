@@ -118,27 +118,27 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="OreFull" xml:space="preserve">
-    <value>Уф... хранилище руды заполнено!</value>
+    <value>Уф... склад руды заполнен!</value>
   </data>
   <data name="StoneFull" xml:space="preserve">
-    <value>Уф... хранилище камней теперь заполнено!</value>
+    <value>Уф... склад камней заполнен!</value>
   </data>
   <data name="TimberFull" xml:space="preserve">
-    <value>Уф... лесохранилище заполнено!</value>
+    <value>Уф... склад бревен заполнен!</value>
   </data>
   <data name="DumpTimber" xml:space="preserve">
-    <value>Сваливай сюда дрова!</value>
+    <value>Сваливай бревна сюда!</value>
   </data>
   <data name="DumpOre" xml:space="preserve">
-    <value>Сваливай сюда руду!</value>
+    <value>Сваливай руду сюда!</value>
   </data>
   <data name="DumpStone" xml:space="preserve">
-    <value>Свалка камня и мрамора сюда!</value>
+    <value>Сваливай камень и мрамор сюда!</value>
   </data>
   <data name="TeleOn" xml:space="preserve">
     <value>Телепортация на свалку, когда все склады заполнены, теперь включена.</value>
   </data>
   <data name="TeleOff" xml:space="preserve">
-    <value>Телепортация к местам свалки, когда все склады заполнены, отключена.</value>
+    <value>Телепортация на свалку, когда все склады заполнены, теперь отключена.</value>
   </data>
 </root>
