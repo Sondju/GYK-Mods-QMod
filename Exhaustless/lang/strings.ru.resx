@@ -118,12 +118,12 @@
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
 	<data name="LuckyHadAnotherPartOne" xml:space="preserve">
-    <value>повезло, что у меня был другой</value>
+    <value>Повезло, что у меня был другой</value>
   </data>
 	<data name="LuckyHadAnotherPartTwo" xml:space="preserve">
     <value>на меня!</value>
   </data>
 	<data name="Yawn" xml:space="preserve">
-    <value>Зеваю... *протирает глаза*..</value>
+    <value>Зевок... *протирает глаза*..</value>
   </data>
 </root>
