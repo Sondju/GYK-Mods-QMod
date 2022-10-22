@@ -98,12 +98,12 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ConfigMessage" xml:space="preserve">
-    <value>Конфиг перезагружен!</value>
+    <value>Конфигурация перезагружена!</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>Обнаружена несовместимость модов</value>
+    <value>Обнаружена несовместимость</value>
   </data>
   <data name="Content" xml:space="preserve">
-    <value>Похоже, у вас установлен Sprint Reloaded. К сожалению Разное. Bits &amp; Bobs и Sprint Reloaded редактируют одни и те же значения при изменении скорости игрока и несовместимы друг с другом. Сторона игрока Разное. Bits &amp; Bobs будут отключены. Скорость Портера не должна быть затронута.</value>
+    <value>Похоже, у вас установлен Sprint Reloaded. К сожалению, Misc. Bits &amp; Bobs и Sprint Reloaded редактируют одни и те же значения при изменении скорости игрока и несовместимы друг с другом. Изменения скорости игрока в Misc. Bits &amp; Bobs будут отключены. Скорость грузчиков затронута не будет.</value>
   </data>
 </root>
