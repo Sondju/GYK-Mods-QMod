@@ -118,12 +118,12 @@
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
 	<data name="ApplesReady" xml:space="preserve">
-		<value>Урожай яблок готов!</value>
+		<value>Яблоки можно собрать!</value>
 	</data>
 	<data name="BerriesReady" xml:space="preserve">
-		<value>Сбор ягод готов!</value>
+		<value>Ягоды можно собрать!</value>
 	</data>
 	<data name="HoneyReady" xml:space="preserve">
-		<value>Сбор меда готов!</value>
+		<value>Мед можно собрать!</value>
 	</data>
 </root>
