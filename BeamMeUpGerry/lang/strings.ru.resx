@@ -121,10 +121,10 @@
 		<value>Это пока нельзя использовать!</value>
 	</data>
   <data name="Ready" xml:space="preserve">
-		<value>Телепорт-камень готов!</value>
+		<value>Камень телепортации готов!</value>
 	</data>
   <data name="WhereIsIt" xml:space="preserve">
-		<value>Где я оставил этот камень...</value>
+		<value>Где же я оставил этот камень?</value>
 	</data>
   <data name="Clay" xml:space="preserve">
 		<value>Глиняный карьер</value>
@@ -133,13 +133,13 @@
 		<value>Песчаная насыпь</value>
 	</data>
   <data name="Farmer" xml:space="preserve">
-		<value>Фермер</value>
+		<value>Дом Фермера</value>
 	</data>
   <data name="Mill" xml:space="preserve">
 		<value>Мельница</value>
 	</data>
   <data name="MoreCoin" xml:space="preserve">
-    <value>Вам нужно больше монет!!</value>
+    <value>Нужно больше монет!</value>
   </data>
   <data name="DontKnow" xml:space="preserve">
     <value>Я не знаю, где это!</value>
@@ -148,10 +148,10 @@
     <value>Где моя монета?</value>
   </data>
   <data name="M2" xml:space="preserve">
-    <value>Передать его.</value>
+    <value>Отдай ее мне.</value>
   </data>
   <data name="M3" xml:space="preserve">
-    <value>Монета. В настоящее время.</value>
+    <value>Монету. Сейчас же.</value>
   </data>
   <data name="M4" xml:space="preserve">
     <value>Ты вернешься в мгновение ока.</value>
@@ -160,7 +160,7 @@
     <value>Это не благотворительность...</value>
   </data>
   <data name="M6" xml:space="preserve">
-    <value>Прокашляйся, приятель.</value>
+    <value>Раскошеливайся, приятель.</value>
   </data>
   <data name="M7" xml:space="preserve">
     <value>Приятная поездка?</value>
@@ -172,21 +172,21 @@
     <value>Мы уже на месте?</value>
   </data>
   <data name="M10" xml:space="preserve">
-    <value>Товарищ по деньгам.</value>
+    <value>Деньги, приятель.</value>
   </data>
   <data name="Coal" xml:space="preserve">
     <value>Угольная жила</value>
   </data>
   <data name="ConfigMessage" xml:space="preserve">
-    <value>Конфиг перезагружен!</value>
+    <value>Конфигурация перезагружена!</value>
   </data>
   <data name="CantUseHere" xml:space="preserve">
     <value>Я не могу использовать это здесь, босс!</value>
   </data>
   <data name="InTutorial" xml:space="preserve">
-    <value>Я пока не могу этого сделать! Кое-что об учебнике….</value>
+    <value>Я пока не могу этого сделать! Как-то связано с обучением...</value>
   </data>
   <data name="InTutorialNoStone" xml:space="preserve">
-    <value>Я пока не могу этого сделать! Что-то насчет туториала - а у тебя нет камня телепорта.</value>
+    <value>Я пока не могу этого сделать! Как-то связано с обучением... и у тебя нет камня телепортации.</value>
   </data>
 </root>
