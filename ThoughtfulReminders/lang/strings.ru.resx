@@ -60,45 +60,45 @@
             : and then encoded with base64 encoding.
     -->
 	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-		<xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+		<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
 		<xsd:element name="root" msdata:IsDataSet="true">
 			<xsd:complexType>
 				<xsd:choice maxOccurs="unbounded">
 					<xsd:element name="metadata">
 						<xsd:complexType>
 							<xsd:sequence>
-								<xsd:element name="value" type="xsd:string" minOccurs="0" />
+								<xsd:element name="value" type="xsd:string" minOccurs="0"/>
 							</xsd:sequence>
-							<xsd:attribute name="name" use="required" type="xsd:string" />
-							<xsd:attribute name="type" type="xsd:string" />
-							<xsd:attribute name="mimetype" type="xsd:string" />
-							<xsd:attribute ref="xml:space" />
+							<xsd:attribute name="name" use="required" type="xsd:string"/>
+							<xsd:attribute name="type" type="xsd:string"/>
+							<xsd:attribute name="mimetype" type="xsd:string"/>
+							<xsd:attribute ref="xml:space"/>
 						</xsd:complexType>
 					</xsd:element>
 					<xsd:element name="assembly">
 						<xsd:complexType>
-							<xsd:attribute name="alias" type="xsd:string" />
-							<xsd:attribute name="name" type="xsd:string" />
+							<xsd:attribute name="alias" type="xsd:string"/>
+							<xsd:attribute name="name" type="xsd:string"/>
 						</xsd:complexType>
 					</xsd:element>
 					<xsd:element name="data">
 						<xsd:complexType>
 							<xsd:sequence>
-								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
 							</xsd:sequence>
-							<xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-							<xsd:attribute ref="xml:space" />
+							<xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+							<xsd:attribute ref="xml:space"/>
 						</xsd:complexType>
 					</xsd:element>
 					<xsd:element name="resheader">
 						<xsd:complexType>
 							<xsd:sequence>
-								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
 							</xsd:sequence>
-							<xsd:attribute name="name" type="xsd:string" use="required" />
+							<xsd:attribute name="name" type="xsd:string" use="required"/>
 						</xsd:complexType>
 					</xsd:element>
 				</xsd:choice>
@@ -118,45 +118,45 @@
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
 	<data name="default" xml:space="preserve">
-    <value>Хм, какой сегодня день? ...</value>
-  </data>
+		<value>Хм... какой сегодня день?</value>
+	</data>
 	<data name="dEnvy" xml:space="preserve">
-    <value>День зависти...</value>
-  </data>
-	<data name="dGluttony" xml:space="preserve">
-    <value>День обжорства...</value>
-  </data>
+		<value>День зависти...</value>
+	</data>
 	<data name="dhEnvy" xml:space="preserve">
-    <value>День зависти...</value>
-  </data>
+		<value>День зависти... кажется, сегодня должен появиться Змей...</value>
+	</data>
+	<data name="dGluttony" xml:space="preserve">
+		<value>День чревоугодия...</value>
+	</data>
 	<data name="dhGluttony" xml:space="preserve">
-    <value>День Чревоугодия... сегодня должен увидеть торговца...</value>
-  </data>
-	<data name="dhLust" xml:space="preserve">
-    <value>Day of Lust...можно заскочить в таверну...</value>
-  </data>
-	<data name="dhPride" xml:space="preserve">
-    <value>День Гордости... может сходить к епископу...</value>
-  </data>
-	<data name="dhPrideSermon" xml:space="preserve">
-    <value>День Гордости... не могу забыть мою сегодняшнюю проповедь...</value>
-  </data>
-	<data name="dhSloth" xml:space="preserve">
-    <value>День лени... интересно, что задумал астролог...</value>
-  </data>
-	<data name="dhWrath" xml:space="preserve">
-    <value>День гнева... Интересно, есть ли что-нибудь, что можно сжечь...</value>
-  </data>
+		<value>День чревоугодия... надо бы повидаться с Купцом...</value>
+	</data>
 	<data name="dLust" xml:space="preserve">
-    <value>День похоти...</value>
-  </data>
+		<value>День похоти...</value>
+	</data>
+	<data name="dhLust" xml:space="preserve">
+		<value>День похоти... неплохо бы заглянуть в таверну к Шармель...</value>
+	</data>
 	<data name="dPride" xml:space="preserve">
-    <value>День гордости...</value>
-  </data>
+		<value>День гордыни...</value>
+	</data>
+	<data name="dhPride" xml:space="preserve">
+		<value>День гордыни... может быть стоит сходить к Епископу...</value>
+	</data>
+	<data name="dhPrideSermon" xml:space="preserve">
+		<value>День гордыни... не забыть бы о сегодняшней проповеди...</value>
+	</data>
 	<data name="dSloth" xml:space="preserve">
-    <value>День лени...</value>
-  </data>
+		<value>День лени...</value>
+	</data>
+	<data name="dhSloth" xml:space="preserve">
+		<value>День лени... интересно, чем сегодня занимается Звездочет...</value>
+	</data>
 	<data name="dWrath" xml:space="preserve">
-    <value>День гнева...</value>
-  </data>
+		<value>День гнева...</value>
+	</data>
+	<data name="dhWrath" xml:space="preserve">
+		<value>День гнева... интересно, нашел ли Инквизитор ведьму, которую можно сжечь...</value>
+	</data>
 </root>
