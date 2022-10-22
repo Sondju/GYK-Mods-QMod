@@ -178,7 +178,7 @@
     <value>Угольная жила</value>
   </data>
   <data name="ConfigMessage" xml:space="preserve">
-    <value>Конфигурация перезагружена!</value>
+    <value>Настройки перезагружены!</value>
   </data>
   <data name="CantUseHere" xml:space="preserve">
     <value>Я не могу использовать это здесь, босс!</value>
