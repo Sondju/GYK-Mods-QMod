@@ -121,6 +121,6 @@
     <value>Хм, думаю, я вернусь позже...</value>
   </data>
   <data name="ConfigMessage" xml:space="preserve">
-    <value>Конфиг перезагружен!</value>
+    <value>Конфигурация перезагружена!</value>
   </data>
 </root>
