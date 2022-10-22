@@ -101,9 +101,9 @@
 		<value>Игрок</value>
 	</data>
   <data name="Wilderness" xml:space="preserve">
-		<value>Пустыня</value>
+		<value>Пустошь</value>
 	</data>
   <data name="ConfigMessage" xml:space="preserve">
-    <value>Конфиг перезагружен!</value>
+    <value>Конфигурация перезагружена!</value>
   </data>
 </root>
