@@ -60,45 +60,45 @@
             : and then encoded with base64 encoding.
     -->
 	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-		<xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+		<xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
 		<xsd:element name="root" msdata:IsDataSet="true">
 			<xsd:complexType>
 				<xsd:choice maxOccurs="unbounded">
 					<xsd:element name="metadata">
 						<xsd:complexType>
 							<xsd:sequence>
-								<xsd:element name="value" type="xsd:string" minOccurs="0" />
+								<xsd:element name="value" type="xsd:string" minOccurs="0"/>
 							</xsd:sequence>
-							<xsd:attribute name="name" use="required" type="xsd:string" />
-							<xsd:attribute name="type" type="xsd:string" />
-							<xsd:attribute name="mimetype" type="xsd:string" />
-							<xsd:attribute ref="xml:space" />
+							<xsd:attribute name="name" use="required" type="xsd:string"/>
+							<xsd:attribute name="type" type="xsd:string"/>
+							<xsd:attribute name="mimetype" type="xsd:string"/>
+							<xsd:attribute ref="xml:space"/>
 						</xsd:complexType>
 					</xsd:element>
 					<xsd:element name="assembly">
 						<xsd:complexType>
-							<xsd:attribute name="alias" type="xsd:string" />
-							<xsd:attribute name="name" type="xsd:string" />
+							<xsd:attribute name="alias" type="xsd:string"/>
+							<xsd:attribute name="name" type="xsd:string"/>
 						</xsd:complexType>
 					</xsd:element>
 					<xsd:element name="data">
 						<xsd:complexType>
 							<xsd:sequence>
-								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
 							</xsd:sequence>
-							<xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-							<xsd:attribute ref="xml:space" />
+							<xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+							<xsd:attribute ref="xml:space"/>
 						</xsd:complexType>
 					</xsd:element>
 					<xsd:element name="resheader">
 						<xsd:complexType>
 							<xsd:sequence>
-								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
 							</xsd:sequence>
-							<xsd:attribute name="name" type="xsd:string" use="required" />
+							<xsd:attribute name="name" type="xsd:string" use="required"/>
 						</xsd:complexType>
 					</xsd:element>
 				</xsd:choice>
@@ -118,72 +118,72 @@
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
 	<data name="Header" xml:space="preserve">
-    <value>Мусорный сундук Джерри</value>
-  </data>
+		<value>Ящик для барахла Герри</value>
+	</data>
 	<data name="Message1" xml:space="preserve">
-    <value>Благодарим за установку Jerry's Junk Trunk!</value>
-  </data>
+		<value>Благодарим за установку мода Jerry's Junk Trunk!</value>
+	</data>
 	<data name="Message2" xml:space="preserve">
-    <value>- Багажник Джерри изначально ограничен десятью местами.</value>
-  </data>
+		<value>- Ящик для барахла изначально имеет 10 ячеек, вмещающих 50 единиц товара.</value>
+	</data>
 	<data name="Message3" xml:space="preserve">
-    <value>- Вы можете построить только один.</value>
-  </data>
+		<value>- Вы можете поставить только один ящик для барахла.</value>
+	</data>
 	<data name="Message4" xml:space="preserve">
-    <value>- Как только предметы входят, они не выходят.</value>
-  </data>
+		<value>- Предметы, отправленные в ящик для барахла невозможно вернуть.</value>
+	</data>
 	<data name="Message5" xml:space="preserve">
-    <value>- Предметы в сундуке продаются, когда день заканчивается (луна немного мимо церкви).</value>
-  </data>
-	<data name="Message7" xml:space="preserve">
-    <value>- Сундук имеет три уровня прогресса, начальную разблокировку, а затем два улучшения, связанные с определенными технологиями/перками.</value>
-  </data>
-	<data name="Message8" xml:space="preserve">
-    <value>Наслаждаться! - p1xel8ted</value>
-  </data>
-	<data name="Stage1Des" xml:space="preserve">
-    <value>Создается в: Рабочий стол во дворе. Имеет 10 слотов с максимальным размером стека 50.</value>
-  </data>
-	<data name="Stage1Header" xml:space="preserve">
-    <value>Создать: Мусорный сундук Джерри.</value>
-  </data>
-	<data name="Stage2Des" xml:space="preserve">
-    <value>Багажник Джерри расширен! Теперь имеет 20 слотов с максимальным размером стека 50.</value>
-  </data>
-	<data name="Stage2Header" xml:space="preserve">
-    <value>Улучшение: Старомодный сундук Джерри</value>
-  </data>
-	<data name="Stage3Header" xml:space="preserve">
-    <value>Улучшение: Старомодный сундук Джерри</value>
-  </data>
-	<data name="WorkWork" xml:space="preserve">
-    <value>Работа. Работа.</value>
-  </data>
+		<value>- Предметы в ящике продаются в полночь (когда луна находится над церковью).</value>
+	</data>
 	<data name="Message6" xml:space="preserve">
-    <value>- Вы получаете больше у продавца. Джерри получает часть прибыли.</value>
-  </data>
+		<value>- Вы получаете больше у торговца. Герри получает долю от прибыли.</value>
+	</data>
+	<data name="Message7" xml:space="preserve">
+		<value>- У ящика три уровня: начальный и два улучшения, связанные с определенными технологиями/перками.</value>
+	</data>
+	<data name="Message8" xml:space="preserve">
+		<value>Наслаждайтесь! - p1xel8ted</value>
+	</data>
+	<data name="Stage1Header" xml:space="preserve">
+		<value>Построить: Простой ящик Герри.</value>
+	</data>
+	<data name="Stage1Des" xml:space="preserve">
+		<value>Создается на рабочем столе во дворе. Имеет 10 ячеек, вмещающих 50 единиц товара.</value>
+	</data>
+	<data name="Stage2Header" xml:space="preserve">
+		<value>Улучшить: Хороший ящик Герри</value>
+	</data>
+	<data name="Stage2Des" xml:space="preserve">
+		<value>Ящик Герри расширен! Теперь он имеет 20 ячеек, вмещающих 50 единиц товара.</value>
+	</data>
+	<data name="Stage3Header" xml:space="preserve">
+		<value>Улучшить: Отличный ящик Герри</value>
+	</data>
 	<data name="Stage3Des" xml:space="preserve">
-    <value>Джерри получает меньшую долю прибыли, а максимальный размер стека увеличивается до 100.</value>
-  </data>
+		<value>Герри получает меньшую долю прибыли, а вместимость ячейки увеличивается до 100 единиц товара.</value>
+	</data>
+	<data name="WorkWork" xml:space="preserve">
+		<value>Работа. Работа.</value>
+	</data>
 	<data name="Vendor" xml:space="preserve">
-    <value>Продавец</value>
-  </data>
+		<value>Торговец</value>
+	</data>
 	<data name="Vendors" xml:space="preserve">
-    <value>Продавцы</value>
-  </data>
+		<value>Торговцы</value>
+	</data>
 	<data name="HeaderSales" xml:space="preserve">
-    <value>Продажа барахла Джерри</value>
-  </data>
+		<value>Продажа барахла Герри</value>
+	</data>
 	<data name="For" xml:space="preserve">
-    <value>за</value>
-  </data>
+		<value>за</value>
+	</data>
 	<data name="Bye" xml:space="preserve">
-    <value>До свидания.</value>
-  </data>
+		<value>До свидания.</value>
+	</data>
 	<data name="Nothing" xml:space="preserve">
-    <value>Какая?! Ничего такого!</value>
-  </data>
+		<value>Что?! Ничего нет?!</value>
+	</data>
 	<data name="GerrysPrice" xml:space="preserve">
-		<value>Цена Джерри:</value>
+		<value>Цена Герри:</value>
 	</data>
 </root>
