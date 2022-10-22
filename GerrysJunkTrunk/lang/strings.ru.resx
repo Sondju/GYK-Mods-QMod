@@ -124,7 +124,7 @@
     <value>Благодарим за установку мода Jerry's Junk Trunk!</value>
   </data>
 	<data name="Message2" xml:space="preserve">
-    <value>- Ящик для барахла изначально имеет 10 ячеек, вмещающих 50 единиц товара.</value>
+    <value>- Ящик для барахла изначально имеет 10 ячеек, вмещающих по 50 единиц товара.</value>
   </data>
 	<data name="Message3" xml:space="preserve">
     <value>- Можно построить только один ящик для барахла.</value>
