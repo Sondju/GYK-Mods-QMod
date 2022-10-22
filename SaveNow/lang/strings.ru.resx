@@ -101,22 +101,22 @@
 		<value>Автосохранение</value>
 	</data>
   <data name="Rush" xml:space="preserve">
-		<value>Что за спешка! Получает меня каждый раз!</value>
+		<value>Что за спешка! Достает меня каждый раз!</value>
 	</data>
   <data name="InfoAutoSave" xml:space="preserve">
 		<value>Автосохранение</value>
 	</data>
   <data name="InfoPeriod" xml:space="preserve">
-		<value>Период</value>
+		<value>Периодичность в минутах:</value>
 	</data>
   <data name="InfoMinutes" xml:space="preserve">
-		<value>минута</value>
+		<value></value>
 	</data>
   <data name="InfoNewSaveOnAutoSave" xml:space="preserve">
 		<value>Новое сохранение при автоматическом сохранении</value>
 	</data>
   <data name="InfoSavesToKeep" xml:space="preserve">
-		<value>Сохраняет, чтобы сохранить</value>
+		<value>Количество сохранений</value>
 	</data>
   <data name="SaveAreYouSureMenu" xml:space="preserve">
 		<value>Вы уверены, что хотите вернуться в главное меню?</value>
@@ -137,6 +137,6 @@
     <value>Игра сохранена</value>
   </data>
   <data name="CantSaveHere" xml:space="preserve">
-    <value>Здесь нельзя сохранить, босс!</value>
+    <value>Здесь нельзя сохраниться, босс!</value>
   </data>
 </root>
